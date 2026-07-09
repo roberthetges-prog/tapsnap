@@ -6,14 +6,8 @@ import { listBrands, applyFilters, nextQuestion } from "../../lib/matcher.js";
 const FIELD_LABEL = { brand: "Brand", category: "Type", dimension: "Size", valveType: "Valve" };
 
 function detectionsToAnswers(all, ai) {
-  const order = [
-    ["brand", ai.brand],
-    ["category", ai.category],
-    ["dimension", ai.dimension],
-    ["valveType", ai.valveType],
-  ];
-  const ans = [];
-  let cur = {};
+  const order = [["brand", ai.brand], ["category", ai.category], ["dimension", ai.dimension], ["valveType", ai.valveType]];
+  const ans = []; let cur = {};
   for (const [field, val] of order) {
     if (!val) continue;
     const trial = { ...cur, [field]: val };
@@ -40,9 +34,14 @@ export default function Find() {
   const [ai, setAi] = useState(null);
 
   const brands = useMemo(() => listBrands(parts), []);
+  const brandSet = useMemo(() => new Set(brands.map((b) => b.brand)), [brands]);
   const sel = useMemo(() => answers.reduce((o, a) => ((o[a.field] = a.value), o), {}), [answers]);
   const matches = useMemo(() => applyFilters(parts, sel), [sel]);
   const q = useMemo(() => nextQuestion(parts, sel), [sel]);
+  const guesses = useMemo(
+    () => (ai && Array.isArray(ai.brandGuesses) ? ai.brandGuesses.filter((g) => brandSet.has(g)) : []),
+    [ai, brandSet]
+  );
 
   const add = (field, value) => { setForceResults(false); setAnswers((a) => [...a.filter((x) => x.field !== field), { field, value }]); };
   const back = () => { setForceResults(false); setAnswers((a) => a.slice(0, -1)); };
@@ -77,8 +76,9 @@ export default function Find() {
         {ai && ai.description && (
           <div className="aibar">
             <b>From your photo:</b> {ai.description}
-            {ai.leverType === "single-lever" ? " Looks like a single-lever mixer — that means a cartridge, so the size is the key thing." : ""}
-            {ai.measureTip ? " " + ai.measureTip : ""}
+            {ai.handleDesign ? <div className="reads"><span><b>Handle:</b> {ai.handleDesign}</span>{ai.spoutShape ? <span><b>Spout:</b> {ai.spoutShape}</span> : null}</div> : null}
+            {ai.leverType === "single-lever" ? <div>Looks like a single-lever mixer — that means a cartridge, so the size is the key thing.</div> : null}
+            {ai.measureTip ? <div>{ai.measureTip}</div> : null}
           </div>
         )}
         {ai && ai.status === "off" && <div className="aibar muted">Photo recognition isn&apos;t switched on yet — pick your brand below to continue.</div>}
@@ -95,7 +95,7 @@ export default function Find() {
               <div className="icon">📷</div>
               <div className="txt">
                 <b>{analysing ? "Analysing your photo…" : "Snap the tap or the removed cartridge"}</b>
-                {analysing ? "Reading the image and matching it to our parts." : "We'll detect the type and read any branding, then ask you the size."}
+                {analysing ? "Reading the handle and spout design to guess the brand." : "We look at the handle and spout to guess the brand, then ask you the size."}
               </div>
               <label className="btn btn-ghost" style={{ marginLeft: "auto" }}>
                 {photo ? "Change photo" : "Add photo"}
@@ -103,6 +103,15 @@ export default function Find() {
               </label>
               {photo && <img src={photo} className="thumb" alt="your part" />}
             </div>
+
+            {guesses.length > 0 && (
+              <div className="guessrow">
+                <span className="glabel">Looks like:</span>
+                {guesses.map((g) => (<button key={g} className="opt guess" onClick={() => add("brand", g)}>{g}</button>))}
+                <span className="ghint">— tap one, or pick from the full list below</span>
+              </div>
+            )}
+
             <h2>Which brand is it?</h2>
             <p className="sub">Look for a name on the tap, handle or flange. No name? Pick <b>Universal</b> — most taps use a standard cartridge.</p>
             <div className="grid">
