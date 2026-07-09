@@ -13,7 +13,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "25mm"
  },
  {
   "id": 2,
@@ -29,7 +30,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://foreno.co.nz/wp-content/uploads/forpt105-G35.jpg"
+  "photo": "https://foreno.co.nz/wp-content/uploads/forpt105-G35.jpg",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 3,
@@ -45,7 +47,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 4,
@@ -61,7 +64,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://foreno.co.nz/wp-content/uploads/forpt22-g40.jpg"
+  "photo": "https://foreno.co.nz/wp-content/uploads/forpt22-g40.jpg",
+  "dimensionDetail": "40mm"
  },
  {
   "id": 5,
@@ -77,7 +81,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "40mm"
  },
  {
   "id": 6,
@@ -93,7 +98,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "40mm"
  },
  {
   "id": 7,
@@ -109,7 +115,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "47mm"
  },
  {
   "id": 8,
@@ -125,7 +132,8 @@
   "sourceUrl": "https://foreno.co.nz/product/equaliser-shower-mixer-cartridge/",
   "verified": "Y",
   "notes": "Kerox K-45",
-  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT80.jpg"
+  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT80.jpg",
+  "dimensionDetail": "45mm"
  },
  {
   "id": 9,
@@ -141,7 +149,8 @@
   "sourceUrl": "https://foreno.co.nz/wp-content/uploads/Cartridges_Headworks_ID_Foreno.pdf",
   "verified": "Y",
   "notes": "Kerox K-35OP (Foreno Cartridge ID PDF)",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 10,
@@ -157,7 +166,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT04.jpg"
+  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT04.jpg",
+  "dimensionDetail": "12mm"
  },
  {
   "id": 11,
@@ -173,7 +183,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 12,
@@ -189,7 +200,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 13,
@@ -205,7 +217,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 14,
@@ -221,7 +234,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT43.jpg"
+  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT43.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 15,
@@ -237,7 +251,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT65.jpg"
+  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT65.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 16,
@@ -253,7 +268,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 17,
@@ -269,7 +285,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "12mm"
  },
  {
   "id": 18,
@@ -279,13 +296,14 @@
   "category": "Washer/Seal",
   "partNumber": "FORPT10",
   "valveType": "washer",
-  "dimension": "1/2\"",
+  "dimension": "",
   "supersession": "",
   "buyUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT10.jpg"
+  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT10.jpg",
+  "dimensionDetail": "1/2\""
  },
  {
   "id": 19,
@@ -301,7 +319,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "40mm"
  },
  {
   "id": 20,
@@ -311,13 +330,14 @@
   "category": "Washer/Seal",
   "partNumber": "FORPT151",
   "valveType": "washer",
-  "dimension": "1/2\"",
+  "dimension": "",
   "supersession": "",
   "buyUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "1/2\""
  },
  {
   "id": 21,
@@ -333,7 +353,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT18.jpg"
+  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT18.jpg",
+  "dimensionDetail": "22mm"
  },
  {
   "id": 22,
@@ -349,7 +370,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT19.jpg"
+  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT19.jpg",
+  "dimensionDetail": "24mm"
  },
  {
   "id": 23,
@@ -365,7 +387,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "28mm"
  },
  {
   "id": 24,
@@ -381,7 +404,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 25,
@@ -397,7 +421,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 26,
@@ -413,7 +438,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 27,
@@ -429,7 +455,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 28,
@@ -445,7 +472,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 29,
@@ -461,7 +489,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 30,
@@ -477,7 +506,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 31,
@@ -493,7 +523,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 32,
@@ -509,7 +540,8 @@
   "sourceUrl": "https://foreno.co.nz/all-products/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT109.jpg"
+  "photo": "https://foreno.co.nz/wp-content/uploads/FORPT109.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 33,
@@ -525,7 +557,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/cc25_1__FillWzYwMCw2MDBd.jpg"
+  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/cc25_1__FillWzYwMCw2MDBd.jpg",
+  "dimensionDetail": "25mm"
  },
  {
   "id": 34,
@@ -541,7 +574,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC25OP_1__FillWzYwMCw2MDBd.jpg"
+  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC25OP_1__FillWzYwMCw2MDBd.jpg",
+  "dimensionDetail": "25mm"
  },
  {
   "id": 35,
@@ -557,7 +591,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "25mm"
  },
  {
   "id": 36,
@@ -573,7 +608,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35_1__FillWzYwMCw2MDBd.jpg"
+  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35_1__FillWzYwMCw2MDBd.jpg",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 37,
@@ -589,7 +625,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35OP_1__FillWzYwMCw2MDBd.jpg"
+  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35OP_1__FillWzYwMCw2MDBd.jpg",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 38,
@@ -605,7 +642,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 39,
@@ -621,7 +659,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35E_1__FillWzYwMCw2MDBd.jpg"
+  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35E_1__FillWzYwMCw2MDBd.jpg",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 40,
@@ -637,7 +676,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35_1__FillWzYwMCw2MDBd.jpg"
+  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35_1__FillWzYwMCw2MDBd.jpg",
+  "dimensionDetail": "40mm"
  },
  {
   "id": 41,
@@ -653,7 +693,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35E_1__FillWzYwMCw2MDBd.jpg"
+  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35E_1__FillWzYwMCw2MDBd.jpg",
+  "dimensionDetail": "40mm"
  },
  {
   "id": 42,
@@ -669,7 +710,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35_1__FillWzYwMCw2MDBd.jpg"
+  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35_1__FillWzYwMCw2MDBd.jpg",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 43,
@@ -685,7 +727,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 44,
@@ -701,7 +744,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35_1__FillWzYwMCw2MDBd.jpg"
+  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35_1__FillWzYwMCw2MDBd.jpg",
+  "dimensionDetail": "40mm"
  },
  {
   "id": 45,
@@ -717,7 +761,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "40mm"
  },
  {
   "id": 46,
@@ -733,7 +778,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/EN0039_1__FillWzYwMCw2MDBd.jpg"
+  "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/EN0039_1__FillWzYwMCw2MDBd.jpg",
+  "dimensionDetail": "47mm"
  },
  {
   "id": 47,
@@ -743,13 +789,14 @@
   "category": "Cartridge",
   "partNumber": "F-CTP01",
   "valveType": "ceramic disc",
-  "dimension": "mixed",
+  "dimension": "",
   "supersession": "",
   "buyUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "sourceUrl": "https://www.felton.co.nz/spare-parts/cartridges/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "mixed"
  },
  {
   "id": 48,
@@ -765,7 +812,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts-2/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 49,
@@ -781,7 +829,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts-2/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 50,
@@ -797,7 +846,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts-2/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 51,
@@ -813,7 +863,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts-2/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 52,
@@ -829,7 +880,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts-2/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 53,
@@ -845,7 +897,8 @@
   "sourceUrl": "https://www.felton.co.nz/spare-parts-2/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 54,
@@ -861,7 +914,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "verified": "Y",
   "notes": "Robertson Trade distributes; Kerox universal",
-  "photo": ""
+  "photo": "https://www.robertsontrade.co.nz/storage/spare-parts/K35A%20new.jpg",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 55,
@@ -877,7 +931,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "https://www.robertsontrade.co.nz/storage/parts/K35B-1639339419-COPY.jpg",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 56,
@@ -893,7 +948,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "https://www.robertsontrade.co.nz/storage/product-image/universal/KO40A.jpg",
+  "dimensionDetail": "40mm"
  },
  {
   "id": 57,
@@ -909,7 +965,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "https://www.robertsontrade.co.nz/storage/product-image/KO40B.jpg",
+  "dimensionDetail": "40mm"
  },
  {
   "id": 58,
@@ -925,7 +982,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "verified": "Y",
   "notes": "Diameter not published; ION basin cartridges are 25mm",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 59,
@@ -941,7 +999,8 @@
   "sourceUrl": "https://sydneybathroomware.com.au/hansa-35mm-replacement-mixer-cartridge-59913075/",
   "verified": "Y",
   "notes": "Hansa '3.5' is a model name, not the mm size",
-  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Hansa-35mm-Replacement-Mixer-Cartridge-59913075.png"
+  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Hansa-35mm-Replacement-Mixer-Cartridge-59913075.png",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 60,
@@ -957,7 +1016,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "verified": "Y",
   "notes": "Diameter not confirmed; '2.5' is not the mm size",
-  "photo": ""
+  "photo": "https://www.robertsontrade.co.nz/storage/parts/hansa/59913914.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 61,
@@ -967,13 +1027,14 @@
   "category": "Cartridge",
   "partNumber": "59904601",
   "valveType": "ceramic disc",
-  "dimension": "46mm (46x46x60)",
+  "dimension": "46mm",
   "supersession": "",
   "buyUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "sourceUrl": "https://sydneybathroomware.com.au/hansa-46mm-mixer-cartridge-59904601/",
   "verified": "Y",
   "notes": "'4.8' is a model name, not the mm size",
-  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/lrg_27058_HansaCartridge599046011.jpg"
+  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/lrg_27058_HansaCartridge599046011.jpg",
+  "dimensionDetail": "46mm (46x46x60)"
  },
  {
   "id": 62,
@@ -989,7 +1050,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "https://www.robertsontrade.co.nz/storage/parts/hansa/59913051.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 63,
@@ -1005,7 +1067,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 64,
@@ -1021,7 +1084,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 65,
@@ -1031,13 +1095,14 @@
   "category": "Headwork",
   "partNumber": "59912626",
   "valveType": "headwork",
-  "dimension": "1/2\"",
+  "dimension": "",
   "supersession": "",
   "buyUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "1/2\""
  },
  {
   "id": 66,
@@ -1053,7 +1118,8 @@
   "sourceUrl": "https://italianluxuryinteriors.com/products/r98123-ricambi",
   "verified": "Y",
   "notes": "",
-  "photo": "https://italianluxuryinteriors.com/cdn/shop/files/zucchetti_r98123_ceramic_disc_mixer_tap_cartridge_25mm.jpg?v=1688385187"
+  "photo": "https://italianluxuryinteriors.com/cdn/shop/files/zucchetti_r98123_ceramic_disc_mixer_tap_cartridge_25mm.jpg?v=1688385187",
+  "dimensionDetail": "25mm"
  },
  {
   "id": 67,
@@ -1069,7 +1135,8 @@
   "sourceUrl": "https://italianluxuryinteriors.com/products/r98112-ricambi",
   "verified": "Y",
   "notes": "",
-  "photo": "https://italianluxuryinteriors.com/cdn/shop/files/zucchetti_r98112_ceramic_disc_mixer_tap_cartridge_35mm_2.jpg?v=1688385495"
+  "photo": "https://italianluxuryinteriors.com/cdn/shop/files/zucchetti_r98112_ceramic_disc_mixer_tap_cartridge_35mm_2.jpg?v=1688385495",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 68,
@@ -1085,7 +1152,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 69,
@@ -1101,7 +1169,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 70,
@@ -1117,7 +1186,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 71,
@@ -1133,7 +1203,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/aerators-and-restrictors",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.robertsontrade.co.nz/storage/product-image/zucchetti/PanS/R99316%20disc.jpg"
+  "photo": "https://www.robertsontrade.co.nz/storage/product-image/zucchetti/PanS/R99316%20disc.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 72,
@@ -1143,13 +1214,14 @@
   "category": "Aerator",
   "partNumber": "45859.02",
   "valveType": "aerator",
-  "dimension": "M16.5 / 7.5 LPM",
+  "dimension": "",
   "supersession": "",
   "buyUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/aerators-and-restrictors",
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/aerators-and-restrictors",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.robertsontrade.co.nz/storage/product-image/zucchetti/PanS/45859.02.jpg"
+  "photo": "https://www.robertsontrade.co.nz/storage/product-image/zucchetti/PanS/45859.02.jpg",
+  "dimensionDetail": "M16.5 / 7.5 LPM"
  },
  {
   "id": 73,
@@ -1165,7 +1237,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/aerators-and-restrictors",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.robertsontrade.co.nz/storage/product-image/neopearl/09-9164.0.jpg"
+  "photo": "https://www.robertsontrade.co.nz/storage/product-image/neopearl/09-9164.0.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 74,
@@ -1181,7 +1254,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/aerators-and-restrictors",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.robertsontrade.co.nz/storage/parts/Elementi/42902.00.jpg"
+  "photo": "https://www.robertsontrade.co.nz/storage/parts/Elementi/42902.00.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 75,
@@ -1197,7 +1271,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/aerators-and-restrictors",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.robertsontrade.co.nz/storage/product-image/elementi/ATBX0087-XD%20new.jpg"
+  "photo": "https://www.robertsontrade.co.nz/storage/product-image/elementi/ATBX0087-XD%20new.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 76,
@@ -1213,7 +1288,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/tapware-seals-and-washers",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.robertsontrade.co.nz/storage/parts/universal/98999.00.jpg"
+  "photo": "https://www.robertsontrade.co.nz/storage/parts/universal/98999.00.jpg",
+  "dimensionDetail": "15mm"
  },
  {
   "id": 77,
@@ -1229,7 +1305,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/tapware-seals-and-washers",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.robertsontrade.co.nz/storage/parts/universal/98992.00.jpg"
+  "photo": "https://www.robertsontrade.co.nz/storage/parts/universal/98992.00.jpg",
+  "dimensionDetail": "20mm"
  },
  {
   "id": 78,
@@ -1245,7 +1322,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/tapware-seals-and-washers",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.robertsontrade.co.nz/storage/product%20images/59910749%20A.jpg"
+  "photo": "https://www.robertsontrade.co.nz/storage/product%20images/59910749%20A.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 79,
@@ -1261,7 +1339,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/tapware-seals-and-washers",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.robertsontrade.co.nz/storage/product-image/cENTRALbRASS/CS-42022.jpg"
+  "photo": "https://www.robertsontrade.co.nz/storage/product-image/cENTRALbRASS/CS-42022.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 80,
@@ -1271,13 +1350,14 @@
   "category": "Cartridge",
   "partNumber": "QHZ0662-01-RS2",
   "valveType": "handle",
-  "dimension": "35mm cartridge",
+  "dimension": "35mm",
   "supersession": "",
   "buyUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/tapware-handles",
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/tapware-handles",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.robertsontrade.co.nz/storage/product-image/elementi/uno/43951.02%20disc%20new%20handle.png"
+  "photo": "https://www.robertsontrade.co.nz/storage/product-image/elementi/uno/43951.02%20disc%20new%20handle.png",
+  "dimensionDetail": "35mm cartridge"
  },
  {
   "id": 81,
@@ -1287,13 +1367,14 @@
   "category": "Cartridge",
   "partNumber": "ATBQ0261-11",
   "valveType": "handle",
-  "dimension": "40mm cartridge",
+  "dimension": "40mm",
   "supersession": "",
   "buyUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/tapware-handles",
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/tapware-handles",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.robertsontrade.co.nz/storage/product-image/elementi/uno/42970.02%20disc%20new%20HANDLE.png"
+  "photo": "https://www.robertsontrade.co.nz/storage/product-image/elementi/uno/42970.02%20disc%20new%20HANDLE.png",
+  "dimensionDetail": "40mm cartridge"
  },
  {
   "id": 82,
@@ -1309,7 +1390,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/tapware-handles",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.robertsontrade.co.nz/storage/parts/hansa/59914417.jpg"
+  "photo": "https://www.robertsontrade.co.nz/storage/parts/hansa/59914417.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 83,
@@ -1325,7 +1407,8 @@
   "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/tapware-handles",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.robertsontrade.co.nz/storage/product-image/zucchetti/PanS/R96481%20disc.jpg"
+  "photo": "https://www.robertsontrade.co.nz/storage/product-image/zucchetti/PanS/R96481%20disc.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 84,
@@ -1335,13 +1418,14 @@
   "category": "Cartridge",
   "partNumber": "04-7772",
   "valveType": "ceramic disc",
-  "dimension": "40x40x62mm",
+  "dimension": "40mm",
   "supersession": "",
   "buyUrl": "https://sydneybathroomware.com.au/replacement-cartridges/methven-40mm-shower-mixer-cartridge-04-7772/",
   "sourceUrl": "https://sydneybathroomware.com.au/replacement-cartridges/methven-40mm-shower-mixer-cartridge-04-7772/",
   "verified": "Y",
   "notes": "Sydney Bathroomware SKU 04-7772",
-  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/methven-40mm-shower-mixer-cartridge-04-7772.webp"
+  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/methven-40mm-shower-mixer-cartridge-04-7772.webp",
+  "dimensionDetail": "40x40x62mm"
  },
  {
   "id": 85,
@@ -1351,13 +1435,14 @@
   "category": "Cartridge",
   "partNumber": "04-9172",
   "valveType": "ceramic disc",
-  "dimension": "35mm dia x 73mm H",
+  "dimension": "35mm",
   "supersession": "",
   "buyUrl": "https://plumbingsales.com.au/methven-35mm-kerox-mixer-tap-cartridge-with-leg-k35b-04-9172.html",
   "sourceUrl": "https://plumbingsales.com.au/methven-35mm-kerox-mixer-tap-cartridge-with-leg-k35b-04-9172.html",
   "verified": "Y",
   "notes": "Kerox K35B",
-  "photo": "https://plumbingsales.com.au/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/m/e/methven_35mm_kerox_mixer_tap_cartridge_with_leg_k35b_04-9172.jpg"
+  "photo": "https://plumbingsales.com.au/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/m/e/methven_35mm_kerox_mixer_tap_cartridge_with_leg_k35b_04-9172.jpg",
+  "dimensionDetail": "35mm dia x 73mm H"
  },
  {
   "id": 86,
@@ -1373,7 +1458,8 @@
   "sourceUrl": "https://6f5808fed5df953b5ce8-f7092dceca7c6a0fa248f5b05eee4343.ssl.cf3.rackcdn.com/nz/exploded-view/e8114-exploded-view.pdf",
   "verified": "Diagram",
   "notes": "Exploded PDF also lists SP470, SP033510, SP143, 782002, SP190, SP083550, SP233550, 785946 - component per code not labelled on diagram",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 87,
@@ -1389,7 +1475,8 @@
   "sourceUrl": "https://6f5808fed5df953b5ce8-f7092dceca7c6a0fa248f5b05eee4343.ssl.cf3.rackcdn.com/nz/exploded-view/e8117-exploded-view.pdf",
   "verified": "Diagram",
   "notes": "Exploded PDF lists SP470, SP233550, SP472, SP033510, SP478 - shares internals with E8114; component per code not labelled",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 88,
@@ -1399,13 +1486,14 @@
   "category": "Cartridge",
   "partNumber": "SP036-011",
   "valveType": "ceramic disc",
-  "dimension": "35mm x 58mm",
+  "dimension": "35mm",
   "supersession": "",
   "buyUrl": "https://showerdoc.com/",
   "sourceUrl": "https://showerdoc.com/",
   "verified": "Y",
   "notes": "Methven Group (Deva/UK) code - confirm NZ availability",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "35mm x 58mm"
  },
  {
   "id": 89,
@@ -1421,7 +1509,8 @@
   "sourceUrl": "https://showerdoc.com/",
   "verified": "Y",
   "notes": "Methven Group (Deva/UK) code - confirm NZ availability",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 90,
@@ -1437,7 +1526,8 @@
   "sourceUrl": "https://showerdoc.com/",
   "verified": "Y",
   "notes": "Methven Group (Deva/UK) code - confirm NZ availability",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 91,
@@ -1453,7 +1543,8 @@
   "sourceUrl": "https://www.bathroomspareparts.co.uk/methven-aurajet-flow-control-cartridge-sp077008-282029-p.asp",
   "verified": "Y",
   "notes": "Methven Group code - Aurajet sold in NZ; confirm SKU",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 92,
@@ -1469,7 +1560,8 @@
   "sourceUrl": "https://www.mitre10.co.nz/shop/greens-tapware-universal-cartridge-40mm/p/189232",
   "verified": "Y",
   "notes": "Mitre 10 SKU 189232",
-  "photo": "https://b2c-api-prod-internal.cc.mitre10.co.nz/medias/sys_master/productimages/h0f/hdf/8799765299230/189232xlg/189232xlg.jpg"
+  "photo": "https://b2c-api-prod-internal.cc.mitre10.co.nz/medias/sys_master/productimages/h0f/hdf/8799765299230/189232xlg/189232xlg.jpg",
+  "dimensionDetail": "40mm"
  },
  {
   "id": 93,
@@ -1479,13 +1571,14 @@
   "category": "Cartridge",
   "partNumber": "5980081",
   "valveType": "ceramic disc",
-  "dimension": "42mm dia x 90mm H",
+  "dimension": "42mm",
   "supersession": "",
   "buyUrl": "https://plumbingsales.com.au/greens-ceramic-disc-cartridge-5980081.html",
   "sourceUrl": "https://plumbingsales.com.au/greens-ceramic-disc-cartridge-5980081.html",
   "verified": "Y",
   "notes": "",
-  "photo": "https://plumbingsales.com.au/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/g/r/greens_starmix_marketti_mixer_tap_ceramic_disc_cartridge_5980081.jpg"
+  "photo": "https://plumbingsales.com.au/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/g/r/greens_starmix_marketti_mixer_tap_ceramic_disc_cartridge_5980081.jpg",
+  "dimensionDetail": "42mm dia x 90mm H"
  },
  {
   "id": 94,
@@ -1495,13 +1588,14 @@
   "category": "Cartridge",
   "partNumber": "5980082",
   "valveType": "ceramic disc",
-  "dimension": "42mm dia x 65mm H",
+  "dimension": "42mm",
   "supersession": "",
   "buyUrl": "https://plumbingsales.com.au/greens-ceramic-disc-cartridge-5980082.html",
   "sourceUrl": "https://plumbingsales.com.au/greens-ceramic-disc-cartridge-5980082.html",
   "verified": "Y",
   "notes": "",
-  "photo": "https://plumbingsales.com.au/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/g/r/greens_starmix_mixer_tap_ceramic_disc_cartridge_5980082.jpg"
+  "photo": "https://plumbingsales.com.au/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/g/r/greens_starmix_mixer_tap_ceramic_disc_cartridge_5980082.jpg",
+  "dimensionDetail": "42mm dia x 65mm H"
  },
  {
   "id": 95,
@@ -1517,7 +1611,8 @@
   "sourceUrl": "https://plumbingsales.com.au/greens-ceramic-disc-cartridge-5980082.html",
   "verified": "Low",
   "notes": "Seen in listing title only - confirm before use",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 96,
@@ -1533,7 +1628,8 @@
   "sourceUrl": "https://specify.caroma.com/au/products/spare-parts-valves/tapware-spares/",
   "verified": "Y",
   "notes": "Caroma Spare Parts Booklet",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 97,
@@ -1549,7 +1645,8 @@
   "sourceUrl": "https://sydneybathroomware.com.au/caroma-spare-parts/caroma-half-turn-basin-spindle-2838-04/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Caroma-Half-Turn-Basin-Spindle-2838.04.jpg"
+  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Caroma-Half-Turn-Basin-Spindle-2838.04.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 98,
@@ -1565,7 +1662,8 @@
   "sourceUrl": "https://sydneybathroomware.com.au/caroma-spare-parts/caroma-half-turn-basin-spindle-2838-04/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 99,
@@ -1581,7 +1679,8 @@
   "sourceUrl": "https://sydneybathroomware.com.au/dorf-spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Dorf-Ceramic-Disc-Wall-Spindles-6478.04.jpg"
+  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Dorf-Ceramic-Disc-Wall-Spindles-6478.04.jpg",
+  "dimensionDetail": ""
  },
  {
   "id": 100,
@@ -1597,7 +1696,8 @@
   "sourceUrl": "https://sydneybathroomware.com.au/dorf-spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 101,
@@ -1613,7 +1713,8 @@
   "sourceUrl": "https://sydneybathroomware.com.au/dorf-spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 102,
@@ -1629,7 +1730,8 @@
   "sourceUrl": "https://sydneybathroomware.com.au/dorf-spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 103,
@@ -1645,7 +1747,8 @@
   "sourceUrl": "https://sydneybathroomware.com.au/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Reno_Hub-Fienza-25mm-Mixer-Cartridge-WAS50.webp"
+  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Reno_Hub-Fienza-25mm-Mixer-Cartridge-WAS50.webp",
+  "dimensionDetail": "25mm"
  },
  {
   "id": 104,
@@ -1661,7 +1764,8 @@
   "sourceUrl": "https://sydneybathroomware.com.au/spare-parts/",
   "verified": "Y",
   "notes": "",
-  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Phoenix-Vivid-Slimline-25mm-Cartridge.jpg"
+  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Phoenix-Vivid-Slimline-25mm-Cartridge.jpg",
+  "dimensionDetail": "25mm"
  },
  {
   "id": 105,
@@ -1677,7 +1781,8 @@
   "sourceUrl": "https://sydneybathroomware.com.au/spare-parts/",
   "verified": "Y",
   "notes": "Retailer SKU 40352",
-  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Phoenix-35mm-Cartridge-Shower-Mixer-40351NR-Front.jpg"
+  "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Phoenix-35mm-Cartridge-Shower-Mixer-40351NR-Front.jpg",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 106,
@@ -1693,7 +1798,8 @@
   "sourceUrl": "https://www.reece.co.nz/product/mizu-soothe-basin-mixer-tap-cartridge-25mm-9505049",
   "verified": "Y",
   "notes": "Reece product code",
-  "photo": "https://digitalassets.reecegroup.com.au/m/40b32a0ce03f9755/Web_1200x900-Mizu-Soothe-Basin-Mixer-Cartridge-25mm.jpg"
+  "photo": "https://digitalassets.reecegroup.com.au/m/40b32a0ce03f9755/Web_1200x900-Mizu-Soothe-Basin-Mixer-Cartridge-25mm.jpg",
+  "dimensionDetail": "25mm"
  },
  {
   "id": 107,
@@ -1709,7 +1815,8 @@
   "sourceUrl": "https://www.reece.co.nz/product/mizu-basin-sink-shower-mixer-cartridge-9503176",
   "verified": "Y",
   "notes": "Diameter not published on Reece",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 108,
@@ -1725,7 +1832,8 @@
   "sourceUrl": "https://www.reece.co.nz/product/mizu-bliss-soothe-shower-mixer-tap-cartridge-25mm-9505050",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "25mm"
  },
  {
   "id": 109,
@@ -1741,7 +1849,8 @@
   "sourceUrl": "https://www.reece.com.au/product/posh-solus-mk3-basin-mixer-cartridge-2250682",
   "verified": "Y",
   "notes": "AU code; diameter not published; confirm NZ SKU",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 110,
@@ -1757,7 +1866,8 @@
   "sourceUrl": "https://www.reece.com.au/product/posh-solus-mk3-shower-sink-mixer-cartridge-2250688",
   "verified": "Y",
   "notes": "Diameter not published; confirm NZ SKU",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 111,
@@ -1773,7 +1883,8 @@
   "sourceUrl": "https://www.reece.com.au/product/posh-solus-mk3-gooseneck-sink-mixer-aerator-2250693",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 112,
@@ -1789,7 +1900,8 @@
   "sourceUrl": "https://www.bunnings.com.au/mondella-1-4-turn-ceramic-disc-basin-spindles-2-pack_p0014721",
   "verified": "Y",
   "notes": "Model KSP0172; Bunnings I/N 0014721",
-  "photo": "https://media.bunnings.com.au/api/public/content/7cc270d884c94b42b785cc319be29925?v=14fa6e67"
+  "photo": "https://media.bunnings.com.au/api/public/content/7cc270d884c94b42b785cc319be29925?v=14fa6e67",
+  "dimensionDetail": ""
  },
  {
   "id": 113,
@@ -1805,7 +1917,8 @@
   "sourceUrl": "https://www.mondella.com.au/products/basin-tapware/0684129-12-turn-wall-top-assembly-chrome-cadenza",
   "verified": "Y",
   "notes": "Bunnings I/N",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 114,
@@ -1821,7 +1934,8 @@
   "sourceUrl": "https://www.mondella.com.au/products/basin-tapware/0683916-14-turn-pin-lever-wall-top-assembly-chrome-resonance",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 115,
@@ -1837,7 +1951,8 @@
   "sourceUrl": "https://www.mondella.com.au/products/basin-tapware/0658694-wall-top-assembly-tap-set-chrome-maestro",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 116,
@@ -1853,7 +1968,8 @@
   "sourceUrl": "https://www.mondella.com.au/products/basin-tapware/0696351-wall-top-assemblies-lead-free-chrome-overture",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 117,
@@ -1869,7 +1985,8 @@
   "sourceUrl": "https://www.mondella.com.au/products/shower-tapware/0658762-chrome-maestro-wall-and-basin-spindle-set",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 118,
@@ -1885,7 +2002,8 @@
   "sourceUrl": "https://www.mondella.com.au/products/shower-tapware/0658706-ceramic-mixer-handle-chrome-maestro",
   "verified": "Y",
   "notes": "Replacement handle",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 119,
@@ -1901,7 +2019,8 @@
   "sourceUrl": "https://www.plumbingworld.co.nz/bathroom/care/LEVCADISHC35/LeVivi-Care-Tap-Handle.html",
   "verified": "Y",
   "notes": "PW code; taps use 35mm ceramic cartridge but no standalone cartridge SKU",
-  "photo": "https://www.plumbingworld.co.nz/productimages/MEDIUM/1/5951_6081_10974.jpg"
+  "photo": "https://www.plumbingworld.co.nz/productimages/MEDIUM/1/5951_6081_10974.jpg",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 120,
@@ -1917,7 +2036,8 @@
   "sourceUrl": "https://www.meir.com.au/collections/spare-parts",
   "verified": "Y",
   "notes": "Workhorse cartridge; 15yr warranty",
-  "photo": "https://www.meir.com.au/cdn/shop/products/kerox-cartridge-1_1024x1024.jpg?v=1758420182"
+  "photo": "https://www.meir.com.au/cdn/shop/products/kerox-cartridge-1_1024x1024.jpg?v=1758420182",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 121,
@@ -1933,7 +2053,8 @@
   "sourceUrl": "https://www.meir.com.au/collections/spare-parts",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 122,
@@ -1943,13 +2064,14 @@
   "category": "Spindle",
   "partNumber": "MQ02",
   "valveType": "quarter-turn",
-  "dimension": "80-85mm",
+  "dimension": "80mm",
   "supersession": "",
   "buyUrl": "https://www.meir.com.au/products/wall-top-assembly-spindle-80mm-85mm",
   "sourceUrl": "https://www.meir.com.au/collections/spare-parts",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "80-85mm"
  },
  {
   "id": 123,
@@ -1965,7 +2087,8 @@
   "sourceUrl": "https://www.meir.com.au/collections/spare-parts",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 124,
@@ -1981,7 +2104,8 @@
   "sourceUrl": "https://www.meir.com.au/collections/spare-parts",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 125,
@@ -1997,7 +2121,8 @@
   "sourceUrl": "https://archipro.co.nz/product/buddy-x-basin-mixer-plumbline",
   "verified": "Y",
   "notes": "SKU CBX003C.CR",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 126,
@@ -2013,7 +2138,8 @@
   "sourceUrl": "https://archipro.co.nz/product/buddy-square-shower-mixer-plumbline",
   "verified": "Y",
   "notes": "Shown as B003.001 (35A)",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 127,
@@ -2029,7 +2155,8 @@
   "sourceUrl": "https://archipro.co.nz/product/buddy-square-shower-mixer-plumbline",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "30mm"
  },
  {
   "id": 128,
@@ -2045,7 +2172,8 @@
   "sourceUrl": "https://archipro.co.nz/product/buddy-dual-function-kitchen-mixer-plumbline",
   "verified": "Y",
   "notes": "Shown as CB042.001 (35A)",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 129,
@@ -2061,7 +2189,8 @@
   "sourceUrl": "https://archipro.co.nz/product/buddy-kitchen-mixer-round-spout-plumbline",
   "verified": "Y",
   "notes": "SKU CB040.CR",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 130,
@@ -2077,7 +2206,8 @@
   "sourceUrl": "https://nerotapware.com.au/products/35mm-cartridge-2",
   "verified": "Y",
   "notes": "",
-  "photo": "https://nero-tapware-assets.spicyweb.net.au/products/Products/_980xAUTO_crop_center-center_none/1912121/NR504110NT-35mm-Cartridge-Thumb.webp"
+  "photo": "https://nero-tapware-assets.spicyweb.net.au/products/Products/_980xAUTO_crop_center-center_none/1912121/NR504110NT-35mm-Cartridge-Thumb.webp",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 131,
@@ -2093,7 +2223,8 @@
   "sourceUrl": "https://nerotapware.com.au/products/40mm-cartridge",
   "verified": "Y",
   "notes": "",
-  "photo": "https://nero-tapware-assets.spicyweb.net.au/products/Products/_980xAUTO_crop_center-center_none/1912115/NR504080NT-40mm-Cartridge-Thumb.webp"
+  "photo": "https://nero-tapware-assets.spicyweb.net.au/products/Products/_980xAUTO_crop_center-center_none/1912115/NR504080NT-40mm-Cartridge-Thumb.webp",
+  "dimensionDetail": "40mm"
  },
  {
   "id": 132,
@@ -2109,7 +2240,8 @@
   "sourceUrl": "https://www.grohe.us/products/cartridge-10",
   "verified": "Y",
   "notes": "Official Grohe spare",
-  "photo": "https://cdn.shopify.com/s/files/1/0866/6811/6281/files/16816_46374000-cartridge_0_CDNwebp.webp"
+  "photo": "https://cdn.shopify.com/s/files/1/0866/6811/6281/files/16816_46374000-cartridge_0_CDNwebp.webp",
+  "dimensionDetail": ""
  },
  {
   "id": 133,
@@ -2125,7 +2257,8 @@
   "sourceUrl": "https://www.grohe.us/products/cartridge-9",
   "verified": "Y",
   "notes": "Official Grohe spare",
-  "photo": "https://cdn.shopify.com/s/files/1/0866/6811/6281/files/16708_46048000-cartridge_0_CDNwebp.webp"
+  "photo": "https://cdn.shopify.com/s/files/1/0866/6811/6281/files/16708_46048000-cartridge_0_CDNwebp.webp",
+  "dimensionDetail": ""
  },
  {
   "id": 134,
@@ -2141,7 +2274,8 @@
   "sourceUrl": "https://www.grohe.us/products/metal-hose-1",
   "verified": "Y",
   "notes": "",
-  "photo": "https://cdn.shopify.com/s/files/1/0866/6811/6281/files/16715_46092000-metal-hose-starlight-chrome_0_CDNwebp.webp"
+  "photo": "https://cdn.shopify.com/s/files/1/0866/6811/6281/files/16715_46092000-metal-hose-starlight-chrome_0_CDNwebp.webp",
+  "dimensionDetail": ""
  },
  {
   "id": 135,
@@ -2157,7 +2291,8 @@
   "sourceUrl": "https://www.grohe.us/products/pull-out-spray-18",
   "verified": "Y",
   "notes": "Discontinued",
-  "photo": "https://cdn.shopify.com/s/files/1/0866/6811/6281/files/16893_46592000-minta-pull-out-spray-starlight-chrome_0_CDNwebp.webp"
+  "photo": "https://cdn.shopify.com/s/files/1/0866/6811/6281/files/16893_46592000-minta-pull-out-spray-starlight-chrome_0_CDNwebp.webp",
+  "dimensionDetail": ""
  },
  {
   "id": 136,
@@ -2173,7 +2308,8 @@
   "sourceUrl": "https://www.franke.com/product-sheet/fks-ca-b2b/products/133.0173.623/specreport?lang=en_CA&applicationName=website",
   "verified": "Y",
   "notes": "Official Franke SP number",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 137,
@@ -2189,7 +2325,8 @@
   "sourceUrl": "https://www.franke.com/product-sheet/fks-ca-b2b/products/133.0358.053/specreport?lang=en_CA&applicationName=website",
   "verified": "Y",
   "notes": "Also sold as SP3794-H",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": ""
  },
  {
   "id": 138,
@@ -2205,7 +2342,8 @@
   "sourceUrl": "https://www.divapor.com/spares/kitchens/tap-cartridges/franke-eos-1202r-sp1202-4010421-35mm-single-lever-kitchen-tap-cartridge-replacement-1330056079-compatible.php",
   "verified": "Y",
   "notes": "Genuine Franke OEM no.; also SP1202/4010421",
-  "photo": "https://www.divapor.com/spares/images/Franke-Spares/FR-EO12/Franke-EOS-Spares.jpg"
+  "photo": "https://www.divapor.com/spares/images/Franke-Spares/FR-EO12/Franke-EOS-Spares.jpg",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 139,
@@ -2221,7 +2359,8 @@
   "sourceUrl": "https://www.elettronew.com/en/spare-parts-and-accessories-taps/cartridge-for-paini-taps-without-distributor-diameter-35-mm-53cc956gm-35132.html",
   "verified": "Y",
   "notes": "Workhorse; EAN 8000177002335",
-  "photo": "https://www.elettronew.com/63804-large_default/cartridge-for-paini-taps-without-distributor-diameter-35-mm-53cc956gm.jpg"
+  "photo": "https://www.elettronew.com/63804-large_default/cartridge-for-paini-taps-without-distributor-diameter-35-mm-53cc956gm.jpg",
+  "dimensionDetail": "35mm"
  },
  {
   "id": 140,
@@ -2237,7 +2376,8 @@
   "sourceUrl": "https://www.rubinetteriashop.com/en/cartridges-for-mixers/2646-cartridge-replacement-paini-53cc956g25-1150090.html",
   "verified": "Y",
   "notes": "",
-  "photo": "https://www.rubinetteriashop.com/16116-large_default/cartridge-replacement-paini-53cc956g25-1150090.jpg"
+  "photo": "https://www.rubinetteriashop.com/16116-large_default/cartridge-replacement-paini-53cc956g25-1150090.jpg",
+  "dimensionDetail": "25mm"
  },
  {
   "id": 141,
@@ -2253,6 +2393,313 @@
   "sourceUrl": "https://www.rubinetteriashop.com/en/cartridges-for-mixers/991-27857-cartridge-for-taps-o-40-paini-53cc956g40ap.html",
   "verified": "Y",
   "notes": "",
-  "photo": ""
+  "photo": "",
+  "dimensionDetail": "40mm"
+ },
+ {
+  "id": 142,
+  "brand": "Universal",
+  "range": "Most single-lever mixer taps",
+  "component": "25mm ceramic cartridge (Kerox)",
+  "category": "Cartridge",
+  "partNumber": "K-25-OP",
+  "valveType": "ceramic disc",
+  "dimension": "25mm",
+  "supersession": "",
+  "buyUrl": "https://www.noelsplumbingsupply.com/product/25mm-single-handle-ceramic-cartridge-for-import-faucet-2/",
+  "sourceUrl": "https://www.noelsplumbingsupply.com/product/25mm-single-handle-ceramic-cartridge-for-import-faucet-2/",
+  "verified": "Y",
+  "notes": "Fits many import single-lever mixers",
+  "photo": "https://www.noelsplumbingsupply.com/wp-content/uploads/2019/02/91842-e1713891692672.png",
+  "dimensionDetail": "25mm"
+ },
+ {
+  "id": 143,
+  "brand": "Universal",
+  "range": "Most single-lever mixer taps",
+  "component": "35mm ceramic cartridge - standard/flat seat (Kerox)",
+  "category": "Cartridge",
+  "partNumber": "K35A",
+  "valveType": "ceramic disc",
+  "dimension": "35mm",
+  "supersession": "",
+  "buyUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks/35mm-standard-universal-cartridge-flat-seat",
+  "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
+  "verified": "Y",
+  "notes": "A = flat/standard seat",
+  "photo": "https://www.robertsontrade.co.nz/storage/spare-parts/K35A%20new.jpg",
+  "dimensionDetail": "35mm"
+ },
+ {
+  "id": 144,
+  "brand": "Universal",
+  "range": "Most single-lever mixer taps",
+  "component": "35mm ceramic cartridge - extended seat (Kerox)",
+  "category": "Cartridge",
+  "partNumber": "K35B",
+  "valveType": "ceramic disc",
+  "dimension": "35mm",
+  "supersession": "",
+  "buyUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks/35mm-extended-universal-cartridge-ext-seat",
+  "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
+  "verified": "Y",
+  "notes": "B = extended (raised) seat",
+  "photo": "https://www.robertsontrade.co.nz/storage/parts/K35B-1639339419-COPY.jpg",
+  "dimensionDetail": "35mm"
+ },
+ {
+  "id": 145,
+  "brand": "Universal",
+  "range": "Most single-lever mixer taps",
+  "component": "40mm ceramic cartridge - standard/flat seat (Kerox)",
+  "category": "Cartridge",
+  "partNumber": "KO40A",
+  "valveType": "ceramic disc",
+  "dimension": "40mm",
+  "supersession": "",
+  "buyUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks/40mm-standard-universal-cartridge-flat-seat-",
+  "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
+  "verified": "Y",
+  "notes": "Also sold as K40A",
+  "photo": "https://www.robertsontrade.co.nz/storage/product-image/universal/KO40A.jpg",
+  "dimensionDetail": "40mm"
+ },
+ {
+  "id": 146,
+  "brand": "Universal",
+  "range": "Most single-lever mixer taps",
+  "component": "40mm ceramic cartridge - extended seat (Kerox)",
+  "category": "Cartridge",
+  "partNumber": "KO40B",
+  "valveType": "ceramic disc",
+  "dimension": "40mm",
+  "supersession": "",
+  "buyUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks/40mm-extended-universal-cartridge-ext-seat",
+  "sourceUrl": "https://www.robertsontrade.co.nz/products/tapware-and-mixer-parts/cartridges-and-headworks",
+  "verified": "Y",
+  "notes": "Also sold as K40B",
+  "photo": "https://www.robertsontrade.co.nz/storage/product-image/KO40B.jpg",
+  "dimensionDetail": "40mm"
+ },
+ {
+  "id": 147,
+  "brand": "Universal",
+  "range": "Import single-lever mixer taps",
+  "component": "45mm ceramic cartridge (Kerox)",
+  "category": "Cartridge",
+  "partNumber": "K-45P",
+  "valveType": "ceramic disc",
+  "dimension": "45mm",
+  "supersession": "",
+  "buyUrl": "https://www.noelsplumbingsupply.com/product/single-lever-45mm-ceramic-cartridge-for-import-faucets/",
+  "sourceUrl": "https://www.noelsplumbingsupply.com/product/single-lever-45mm-ceramic-cartridge-for-import-faucets/",
+  "verified": "Y",
+  "notes": "Kerox 45mm single-lever",
+  "photo": "https://www.noelsplumbingsupply.com/wp-content/uploads/2024/10/62255-3-e1729174747744.png",
+  "dimensionDetail": "45mm"
+ },
+ {
+  "id": 148,
+  "brand": "Universal",
+  "range": "Kitchen/basin single-lever mixers",
+  "component": "35mm ceramic cartridge (Sedal)",
+  "category": "Cartridge",
+  "partNumber": "SN-35",
+  "valveType": "ceramic disc",
+  "dimension": "35mm",
+  "supersession": "",
+  "buyUrl": "https://lulani.com/products/sedal-single-handle-ceramic-disc-cartridge",
+  "sourceUrl": "https://lulani.com/products/sedal-single-handle-ceramic-disc-cartridge",
+  "verified": "Y",
+  "notes": "Sedal single-lever",
+  "photo": "https://lulani.com/cdn/shop/files/LP-100-71PV1_86f4ece6-f597-4ac5-bd2a-1d2a7e3a71b4_2000x.jpg?v=1691090155",
+  "dimensionDetail": "35mm"
+ },
+ {
+  "id": 149,
+  "brand": "Universal",
+  "range": "Small single-lever mixers",
+  "component": "25mm ceramic cartridge (Sedal)",
+  "category": "Cartridge",
+  "partNumber": "SN-25",
+  "valveType": "ceramic disc",
+  "dimension": "25mm",
+  "supersession": "",
+  "buyUrl": "https://www.sedal.com/pdfs/Cold%20Mirror.pdf",
+  "sourceUrl": "https://www.sedal.com/pdfs/Cold%20Mirror.pdf",
+  "verified": "Y",
+  "notes": "Sedal 25mm (Cold Mirror brochure)",
+  "photo": "",
+  "dimensionDetail": "25mm"
+ },
+ {
+  "id": 150,
+  "brand": "Voda",
+  "range": "HiFlo",
+  "component": "25mm cartridge",
+  "category": "Cartridge",
+  "partNumber": "VDAPT19",
+  "valveType": "ceramic disc",
+  "dimension": "25mm",
+  "supersession": "",
+  "buyUrl": "https://vodaplumbingware.co.nz/product/hi-flo-25mm-cartridge/",
+  "sourceUrl": "https://vodaplumbingware.co.nz/spare-parts/",
+  "verified": "Y",
+  "notes": "Mico house brand",
+  "photo": "https://vodaplumbingware.co.nz/wp-content/uploads/VDAPT19.jpg",
+  "dimensionDetail": "25mm"
+ },
+ {
+  "id": 151,
+  "brand": "Voda",
+  "range": "HiFlo",
+  "component": "35mm cartridge",
+  "category": "Cartridge",
+  "partNumber": "VDAPT24",
+  "valveType": "ceramic disc",
+  "dimension": "35mm",
+  "supersession": "",
+  "buyUrl": "https://vodaplumbingware.co.nz/spare-parts/",
+  "sourceUrl": "https://vodaplumbingware.co.nz/spare-parts/",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "dimensionDetail": "35mm"
+ },
+ {
+  "id": 152,
+  "brand": "Voda",
+  "range": "HiFlo",
+  "component": "40mm cartridge",
+  "category": "Cartridge",
+  "partNumber": "VDAPT17",
+  "valveType": "ceramic disc",
+  "dimension": "40mm",
+  "supersession": "",
+  "buyUrl": "https://vodaplumbingware.co.nz/spare-parts/",
+  "sourceUrl": "https://vodaplumbingware.co.nz/spare-parts/",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "dimensionDetail": "40mm"
+ },
+ {
+  "id": 153,
+  "brand": "Voda",
+  "range": "Pro Flow",
+  "component": "45mm shower mixer cartridge",
+  "category": "Cartridge",
+  "partNumber": "VDAPT49",
+  "valveType": "ceramic disc",
+  "dimension": "45mm",
+  "supersession": "",
+  "buyUrl": "https://vodaplumbingware.co.nz/spare-parts/",
+  "sourceUrl": "https://vodaplumbingware.co.nz/spare-parts/",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "dimensionDetail": "45mm"
+ },
+ {
+  "id": 154,
+  "brand": "Voda",
+  "range": "VORTEX",
+  "component": "47mm shower mixer cartridge",
+  "category": "Cartridge",
+  "partNumber": "VDAPT300",
+  "valveType": "ceramic disc",
+  "dimension": "47mm",
+  "supersession": "",
+  "buyUrl": "https://vodaplumbingware.co.nz/spare-parts/",
+  "sourceUrl": "https://vodaplumbingware.co.nz/spare-parts/",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "dimensionDetail": "47mm"
+ },
+ {
+  "id": 155,
+  "brand": "Hansgrohe",
+  "range": "M3/M2 single-hole faucets",
+  "component": "Ceramic cartridge M3/M2",
+  "category": "Cartridge",
+  "partNumber": "92730000",
+  "valveType": "ceramic disc",
+  "dimension": "35mm",
+  "supersession": "",
+  "buyUrl": "https://www.hansgrohe-usa.com/articledetail-ceramic-cartridge-m3-m2--92730000",
+  "sourceUrl": "https://www.hansgrohe-usa.com/articledetail-ceramic-cartridge-m3-m2--92730000",
+  "verified": "Y",
+  "notes": "Diameter ~35mm per third-party listing; confirm",
+  "photo": "https://assets.hansgrohe.com/mam/celum/celum_assets/154__hpu60454_tif.png?format=HBW2",
+  "dimensionDetail": "35mm"
+ },
+ {
+  "id": 156,
+  "brand": "Hansgrohe",
+  "range": "M1",
+  "component": "Ceramic cartridge M1 (complete)",
+  "category": "Cartridge",
+  "partNumber": "97685000",
+  "valveType": "ceramic disc",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://www.hansgrohe-usa.com/articledetail-ceramic-cartridge-m1-complete-97685000",
+  "sourceUrl": "https://www.hansgrohe-usa.com/articledetail-ceramic-cartridge-m1-complete-97685000",
+  "verified": "Y",
+  "notes": "",
+  "photo": "https://assets.hansgrohe.com/mam/celum/celum_assets/154__hpa01043_tif.png?format=HBW2",
+  "dimensionDetail": ""
+ },
+ {
+  "id": 157,
+  "brand": "Hansgrohe",
+  "range": "M25",
+  "component": "Ceramic cartridge M25",
+  "category": "Cartridge",
+  "partNumber": "95973001",
+  "valveType": "ceramic disc",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://www.hansgrohe-usa.com/articledetail-ceramic-cartridge-m25-95973001",
+  "sourceUrl": "https://www.hansgrohe-usa.com/articledetail-ceramic-cartridge-m25-95973001",
+  "verified": "Y",
+  "notes": "",
+  "photo": "https://assets.hansgrohe.com/mam/celum/celum_assets/154__hpa01043_tif.png?format=HBW2",
+  "dimensionDetail": ""
+ },
+ {
+  "id": 158,
+  "brand": "Newform",
+  "range": "Ergo (65921 sink mixer)",
+  "component": "Kitchen tap ceramic cartridge",
+  "category": "Cartridge",
+  "partNumber": "14720",
+  "valveType": "ceramic disc",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://www.bathroomspareparts.co.uk/newform-ergo-65921-kitchen-tap-cartridge-14720-90062-p.asp",
+  "sourceUrl": "https://www.bathroomspareparts.co.uk/newform-ergo-65921-kitchen-tap-cartridge-14720-90062-p.asp",
+  "verified": "Y",
+  "notes": "",
+  "photo": "https://files.ekmcdn.com/ebaths2/images/newform-ergo-65921-kitchen-tap-cartridge-14720-90062-p.jpg",
+  "dimensionDetail": ""
+ },
+ {
+  "id": 159,
+  "brand": "Newform",
+  "range": "Ergo-Q",
+  "component": "25mm cartridge (D.25)",
+  "category": "Cartridge",
+  "partNumber": "25903",
+  "valveType": "ceramic disc",
+  "dimension": "25mm",
+  "supersession": "",
+  "buyUrl": "https://www.rubinetteriashop.com/en/cartridges-for-mixers/6773-replacement-cartridge-for-newform-taps-d25-25903.html",
+  "sourceUrl": "https://www.rubinetteriashop.com/en/cartridges-for-mixers/6773-replacement-cartridge-for-newform-taps-d25-25903.html",
+  "verified": "Y",
+  "notes": "",
+  "photo": "https://www.rubinetteriashop.com/69417-large_default/replacement-cartridge-for-newform-taps-d25-25903.jpg",
+  "dimensionDetail": "25mm"
  }
 ]
