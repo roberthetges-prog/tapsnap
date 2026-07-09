@@ -93,7 +93,7 @@ export default function Find() {
 
   const stage = modelResult ? "modelresult"
     : !sel.productType ? "type"
-    : (sel.productType === "Valve" && !sel.valveFamily) ? "family"
+    : ((sel.productType === "Valve" || sel.productType === "Toilet") && !sel.valveFamily) ? "family"
     : !sel.brand ? "brand"
     : (sel.productType === "Tapware" && !skipModel && modelCards.length >= 1) ? "model"
     : (forceResults || !q) ? "results" : "question";
@@ -139,16 +139,17 @@ export default function Find() {
             <div className="grid">
               <button className="opt bigopt" onClick={() => add("productType", "Tapware")}>🚰 Tap / mixer <span className="c">{parts.filter((p) => p.productType === "Tapware").length}</span></button>
               <button className="opt bigopt" onClick={() => add("productType", "Valve")}>🎛 Valve <span className="c">{parts.filter((p) => p.productType === "Valve").length}</span></button>
+              <button className="opt bigopt" onClick={() => add("productType", "Toilet")}>🚽 Toilet <span className="c">{parts.filter((p) => p.productType === "Toilet").length}</span></button>
             </div>
           </div>
         )}
 
         {stage === "family" && (
           <div className="panel">
-            <h2>What kind of valve?</h2>
-            <p className="sub">Tempering valves reduce hot-water temperature; the others control pressure and relief.</p>
+            <h2>{sel.productType === "Toilet" ? "What toilet part?" : "What kind of valve?"}</h2>
+            <p className="sub">{sel.productType === "Toilet" ? "Inlet (fill) and outlet (flush) valves are matchable exactly; seats are matched by fixing type and shape." : "Tempering valves reduce hot-water temperature; the others control pressure and relief."}</p>
             <div className="grid">
-              {distinctValues(applyFilters(parts, { productType: "Valve" }), "valveFamily").map((o) => (
+              {distinctValues(applyFilters(parts, { productType: sel.productType }), "valveFamily").map((o) => (
                 <button className="opt" key={o.value} onClick={() => add("valveFamily", o.value)}>{o.value} <span className="c">{o.count}</span></button>
               ))}
             </div>
@@ -196,7 +197,7 @@ export default function Find() {
 
         {stage === "question" && q && (
           <div className="panel">
-            <h2>{q.label}</h2>
+            <h2>{sel.productType === "Toilet" && q.field === "dimension" ? "Which type is it?" : q.label}</h2>
             <p className="sub">{q.remaining} possible parts so far — pick one to narrow it down.</p>
             {q.field === "dimension" && sel.productType === "Tapware" && <MeasureHelp />}
             <div className="grid">
