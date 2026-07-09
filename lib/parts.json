@@ -15,7 +15,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "25mm",
-  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg"
+  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 2,
@@ -33,7 +36,10 @@
   "notes": "",
   "photo": "https://foreno.co.nz/wp-content/uploads/forpt105-G35.jpg",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg"
+  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 3,
@@ -51,7 +57,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg"
+  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 4,
@@ -69,7 +78,10 @@
   "notes": "",
   "photo": "https://foreno.co.nz/wp-content/uploads/forpt22-g40.jpg",
   "dimensionDetail": "40mm",
-  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg"
+  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 5,
@@ -87,7 +99,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "40mm",
-  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg"
+  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 6,
@@ -105,7 +120,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "40mm",
-  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg"
+  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 7,
@@ -123,7 +141,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "47mm",
-  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/LT060.jpg"
+  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/LT060.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 8,
@@ -141,7 +162,10 @@
   "notes": "Kerox K-45",
   "photo": "https://foreno.co.nz/wp-content/uploads/FORPT80.jpg",
   "dimensionDetail": "45mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 9,
@@ -159,7 +183,10 @@
   "notes": "Kerox K-35OP (Foreno Cartridge ID PDF)",
   "photo": "",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/SLT11LFCH.jpg"
+  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/SLT11LFCH.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 10,
@@ -177,7 +204,10 @@
   "notes": "",
   "photo": "https://foreno.co.nz/wp-content/uploads/FORPT04.jpg",
   "dimensionDetail": "12mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 11,
@@ -195,7 +225,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 12,
@@ -213,7 +246,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 13,
@@ -231,7 +267,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 14,
@@ -249,7 +288,10 @@
   "notes": "",
   "photo": "https://foreno.co.nz/wp-content/uploads/FORPT43.jpg",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 15,
@@ -267,7 +309,10 @@
   "notes": "",
   "photo": "https://foreno.co.nz/wp-content/uploads/FORPT65.jpg",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 16,
@@ -285,7 +330,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 17,
@@ -303,7 +351,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "12mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 18,
@@ -321,7 +372,10 @@
   "notes": "",
   "photo": "https://foreno.co.nz/wp-content/uploads/FORPT10.jpg",
   "dimensionDetail": "1/2\"",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 19,
@@ -339,7 +393,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "40mm",
-  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg"
+  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/FM10LFCH.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 20,
@@ -357,7 +414,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "1/2\"",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 21,
@@ -375,7 +435,10 @@
   "notes": "",
   "photo": "https://foreno.co.nz/wp-content/uploads/FORPT18.jpg",
   "dimensionDetail": "22mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 22,
@@ -393,7 +456,10 @@
   "notes": "",
   "photo": "https://foreno.co.nz/wp-content/uploads/FORPT19.jpg",
   "dimensionDetail": "24mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 23,
@@ -411,7 +477,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "28mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 24,
@@ -429,7 +498,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 25,
@@ -447,7 +519,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 26,
@@ -465,7 +540,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 27,
@@ -483,7 +561,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 28,
@@ -501,7 +582,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/LT24LFCH_featured.jpg"
+  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/LT24LFCH_featured.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 29,
@@ -519,7 +603,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/NBF4.jpg"
+  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/NBF4.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 30,
@@ -537,7 +624,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/MUR20LFCH_featured.jpg"
+  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/MUR20LFCH_featured.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 31,
@@ -555,7 +645,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 32,
@@ -573,7 +666,10 @@
   "notes": "",
   "photo": "https://foreno.co.nz/wp-content/uploads/FORPT109.jpg",
   "dimensionDetail": "",
-  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/LTM20CH.jpg"
+  "tapPhoto": "https://foreno.co.nz/wp-content/uploads/LTM20CH.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 33,
@@ -591,7 +687,10 @@
   "notes": "",
   "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/cc25_1__FillWzYwMCw2MDBd.jpg",
   "dimensionDetail": "25mm",
-  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/A_Product-Images_700x700px/Que/QBMC_Que-Basin-Mixer_04__FillWzYwMCw2MDBd.jpg"
+  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/A_Product-Images_700x700px/Que/QBMC_Que-Basin-Mixer_04__FillWzYwMCw2MDBd.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 34,
@@ -609,7 +708,10 @@
   "notes": "",
   "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC25OP_1__FillWzYwMCw2MDBd.jpg",
   "dimensionDetail": "25mm",
-  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/A_Product-Images_700x700px/Axiss/AX2BMC_1__FillWzYwMCw2MDBd.jpg"
+  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/A_Product-Images_700x700px/Axiss/AX2BMC_1__FillWzYwMCw2MDBd.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 35,
@@ -627,7 +729,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "25mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 36,
@@ -645,7 +750,10 @@
   "notes": "",
   "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35_1__FillWzYwMCw2MDBd.jpg",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/A_Product-Images_700x700px/Axiss/AX2BMC_1__FillWzYwMCw2MDBd.jpg"
+  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/A_Product-Images_700x700px/Axiss/AX2BMC_1__FillWzYwMCw2MDBd.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 37,
@@ -663,7 +771,10 @@
   "notes": "",
   "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35OP_1__FillWzYwMCw2MDBd.jpg",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/A_Product-Images_700x700px/Linea/Chrome/Updated-Handle-2025/LBMC-Linea-Basin-Mixer_02__FillWzYwMCw2MDBd.jpg"
+  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/A_Product-Images_700x700px/Linea/Chrome/Updated-Handle-2025/LBMC-Linea-Basin-Mixer_02__FillWzYwMCw2MDBd.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 38,
@@ -681,7 +792,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "35mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 39,
@@ -699,7 +813,10 @@
   "notes": "",
   "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35E_1__FillWzYwMCw2MDBd.jpg",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/A_Product-Images_700x700px/Que/QBMC_Que-Basin-Mixer_04__FillWzYwMCw2MDBd.jpg"
+  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/A_Product-Images_700x700px/Que/QBMC_Que-Basin-Mixer_04__FillWzYwMCw2MDBd.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 40,
@@ -717,7 +834,10 @@
   "notes": "",
   "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35_1__FillWzYwMCw2MDBd.jpg",
   "dimensionDetail": "40mm",
-  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/A_Product-Images_700x700px/Axiss/AX2BMC_1__FillWzYwMCw2MDBd.jpg"
+  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/A_Product-Images_700x700px/Axiss/AX2BMC_1__FillWzYwMCw2MDBd.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 41,
@@ -735,7 +855,10 @@
   "notes": "",
   "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35E_1__FillWzYwMCw2MDBd.jpg",
   "dimensionDetail": "40mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 42,
@@ -753,7 +876,10 @@
   "notes": "",
   "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35_1__FillWzYwMCw2MDBd.jpg",
   "dimensionDetail": "35mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 43,
@@ -771,7 +897,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "35mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 44,
@@ -789,7 +918,10 @@
   "notes": "",
   "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/Kerox-Cartridges/CC35_1__FillWzYwMCw2MDBd.jpg",
   "dimensionDetail": "40mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 45,
@@ -807,7 +939,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "40mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 46,
@@ -825,7 +960,10 @@
   "notes": "",
   "photo": "https://www.felton.co.nz/assets/Uploads/A-Spare-Parts/Product-Images_700x700px/EN0039_1__FillWzYwMCw2MDBd.jpg",
   "dimensionDetail": "47mm",
-  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/QFSPCSMC_Que-Fusion-Plus-Shower-Mixer-Chrome-v3__FillWzYwMCw2MDBd.jpg"
+  "tapPhoto": "https://www.felton.co.nz/assets/Uploads/QFSPCSMC_Que-Fusion-Plus-Shower-Mixer-Chrome-v3__FillWzYwMCw2MDBd.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 47,
@@ -843,7 +981,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "mixed",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 48,
@@ -861,7 +1002,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 49,
@@ -879,7 +1023,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 50,
@@ -897,7 +1044,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 51,
@@ -915,7 +1065,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 52,
@@ -933,7 +1086,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 53,
@@ -951,7 +1107,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 54,
@@ -969,7 +1128,10 @@
   "notes": "Robertson Trade distributes; Kerox universal",
   "photo": "https://www.robertsontrade.co.nz/storage/spare-parts/K35A%20new.jpg",
   "dimensionDetail": "35mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 55,
@@ -987,7 +1149,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/parts/K35B-1639339419-COPY.jpg",
   "dimensionDetail": "35mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 56,
@@ -1005,7 +1170,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/product-image/universal/KO40A.jpg",
   "dimensionDetail": "40mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 57,
@@ -1023,7 +1191,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/product-image/KO40B.jpg",
   "dimensionDetail": "40mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 58,
@@ -1041,7 +1212,10 @@
   "notes": "Diameter not published; ION basin cartridges are 25mm",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://www.plumbingworld.co.nz/productimages/MEDIUM/1/3339_3407_6755.jpg"
+  "tapPhoto": "https://www.plumbingworld.co.nz/productimages/MEDIUM/1/3339_3407_6755.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 59,
@@ -1059,7 +1233,10 @@
   "notes": "Hansa '3.5' is a model name, not the mm size",
   "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Hansa-35mm-Replacement-Mixer-Cartridge-59913075.png",
   "dimensionDetail": "35mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 60,
@@ -1077,7 +1254,10 @@
   "notes": "Diameter not confirmed; '2.5' is not the mm size",
   "photo": "https://www.robertsontrade.co.nz/storage/parts/hansa/59913914.jpg",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 61,
@@ -1095,7 +1275,10 @@
   "notes": "'4.8' is a model name, not the mm size",
   "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/lrg_27058_HansaCartridge599046011.jpg",
   "dimensionDetail": "46mm (46x46x60)",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 62,
@@ -1113,7 +1296,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/parts/hansa/59913051.jpg",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 63,
@@ -1131,7 +1317,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 64,
@@ -1149,7 +1338,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 65,
@@ -1167,7 +1359,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "1/2\"",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 66,
@@ -1185,7 +1380,10 @@
   "notes": "",
   "photo": "https://italianluxuryinteriors.com/cdn/shop/files/zucchetti_r98123_ceramic_disc_mixer_tap_cartridge_25mm.jpg?v=1688385187",
   "dimensionDetail": "25mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 67,
@@ -1203,7 +1401,10 @@
   "notes": "",
   "photo": "https://italianluxuryinteriors.com/cdn/shop/files/zucchetti_r98112_ceramic_disc_mixer_tap_cartridge_35mm_2.jpg?v=1688385495",
   "dimensionDetail": "35mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 68,
@@ -1221,7 +1422,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 69,
@@ -1239,7 +1443,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 70,
@@ -1257,7 +1464,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 71,
@@ -1275,7 +1485,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/product-image/zucchetti/PanS/R99316%20disc.jpg",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 72,
@@ -1293,7 +1506,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/product-image/zucchetti/PanS/45859.02.jpg",
   "dimensionDetail": "M16.5 / 7.5 LPM",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 73,
@@ -1311,7 +1527,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/product-image/neopearl/09-9164.0.jpg",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 74,
@@ -1329,7 +1548,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/parts/Elementi/42902.00.jpg",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 75,
@@ -1347,7 +1569,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/product-image/elementi/ATBX0087-XD%20new.jpg",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 76,
@@ -1365,7 +1590,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/parts/universal/98999.00.jpg",
   "dimensionDetail": "15mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 77,
@@ -1383,7 +1611,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/parts/universal/98992.00.jpg",
   "dimensionDetail": "20mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 78,
@@ -1401,7 +1632,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/product%20images/59910749%20A.jpg",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 79,
@@ -1419,7 +1653,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/product-image/cENTRALbRASS/CS-42022.jpg",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 80,
@@ -1437,7 +1674,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/product-image/elementi/uno/43951.02%20disc%20new%20handle.png",
   "dimensionDetail": "35mm cartridge",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 81,
@@ -1455,7 +1695,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/product-image/elementi/uno/42970.02%20disc%20new%20HANDLE.png",
   "dimensionDetail": "40mm cartridge",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 82,
@@ -1473,7 +1716,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/parts/hansa/59914417.jpg",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 83,
@@ -1491,7 +1737,10 @@
   "notes": "",
   "photo": "https://www.robertsontrade.co.nz/storage/product-image/zucchetti/PanS/R96481%20disc.jpg",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 84,
@@ -1509,7 +1758,10 @@
   "notes": "Sydney Bathroomware SKU 04-7772",
   "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/methven-40mm-shower-mixer-cartridge-04-7772.webp",
   "dimensionDetail": "40x40x62mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 85,
@@ -1527,7 +1779,10 @@
   "notes": "Kerox K35B",
   "photo": "https://plumbingsales.com.au/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/m/e/methven_35mm_kerox_mixer_tap_cartridge_with_leg_k35b_04-9172.jpg",
   "dimensionDetail": "35mm dia x 73mm H",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 86,
@@ -1545,7 +1800,10 @@
   "notes": "Exploded PDF also lists SP470, SP033510, SP143, 782002, SP190, SP083550, SP233550, 785946 - component per code not labelled on diagram",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://stsharedaueastprodn8wg.blob.core.windows.net/pim-assets/ProductThumbnail/E8214_BK_Image_HeroImage_ECHO_STRATA_SINK_MIXER_CP.jpg"
+  "tapPhoto": "https://stsharedaueastprodn8wg.blob.core.windows.net/pim-assets/ProductThumbnail/E8214_BK_Image_HeroImage_ECHO_STRATA_SINK_MIXER_CP.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 87,
@@ -1563,7 +1821,10 @@
   "notes": "Exploded PDF lists SP470, SP233550, SP472, SP033510, SP478 - shares internals with E8114; component per code not labelled",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://stsharedaueastprodn8wg.blob.core.windows.net/pim-assets/ProductThumbnail/E8214_BK_Image_HeroImage_ECHO_STRATA_SINK_MIXER_CP.jpg"
+  "tapPhoto": "https://stsharedaueastprodn8wg.blob.core.windows.net/pim-assets/ProductThumbnail/E8214_BK_Image_HeroImage_ECHO_STRATA_SINK_MIXER_CP.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 88,
@@ -1581,7 +1842,10 @@
   "notes": "Methven Group (Deva/UK) code - confirm NZ availability",
   "photo": "",
   "dimensionDetail": "35mm x 58mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 89,
@@ -1599,7 +1863,10 @@
   "notes": "Methven Group (Deva/UK) code - confirm NZ availability",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 90,
@@ -1617,7 +1884,10 @@
   "notes": "Methven Group (Deva/UK) code - confirm NZ availability",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 91,
@@ -1635,7 +1905,10 @@
   "notes": "Methven Group code - Aurajet sold in NZ; confirm SKU",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://stsharedaueastprodn8wg.blob.core.windows.net/pim-assets/ProductThumbnail/AOSSCP_BK_Image_HeroImage_AIO_SHOWER_SYSTEM_CP.jpg"
+  "tapPhoto": "https://stsharedaueastprodn8wg.blob.core.windows.net/pim-assets/ProductThumbnail/AOSSCP_BK_Image_HeroImage_AIO_SHOWER_SYSTEM_CP.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 92,
@@ -1653,7 +1926,10 @@
   "notes": "Mitre 10 SKU 189232",
   "photo": "https://b2c-api-prod-internal.cc.mitre10.co.nz/medias/sys_master/productimages/h0f/hdf/8799765299230/189232xlg/189232xlg.jpg",
   "dimensionDetail": "40mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 93,
@@ -1671,7 +1947,10 @@
   "notes": "",
   "photo": "https://plumbingsales.com.au/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/g/r/greens_starmix_marketti_mixer_tap_ceramic_disc_cartridge_5980081.jpg",
   "dimensionDetail": "42mm dia x 90mm H",
-  "tapPhoto": "https://greenstapware.com/wp-content/uploads/2024/12/16185001-Marketti-Blade-Fixed-Basin-Mixer-1.jpg"
+  "tapPhoto": "https://greenstapware.com/wp-content/uploads/2024/12/16185001-Marketti-Blade-Fixed-Basin-Mixer-1.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 94,
@@ -1689,7 +1968,10 @@
   "notes": "",
   "photo": "https://plumbingsales.com.au/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/g/r/greens_starmix_mixer_tap_ceramic_disc_cartridge_5980082.jpg",
   "dimensionDetail": "42mm dia x 65mm H",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 95,
@@ -1707,7 +1989,10 @@
   "notes": "Seen in listing title only - confirm before use",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 96,
@@ -1725,7 +2010,10 @@
   "notes": "Caroma Spare Parts Booklet",
   "photo": "",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/effa59262d388f30/Web_1200x900-Caroma-Saracom-Basin-Mixer-Chrome-6-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/effa59262d388f30/Web_1200x900-Caroma-Saracom-Basin-Mixer-Chrome-6-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 97,
@@ -1743,7 +2031,10 @@
   "notes": "",
   "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Caroma-Half-Turn-Basin-Spindle-2838.04.jpg",
   "dimensionDetail": "",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/effa59262d388f30/Web_1200x900-Caroma-Saracom-Basin-Mixer-Chrome-6-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/effa59262d388f30/Web_1200x900-Caroma-Saracom-Basin-Mixer-Chrome-6-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 98,
@@ -1761,7 +2052,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/effa59262d388f30/Web_1200x900-Caroma-Saracom-Basin-Mixer-Chrome-6-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/effa59262d388f30/Web_1200x900-Caroma-Saracom-Basin-Mixer-Chrome-6-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 99,
@@ -1779,7 +2073,10 @@
   "notes": "",
   "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Dorf-Ceramic-Disc-Wall-Spindles-6478.04.jpg",
   "dimensionDetail": "",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/b279c4dc0412664c/Web_1200x900-Dorf-Flickmixer-Basin-Mixer-Chrome-5-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/b279c4dc0412664c/Web_1200x900-Dorf-Flickmixer-Basin-Mixer-Chrome-5-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 100,
@@ -1797,7 +2094,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/b279c4dc0412664c/Web_1200x900-Dorf-Flickmixer-Basin-Mixer-Chrome-5-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/b279c4dc0412664c/Web_1200x900-Dorf-Flickmixer-Basin-Mixer-Chrome-5-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 101,
@@ -1815,7 +2115,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/b279c4dc0412664c/Web_1200x900-Dorf-Flickmixer-Basin-Mixer-Chrome-5-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/b279c4dc0412664c/Web_1200x900-Dorf-Flickmixer-Basin-Mixer-Chrome-5-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 102,
@@ -1833,7 +2136,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/b279c4dc0412664c/Web_1200x900-Dorf-Flickmixer-Basin-Mixer-Chrome-5-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/b279c4dc0412664c/Web_1200x900-Dorf-Flickmixer-Basin-Mixer-Chrome-5-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 103,
@@ -1851,7 +2157,10 @@
   "notes": "",
   "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Reno_Hub-Fienza-25mm-Mixer-Cartridge-WAS50.webp",
   "dimensionDetail": "25mm",
-  "tapPhoto": "https://www.buildmat.com.au/cdn/shop/files/Phoenix_RU770_20CHR_Chrome_NoBg.png?v=1716700591"
+  "tapPhoto": "https://www.buildmat.com.au/cdn/shop/files/Phoenix_RU770_20CHR_Chrome_NoBg.png?v=1716700591",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 104,
@@ -1869,7 +2178,10 @@
   "notes": "",
   "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Phoenix-Vivid-Slimline-25mm-Cartridge.jpg",
   "dimensionDetail": "25mm",
-  "tapPhoto": "https://www.buildmat.com.au/cdn/shop/files/VS770_CHR_Vivid_Slimline_Basin_Mixer-Chrome-1.png?v=1699824141"
+  "tapPhoto": "https://www.buildmat.com.au/cdn/shop/files/VS770_CHR_Vivid_Slimline_Basin_Mixer-Chrome-1.png?v=1699824141",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 105,
@@ -1887,7 +2199,10 @@
   "notes": "Retailer SKU 40352",
   "photo": "https://sydneybathroomware.com.au/wp-content/uploads/2023/12/Phoenix-35mm-Cartridge-Shower-Mixer-40351NR-Front.jpg",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://www.buildmat.com.au/cdn/shop/files/5127691713932407914.png?v=1714687772"
+  "tapPhoto": "https://www.buildmat.com.au/cdn/shop/files/5127691713932407914.png?v=1714687772",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 106,
@@ -1905,7 +2220,10 @@
   "notes": "Reece product code",
   "photo": "https://digitalassets.reecegroup.com.au/m/40b32a0ce03f9755/Web_1200x900-Mizu-Soothe-Basin-Mixer-Cartridge-25mm.jpg",
   "dimensionDetail": "25mm",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/36459f6f177420df/Web_1200x900-Mizu-Soothe-Wall-Basin-Mixer-Set-200mm-Chrome-4-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/36459f6f177420df/Web_1200x900-Mizu-Soothe-Wall-Basin-Mixer-Set-200mm-Chrome-4-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 107,
@@ -1923,7 +2241,10 @@
   "notes": "Diameter not published on Reece",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/1fce62a6431a02df/Web_1200x900-Mizu-Drift-MK2-Basin-Mixer-Tap-Chrome-5-6-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/1fce62a6431a02df/Web_1200x900-Mizu-Drift-MK2-Basin-Mixer-Tap-Chrome-5-6-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 108,
@@ -1941,7 +2262,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "25mm",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/5ea749f1bec072c1/Web_1200x900-Mizu-Bliss-Basin-Mixer-Tap-Chrome-4-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/5ea749f1bec072c1/Web_1200x900-Mizu-Bliss-Basin-Mixer-Tap-Chrome-4-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 109,
@@ -1959,7 +2283,10 @@
   "notes": "AU code; diameter not published; confirm NZ SKU",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/2c870a9a7a33fd6c/Web_1200x900-Posh-Solus-MK3-Basin-Mixer-Tap-Chrome-4-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/2c870a9a7a33fd6c/Web_1200x900-Posh-Solus-MK3-Basin-Mixer-Tap-Chrome-4-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 110,
@@ -1977,7 +2304,10 @@
   "notes": "Diameter not published; confirm NZ SKU",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/2c870a9a7a33fd6c/Web_1200x900-Posh-Solus-MK3-Basin-Mixer-Tap-Chrome-4-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/2c870a9a7a33fd6c/Web_1200x900-Posh-Solus-MK3-Basin-Mixer-Tap-Chrome-4-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 111,
@@ -1995,7 +2325,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/2c870a9a7a33fd6c/Web_1200x900-Posh-Solus-MK3-Basin-Mixer-Tap-Chrome-4-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/2c870a9a7a33fd6c/Web_1200x900-Posh-Solus-MK3-Basin-Mixer-Tap-Chrome-4-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 112,
@@ -2013,7 +2346,10 @@
   "notes": "Model KSP0172; Bunnings I/N 0014721",
   "photo": "https://media.bunnings.com.au/api/public/content/7cc270d884c94b42b785cc319be29925?v=14fa6e67",
   "dimensionDetail": "",
-  "tapPhoto": "https://media.bunnings.com.au/api/public/content/ba105fb7c65a4d388a2ba8d7c39761b8?v=669d0770&t=w1200"
+  "tapPhoto": "https://media.bunnings.com.au/api/public/content/ba105fb7c65a4d388a2ba8d7c39761b8?v=669d0770&t=w1200",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 113,
@@ -2031,7 +2367,10 @@
   "notes": "Bunnings I/N",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://media.bunnings.com.au/api/public/content/b430124ff49848659a67607a978b0714?v=f1f68d6b&t=w1200"
+  "tapPhoto": "https://media.bunnings.com.au/api/public/content/b430124ff49848659a67607a978b0714?v=f1f68d6b&t=w1200",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 114,
@@ -2049,7 +2388,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://media.bunnings.com.au/api/public/content/ba105fb7c65a4d388a2ba8d7c39761b8?v=669d0770&t=w1200"
+  "tapPhoto": "https://media.bunnings.com.au/api/public/content/ba105fb7c65a4d388a2ba8d7c39761b8?v=669d0770&t=w1200",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 115,
@@ -2067,7 +2409,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://media.bunnings.com.au/api/public/content/933fe2064f2a4e869ee5df1ef3f94557?v=7dc5457b&t=w1200"
+  "tapPhoto": "https://media.bunnings.com.au/api/public/content/933fe2064f2a4e869ee5df1ef3f94557?v=7dc5457b&t=w1200",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 116,
@@ -2085,7 +2430,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 117,
@@ -2103,7 +2451,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://media.bunnings.com.au/api/public/content/933fe2064f2a4e869ee5df1ef3f94557?v=7dc5457b&t=w1200"
+  "tapPhoto": "https://media.bunnings.com.au/api/public/content/933fe2064f2a4e869ee5df1ef3f94557?v=7dc5457b&t=w1200",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 118,
@@ -2121,7 +2472,10 @@
   "notes": "Replacement handle",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://media.bunnings.com.au/api/public/content/933fe2064f2a4e869ee5df1ef3f94557?v=7dc5457b&t=w1200"
+  "tapPhoto": "https://media.bunnings.com.au/api/public/content/933fe2064f2a4e869ee5df1ef3f94557?v=7dc5457b&t=w1200",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 119,
@@ -2139,7 +2493,10 @@
   "notes": "PW code; taps use 35mm ceramic cartridge but no standalone cartridge SKU",
   "photo": "https://www.plumbingworld.co.nz/productimages/MEDIUM/1/5951_6081_10974.jpg",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://www.plumbingworld.co.nz/productimages/MEDIUM/1/4657_4743_8781.jpg"
+  "tapPhoto": "https://www.plumbingworld.co.nz/productimages/MEDIUM/1/4657_4743_8781.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 120,
@@ -2157,7 +2514,10 @@
   "notes": "Workhorse cartridge; 15yr warranty",
   "photo": "https://www.meir.com.au/cdn/shop/products/kerox-cartridge-1_1024x1024.jpg?v=1758420182",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://meirblack.co.nz/cdn/shop/products/MB03-C-Chrome-Retro-Basin-Mixer-Tap-Meir-3_d771a4d8-9f42-40f2-b6a6-dd24b8b3f036_1024x1024.jpg"
+  "tapPhoto": "https://meirblack.co.nz/cdn/shop/products/MB03-C-Chrome-Retro-Basin-Mixer-Tap-Meir-3_d771a4d8-9f42-40f2-b6a6-dd24b8b3f036_1024x1024.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 121,
@@ -2175,7 +2535,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://meirblack.co.nz/cdn/shop/products/MB03-C-Chrome-Retro-Basin-Mixer-Tap-Meir-3_d771a4d8-9f42-40f2-b6a6-dd24b8b3f036_1024x1024.jpg"
+  "tapPhoto": "https://meirblack.co.nz/cdn/shop/products/MB03-C-Chrome-Retro-Basin-Mixer-Tap-Meir-3_d771a4d8-9f42-40f2-b6a6-dd24b8b3f036_1024x1024.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 122,
@@ -2193,7 +2556,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "80-85mm",
-  "tapPhoto": "https://meirblack.co.nz/cdn/shop/products/MB03-C-Chrome-Retro-Basin-Mixer-Tap-Meir-3_d771a4d8-9f42-40f2-b6a6-dd24b8b3f036_1024x1024.jpg"
+  "tapPhoto": "https://meirblack.co.nz/cdn/shop/products/MB03-C-Chrome-Retro-Basin-Mixer-Tap-Meir-3_d771a4d8-9f42-40f2-b6a6-dd24b8b3f036_1024x1024.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 123,
@@ -2211,7 +2577,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://meirblack.co.nz/cdn/shop/products/MB03-C-Chrome-Retro-Basin-Mixer-Tap-Meir-3_d771a4d8-9f42-40f2-b6a6-dd24b8b3f036_1024x1024.jpg"
+  "tapPhoto": "https://meirblack.co.nz/cdn/shop/products/MB03-C-Chrome-Retro-Basin-Mixer-Tap-Meir-3_d771a4d8-9f42-40f2-b6a6-dd24b8b3f036_1024x1024.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 124,
@@ -2229,7 +2598,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": "https://meirblack.co.nz/cdn/shop/products/MB03-C-Chrome-Retro-Basin-Mixer-Tap-Meir-3_d771a4d8-9f42-40f2-b6a6-dd24b8b3f036_1024x1024.jpg"
+  "tapPhoto": "https://meirblack.co.nz/cdn/shop/products/MB03-C-Chrome-Retro-Basin-Mixer-Tap-Meir-3_d771a4d8-9f42-40f2-b6a6-dd24b8b3f036_1024x1024.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 125,
@@ -2247,7 +2619,10 @@
   "notes": "SKU CBX003C.CR",
   "photo": "",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://www.thekitchenhub.co.nz/cdn/shop/products/Blank1000x1000-184_13785b8a-7579-4d45-a55a-b230fc67493b_600x.png?v=1658205897"
+  "tapPhoto": "https://www.thekitchenhub.co.nz/cdn/shop/products/Blank1000x1000-184_13785b8a-7579-4d45-a55a-b230fc67493b_600x.png?v=1658205897",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 126,
@@ -2265,7 +2640,10 @@
   "notes": "Shown as B003.001 (35A)",
   "photo": "",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://www.thekitchenhub.co.nz/cdn/shop/products/Blank1000x1000-140_19e1ee23-775c-42c5-b75f-b3961a225252_600x.png?v=1658221549"
+  "tapPhoto": "https://www.thekitchenhub.co.nz/cdn/shop/products/Blank1000x1000-140_19e1ee23-775c-42c5-b75f-b3961a225252_600x.png?v=1658221549",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 127,
@@ -2283,7 +2661,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "30mm",
-  "tapPhoto": "https://www.thekitchenhub.co.nz/cdn/shop/products/Blank1000x1000-140_19e1ee23-775c-42c5-b75f-b3961a225252_600x.png?v=1658221549"
+  "tapPhoto": "https://www.thekitchenhub.co.nz/cdn/shop/products/Blank1000x1000-140_19e1ee23-775c-42c5-b75f-b3961a225252_600x.png?v=1658221549",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 128,
@@ -2301,7 +2682,10 @@
   "notes": "Shown as CB042.001 (35A)",
   "photo": "",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://www.thekitchenhub.co.nz/cdn/shop/products/TKH_Buddy_600x_a23bb4f1-3ad2-4b63-8302-6c5fc6571c9c_600x.jpg?v=1658213090"
+  "tapPhoto": "https://www.thekitchenhub.co.nz/cdn/shop/products/TKH_Buddy_600x_a23bb4f1-3ad2-4b63-8302-6c5fc6571c9c_600x.jpg?v=1658213090",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 129,
@@ -2319,7 +2703,10 @@
   "notes": "SKU CB040.CR",
   "photo": "",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://www.thekitchenhub.co.nz/cdn/shop/products/TKH_Buddy_600x_a23bb4f1-3ad2-4b63-8302-6c5fc6571c9c_600x.jpg?v=1658213090"
+  "tapPhoto": "https://www.thekitchenhub.co.nz/cdn/shop/products/TKH_Buddy_600x_a23bb4f1-3ad2-4b63-8302-6c5fc6571c9c_600x.jpg?v=1658213090",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 130,
@@ -2337,7 +2724,10 @@
   "notes": "",
   "photo": "https://nero-tapware-assets.spicyweb.net.au/products/Products/_980xAUTO_crop_center-center_none/1912121/NR504110NT-35mm-Cartridge-Thumb.webp",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://www.buildmat.com.au/cdn/shop/files/NR221901CH-mecca-basin-mixer-chrome-001.png?v=1705271466"
+  "tapPhoto": "https://www.buildmat.com.au/cdn/shop/files/NR221901CH-mecca-basin-mixer-chrome-001.png?v=1705271466",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 131,
@@ -2355,7 +2745,10 @@
   "notes": "",
   "photo": "https://nero-tapware-assets.spicyweb.net.au/products/Products/_980xAUTO_crop_center-center_none/1912115/NR504080NT-40mm-Cartridge-Thumb.webp",
   "dimensionDetail": "40mm",
-  "tapPhoto": "https://www.buildmat.com.au/cdn/shop/files/NR221901CH-mecca-basin-mixer-chrome-001.png?v=1705271466"
+  "tapPhoto": "https://www.buildmat.com.au/cdn/shop/files/NR221901CH-mecca-basin-mixer-chrome-001.png?v=1705271466",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 132,
@@ -2373,7 +2766,10 @@
   "notes": "Official Grohe spare",
   "photo": "https://cdn.shopify.com/s/files/1/0866/6811/6281/files/16816_46374000-cartridge_0_CDNwebp.webp",
   "dimensionDetail": "",
-  "tapPhoto": "https://www.lettalondon.com/cdn/shop/products/grohe-zedra-the-single-lever-kitchen-mixer-tap-with-pull-out-spout-chrome-32294002.jpg?v=1678805697"
+  "tapPhoto": "https://www.lettalondon.com/cdn/shop/products/grohe-zedra-the-single-lever-kitchen-mixer-tap-with-pull-out-spout-chrome-32294002.jpg?v=1678805697",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 133,
@@ -2391,7 +2787,10 @@
   "notes": "Official Grohe spare",
   "photo": "https://cdn.shopify.com/s/files/1/0866/6811/6281/files/16708_46048000-cartridge_0_CDNwebp.webp",
   "dimensionDetail": "",
-  "tapPhoto": "https://www.lettalondon.com/cdn/shop/products/grohe-zedra-the-single-lever-kitchen-mixer-tap-with-pull-out-spout-chrome-32294002.jpg?v=1678805697"
+  "tapPhoto": "https://www.lettalondon.com/cdn/shop/products/grohe-zedra-the-single-lever-kitchen-mixer-tap-with-pull-out-spout-chrome-32294002.jpg?v=1678805697",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 134,
@@ -2409,7 +2808,10 @@
   "notes": "",
   "photo": "https://cdn.shopify.com/s/files/1/0866/6811/6281/files/16715_46092000-metal-hose-starlight-chrome_0_CDNwebp.webp",
   "dimensionDetail": "",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/bc19dbaaf2edeb5/Web_1200x900-GROHE-Concetto-Basin-Mixer-Tap-Chrome-5-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/bc19dbaaf2edeb5/Web_1200x900-GROHE-Concetto-Basin-Mixer-Tap-Chrome-5-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 135,
@@ -2427,7 +2829,10 @@
   "notes": "Discontinued",
   "photo": "https://cdn.shopify.com/s/files/1/0866/6811/6281/files/16893_46592000-minta-pull-out-spray-starlight-chrome_0_CDNwebp.webp",
   "dimensionDetail": "",
-  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/cab616c70c0485d4/Web_1200x900-GROHE-Minta-U-Sink-Mixer-with-Pull-Out-Squareline-Chrome-4-Star.jpg"
+  "tapPhoto": "https://digitalassets.reecegroup.com.au/m/cab616c70c0485d4/Web_1200x900-GROHE-Minta-U-Sink-Mixer-with-Pull-Out-Squareline-Chrome-4-Star.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 136,
@@ -2445,7 +2850,10 @@
   "notes": "Official Franke SP number",
   "photo": "",
   "dimensionDetail": "35mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 137,
@@ -2463,7 +2871,10 @@
   "notes": "Also sold as SP3794-H",
   "photo": "",
   "dimensionDetail": "",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 138,
@@ -2481,7 +2892,10 @@
   "notes": "Genuine Franke OEM no.; also SP1202/4010421",
   "photo": "https://www.divapor.com/spares/images/Franke-Spares/FR-EO12/Franke-EOS-Spares.jpg",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://www.cassbrothers.com.au/cdn/shop/files/Franke_TA9600_EOS_NEO_Gooseneck_Swivel_Mixer_Tap_-_Stainless_Steel_115.0616.112_0.jpeg?v=1715649239"
+  "tapPhoto": "https://www.cassbrothers.com.au/cdn/shop/files/Franke_TA9600_EOS_NEO_Gooseneck_Swivel_Mixer_Tap_-_Stainless_Steel_115.0616.112_0.jpeg?v=1715649239",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 139,
@@ -2499,7 +2913,10 @@
   "notes": "Workhorse; EAN 8000177002335",
   "photo": "https://www.elettronew.com/63804-large_default/cartridge-for-paini-taps-without-distributor-diameter-35-mm-53cc956gm.jpg",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://www.plumbingworld.co.nz/productimages/MEDIUM/1/5751_5881_10623.jpg"
+  "tapPhoto": "https://www.plumbingworld.co.nz/productimages/MEDIUM/1/5751_5881_10623.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 140,
@@ -2517,7 +2934,10 @@
   "notes": "",
   "photo": "https://www.rubinetteriashop.com/16116-large_default/cartridge-replacement-paini-53cc956g25-1150090.jpg",
   "dimensionDetail": "25mm",
-  "tapPhoto": "https://www.plumbingworld.co.nz/productimages/MEDIUM/1/5751_5881_10623.jpg"
+  "tapPhoto": "https://www.plumbingworld.co.nz/productimages/MEDIUM/1/5751_5881_10623.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 141,
@@ -2535,7 +2955,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "40mm",
-  "tapPhoto": "https://www.plumbingworld.co.nz/productimages/MEDIUM/1/5751_5881_10623.jpg"
+  "tapPhoto": "https://www.plumbingworld.co.nz/productimages/MEDIUM/1/5751_5881_10623.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 142,
@@ -2553,7 +2976,10 @@
   "notes": "Fits many import single-lever mixers",
   "photo": "https://www.noelsplumbingsupply.com/wp-content/uploads/2019/02/91842-e1713891692672.png",
   "dimensionDetail": "25mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 143,
@@ -2571,7 +2997,10 @@
   "notes": "A = flat/standard seat",
   "photo": "https://www.robertsontrade.co.nz/storage/spare-parts/K35A%20new.jpg",
   "dimensionDetail": "35mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 144,
@@ -2589,7 +3018,10 @@
   "notes": "B = extended (raised) seat",
   "photo": "https://www.robertsontrade.co.nz/storage/parts/K35B-1639339419-COPY.jpg",
   "dimensionDetail": "35mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 145,
@@ -2607,7 +3039,10 @@
   "notes": "Also sold as K40A",
   "photo": "https://www.robertsontrade.co.nz/storage/product-image/universal/KO40A.jpg",
   "dimensionDetail": "40mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 146,
@@ -2625,7 +3060,10 @@
   "notes": "Also sold as K40B",
   "photo": "https://www.robertsontrade.co.nz/storage/product-image/KO40B.jpg",
   "dimensionDetail": "40mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 147,
@@ -2643,7 +3081,10 @@
   "notes": "Kerox 45mm single-lever",
   "photo": "https://www.noelsplumbingsupply.com/wp-content/uploads/2024/10/62255-3-e1729174747744.png",
   "dimensionDetail": "45mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 148,
@@ -2661,7 +3102,10 @@
   "notes": "Sedal single-lever",
   "photo": "https://lulani.com/cdn/shop/files/LP-100-71PV1_86f4ece6-f597-4ac5-bd2a-1d2a7e3a71b4_2000x.jpg?v=1691090155",
   "dimensionDetail": "35mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 149,
@@ -2679,7 +3123,10 @@
   "notes": "Sedal 25mm (Cold Mirror brochure)",
   "photo": "",
   "dimensionDetail": "25mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 150,
@@ -2697,7 +3144,10 @@
   "notes": "Mico house brand",
   "photo": "https://vodaplumbingware.co.nz/wp-content/uploads/VDAPT19.jpg",
   "dimensionDetail": "25mm",
-  "tapPhoto": "https://vodaplumbingware.co.nz/wp-content/uploads/VECM20LFCH.jpg"
+  "tapPhoto": "https://vodaplumbingware.co.nz/wp-content/uploads/VECM20LFCH.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 151,
@@ -2715,7 +3165,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://vodaplumbingware.co.nz/wp-content/uploads/VECM20LFCH.jpg"
+  "tapPhoto": "https://vodaplumbingware.co.nz/wp-content/uploads/VECM20LFCH.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 152,
@@ -2733,7 +3186,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "40mm",
-  "tapPhoto": "https://vodaplumbingware.co.nz/wp-content/uploads/VECM20LFCH.jpg"
+  "tapPhoto": "https://vodaplumbingware.co.nz/wp-content/uploads/VECM20LFCH.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 153,
@@ -2751,7 +3207,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "45mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 154,
@@ -2769,7 +3228,10 @@
   "notes": "",
   "photo": "",
   "dimensionDetail": "47mm",
-  "tapPhoto": ""
+  "tapPhoto": "",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 155,
@@ -2787,7 +3249,10 @@
   "notes": "Diameter ~35mm per third-party listing; confirm",
   "photo": "https://assets.hansgrohe.com/mam/celum/celum_assets/154__hpu60454_tif.png?format=HBW2",
   "dimensionDetail": "35mm",
-  "tapPhoto": "https://assets.hansgrohe.com/mam/celum/celum_assets/154__hpa00546_tif.png?format=HBW2"
+  "tapPhoto": "https://assets.hansgrohe.com/mam/celum/celum_assets/154__hpa00546_tif.png?format=HBW2",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 156,
@@ -2805,7 +3270,10 @@
   "notes": "",
   "photo": "https://assets.hansgrohe.com/mam/celum/celum_assets/154__hpa01043_tif.png?format=HBW2",
   "dimensionDetail": "",
-  "tapPhoto": "https://assets.hansgrohe.com/mam/celum/celum_assets/154__hpa00546_tif.png?format=HBW2"
+  "tapPhoto": "https://assets.hansgrohe.com/mam/celum/celum_assets/154__hpa00546_tif.png?format=HBW2",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 157,
@@ -2823,7 +3291,10 @@
   "notes": "",
   "photo": "https://assets.hansgrohe.com/mam/celum/celum_assets/154__hpa01043_tif.png?format=HBW2",
   "dimensionDetail": "",
-  "tapPhoto": "https://assets.hansgrohe.com/mam/celum/celum_assets/154__hpa00546_tif.png?format=HBW2"
+  "tapPhoto": "https://assets.hansgrohe.com/mam/celum/celum_assets/154__hpa00546_tif.png?format=HBW2",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 158,
@@ -2841,7 +3312,10 @@
   "notes": "",
   "photo": "https://files.ekmcdn.com/ebaths2/images/newform-ergo-65921-kitchen-tap-cartridge-14720-90062-p.jpg",
   "dimensionDetail": "",
-  "tapPhoto": "https://www.newform.it/media/00-catalogo-prodotti/65910/65910.21.018/65910.21.018_share.jpg"
+  "tapPhoto": "https://www.newform.it/media/00-catalogo-prodotti/65910/65910.21.018/65910.21.018_share.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
  },
  {
   "id": 159,
@@ -2859,6 +3333,569 @@
   "notes": "",
   "photo": "https://www.rubinetteriashop.com/69417-large_default/replacement-cartridge-for-newform-taps-d25-25903.jpg",
   "dimensionDetail": "25mm",
-  "tapPhoto": "https://www.newform.it/media/00-catalogo-prodotti/66416/66416.01.093/66416.01.093_share.jpg"
+  "tapPhoto": "https://www.newform.it/media/00-catalogo-prodotti/66416/66416.01.093/66416.01.093_share.jpg",
+  "productType": "Tapware",
+  "valveFamily": "",
+  "explodedUrl": ""
+ },
+ {
+  "brand": "Enware",
+  "range": "Aquablend 500 (ATM500L)",
+  "component": "5-year LF service kit",
+  "category": "Service kit",
+  "partNumber": "ATMS512L",
+  "valveType": "",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://www.enware.com.au/products/spare-parts-5-year-lf-service-kit-atm500-l",
+  "sourceUrl": "https://www.enware.com.au/products/spare-parts-5-year-lf-service-kit-atm500-l",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Tempering valve",
+  "explodedUrl": "",
+  "id": 160
+ },
+ {
+  "brand": "Enware",
+  "range": "Aquablend SQX",
+  "component": "Thermostatic cartridge (replacement)",
+  "category": "Cartridge",
+  "partNumber": "ATMS600L",
+  "valveType": "",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://www.enware.com.au/products/aquablend-sqx-lead-free-cartridge-replacement",
+  "sourceUrl": "https://www.enware.com.au/products/aquablend-sqx-lead-free-cartridge-replacement",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Tempering valve",
+  "explodedUrl": "",
+  "id": 161
+ },
+ {
+  "brand": "Enware",
+  "range": "Aquablend 1000/1500/2000",
+  "component": "5-year upgrade service kit (with lift lever)",
+  "category": "Service kit",
+  "partNumber": "ATMS242L",
+  "valveType": "",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://www.enware.com.au/products/aquablend-5-year-upgrade-service-kit-with-lift-lever-lead-free",
+  "sourceUrl": "https://www.enware.com.au/products/aquablend-5-year-upgrade-service-kit-with-lift-lever-lead-free",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Tempering valve",
+  "explodedUrl": "",
+  "id": 162
+ },
+ {
+  "brand": "Enware",
+  "range": "Aquablend 1500/1000/2000",
+  "component": "Thermostatic element",
+  "category": "Element",
+  "partNumber": "ATMS1400L",
+  "valveType": "",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://www.enware.com.au/products/aquablend-thermostatic-element-1500-1000-2000",
+  "sourceUrl": "https://www.enware.com.au/products/aquablend-thermostatic-element-1500-1000-2000",
+  "verified": "Y",
+  "notes": "",
+  "photo": "https://www.enware.com.au/cdn/shop/files/Enware_ATMS1400_HERO.jpg",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Tempering valve",
+  "explodedUrl": "",
+  "id": 163
+ },
+ {
+  "brand": "Enware",
+  "range": "Aquablend 1000/1500/2000",
+  "component": "O-ring kit (post-2009)",
+  "category": "O-ring kit",
+  "partNumber": "ATMS123",
+  "valveType": "",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://www.enware.com.au/products/aquablend-1000-1500-2000-o-ring-kit-post-2009",
+  "sourceUrl": "https://www.enware.com.au/products/aquablend-1000-1500-2000-o-ring-kit-post-2009",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Tempering valve",
+  "explodedUrl": "",
+  "id": 164
+ },
+ {
+  "brand": "Enware",
+  "range": "Aquablend 2500 (ATM725L)",
+  "component": "5-year service kit",
+  "category": "Service kit",
+  "partNumber": "ATMS4001",
+  "valveType": "",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://www.enware.com.au/products/aquablend-atm725l-2500-5-year-service-kit",
+  "sourceUrl": "https://www.enware.com.au/products/aquablend-atm725l-2500-5-year-service-kit",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Tempering valve",
+  "explodedUrl": "",
+  "id": 165
+ },
+ {
+  "brand": "Galvin",
+  "range": "CliniMix 1000/1500/2000 Lead Safe TMV",
+  "component": "TMV 5-year upgrade/service kit",
+  "category": "Service kit",
+  "partNumber": "201.79.10.09",
+  "valveType": "",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://www.galvinengineering.com.au/clinimix-lead-safe-tmv-5-year-upgrade-service-kit",
+  "sourceUrl": "https://www.galvinengineering.com.au/clinimix-lead-safe-tmv-5-year-upgrade-service-kit",
+  "verified": "Y",
+  "notes": "Incl. top cap, element+piston, mixing tube, O-ring, key, grease",
+  "photo": "https://www.galvinengineering.com.au/assets/full/201.79.10.09.jpg",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Tempering valve",
+  "explodedUrl": "https://www.galvinengineering.com.au/assets/product_documents/installation_instructions/201.79.10.09%20Install.pdf",
+  "id": 166
+ },
+ {
+  "brand": "Caleffi",
+  "range": "521 MixCal thermostatic mixing valve",
+  "component": "Replacement body / cartridge",
+  "category": "Cartridge",
+  "partNumber": "521101A",
+  "valveType": "",
+  "dimension": "1\"",
+  "supersession": "",
+  "buyUrl": "https://www.caleffi.com/en-us/replacement-body-521-caleffi-521101a",
+  "sourceUrl": "https://www.caleffi.com/en-us/replacement-body-521-caleffi-521101a",
+  "verified": "Y",
+  "notes": "",
+  "photo": "https://www.caleffi.com/sites/default/files/product/cover/521101A.jpg",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Tempering valve",
+  "explodedUrl": "https://www.caleffi.com/sites/default/files/media/external-file/01050_NA.pdf",
+  "id": 167
+ },
+ {
+  "brand": "RMC",
+  "range": "RMC HeatGuard 15 HP (high pressure)",
+  "component": "Tempering valve (complete unit)",
+  "category": "Complete valve",
+  "partNumber": "348045",
+  "valveType": "",
+  "dimension": "15mm",
+  "supersession": "",
+  "buyUrl": "https://www.rheem.com.au/rheem/products/Spare-Parts/TEMPERING-VALVE-RMC-HEATGUARD-15-HP/p/348045",
+  "sourceUrl": "https://www.rheem.com.au/rheem/products/Spare-Parts/TEMPERING-VALVE-RMC-HEATGUARD-15-HP/p/348045",
+  "verified": "Y",
+  "notes": "Rheem/RMC genuine spare; not internally serviceable except strainers",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Tempering valve",
+  "explodedUrl": "https://www.rmc.com.au/wp-content/uploads/2020/10/RMC_HeatGuard_Installation_Manual_1020.pdf",
+  "id": 168
+ },
+ {
+  "brand": "RMC",
+  "range": "RMC HeatGuard 20 HP (high pressure)",
+  "component": "Tempering valve (complete unit)",
+  "category": "Complete valve",
+  "partNumber": "348046",
+  "valveType": "",
+  "dimension": "20mm",
+  "supersession": "",
+  "buyUrl": "https://www.rheem.com.au/rheem/products/Spare-Parts/TEMPERING-VALVE-RMC-HEATGUARD-20-HP/p/348046",
+  "sourceUrl": "https://www.rheem.com.au/rheem/products/Spare-Parts/TEMPERING-VALVE-RMC-HEATGUARD-20-HP/p/348046",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Tempering valve",
+  "explodedUrl": "https://www.rmc.com.au/wp-content/uploads/2020/10/RMC_HeatGuard_Installation_Manual_1020.pdf",
+  "id": 169
+ },
+ {
+  "brand": "Apex",
+  "range": "Apex tempering valve (15mm)",
+  "component": "Tempering valve (complete)",
+  "category": "Complete valve",
+  "partNumber": "TV15",
+  "valveType": "",
+  "dimension": "15mm",
+  "supersession": "",
+  "buyUrl": "https://apexvalves.co.nz/control/tempering-valve",
+  "sourceUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "verified": "Y",
+  "notes": "Factory 53C, adj 35-60C",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Tempering valve",
+  "explodedUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "id": 170
+ },
+ {
+  "brand": "Apex",
+  "range": "Apex tempering valve (20mm)",
+  "component": "Tempering valve (complete)",
+  "category": "Complete valve",
+  "partNumber": "TV20",
+  "valveType": "",
+  "dimension": "20mm",
+  "supersession": "",
+  "buyUrl": "https://apexvalves.co.nz/control/tempering-valve",
+  "sourceUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Tempering valve",
+  "explodedUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "id": 171
+ },
+ {
+  "brand": "Caleffi",
+  "range": "Caleffi 535H PresCal 1/2-3/4-1\"",
+  "component": "Replacement cartridge",
+  "category": "Cartridge",
+  "partNumber": "535006HA",
+  "valveType": "",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://www.caleffi.com/en-us/replacement-cartridge-for-535-series-535-caleffi-535006ha",
+  "sourceUrl": "https://www.caleffi.com/en-us/replacement-cartridge-for-535-series-535-caleffi-535006ha",
+  "verified": "Y",
+  "notes": "Self-contained cartridge",
+  "photo": "https://www.caleffi.com/sites/default/files/product/cover/535006HA.jpg",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure reducing valve",
+  "explodedUrl": "https://www.caleffi.com/sites/default/files/media/external-file/01265_NA.pdf",
+  "id": 172
+ },
+ {
+  "brand": "Caleffi",
+  "range": "Caleffi 535H PresCal 1 1/4-1 1/2-2\"",
+  "component": "Replacement cartridge",
+  "category": "Cartridge",
+  "partNumber": "535009HA",
+  "valveType": "",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://www.caleffi.com/en-us/replacement-cartridge-for-535-series-535-caleffi-535006ha",
+  "sourceUrl": "https://www.caleffi.com/en-us/replacement-cartridge-for-535-series-535-caleffi-535006ha",
+  "verified": "Y",
+  "notes": "",
+  "photo": "https://www.caleffi.com/sites/default/files/product/cover/535006HA.jpg",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure reducing valve",
+  "explodedUrl": "https://www.caleffi.com/sites/default/files/media/external-file/01265_NA.pdf",
+  "id": 173
+ },
+ {
+  "brand": "Watts",
+  "range": "Watts LF25AUB 3/4\"",
+  "component": "PRV repair kit (RK 25AUB 3/4)",
+  "category": "Repair kit",
+  "partNumber": "0864943",
+  "valveType": "",
+  "dimension": "20mm",
+  "supersession": "",
+  "buyUrl": "https://www.watts.com/products/plumbing-flow-control-solutions/repair-kits/pressure-reducing-valve-repair-kits/rk-25aub-z3/rk-25aub-34",
+  "sourceUrl": "https://www.watts.com/products/plumbing-flow-control-solutions/repair-kits/pressure-reducing-valve-repair-kits/rk-25aub-z3/rk-25aub-34",
+  "verified": "Y",
+  "notes": "Diaphragm, seat, strainer, gaskets",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure reducing valve",
+  "explodedUrl": "",
+  "id": 174
+ },
+ {
+  "brand": "Apex",
+  "range": "Apex FV feed valve 15x20mm",
+  "component": "Pressure-reducing feed valve (65 kPa)",
+  "category": "Complete valve",
+  "partNumber": "FV7.6",
+  "valveType": "",
+  "dimension": "15mm",
+  "supersession": "",
+  "buyUrl": "https://apexvalves.co.nz/reducing/pressure-reducing-valve",
+  "sourceUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56921-source/638785208140000000/apex-pressure-reducing-valve-feed-valve.pdf",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure reducing valve",
+  "explodedUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56921-source/638785208140000000/apex-pressure-reducing-valve-feed-valve.pdf",
+  "id": 175
+ },
+ {
+  "brand": "Apex",
+  "range": "Apex FV feed valves",
+  "component": "FV service kit (washer + compensating piston)",
+  "category": "Service kit",
+  "partNumber": "FVRK Mk II",
+  "valveType": "",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://apexvalves.co.nz/reducing/pressure-reducing-valve",
+  "sourceUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "verified": "Y",
+  "notes": "Apex service kit for FV pressure-reducing valves",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure reducing valve",
+  "explodedUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56921-source/638785208140000000/apex-pressure-reducing-valve-feed-valve.pdf",
+  "id": 176
+ },
+ {
+  "brand": "Apex",
+  "range": "Apex LV limiting valve 15mm",
+  "component": "Pressure limiting valve 500 kPa",
+  "category": "Complete valve",
+  "partNumber": "LV15-500",
+  "valveType": "",
+  "dimension": "15mm",
+  "supersession": "",
+  "buyUrl": "https://apexvalves.co.nz/reducing/pressure-limiting-valve",
+  "sourceUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure limiting valve",
+  "explodedUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "id": 177
+ },
+ {
+  "brand": "Apex",
+  "range": "Apex LV limiting valve 20mm",
+  "component": "Pressure limiting valve 500 kPa",
+  "category": "Complete valve",
+  "partNumber": "LV20-500",
+  "valveType": "",
+  "dimension": "20mm",
+  "supersession": "",
+  "buyUrl": "https://apexvalves.co.nz/reducing/pressure-limiting-valve",
+  "sourceUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure limiting valve",
+  "explodedUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "id": 178
+ },
+ {
+  "brand": "Apex",
+  "range": "Apex LV limiting valves",
+  "component": "Limiting valve cartridge (spare)",
+  "category": "Cartridge",
+  "partNumber": "LVC",
+  "valveType": "",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://apexvalves.co.nz/reducing/pressure-limiting-valve",
+  "sourceUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "verified": "Y",
+  "notes": "Replaceable cartridge; adj 200-600 kPa",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure limiting valve",
+  "explodedUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "id": 179
+ },
+ {
+  "brand": "RMC",
+  "range": "RMC PSL512 (Lead Free)",
+  "component": "Pressure limiting valve 15mm 500 kPa",
+  "category": "Complete valve",
+  "partNumber": "PLX1505",
+  "valveType": "",
+  "dimension": "15mm",
+  "supersession": "",
+  "buyUrl": "https://pacificvalves.com/plx1505-psl512-lead-free-pressure-limiting-valve-15mm-500kpa-rmc",
+  "sourceUrl": "https://pacificvalves.com/plx1505-psl512-lead-free-pressure-limiting-valve-15mm-500kpa-rmc",
+  "verified": "Y",
+  "notes": "Max inlet 2000 kPa",
+  "photo": "https://pacificvalves.com/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/f/i/file_13_2_5.jpg",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure limiting valve",
+  "explodedUrl": "",
+  "id": 180
+ },
+ {
+  "brand": "Apex",
+  "range": "Apex EVT cold-water expansion valve",
+  "component": "Expansion control valve 700 kPa",
+  "category": "Complete valve",
+  "partNumber": "EVT700",
+  "valveType": "",
+  "dimension": "20mm",
+  "supersession": "",
+  "buyUrl": "https://apexvalves.co.nz/control/cold-water-expansion-valve",
+  "sourceUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "verified": "Y",
+  "notes": "Replaceable cartridge",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Expansion control valve",
+  "explodedUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "id": 181
+ },
+ {
+  "brand": "Apex",
+  "range": "Apex EVT cold-water expansion valve",
+  "component": "Expansion control valve 500 kPa",
+  "category": "Complete valve",
+  "partNumber": "EVT500",
+  "valveType": "",
+  "dimension": "20mm",
+  "supersession": "",
+  "buyUrl": "https://apexvalves.co.nz/control/cold-water-expansion-valve",
+  "sourceUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Expansion control valve",
+  "explodedUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "id": 182
+ },
+ {
+  "brand": "RMC",
+  "range": "RMC HT592 (Lead Free)",
+  "component": "Pressure & temperature relief valve 15mm 850 kPa",
+  "category": "Complete valve",
+  "partNumber": "HTX1509",
+  "valveType": "",
+  "dimension": "15mm",
+  "supersession": "",
+  "buyUrl": "https://pacificvalves.com/htx1509-ht592-lead-free-pressure-and-temperature-relief-valve-15mm-850-kpa-rmc",
+  "sourceUrl": "https://pacificvalves.com/htx1509-ht592-lead-free-pressure-and-temperature-relief-valve-15mm-850-kpa-rmc",
+  "verified": "Y",
+  "notes": "AS1357; silicon seat, SS spring",
+  "photo": "https://pacificvalves.com/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/f/i/file_11_11_4.jpg",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure & temperature relief valve",
+  "explodedUrl": "",
+  "id": 183
+ },
+ {
+  "brand": "RMC",
+  "range": "RMC HT577 (Lead Free)",
+  "component": "Pressure & temperature relief valve 15mm 700 kPa",
+  "category": "Complete valve",
+  "partNumber": "HTX1503",
+  "valveType": "",
+  "dimension": "15mm",
+  "supersession": "",
+  "buyUrl": "https://pacificvalves.com/safety-control-valves/pressure-temperature-relief-valves",
+  "sourceUrl": "https://pacificvalves.com/safety-control-valves/pressure-temperature-relief-valves",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure & temperature relief valve",
+  "explodedUrl": "",
+  "id": 184
+ },
+ {
+  "brand": "RMC",
+  "range": "RMC HT707 (Lead Free)",
+  "component": "Pressure & temperature relief valve 20mm 1000 kPa",
+  "category": "Complete valve",
+  "partNumber": "HTX2005",
+  "valveType": "",
+  "dimension": "20mm",
+  "supersession": "",
+  "buyUrl": "https://pacificvalves.com/safety-control-valves/pressure-temperature-relief-valves",
+  "sourceUrl": "https://pacificvalves.com/safety-control-valves/pressure-temperature-relief-valves",
+  "verified": "Y",
+  "notes": "",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure & temperature relief valve",
+  "explodedUrl": "",
+  "id": 185
+ },
+ {
+  "brand": "Apex",
+  "range": "Apex RV relief valve",
+  "component": "Pressure relief valve 75 kPa",
+  "category": "Complete valve",
+  "partNumber": "RV7.6",
+  "valveType": "",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://apexvalves.co.nz/control/pressure-relief-valve",
+  "sourceUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "verified": "Y",
+  "notes": "Low-pressure HWC / marine",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure & temperature relief valve",
+  "explodedUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "id": 186
+ },
+ {
+  "brand": "Apex",
+  "range": "Apex RV relief valves",
+  "component": "RV service kit (washer/seat)",
+  "category": "Service kit",
+  "partNumber": "RVRK Mk II",
+  "valveType": "",
+  "dimension": "",
+  "supersession": "",
+  "buyUrl": "https://apexvalves.co.nz/control/pressure-relief-valve",
+  "sourceUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "verified": "Y",
+  "notes": "Apex service kit for RV relief valves",
+  "photo": "",
+  "tapPhoto": "",
+  "productType": "Valve",
+  "valveFamily": "Pressure & temperature relief valve",
+  "explodedUrl": "https://www.wattsnz.co.nz/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/56913-source/638762009440000000/apex-plumbing-catalogue-1939.pdf",
+  "id": 187
  }
 ]
