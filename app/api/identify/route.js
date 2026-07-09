@@ -8,7 +8,7 @@ export const maxDuration = 30;
 // Try these in order; use the first the account has access to. Override with VISION_MODEL.
 const MODELS = process.env.VISION_MODEL
   ? [process.env.VISION_MODEL]
-  : ["claude-3-5-sonnet-latest", "claude-3-5-sonnet-20240620", "claude-3-haiku-20240307"];
+  : ["claude-haiku-4-5-20251001", "claude-sonnet-5", "claude-opus-4-8"];
 
 const scrub = (s) => String(s).replace(/sk-ant-[A-Za-z0-9_\-]+/g, "[redacted]");
 function readKey() {
