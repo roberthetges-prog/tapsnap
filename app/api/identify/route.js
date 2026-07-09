@@ -7,6 +7,16 @@ export const maxDuration = 30;
 
 const MODEL = process.env.VISION_MODEL || "claude-3-5-sonnet-20241022";
 
+// Never let a key leak into a response or log.
+const scrub = (s) => String(s).replace(/sk-ant-[A-Za-z0-9_\-]+/g, "[redacted]");
+// Tolerate a value that was pasted with extra text (e.g. a whole example command):
+// pull out just the key token if present.
+function readKey() {
+  const raw = (process.env.ANTHROPIC_API_KEY || "").trim();
+  const m = raw.match(/sk-ant-[A-Za-z0-9_\-]+/);
+  return m ? m[0] : raw;
+}
+
 const BRANDS = [
   "Foreno","Felton","Robertson","Methven","Greens","Caroma","Dorf","Phoenix",
   "Mizu","Posh","Mondella","LeVivi","Meir","Buddy","Nero","Grohe","Franke","Paini",
@@ -26,8 +36,8 @@ Rules:
 - Never invent a brand or a part number. Prefer "" over guessing.`;
 
 export async function POST(request) {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) {
+  const key = readKey();
+  if (!key || !key.startsWith("sk-ant-")) {
     return Response.json({ configured: false });
   }
   let body;
@@ -65,15 +75,15 @@ export async function POST(request) {
 
     if (!resp.ok) {
       const t = await resp.text();
-      return Response.json({ configured: true, error: "vision api error", detail: t.slice(0, 300) }, { status: 502 });
+      return Response.json({ configured: true, error: "vision api error", detail: scrub(t).slice(0, 300) }, { status: 502 });
     }
     const json = await resp.json();
     const text = (json.content || []).map((c) => c.text || "").join("").trim();
     const match = text.match(/\{[\s\S]*\}/);
-    if (!match) return Response.json({ configured: true, error: "no json", raw: text.slice(0, 300) });
+    if (!match) return Response.json({ configured: true, error: "no json" });
     const parsed = JSON.parse(match[0]);
     return Response.json({ configured: true, ...parsed });
   } catch (e) {
-    return Response.json({ configured: true, error: String(e).slice(0, 300) }, { status: 500 });
+    return Response.json({ configured: true, error: scrub(e).slice(0, 200) }, { status: 500 });
   }
 }
