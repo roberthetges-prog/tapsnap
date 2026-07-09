@@ -1,9 +1,12 @@
 "use client";
 import { useMemo, useState } from "react";
 import parts from "../../lib/parts.json";
+import models from "../../lib/models.json";
 import { listBrands, applyFilters, nextQuestion } from "../../lib/matcher.js";
 
-const FIELD_LABEL = { productType: "Fixing", valveFamily: "Valve", brand: "Brand", range: "Model", category: "Part", dimension: "Size", valveType: "Mechanism" };
+const FIELD_LABEL = { productType: "Fixing", valveFamily: "Valve", brand: "Brand", category: "Part", dimension: "Size", valveType: "Mechanism" };
+const modelsByBrand = {};
+for (const mo of models) (modelsByBrand[mo.brand] ||= []).push(mo);
 
 function detectionsToAnswers(all, ai) {
   const order = [["productType", "Tapware"], ["brand", ai.brand], ["category", ai.category], ["dimension", ai.dimension], ["valveType", ai.valveType]];
@@ -27,7 +30,7 @@ function MeasureHelp() {
     <details className="measure">
       <summary>📏 How to measure your cartridge</summary>
       <p>Pull the old cartridge out and measure straight across the round body (the diameter) with a ruler or vernier calipers. That measurement in millimetres is what decides the part.</p>
-      <p><b>Common sizes:</b> 25mm, 35mm, 40mm and 45mm. If you can&apos;t measure it yet, pick your best guess and check the reference photo on the result.</p>
+      <p><b>Common sizes:</b> 25mm, 35mm, 40mm and 45mm.</p>
     </details>
   );
 }
@@ -36,6 +39,7 @@ export default function Find() {
   const [answers, setAnswers] = useState([]);
   const [forceResults, setForceResults] = useState(false);
   const [skipModel, setSkipModel] = useState(false);
+  const [modelResult, setModelResult] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [analysing, setAnalysing] = useState(false);
   const [ai, setAi] = useState(null);
@@ -44,30 +48,35 @@ export default function Find() {
   const pool = useMemo(() => applyFilters(parts, sel), [sel]);
   const brands = useMemo(() => listBrands(pool), [pool]);
   const brandSet = useMemo(() => new Set(listBrands(parts).map((b) => b.brand)), []);
-  const matches = pool;
   const q = useMemo(() => (sel.brand ? nextQuestion(parts, sel) : null), [sel]);
   const guesses = useMemo(() => (ai && Array.isArray(ai.brandGuesses) ? ai.brandGuesses.filter((g) => brandSet.has(g)) : []), [ai, brandSet]);
 
-  const modelOptions = useMemo(() => {
-    if (sel.productType !== "Tapware" || !sel.brand || sel.range) return [];
-    const rows = applyFilters(parts, sel).filter((p) => p.tapPhoto);
+  const modelCards = useMemo(() => {
+    if (sel.productType !== "Tapware" || !sel.brand) return [];
+    const cat = modelsByBrand[sel.brand];
+    if (cat && cat.length) return cat.map((mo) => ({ model: mo.model, photo: mo.photo, size: mo.size, cartPart: mo.cartPart, buyUrl: mo.buyUrl, exploded: mo.exploded, confirm: mo.confirm }));
+    const rows = applyFilters(parts, sel).filter((p) => p.tapPhoto && p.category === "Cartridge");
     const byRange = new Map();
-    for (const p of rows) {
-      let e = byRange.get(p.range);
-      if (!e) { e = { range: p.range, tap: p.tapPhoto, cart: null }; byRange.set(p.range, e); }
-      if (!e.cart && p.category === "Cartridge") e.cart = p;
-    }
+    for (const p of rows) if (!byRange.has(p.range)) byRange.set(p.range, { model: p.range, photo: p.tapPhoto, size: p.dimension, cartPart: p.partNumber, buyUrl: p.buyUrl, exploded: p.explodedUrl, confirm: false });
     return [...byRange.values()];
   }, [sel]);
 
-  const add = (field, value) => { setForceResults(false); setSkipModel(false); setAnswers((a) => [...a.filter((x) => x.field !== field), { field, value }]); };
-  const back = () => { setForceResults(false); setSkipModel(false); setAnswers((a) => a.slice(0, -1)); };
-  const reset = () => { setForceResults(false); setSkipModel(false); setAnswers([]); setPhoto(null); setAi(null); };
+  const add = (field, value) => { setForceResults(false); setSkipModel(false); setModelResult(null); setAnswers((a) => [...a.filter((x) => x.field !== field), { field, value }]); };
+  const back = () => { setForceResults(false); setSkipModel(false); if (modelResult) { setModelResult(null); return; } setAnswers((a) => a.slice(0, -1)); };
+  const reset = () => { setForceResults(false); setSkipModel(false); setModelResult(null); setAnswers([]); setPhoto(null); setAi(null); };
+
+  function pickModel(card) {
+    const found = card.cartPart ? parts.filter((p) => p.partNumber === card.cartPart) : [];
+    let res;
+    if (found.length) res = found.map((p) => ({ ...p, range: card.model, tapPhoto: card.photo || p.tapPhoto, explodedUrl: p.explodedUrl || card.exploded }));
+    else res = [{ id: "m-" + card.model, brand: sel.brand, range: card.model, component: card.size ? card.size + " ceramic cartridge" : "Replacement cartridge", category: "Cartridge", partNumber: card.cartPart || "", valveType: "", dimension: card.size || "", supersession: "", buyUrl: card.buyUrl, sourceUrl: card.buyUrl, verified: card.confirm ? "" : "Y", notes: card.confirm ? "Cartridge size from a retailer listing — confirm before ordering." : "This model uses a standard cartridge of this size; the maker doesn't sell a separate cartridge code.", photo: "", tapPhoto: card.photo, productType: "Tapware", valveFamily: "", explodedUrl: card.exploded }];
+    setModelResult(res);
+  }
 
   async function onPhoto(e) {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
-    setPhoto(URL.createObjectURL(f)); setAi(null); setAnalysing(true);
+    setPhoto(URL.createObjectURL(f)); setAi(null); setAnalysing(true); setModelResult(null);
     try {
       const dataUrl = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(f); });
       const base64 = String(dataUrl).split(",")[1];
@@ -82,11 +91,14 @@ export default function Find() {
     } catch { setAi({ status: "error" }); } finally { setAnalysing(false); }
   }
 
-  const stage = !sel.productType ? "type"
+  const stage = modelResult ? "modelresult"
+    : !sel.productType ? "type"
     : (sel.productType === "Valve" && !sel.valveFamily) ? "family"
     : !sel.brand ? "brand"
-    : (sel.productType === "Tapware" && !sel.range && !skipModel && modelOptions.length >= 2) ? "model"
+    : (sel.productType === "Tapware" && !skipModel && modelCards.length >= 1) ? "model"
     : (forceResults || !q) ? "results" : "question";
+
+  const matches = pool;
 
   return (
     <main className="finder">
@@ -94,19 +106,19 @@ export default function Find() {
         <h1 style={{ fontSize: 24, margin: "8px 0 2px" }}>Find your spare part</h1>
         <p style={{ color: "var(--muted)", marginTop: 0 }}>Snap or upload a photo, or pick your way to the exact part.</p>
 
-        {ai && ai.description && stage !== "results" && (
+        {ai && ai.description && stage !== "results" && stage !== "modelresult" && (
           <div className="aibar">
             <b>From your photo:</b> {ai.description}
             {ai.handleDesign ? <div className="reads"><span><b>Handle:</b> {ai.handleDesign}</span>{ai.spoutShape ? <span><b>Spout:</b> {ai.spoutShape}</span> : null}</div> : null}
-            {ai.measureTip ? <div>{ai.measureTip}</div> : null}
           </div>
         )}
-        {ai && ai.status === "off" && <div className="aibar muted">Photo recognition isn&apos;t switched on yet — pick your brand below to continue.</div>}
-        {ai && ai.status === "error" && <div className="aibar muted">Couldn&apos;t read that photo — pick your brand below to continue.</div>}
+        {ai && ai.status === "off" && <div className="aibar muted">Photo recognition isn&apos;t switched on yet — pick your brand below.</div>}
+        {ai && ai.status === "error" && <div className="aibar muted">Couldn&apos;t read that photo — pick your brand below.</div>}
 
         <div className="crumbs">
           {answers.map((a) => (<span className="crumb" key={a.field}>{FIELD_LABEL[a.field]}: <b>{a.value}</b></span>))}
-          {answers.length > 0 && (<><button className="crumb" onClick={back}>← Back</button><button className="crumb" onClick={reset}>Start over</button></>)}
+          {modelResult && <span className="crumb">Model: <b>{modelResult[0].range}</b></span>}
+          {(answers.length > 0 || modelResult) && (<><button className="crumb" onClick={back}>← Back</button><button className="crumb" onClick={reset}>Start over</button></>)}
         </div>
 
         {stage === "type" && (
@@ -115,7 +127,7 @@ export default function Find() {
               <div className="icon">📷</div>
               <div className="txt">
                 <b>{analysing ? "Analysing your photo…" : "Fixing a tap? Show us a photo"}</b>
-                {analysing ? "Reading the handle and spout to guess the brand." : "We look at the handle and spout to guess the brand, then help you pick the model."}
+                {analysing ? "Reading the handle and spout to guess the brand." : "We guess the brand, then you pick the exact model."}
               </div>
               <div className="upbtns">
                 <label className="btn btn-ghost">📷 Take photo<input type="file" accept="image/*" capture="environment" onChange={onPhoto} style={{ display: "none" }} /></label>
@@ -165,12 +177,12 @@ export default function Find() {
             <h2>Which of these is your tap?</h2>
             <p className="sub">Recognise it by shape — the model tells us the cartridge, so you won&apos;t need to measure. Not sure? Skip and go by size.</p>
             <div className="models">
-              {modelOptions.map((m) => (
-                <button className="modelcard" key={m.range} onClick={() => add("range", m.range)}>
-                  <div className="mimg">{m.tap ? <img src={m.tap} alt={m.range} loading="lazy" /> : null}</div>
+              {modelCards.map((mo) => (
+                <button className="modelcard" key={mo.model} onClick={() => pickModel(mo)}>
+                  <div className="mimg">{mo.photo ? <img src={mo.photo} alt={mo.model} loading="lazy" /> : <span className="mph">no photo yet</span>}</div>
                   <div className="minfo">
-                    <div className="mname">{m.range}</div>
-                    {m.cart && <div className="mhint">→ {m.cart.dimension ? m.cart.dimension + " " : ""}{m.cart.partNumber}</div>}
+                    <div className="mname">{mo.model}</div>
+                    {(mo.size || mo.cartPart) && <div className="mhint">→ {[mo.size, mo.cartPart].filter(Boolean).join(" ")}{mo.confirm ? " ?" : ""}</div>}
                   </div>
                 </button>
               ))}
@@ -197,15 +209,17 @@ export default function Find() {
           </div>
         )}
 
-        {stage === "results" && (
+        {(stage === "results" || stage === "modelresult") && (
           <div className="results">
-            <h2>{matches.length} matching part{matches.length === 1 ? "" : "s"}</h2>
-            <p className="sub">{matches.length > 1 ? "These all fit your answers. Check the photo (and diagram) against yours." : "Here is your part — check it against yours."}</p>
-            <div className="cards">{matches.map((p) => <PartCard key={p.id} p={p} />)}</div>
-            <div className="toolbar">
-              <button className="btn btn-ghost" onClick={back}>← Refine answers</button>
-              <button className="btn btn-ghost" onClick={reset}>Start over</button>
-            </div>
+            {(() => { const list = modelResult || matches; return (<>
+              <h2>{list.length} matching part{list.length === 1 ? "" : "s"}</h2>
+              <p className="sub">{list.length > 1 ? "These all fit. Check the photo (and diagram) against yours." : "Here is your part — check it against yours."}</p>
+              <div className="cards">{list.map((p) => <PartCard key={p.id} p={p} />)}</div>
+              <div className="toolbar">
+                <button className="btn btn-ghost" onClick={back}>← Back</button>
+                <button className="btn btn-ghost" onClick={reset}>Start over</button>
+              </div>
+            </>); })()}
           </div>
         )}
       </div>
@@ -215,6 +229,7 @@ export default function Find() {
 
 function PartCard({ p }) {
   const verified = p.verified === "Y";
+  const pn = p.partNumber || (p.dimension ? p.dimension + " cartridge" : "Cartridge");
   return (
     <div className="card">
       <div className="imgs">
@@ -230,7 +245,7 @@ function PartCard({ p }) {
         )}
       </div>
       <div className="body">
-        <div className="pn">{p.partNumber}</div>
+        <div className="pn">{pn}</div>
         <div className="name">{p.component}</div>
         {p.range && <div className="fits">Fits: {p.range}</div>}
         <div className="chips">
@@ -240,6 +255,7 @@ function PartCard({ p }) {
           <span className="chip">{p.brand}</span>
         </div>
         <span className={"badge " + (verified ? "v" : "d")}>{verified ? "✓ Verified source" : "⚠ Confirm fit"}</span>
+        {p.notes && <div className="note2">{p.notes}</div>}
         {p.supersession && <div className="super">Supersession: {p.supersession}</div>}
         <div className="foot">
           {p.buyUrl && <a className="smallbtn" href={p.buyUrl} target="_blank" rel="noreferrer">Buy / info →</a>}
