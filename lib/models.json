@@ -1,5 +1,35 @@
 [
  {
+  "brand": "Buddy",
+  "model": "Buddy Basin Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://plumbline.co.nz/buddy"
+ },
+ {
+  "brand": "Buddy",
+  "model": "Buddy Kitchen Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://plumbline.co.nz/buddy"
+ },
+ {
+  "brand": "Buddy",
+  "model": "Buddy Shower Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://plumbline.co.nz/buddy"
+ },
+ {
   "brand": "Caroma",
   "model": "Saracom Basin Mixer",
   "size": "35mm",
@@ -1710,6 +1740,46 @@
   "buyUrl": "https://foreno.co.nz/all-products/bathroom-tapware/"
  },
  {
+  "brand": "Franke",
+  "model": "Franke Active Sink Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.franke.com/nz/en/home-solutions/products/kitchen-taps.html"
+ },
+ {
+  "brand": "Franke",
+  "model": "Franke Atlas Neo Sink Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.franke.com/nz/en/home-solutions/products/kitchen-taps.html"
+ },
+ {
+  "brand": "Franke",
+  "model": "Franke Eos Neo Pull-Out Sink Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.franke.com/nz/en/home-solutions/products/kitchen-taps.html"
+ },
+ {
+  "brand": "Franke",
+  "model": "Franke Neptune Pull-Out Sink Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.franke.com/nz/en/home-solutions/products/kitchen-taps.html"
+ },
+ {
   "brand": "Greens",
   "model": "Astro II Basin Mixer",
   "size": "35mm",
@@ -1988,6 +2058,426 @@
   "exploded": "",
   "confirm": true,
   "buyUrl": "https://greenstapware.com.au/product/textura-pull-down-sink-mixer-w-diamante-technology/"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Atrio Basin Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe BauEdge Basin Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe BauLoop Basin Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe BauLoop Sink Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Concetto Basin Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Concetto Shower Mixer",
+  "size": "46mm",
+  "cartPart": "46048000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Concetto Sink Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Essence Basin Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Essence Sink Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Eurodisc Basin Mixer",
+  "size": "46mm",
+  "cartPart": "46048000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Europlus Basin Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Eurosmart Basin Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Eurosmart Bath Mixer",
+  "size": "46mm",
+  "cartPart": "46048000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Eurosmart Shower Mixer",
+  "size": "46mm",
+  "cartPart": "46048000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Eurosmart Sink Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Eurostyle Basin Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Eurostyle Cosmopolitan Basin Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Eurostyle Sink Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Lineare Basin Mixer",
+  "size": "35mm",
+  "cartPart": "46374000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Lineare Bath Mixer",
+  "size": "46mm",
+  "cartPart": "46048000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Minta Sink Mixer",
+  "size": "46mm",
+  "cartPart": "46048000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Allure Basin Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Get Basin Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Grohe",
+  "model": "Grohe Plus Basin Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.grohe.com/en-GB/service-support/spare-parts-finder"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Focus Single Lever Basin Mixer 100",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Focus Single Lever Shower Mixer",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Logis Single Lever Basin Mixer 100",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Logis Single Lever Shower Mixer",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Metris Single Lever Basin Mixer",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Metris Single Lever Shower Mixer",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Novus Single Lever Basin Mixer 100",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Novus Single Lever Shower Mixer",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Talis E Single Lever Basin Mixer 110",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Talis E Single Lever Shower Mixer",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Talis S Single Lever Basin Mixer",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Talis Single Lever Basin Mixer",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Vernis Blend Single Lever Basin Mixer 100",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Vernis Blend Single Lever Shower Mixer",
+  "size": "35mm",
+  "cartPart": "92730000",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.hansgrohe.com/articledetail-ceramic-cartridge-complete-m3-m2-92730000"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Focus M42 Single Lever Kitchen Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.hansgrohe.com/service/spare-parts-search"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Rebris S Single Lever Basin Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.hansgrohe.com/service/spare-parts-search"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Tecturis S Single Lever Basin Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.hansgrohe.com/service/spare-parts-search"
+ },
+ {
+  "brand": "Hansgrohe",
+  "model": "Hansgrohe Vernis Shape Single Lever Basin Mixer",
+  "size": "",
+  "cartPart": "",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.hansgrohe.com/service/spare-parts-search"
  },
  {
   "brand": "LeVivi",
@@ -2660,6 +3150,76 @@
   "buyUrl": "https://www.plumbingworld.co.nz/shop-by-brand/levivi/LEV25SMMPBK/LeVivi-Slim-Stainless-Steel-Shower-Mixer-Vapour-Black.html"
  },
  {
+  "brand": "Meir",
+  "model": "Meir Piccola Basin Mixer Tap",
+  "size": "35mm",
+  "cartPart": "MX35",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.meir.com.au/products/kerox-ceramic-cartridge-35mm"
+ },
+ {
+  "brand": "Meir",
+  "model": "Meir Round Basin Mixer",
+  "size": "35mm",
+  "cartPart": "MX35",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.meir.com.au/products/kerox-ceramic-cartridge-35mm"
+ },
+ {
+  "brand": "Meir",
+  "model": "Meir Round Gooseneck Basin Mixer with Cold Start",
+  "size": "35mm",
+  "cartPart": "MX35",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.meir.com.au/products/kerox-ceramic-cartridge-35mm"
+ },
+ {
+  "brand": "Meir",
+  "model": "Meir Round Gooseneck Kitchen Mixer Tap",
+  "size": "35mm",
+  "cartPart": "MX35",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.meir.com.au/products/kerox-ceramic-cartridge-35mm"
+ },
+ {
+  "brand": "Meir",
+  "model": "Meir Round Paddle Basin Mixer",
+  "size": "35mm",
+  "cartPart": "MX35",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.meir.com.au/products/kerox-ceramic-cartridge-35mm"
+ },
+ {
+  "brand": "Meir",
+  "model": "Meir Round Piccola Pull Out Kitchen Mixer Tap",
+  "size": "35mm",
+  "cartPart": "MX35",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.meir.com.au/products/kerox-ceramic-cartridge-35mm"
+ },
+ {
+  "brand": "Meir",
+  "model": "Meir Round Wall Mixer (Trim Kit)",
+  "size": "35mm",
+  "cartPart": "MX35",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.meir.com.au/products/kerox-ceramic-cartridge-35mm"
+ },
+ {
   "brand": "Methven",
   "model": "Minimalist MK2 Basin Mixer",
   "size": "25mm",
@@ -3248,6 +3808,156 @@
   "exploded": "",
   "confirm": true,
   "buyUrl": ""
+ },
+ {
+  "brand": "Newform",
+  "model": "Newform Ergo Basin Mixer",
+  "size": "35mm",
+  "cartPart": "14720",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.rubinetteriashop.com/en/cartridges-for-mixers/6959-ceramic-cartridge-replacement-newform-14720.html"
+ },
+ {
+  "brand": "Newform",
+  "model": "Newform Linfa II Basin Mixer",
+  "size": "35mm",
+  "cartPart": "14720",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.rubinetteriashop.com/en/cartridges-for-mixers/6959-ceramic-cartridge-replacement-newform-14720.html"
+ },
+ {
+  "brand": "Newform",
+  "model": "Newform O'Rama Basin Mixer",
+  "size": "35mm",
+  "cartPart": "26801",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.newform.it/files/00-catalogo-prodotti/68410/68410_instructions.pdf"
+ },
+ {
+  "brand": "Newform",
+  "model": "Newform Park Basin Mixer",
+  "size": "35mm",
+  "cartPart": "14720",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.rubinetteriashop.com/en/cartridges-for-mixers/6959-ceramic-cartridge-replacement-newform-14720.html"
+ },
+ {
+  "brand": "Newform",
+  "model": "Newform Real Sink Mixer",
+  "size": "35mm",
+  "cartPart": "24614",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.newform.it/files/00-catalogo-prodotti/63420/63420_instructions.pdf"
+ },
+ {
+  "brand": "Newform",
+  "model": "Newform XT Basin Mixer",
+  "size": "35mm",
+  "cartPart": "14720",
+  "photo": "",
+  "exploded": "",
+  "confirm": false,
+  "buyUrl": "https://www.newform.it/files/00-catalogo-prodotti/4208/4208_instructions.pdf"
+ },
+ {
+  "brand": "Paini",
+  "model": "Paini Arena Kitchen/Sink Mixer",
+  "size": "35mm",
+  "cartPart": "53CC956GM",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.paini.co.uk/products/0/spares/cartridge-valves.html"
+ },
+ {
+  "brand": "Paini",
+  "model": "Paini Cox Basin Mixer",
+  "size": "35mm",
+  "cartPart": "53CC956GM",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.paini.co.uk/products/0/spares/cartridge-valves.html"
+ },
+ {
+  "brand": "Paini",
+  "model": "Paini Cox Pull-Out Sink Mixer",
+  "size": "35mm",
+  "cartPart": "53CC956G35ON",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.paini.co.uk/products/0/spares/cartridge-valves.html"
+ },
+ {
+  "brand": "Paini",
+  "model": "Paini Cox Shower Mixer",
+  "size": "35mm",
+  "cartPart": "53CC956GM",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.paini.co.uk/products/0/spares/cartridge-valves.html"
+ },
+ {
+  "brand": "Paini",
+  "model": "Paini Cox Wall Basin Mixer",
+  "size": "35mm",
+  "cartPart": "53CC956GM",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.paini.co.uk/products/0/spares/cartridge-valves.html"
+ },
+ {
+  "brand": "Paini",
+  "model": "Paini Nove Basin Mixer",
+  "size": "35mm",
+  "cartPart": "53CC956GM",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.paini.co.uk/products/0/spares/cartridge-valves.html"
+ },
+ {
+  "brand": "Paini",
+  "model": "Paini Nove Shower Mixer",
+  "size": "35mm",
+  "cartPart": "53CC956GM",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.paini.co.uk/products/0/spares/cartridge-valves.html"
+ },
+ {
+  "brand": "Paini",
+  "model": "Paini Nove Sink Mixer",
+  "size": "35mm",
+  "cartPart": "53CC956G35ON",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.paini.co.uk/products/0/spares/cartridge-valves.html"
+ },
+ {
+  "brand": "Paini",
+  "model": "Paini Ovo Basin Mixer",
+  "size": "35mm",
+  "cartPart": "53CC956GM",
+  "photo": "",
+  "exploded": "",
+  "confirm": true,
+  "buyUrl": "https://www.paini.co.uk/products/0/spares/cartridge-valves.html"
  },
  {
   "brand": "Phoenix",
