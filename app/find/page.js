@@ -71,7 +71,7 @@ export default function Find() {
     <main className="finder">
       <div className="container">
         <h1 style={{ fontSize: 24, margin: "8px 0 2px" }}>Find your spare part</h1>
-        <p style={{ color: "var(--muted)", marginTop: 0 }}>Snap a photo or pick your brand, and we&apos;ll match the exact part.</p>
+        <p style={{ color: "var(--muted)", marginTop: 0 }}>Snap or upload a photo, or pick your brand, and we&apos;ll match the exact part.</p>
 
         {ai && ai.description && (
           <div className="aibar">
@@ -94,13 +94,13 @@ export default function Find() {
             <div className="uploader">
               <div className="icon">📷</div>
               <div className="txt">
-                <b>{analysing ? "Analysing your photo…" : "Snap the tap or the removed cartridge"}</b>
+                <b>{analysing ? "Analysing your photo…" : "Show us the tap or the removed cartridge"}</b>
                 {analysing ? "Reading the handle and spout design to guess the brand." : "We look at the handle and spout to guess the brand, then ask you the size."}
               </div>
-              <label className="btn btn-ghost" style={{ marginLeft: "auto" }}>
-                {photo ? "Change photo" : "Add photo"}
-                <input type="file" accept="image/*" capture="environment" onChange={onPhoto} style={{ display: "none" }} />
-              </label>
+              <div className="upbtns">
+                <label className="btn btn-ghost">📷 Take photo<input type="file" accept="image/*" capture="environment" onChange={onPhoto} style={{ display: "none" }} /></label>
+                <label className="btn btn-ghost">🖼 Upload<input type="file" accept="image/*" onChange={onPhoto} style={{ display: "none" }} /></label>
+              </div>
               {photo && <img src={photo} className="thumb" alt="your part" />}
             </div>
 
@@ -144,7 +144,7 @@ export default function Find() {
         {showResults && (
           <div className="results">
             <h2>{matches.length} matching part{matches.length === 1 ? "" : "s"}</h2>
-            <p className="sub">{matches.length > 1 ? "These all fit your answers. Match the reference photo or your tap model to pick the right one." : "Here is your part."}</p>
+            <p className="sub">{matches.length > 1 ? "These all fit your answers. Check the tap photo against yours, then match the part." : "Here is your part — check the tap photo matches yours."}</p>
             <div className="cards">{matches.map((p) => <PartCard key={p.id} p={p} />)}</div>
             <div className="toolbar">
               <button className="btn btn-ghost" onClick={back}>← Refine answers</button>
@@ -161,7 +161,18 @@ function PartCard({ p }) {
   const verified = p.verified === "Y";
   return (
     <div className="card">
-      <div className="imgwrap">{p.photo ? <img src={p.photo} alt={p.component} loading="lazy" /> : <span className="ph">{p.category}</span>}</div>
+      <div className="imgs">
+        <figure className="imgfig">
+          <div className="imgwrap">{p.photo ? <img src={p.photo} alt={p.component} loading="lazy" /> : <span className="ph">{p.category}</span>}</div>
+          <figcaption>Spare part</figcaption>
+        </figure>
+        {p.tapPhoto && (
+          <figure className="imgfig">
+            <div className="imgwrap"><img src={p.tapPhoto} alt="the tap this fits" loading="lazy" /></div>
+            <figcaption>Fits this tap</figcaption>
+          </figure>
+        )}
+      </div>
       <div className="body">
         <div className="pn">{p.partNumber}</div>
         <div className="name">{p.component}</div>
