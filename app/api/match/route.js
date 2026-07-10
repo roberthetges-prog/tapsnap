@@ -70,7 +70,7 @@ async function rerank(key, userData, userMedia, cands) {
       resp = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({ model, max_tokens: 800, system: SYSTEM, messages: [{ role: "user", content }] }),
+        body: JSON.stringify({ model, max_tokens: 800, temperature: 0, system: SYSTEM, messages: [{ role: "user", content }] }),
       });
     } catch { return null; }
     if (resp.ok) {
