@@ -67,6 +67,26 @@ async function callModel(key, model, data, mediaType) {
   });
 }
 
+// ---- Cost / abuse guardrails (best-effort, per warm instance) ----
+const RL = { ip: new Map(), global: [] };
+const IP_MAX = 25, IP_WINDOW = 5 * 60 * 1000;
+const GLOBAL_MAX = 60, GLOBAL_WINDOW = 60 * 1000;
+const MAX_IMG = 9_000_000;
+function clientIp(request) {
+  const h = request.headers;
+  return ((h.get("x-forwarded-for") || "").split(",")[0].trim()) || h.get("x-real-ip") || "unknown";
+}
+function rateLimited(ip) {
+  const now = Date.now();
+  RL.global = RL.global.filter((t) => now - t < GLOBAL_WINDOW);
+  if (RL.global.length >= GLOBAL_MAX) return true;
+  let arr = (RL.ip.get(ip) || []).filter((t) => now - t < IP_WINDOW);
+  if (arr.length >= IP_MAX) { RL.ip.set(ip, arr); return true; }
+  arr.push(now); RL.ip.set(ip, arr); RL.global.push(now);
+  if (RL.ip.size > 5000) { for (const [k, v] of RL.ip) { if (!v.length || now - v[v.length - 1] > IP_WINDOW) RL.ip.delete(k); } }
+  return false;
+}
+
 export async function POST(request) {
   const key = readKey();
   if (!key || !key.startsWith("sk-ant-")) return Response.json({ configured: false });
@@ -75,6 +95,8 @@ export async function POST(request) {
   try { body = await request.json(); } catch { return Response.json({ configured: true, error: "bad request" }, { status: 400 }); }
   const { data, mediaType } = body || {};
   if (!data) return Response.json({ configured: true, error: "no image" }, { status: 400 });
+  if (typeof data === "string" && data.length > MAX_IMG) return Response.json({ configured: true, error: "image_too_large", message: "That image is too large — please try a smaller photo." }, { status: 413 });
+  if (rateLimited(clientIp(request))) return Response.json({ configured: true, error: "rate_limited", message: "You're going a bit fast — give it a few seconds and try again." }, { status: 429 });
 
   let lastDetail = "";
   try {
