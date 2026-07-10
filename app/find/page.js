@@ -136,6 +136,7 @@ export default function Find() {
       const mediaType = (String(dataUrl).match(/data:(.*?);/) || [])[1] || "image/jpeg";
       const resp = await fetch("/api/identify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ data: base64, mediaType }) });
       const j = await resp.json();
+      if (!resp.ok && j && (j.error === "rate_limited" || j.error === "image_too_large")) { setAi({ status: "notice", message: j.message }); return; }
       if (!j || j.configured === false) { setAi({ status: "off" }); return; }
       if (j.error) { setAi({ status: "error" }); return; }
       setAi(j);
@@ -178,6 +179,7 @@ export default function Find() {
         )}
         {ai && ai.status === "off" && <div className="aibar muted">Photo recognition isn&apos;t switched on yet — pick your brand below.</div>}
         {ai && ai.status === "error" && <div className="aibar muted">Couldn&apos;t read that photo — pick your brand below.</div>}
+        {ai && ai.status === "notice" && <div className="aibar muted">{ai.message || "Please try again in a moment."} You can also pick your brand below.</div>}
 
         <div className="crumbs">
           {answers.map((a) => (<span className="crumb" key={a.field}>{FIELD_LABEL[a.field]}: <b>{a.value}</b></span>))}
