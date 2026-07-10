@@ -127,3 +127,10 @@ footer{border-top:1px solid var(--line);padding:26px 0;color:var(--muted);font-s
 
 /* Identify (Go) button under the uploaded photo */
 .uploader .goid { margin-top: 10px; width: 100%; font-weight: 700; }
+
+/* Visual match panel */
+.matchhead { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+.matchhead .thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line, #e3e8ee); }
+.matchhead h2 { margin: 0; }
+.mscore { font-size: 12px; font-weight: 700; color: var(--muted, #667); margin-top: 2px; }
+.mscore.good { color: #1a7f37; }
