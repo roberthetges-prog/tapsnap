@@ -4,6 +4,8 @@
 // Paginate with ?start=0&count=60. Capture output and commit as lib/embeddings.json.
 
 import models from "../../../lib/models.json";
+import parts from "../../../lib/parts.json";
+import cartimg from "../../../lib/cartimg.json";
 import sharp from "sharp";
 
 export const runtime = "nodejs";
@@ -59,7 +61,10 @@ export async function GET(request) {
   const start = parseInt(url.searchParams.get("start") || "0", 10);
   const count = parseInt(url.searchParams.get("count") || "60", 10);
 
-  const rows = models.filter((m) => m.photo).map((m) => ({ k: m.brand + "|" + m.model, b: m.brand, m: m.model, p: m.photo }));
+  const tapRows = models.filter((m) => m.photo).map((m) => ({ k: m.brand + "|" + m.model, b: m.brand, m: m.model, p: m.photo }));
+  const partRows = parts.filter((p) => p.photo).map((p) => ({ k: "P|" + p.id, b: p.brand, m: (p.range || p.component || p.category || ""), p: p.photo }));
+  const cartRows = Object.entries((cartimg && cartimg.byCode) || {}).map(([code, url]) => ({ k: "C|" + code, b: "", m: code + " cartridge", p: url }));
+  const rows = tapRows.concat(partRows, cartRows);
   const slice = rows.slice(start, start + count);
 
   // fetch all images -> data URIs (drop failures)
