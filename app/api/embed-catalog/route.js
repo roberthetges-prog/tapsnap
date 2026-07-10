@@ -19,7 +19,7 @@ function keyJina() { return (process.env.JINA_API_KEY || "").trim(); }
 async function toDataURI(url) {
   try {
     const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 8000);
-    const r = await fetch(url, { signal: ctrl.signal, headers: { "user-agent": "Mozilla/5.0 SpareMatchBot" } });
+    const r = await fetch(url, { signal: ctrl.signal, headers: { "user-agent": "Mozilla/5.0 TapSnapBot" } });
     clearTimeout(t);
     if (!r.ok) return null;
     let media = (r.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
@@ -58,8 +58,11 @@ export async function GET(request) {
   const key = keyJina();
   if (!key) return Response.json({ error: "no JINA_API_KEY" }, { status: 400 });
   const url = new URL(request.url);
+  const admin = (process.env.EMBED_TOKEN || "").trim();
+  const given = (url.searchParams.get("key") || "").trim();
+  if (!admin || given !== admin) return Response.json({ error: "forbidden" }, { status: 403 });
   const start = parseInt(url.searchParams.get("start") || "0", 10);
-  const count = parseInt(url.searchParams.get("count") || "60", 10);
+  const count = Math.min(Math.max(parseInt(url.searchParams.get("count") || "20", 10) || 20, 1), 60);
 
   const tapRows = models.filter((m) => m.photo).map((m) => ({ k: m.brand + "|" + m.model, b: m.brand, m: m.model, p: m.photo }));
   const partRows = parts.filter((p) => p.photo).map((p) => ({ k: "P|" + p.id, b: p.brand, m: (p.range || p.component || p.category || ""), p: p.photo }));
