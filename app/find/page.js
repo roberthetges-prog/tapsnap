@@ -16,18 +16,29 @@ function inferType(ai) {
   if (/basin|lavatory|vanity/.test(s)) return "basin";
   return "";
 }
+const BRAND_PRIORITY = ["Felton","Methven","Foreno","Voda","Greens","LeVivi","Robertson","Caroma","Grohe","Hansgrohe","Phoenix","Nero","Meir","Dorf","Mizu","Posh","Paini","Newform","Mondella","Buddy","Franke"];
 function buildCandidates(ai) {
+  const t = inferType(ai);
   const brandsToTry = [];
   if (ai && ai.brand) brandsToTry.push(ai.brand);
   if (ai && Array.isArray(ai.brandGuesses)) for (const g of ai.brandGuesses) if (!brandsToTry.includes(g)) brandsToTry.push(g);
   let pool = [];
   for (const b of brandsToTry) { const arr = modelsByBrand[b]; if (arr) pool.push(...arr.filter((m) => m.photo)); }
-  if (pool.length < 2) return [];
-  const t = inferType(ai);
-  if (t) { const f = pool.filter((m) => (m.model || "").toLowerCase().includes(t)); if (f.length >= 2) pool = f; }
-  const seen = new Set(); const out = [];
-  for (const m of pool) { if (seen.has(m.model)) continue; seen.add(m.model); out.push(m); if (out.length >= 12) break; }
-  return out;
+  if (pool.length >= 2) {
+    if (t) { const f = pool.filter((m) => (m.model || "").toLowerCase().includes(t)); if (f.length >= 2) pool = f; }
+    const seen = new Set(); const out = [];
+    for (const m of pool) { if (seen.has(m.model)) continue; seen.add(m.model); out.push(m); if (out.length >= 12) break; }
+    return out;
+  }
+  // Fallback: no confident brand — sample one photographed model per brand (type-filtered)
+  // so the visual matcher can still surface the right brand family from the whole catalogue.
+  const sample = [];
+  for (const b of BRAND_PRIORITY) {
+    const arr = (modelsByBrand[b] || []).filter((m) => m.photo && (!t || (m.model || "").toLowerCase().includes(t)));
+    if (arr.length) sample.push(arr[0]);
+    if (sample.length >= 12) break;
+  }
+  return sample;
 }
 
 function detectionsToAnswers(all, ai) {
