@@ -30,17 +30,20 @@ async function toDataURI(url) {
   } catch { return null; }
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function jinaEmbed(key, dataURIs) {
-  const r = await fetch("https://api.jina.ai/v1/embeddings", {
-    method: "POST",
-    headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model: "jina-clip-v2", dimensions: DIM, normalized: true, embedding_type: "float", input: dataURIs.map((u) => ({ image: u })) }),
-  });
-  if (!r.ok) throw new Error("jina " + r.status + " " + scrub(await r.text()).slice(0, 200));
-  const j = await r.json();
-  const out = new Array(dataURIs.length).fill(null);
-  for (const d of j.data || []) if (Number.isInteger(d.index)) out[d.index] = d.embedding;
-  return out;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const r = await fetch("https://api.jina.ai/v1/embeddings", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+      body: JSON.stringify({ model: "jina-clip-v2", dimensions: DIM, normalized: true, embedding_type: "float", input: dataURIs.map((u) => ({ image: u })) }),
+    });
+    if (r.ok) { const j = await r.json(); const out = new Array(dataURIs.length).fill(null); for (const d of j.data || []) if (Number.isInteger(d.index)) out[d.index] = d.embedding; return out; }
+    const body = scrub(await r.text()).slice(0, 200);
+    if (r.status === 429 && attempt < 3) { await sleep(20000); continue; } // rate-limited: wait a window and retry
+    throw new Error("jina " + r.status + " " + body);
+  }
+  return dataURIs.map(() => null);
 }
 
 function toB64Int8(vec) {
