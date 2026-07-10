@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import parts from "../../lib/parts.json";
 import models from "../../lib/models.json";
+import cartimg from "../../lib/cartimg.json";
 import { listBrands, applyFilters, nextQuestion } from "../../lib/matcher.js";
 
 const FIELD_LABEL = { productType: "Fixing", valveFamily: "Valve", brand: "Brand", category: "Part", dimension: "Size", valveType: "Mechanism" };
@@ -342,11 +343,12 @@ export default function Find() {
 function PartCard({ p }) {
   const verified = p.verified === "Y";
   const pn = p.partNumber || (p.dimension ? p.dimension + " cartridge" : "Cartridge");
+  const spareImg = p.photo || (cartimg.byCode && cartimg.byCode[p.partNumber]) || (cartimg.bySize && cartimg.bySize[p.dimension]) || "";
   return (
     <div className="card">
       <div className="imgs">
         <figure className="imgfig">
-          <div className="imgwrap">{p.photo ? <img src={p.photo} alt={p.component} loading="lazy" /> : <span className="ph">{p.category}</span>}</div>
+          <div className="imgwrap">{spareImg ? <img src={spareImg} alt={p.component} loading="lazy" /> : <span className="ph">{p.category}</span>}</div>
           <figcaption>{p.productType === "Valve" ? "The part" : "Spare part"}</figcaption>
         </figure>
         {p.tapPhoto && (
