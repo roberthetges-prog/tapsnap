@@ -8,6 +8,28 @@ const FIELD_LABEL = { productType: "Fixing", valveFamily: "Valve", brand: "Brand
 const modelsByBrand = {};
 for (const mo of models) (modelsByBrand[mo.brand] ||= []).push(mo);
 
+function inferType(ai) {
+  const s = (((ai && ai.description) || "") + " " + ((ai && ai.category) || "")).toLowerCase();
+  if (/shower/.test(s)) return "shower";
+  if (/(sink|kitchen)/.test(s)) return "sink";
+  if (/bath/.test(s)) return "bath";
+  if (/basin|lavatory|vanity/.test(s)) return "basin";
+  return "";
+}
+function buildCandidates(ai) {
+  const brandsToTry = [];
+  if (ai && ai.brand) brandsToTry.push(ai.brand);
+  if (ai && Array.isArray(ai.brandGuesses)) for (const g of ai.brandGuesses) if (!brandsToTry.includes(g)) brandsToTry.push(g);
+  let pool = [];
+  for (const b of brandsToTry) { const arr = modelsByBrand[b]; if (arr) pool.push(...arr.filter((m) => m.photo)); }
+  if (pool.length < 2) return [];
+  const t = inferType(ai);
+  if (t) { const f = pool.filter((m) => (m.model || "").toLowerCase().includes(t)); if (f.length >= 2) pool = f; }
+  const seen = new Set(); const out = [];
+  for (const m of pool) { if (seen.has(m.model)) continue; seen.add(m.model); out.push(m); if (out.length >= 12) break; }
+  return out;
+}
+
 function detectionsToAnswers(all, ai) {
   // Only ever set the product type and a confidently-named brand. Never hard-filter by
   // AI category/size (those collapse the catalogue). Land the user on the brand's visual
@@ -45,6 +67,7 @@ export default function Find() {
   const [modelResult, setModelResult] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [file, setFile] = useState(null);
+  const [matches, setMatches] = useState(null);
   const [analysing, setAnalysing] = useState(false);
   const [ai, setAi] = useState(null);
 
@@ -65,16 +88,23 @@ export default function Find() {
     return [...byRange.values()];
   }, [sel]);
 
-  const add = (field, value) => { setForceResults(false); setSkipModel(false); setModelResult(null); setAnswers((a) => [...a.filter((x) => x.field !== field), { field, value }]); };
-  const back = () => { setForceResults(false); setSkipModel(false); if (modelResult) { setModelResult(null); return; } setAnswers((a) => a.slice(0, -1)); };
-  const reset = () => { setForceResults(false); setSkipModel(false); setModelResult(null); setAnswers([]); setPhoto(null); setFile(null); setAi(null); };
+  const add = (field, value) => { setForceResults(false); setSkipModel(false); setModelResult(null); setMatches(null); setAnswers((a) => [...a.filter((x) => x.field !== field), { field, value }]); };
+  const back = () => { setForceResults(false); setSkipModel(false); if (matches) { setMatches(null); return; } if (modelResult) { setModelResult(null); return; } setAnswers((a) => a.slice(0, -1)); };
+  const reset = () => { setForceResults(false); setSkipModel(false); setModelResult(null); setAnswers([]); setPhoto(null); setFile(null); setAi(null); setMatches(null); };
 
-  function pickModel(card) {
+  function pickModel(card, brandOverride) {
+    const brand = brandOverride || card.brand || sel.brand;
     const found = card.cartPart ? parts.filter((p) => p.partNumber === card.cartPart) : [];
     let res;
     if (found.length) res = found.map((p) => ({ ...p, range: card.model, tapPhoto: card.photo || p.tapPhoto, explodedUrl: p.explodedUrl || card.exploded }));
-    else res = [{ id: "m-" + card.model, brand: sel.brand, range: card.model, component: card.size ? card.size + " ceramic cartridge" : "Replacement cartridge", category: "Cartridge", partNumber: card.cartPart || "", valveType: "", dimension: card.size || "", supersession: "", buyUrl: card.buyUrl, sourceUrl: card.buyUrl, verified: card.confirm ? "" : "Y", notes: card.confirm ? "Cartridge size from a retailer listing — confirm before ordering." : "This model uses a standard cartridge of this size; the maker doesn't sell a separate cartridge code.", photo: "", tapPhoto: card.photo, productType: "Tapware", valveFamily: "", explodedUrl: card.exploded }];
+    else res = [{ id: "m-" + card.model, brand: brand, range: card.model, component: card.size ? card.size + " ceramic cartridge" : "Replacement cartridge", category: "Cartridge", partNumber: card.cartPart || "", valveType: "", dimension: card.size || "", supersession: "", buyUrl: card.buyUrl, sourceUrl: card.buyUrl, verified: card.confirm ? "" : "Y", notes: card.confirm ? "Cartridge size from a retailer listing — confirm before ordering." : "This model uses a standard cartridge of this size; the maker doesn't sell a separate cartridge code.", photo: "", tapPhoto: card.photo, productType: "Tapware", valveFamily: "", explodedUrl: card.exploded }];
     setModelResult(res);
+  }
+
+  function onPickMatch(m) {
+    setMatches(null);
+    setAnswers([{ field: "productType", value: "Tapware" }, { field: "brand", value: m.brand }]);
+    pickModel(m, m.brand);
   }
 
   function onPhoto(e) {
@@ -97,10 +127,23 @@ export default function Find() {
       setAi(j);
       const pref = detectionsToAnswers(parts, j);
       if (pref.length) { setForceResults(false); setAnswers(pref); }
+      const cands = buildCandidates(j);
+      if (cands.length >= 2) {
+        try {
+          const mResp = await fetch("/api/match", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ data: base64, mediaType, candidates: cands.map((c) => ({ id: c.model, brand: c.brand, model: c.model, photo: c.photo })) }) });
+          const mj = await mResp.json();
+          if (mj && Array.isArray(mj.ranked) && mj.ranked.length) {
+            const byModel = new Map(cands.map((c) => [c.model, c]));
+            const top = mj.ranked.map((r) => ({ ...(byModel.get(r.model) || {}), score: r.score, same: r.same, reason: r.reason })).filter((r) => r.photo).slice(0, 6);
+            if (top.length) setMatches(top);
+          }
+        } catch { /* visual match is best-effort; ignore failures */ }
+      }
     } catch { setAi({ status: "error" }); } finally { setAnalysing(false); }
   }
 
-  const stage = modelResult ? "modelresult"
+  const stage = (matches && matches.length) ? "matches"
+    : modelResult ? "modelresult"
     : !sel.productType ? "type"
     : ((sel.productType === "Valve" || sel.productType === "Toilet") && !sel.valveFamily) ? "family"
     : !sel.brand ? "brand"
@@ -179,6 +222,33 @@ export default function Find() {
             <p className="sub">{sel.productType === "Tapware" ? <>Look for a name on the tap, handle or flange. No name? Pick <b>Universal</b>.</> : "Check the valve body or label for the maker."}</p>
             <div className="grid">
               {brands.map((b) => (<button className="opt" key={b.brand} onClick={() => add("brand", b.brand)}>{b.brand} <span className="c">{b.count}</span></button>))}
+            </div>
+          </div>
+        )}
+
+        {stage === "matches" && (
+          <div className="panel">
+            <div className="matchhead">
+              {photo && <img src={photo} className="thumb" alt="your tap" />}
+              <div>
+                <h2>Closest matches to your photo</h2>
+                <p className="sub">Ranked by how closely each matches your tap. Pick the right one — or browse all brands.</p>
+              </div>
+            </div>
+            <div className="models">
+              {matches.map((m) => (
+                <button className="modelcard" key={m.brand + m.model} onClick={() => onPickMatch(m)}>
+                  <div className="mimg">{m.photo ? <img src={m.photo} alt={m.model} loading="lazy" /> : <span className="mph">no photo</span>}</div>
+                  <div className="minfo">
+                    <div className="mname">{m.brand} {m.model}</div>
+                    <div className={m.same ? "mscore good" : "mscore"}>{m.same ? "Strong match" : "Possible"} · {Math.round(m.score)}%</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <div className="toolbar">
+              <button className="btn btn-ghost" onClick={() => setMatches(null)}>None of these — browse brands</button>
+              <button className="btn btn-ghost" onClick={reset}>Start over</button>
             </div>
           </div>
         )}
