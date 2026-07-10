@@ -194,8 +194,17 @@ export default function Find() {
                 <label className="btn btn-ghost">🖼 Upload<input type="file" accept="image/*" onChange={onPhoto} style={{ display: "none" }} /></label>
               </div>
               {photo && <img src={photo} className="thumb" alt="your part" />}
-              {photo && <button className="btn btn-primary goid" onClick={runIdentify} disabled={analysing}>{analysing ? "Identifying…" : "🔍 Identify this tap"}</button>}
+              {photo && <button className="btn btn-primary goid" onClick={runIdentify} disabled={analysing}>{analysing ? <><span className="spin" /> Identifying…</> : "🔍 Identify this tap"}</button>}
             </div>
+            {analysing && (
+              <div className="loadcard">
+                <span className="spin big" />
+                <div>
+                  <b>Identifying your tap…</b>
+                  <div className="sub">Reading the shape, then comparing it against our catalogue photos. This takes a few seconds.</div>
+                </div>
+              </div>
+            )}
             <h2>What are you fixing?</h2>
             <div className="grid">
               <button className="opt bigopt" onClick={() => add("productType", "Tapware")}>🚰 Tap / mixer <span className="c">{parts.filter((p) => p.productType === "Tapware").length}</span></button>
