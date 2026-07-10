@@ -44,17 +44,17 @@ export async function GET(request) {
   const rows = models.filter((m) => m.photo).map((m) => ({ k: m.brand + "|" + m.model, b: m.brand, m: m.model, p: m.photo }));
   const slice = rows.slice(start, start + count);
 
-  const results = [];
+  const results = []; const errors = [];
   try {
     for (let i = 0; i < slice.length; i += BATCH) {
       const chunk = slice.slice(i, i + BATCH);
       let vecs;
       try { vecs = await embedImages(key, chunk.map((c) => c.p)); }
-      catch (e) { vecs = chunk.map(() => null); }
+      catch (e) { vecs = chunk.map(() => null); if (errors.length < 3) errors.push(scrub(String(e && e.message || e)).slice(0, 300)); }
       chunk.forEach((c, j) => { if (vecs[j]) results.push({ k: c.k, b: c.b, m: c.m, p: c.p, v: toB64Int8(vecs[j]) }); });
     }
   } catch (e) {
     return Response.json({ error: scrub(String(e)).slice(0, 200) }, { status: 500 });
   }
-  return Response.json({ total: rows.length, start, count, returned: results.length, dim: DIM, embeddings: results });
+  return Response.json({ total: rows.length, start, count, returned: results.length, dim: DIM, errors, embeddings: results });
 }
