@@ -115,9 +115,8 @@ export async function POST(request) {
   const brandOrder = [...new Set([...guesses, ...PRIORITY, ...Object.keys(byBrand)])].filter((b) => byBrand[b]);
   const recall = [];
   for (const b of brandOrder) {
-    const take = guesses.includes(b) ? 2 : 1;
-    for (let i = 0; i < take && i < byBrand[b].length; i++) recall.push(byBrand[b][i]);
-    if (recall.length >= 14) break;
+    for (let i = 0; i < 2 && i < byBrand[b].length; i++) recall.push(byBrand[b][i]);
+    if (recall.length >= 16) break;
   }
   if (recall.length < 2) return Response.json({ configured: true, ranked: [] });
 
@@ -127,14 +126,14 @@ export async function POST(request) {
 
   // top brands from round 1 (up to 3 distinct)
   const topBrands = [];
-  for (const r of round1) { if (!topBrands.includes(r.brand)) topBrands.push(r.brand); if (topBrands.length >= 3) break; }
+  for (const r of round1) { if (!topBrands.includes(r.brand)) topBrands.push(r.brand); if (topBrands.length >= 5) break; }
 
   // ---- Round 2: precision within top brand(s) — compare against ALL their models ----
   let precision = [];
   for (const b of topBrands) { precision.push(...(byBrand[b] || [])); }
   // de-dupe + cap; keep the strongest brand's models first
   const seen = new Set(); const precCands = [];
-  for (const m of precision) { const k = m.brand + "|" + m.model; if (seen.has(k)) continue; seen.add(k); precCands.push(m); if (precCands.length >= 12) break; }
+  for (const m of precision) { const k = m.brand + "|" + m.model; if (seen.has(k)) continue; seen.add(k); precCands.push(m); if (precCands.length >= 14) break; }
 
   let round2 = null;
   if (precCands.length >= 2) {
