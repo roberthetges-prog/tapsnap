@@ -284,6 +284,11 @@ export default function Find() {
               <button className="btn btn-ghost" onClick={() => setVmatch(null)}>None of these — browse brands</button>
               <button className="btn btn-ghost" onClick={reset}>Start over</button>
             </div>
+            <p className="feedback-row">
+              None of these right, or your part isn&apos;t listed?{" "}
+              <a href="mailto:myhappyplace@web.de?subject=TapSnap%20%E2%80%94%20wrong%20or%20missing%20part&body=Tell%20us%20what%20you%20were%20looking%20for%20(brand%20and%20model%20if%20known)%2C%20and%20attach%20your%20photo%20if%20you%20can%3A%0A%0A">Tell us</a>{" "}
+              and we&apos;ll add it.
+            </p>
           </div>
         )}
 
