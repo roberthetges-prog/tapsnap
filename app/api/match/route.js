@@ -6,6 +6,8 @@
 // FALLBACK: if no Jina key / embeddings, use the previous two-round Claude-only matcher.
 
 import models from "../../../lib/models.json";
+import parts from "../../../lib/parts.json";
+import cartimg from "../../../lib/cartimg.json";
 import embeddings from "../../../lib/embeddings.json";
 
 export const runtime = "nodejs";
@@ -20,6 +22,12 @@ function readKey() { const raw = (process.env.ANTHROPIC_API_KEY || "").trim(); c
 function keyJina() { return (process.env.JINA_API_KEY || "").trim(); }
 
 const modelByKey = {}; for (const m of models) modelByKey[m.brand + "|" + m.model] = m;
+const partById = {}; for (const p of parts) partById[p.id] = p;
+function resolveKey(k) {
+  if (k.startsWith("P|")) { const p = partById[+k.slice(2)]; if (!p || !p.photo) return null; return { kind: "part", brand: p.brand, model: (p.range || p.component || p.category || ""), photo: p.photo, part: p }; }
+  if (k.startsWith("C|")) { const code = k.slice(2); const url = (cartimg.byCode || {})[code]; if (!url) return null; return { kind: "cart", brand: "", model: code + " cartridge", photo: url, card: { id: "c-" + code, brand: "", range: code + " cartridge", component: "Ceramic disc cartridge", category: "Cartridge", partNumber: code, valveType: "", dimension: "", supersession: "", buyUrl: "", sourceUrl: "", verified: "Y", notes: "Matched by cartridge photo \u2014 confirm the size and fit before ordering.", photo: url, tapPhoto: "", productType: "Tapware", valveFamily: "", explodedUrl: "" } }; }
+  const m = modelByKey[k]; if (!m || !m.photo) return null; return { kind: "tap", brand: m.brand, model: m.model, photo: m.photo, size: m.size, cartPart: m.cartPart, buyUrl: m.buyUrl, exploded: m.exploded, confirm: m.confirm };
+}
 function cardOf(m) { return { id: m.model, brand: m.brand, model: m.model, photo: m.photo, size: m.size || "", cartPart: m.cartPart || "", buyUrl: m.buyUrl || "", exploded: m.exploded || "", confirm: !!m.confirm }; }
 
 // ---------- embedding recall ----------
@@ -55,11 +63,11 @@ async function embedQuery(key, data, mediaType) {
 }
 function recall(qvec, type, topN) {
   const cat = catalogue();
-  const scored = cat.map((c) => { let s = 0; for (let i = 0; i < qvec.length; i++) s += qvec[i] * c.vec[i]; return { k: c.k, b: c.b, m: c.m, s }; });
-  if (type) { const t = type.toLowerCase(); for (const r of scored) if ((r.m || "").toLowerCase().includes(t)) r.s += 0.03; }
+  const scored = cat.map((c) => { let s = 0; for (let i = 0; i < qvec.length; i++) s += qvec[i] * c.vec[i]; return { k: c.k, s }; });
+  if (type) { const t = type.toLowerCase(); for (const r of scored) if ((r.k || "").toLowerCase().includes(t)) r.s += 0.03; }
   scored.sort((a, b) => b.s - a.s);
   const out = []; const seen = new Set();
-  for (const r of scored) { if (seen.has(r.k)) continue; seen.add(r.k); const mm = modelByKey[r.k]; if (mm && mm.photo) out.push(mm); if (out.length >= topN) break; }
+  for (const r of scored) { if (seen.has(r.k)) continue; seen.add(r.k); const c = resolveKey(r.k); if (c && c.photo) out.push(c); if (out.length >= topN) break; }
   return out;
 }
 
@@ -138,7 +146,7 @@ export async function POST(request) {
       if (qv) {
         const cands = recall(qv, type, 18);            // whole-catalogue nearest neighbours
         if (cands.length >= 2) {
-          const rr = await rerank(key, data, mediaType, cands.slice(0, 12).map(cardOf));
+          const rr = await rerank(key, data, mediaType, cands.slice(0, 12));
           if (rr && rr.length) { ranked = rr; stage = "embed+rerank"; }
         }
       }
@@ -147,6 +155,6 @@ export async function POST(request) {
 
   if (!ranked.length) { try { ranked = await twoRound(key, data, mediaType, type, guesses); stage = "tworound"; } catch { ranked = []; } }
 
-  const finalRanked = ranked.slice(0, 6).map((r) => ({ id: r.id || r.model, brand: r.brand, model: r.model, photo: r.photo, size: r.size, cartPart: r.cartPart, buyUrl: r.buyUrl, exploded: r.exploded, confirm: r.confirm, score: r.score, same: r.same, reason: r.reason }));
+  const finalRanked = ranked.slice(0, 6).map((r) => ({ id: r.id || r.model, brand: r.brand, model: r.model, photo: r.photo, size: r.size, cartPart: r.cartPart, buyUrl: r.buyUrl, exploded: r.exploded, confirm: r.confirm, score: r.score, same: r.same, reason: r.reason, kind: r.kind || "tap", part: r.part, card: r.card }));
   return Response.json({ configured: true, stage, ranked: finalRanked });
 }
