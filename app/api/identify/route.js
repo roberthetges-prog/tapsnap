@@ -52,6 +52,7 @@ async function callModel(key, model, data, mediaType) {
     body: JSON.stringify({
       model,
       max_tokens: 400,
+      temperature: 0,
       system: SYSTEM,
       messages: [
         {
