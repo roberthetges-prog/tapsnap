@@ -31,7 +31,7 @@ export async function GET(request) {
   const sb = sbAdmin(); if (!sb) return Response.json({ error: "db not configured" }, { status: 500 });
   const jkey = keyJina(); if (!jkey) return Response.json({ error: "no JINA_API_KEY" }, { status: 500 });
   const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit") || "25", 10) || 25, 1), 40);
-  const { data: rows, error: selErr } = await sb.from("products").select("id,photo_url").is("embedding", null).not("photo_url", "is", null).limit(limit);
+  const { data: rows, error: selErr } = await sb.from("products").select("id,photo_url").is("embedding", null).not("photo_url", "is", null).order("id", { ascending: false }).limit(limit);
   if (selErr) return Response.json({ error: selErr.message }, { status: 500 });
   let done = 0; const errors = [];
   for (const r of rows || []) {
