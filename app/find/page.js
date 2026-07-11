@@ -82,6 +82,7 @@ export default function Find() {
   const [vmatch, setVmatch] = useState(null);
   const [analysing, setAnalysing] = useState(false);
   const [ai, setAi] = useState(null);
+  const [bFilter, setBFilter] = useState("");
 
   const sel = useMemo(() => answers.reduce((o, a) => ((o[a.field] = a.value), o), {}), [answers]);
   const pool = useMemo(() => applyFilters(parts, sel), [sel]);
@@ -256,9 +257,18 @@ export default function Find() {
             )}
             <h2>Which brand is it?</h2>
             <p className="sub">{sel.productType === "Tapware" ? <>Look for a name on the tap, handle or flange. No name? Pick <b>Universal</b>.</> : "Check the valve body or label for the maker."}</p>
-            <div className="grid">
-              {brands.map((b) => (<button className="opt" key={b.brand} onClick={() => add("brand", b.brand)}>{b.brand} <span className="c">{b.count}</span></button>))}
-            </div>
+            <input className="brandfilter" type="text" inputMode="search" placeholder="🔍 Start typing your brand…" value={bFilter} onChange={(e) => setBFilter(e.target.value)} />
+            {(() => {
+              const t = bFilter.trim().toLowerCase();
+              const shown = t ? brands.filter((b) => b.brand.toLowerCase().includes(t)) : brands;
+              return shown.length ? (
+                <div className="grid">
+                  {shown.map((b) => (<button className="opt" key={b.brand} onClick={() => { setBFilter(""); add("brand", b.brand); }}>{b.brand} <span className="c">{b.count}</span></button>))}
+                </div>
+              ) : (
+                <p className="sub" style={{ marginTop: 10 }}>No brand matches &ldquo;{bFilter.trim()}&rdquo;. Try fewer letters, or pick <b>Universal</b> once you clear the box.</p>
+              );
+            })()}
           </div>
         )}
 
