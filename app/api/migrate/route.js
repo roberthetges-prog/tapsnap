@@ -39,6 +39,8 @@ function buildRows() {
 
 export async function GET(request) {
   const url = new URL(request.url);
+  const admin = (process.env.EMBED_TOKEN || "").trim();
+  if (!admin || (url.searchParams.get("key") || "").trim() !== admin) return Response.json({ error: "forbidden" }, { status: 403 });
   if (url.searchParams.get("go") !== "migrate-tapsnap-once") return Response.json({ error: "add ?go=migrate-tapsnap-once" }, { status: 400 });
   const sb = sbAdmin();
   if (!sb) return Response.json({ error: "supabase admin not configured (need SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY)" }, { status: 500 });
