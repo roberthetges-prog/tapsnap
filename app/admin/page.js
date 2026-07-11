@@ -9,7 +9,21 @@ export default function Admin() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(null);
   const [added, setAdded] = useState([]);
+  const [bfBusy, setBfBusy] = useState(false);
+  const [bf, setBf] = useState(null);
   const set = (k) => (e) => setF({ ...f, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value });
+
+  async function backfill() {
+    if (!pw) { setBf({ err: "Enter the admin password first." }); return; }
+    setBfBusy(true); setBf(null);
+    try {
+      const r = await fetch("/api/embed-backfill", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ password: pw, limit: 40 }) });
+      const j = await r.json();
+      if (!r.ok) setBf({ err: j.error || "Failed" });
+      else setBf({ ok: `Fingerprinted ${j.embedded} image${j.embedded === 1 ? "" : "s"}. ${j.remaining} still without a photo fingerprint.`, errors: (j.errors || []).length });
+    } catch { setBf({ err: "Network error" }); }
+    setBfBusy(false);
+  }
 
   async function submit(e) {
     e.preventDefault();
@@ -51,6 +65,13 @@ export default function Admin() {
       </form>
 
       {msg && <div className={"aibar " + (msg.err ? "muted" : "")} style={{ marginTop: 16, color: msg.err ? "#b4413c" : undefined }}>{msg.err || msg.ok}</div>}
+
+      <div style={{ marginTop: 28, paddingTop: 20, borderTop: "1px solid #e3e8ee" }}>
+        <h2 style={{ fontSize: 16, marginBottom: 4 }}>Maintenance</h2>
+        <p className="sub" style={{ color: "#5b6875", marginTop: 0, fontSize: 14 }}>Fingerprint any catalogue products that are missing a photo match (runs up to 40 at a time — click again if more remain).</p>
+        <button type="button" className="btn" onClick={backfill} disabled={bfBusy} style={{ justifyContent: "center" }}>{bfBusy ? "Fingerprinting…" : "Fingerprint missing images"}</button>
+        {bf && <div className={"aibar " + (bf.err ? "muted" : "")} style={{ marginTop: 12, color: bf.err ? "#b4413c" : undefined }}>{bf.err || bf.ok}{bf.errors ? ` (${bf.errors} couldn’t be fetched)` : ""}</div>}
+      </div>
 
       {added.length > 0 && (
         <div style={{ marginTop: 24 }}>
