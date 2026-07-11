@@ -10,6 +10,10 @@ const modelsByBrand = {};
 for (const mo of models) (modelsByBrand[mo.brand] ||= []).push(mo);
 
 function inferType(ai) {
+  // Prefer the explicit fixture the vision step now returns (basin/shower/sink/bath).
+  // A basin mixer and its paired shower mixer look near-identical, so this call matters.
+  const fx = String((ai && ai.fixture) || "").toLowerCase().trim();
+  if (["basin", "shower", "sink", "bath"].includes(fx)) return fx;
   const s = (((ai && ai.description) || "") + " " + ((ai && ai.category) || "")).toLowerCase();
   if (/shower/.test(s)) return "shower";
   if (/(sink|kitchen)/.test(s)) return "sink";
