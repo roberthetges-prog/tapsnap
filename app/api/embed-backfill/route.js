@@ -8,7 +8,7 @@ function keyJina() { return (process.env.JINA_API_KEY || "").trim(); }
 
 async function fetchBuf(url, ms = 9000) {
   const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), ms);
-  try { const r = await fetch(url, { signal: ctrl.signal, headers: { "user-agent": "Mozilla/5.0 TapSnapBot" } }); clearTimeout(t);
+  try { const r = await fetch(url, { signal: ctrl.signal, headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36", "accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8", "accept-language": "en-NZ,en;q=0.9" } }); clearTimeout(t);
     if (!r.ok) return null; const buf = Buffer.from(await r.arrayBuffer()); return buf.length ? buf : null;
   } catch { clearTimeout(t); return null; }
 }
