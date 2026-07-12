@@ -102,6 +102,15 @@ async function recallDB(qvec, topN) {
 // A basin mixer and its matching shower mixer are sold as a styled PAIR (same handle, near-identical
 // faceplate), so raw visual similarity alone confuses them. Once the vision step tells us the fixture,
 // keep only candidates of that fixture when we have enough of them.
+function narrowByBrand(cands, brand) {
+  // Only called when the brand was READ off the part (stamped on the handle/body), not guessed
+  // from its shape. A name on the metal beats any amount of silhouette matching.
+  if (!brand || !Array.isArray(cands) || !cands.length) return cands;
+  const b = String(brand).toLowerCase().trim();
+  const hit = cands.filter((c) => String(c.brand || "").toLowerCase().includes(b) || b.includes(String(c.brand || "").toLowerCase()));
+  return hit.length >= 2 ? hit : cands;
+}
+
 function narrowByFixture(cands, type) {
   if (!type || !Array.isArray(cands) || !cands.length) return cands;
   const hit = cands.filter((c) => (c.cat || "").includes(type));
@@ -204,6 +213,7 @@ export async function POST(request) {
   const { data, mediaType } = body || {};
   const type = (body?.type || "").toLowerCase();
   const guesses = Array.isArray(body?.brandGuesses) ? body.brandGuesses.filter(Boolean) : [];
+  const brandSure = body?.brandSure ? String(body.brand || "") : "";  // brand actually read off the part
   if (!data) return Response.json({ configured: true, error: "no image" }, { status: 400 });
   if (typeof data === "string" && data.length > MAX_IMG) return Response.json({ configured: true, error: "image_too_large", message: "That image is too large — please try a smaller photo." }, { status: 413 });
   const rl = rateLimited(clientIp(request));
@@ -215,9 +225,10 @@ export async function POST(request) {
     if (jkey) {
       const qv = await embedQuery(jkey, data, mediaType);
       if (qv) {
-        let cands = await recallDB(qv, 40);            // Supabase pgvector (live catalogue, no redeploy)
+        let cands = await recallDB(qv, 80);            // Supabase pgvector (live catalogue, no redeploy)
         let src = "db";
-        if (cands) cands = narrowByFixture(cands, type);  // basin vs shower vs sink vs bath
+        if (cands) cands = narrowByBrand(cands, brandSure);  // name stamped on the part wins
+        if (cands) cands = narrowByFixture(cands, type);      // basin vs shower vs sink vs bath
         if (!cands && embeddings && embeddings.length > 5) { cands = recall(qv, type, 18); src = "bundled"; }
         if (cands && cands.length >= 2) {
           const rr = await rerank(key, data, mediaType, cands.slice(0, 12));
