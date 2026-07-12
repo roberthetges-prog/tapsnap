@@ -9,6 +9,33 @@ const FIELD_LABEL = { productType: "Fixing", valveFamily: "Valve", brand: "Brand
 const modelsByBrand = {};
 for (const mo of models) (modelsByBrand[mo.brand] ||= []).push(mo);
 
+async function cropToBox(dataUrl, box) {
+  // Every catalogue photo is a clean studio shot - white background, tap filling the frame.
+  // The customer photographs a tap on a basin, with tiles and a window behind it. CLIP embeds the
+  // WHOLE picture, so the background goes into the fingerprint and we end up comparing
+  // "tap in a bathroom" against "tap on white". Cropping to just the tap closes that gap.
+  if (!box || !(box.w > 0.05) || !(box.h > 0.05)) return null;
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = dataUrl; });
+    const pad = 0.06; // a little breathing room so we never clip the spout or the base
+    const x = Math.max(0, box.x - pad) * img.width;
+    const y = Math.max(0, box.y - pad) * img.height;
+    let w = Math.min(1, box.w + pad * 2) * img.width;
+    let h = Math.min(1, box.h + pad * 2) * img.height;
+    w = Math.min(w, img.width - x); h = Math.min(h, img.height - y);
+    if (w < 40 || h < 40) return null;
+    // letterbox onto white so the result is framed like a product shot
+    const size = Math.max(w, h);
+    const cv = document.createElement("canvas");
+    cv.width = 512; cv.height = 512;
+    const cx = cv.getContext("2d");
+    cx.fillStyle = "#ffffff"; cx.fillRect(0, 0, 512, 512);
+    const scale = 512 / size;
+    cx.drawImage(img, x, y, w, h, (512 - w * scale) / 2, (512 - h * scale) / 2, w * scale, h * scale);
+    return cv.toDataURL("image/jpeg", 0.9).split(",")[1];
+  } catch { return null; }
+}
+
 function inferType(ai) {
   // Prefer the explicit fixture the vision step now returns (basin/shower/sink/bath).
   // A basin mixer and its paired shower mixer look near-identical, so this call matters.
@@ -166,7 +193,11 @@ export default function Find() {
       const pref = detectionsToAnswers(parts, j);
       try {
         const bg = [j.brand, ...(Array.isArray(j.brandGuesses) ? j.brandGuesses : [])].filter(Boolean);
-        const mResp = await fetch("/api/match", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ data: base64, mediaType, type: inferType(j), brandGuesses: bg }) });
+        // fingerprint the CROPPED tap, not the whole bathroom
+        const cropped = await cropToBox(String(dataUrl), j.box);
+        const qData = cropped || base64;
+        const qMedia = cropped ? "image/jpeg" : mediaType;
+        const mResp = await fetch("/api/match", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ data: qData, mediaType: qMedia, type: inferType(j), brandGuesses: bg }) });
         const mj = await mResp.json();
         if (mj && Array.isArray(mj.ranked) && mj.ranked.length) {
           const top = mj.ranked.filter((r) => r.photo).slice(0, 6);
