@@ -9,6 +9,23 @@ const FIELD_LABEL = { productType: "Fixing", valveFamily: "Valve", brand: "Brand
 const modelsByBrand = {};
 for (const mo of models) (modelsByBrand[mo.brand] ||= []).push(mo);
 
+async function downscale(dataUrl, maxSide) {
+  // A photo straight off a phone is 4-12MB. Base64-encoded that blows past the vision API's
+  // per-image limit and the whole request is REJECTED - which is why real phone photos failed
+  // while small test images worked. Shrink it here, in the browser, before it is ever sent.
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = dataUrl; });
+    const side = Math.max(img.width, img.height);
+    if (!side) return null;
+    const scale = Math.min(1, (maxSide || 1600) / side);
+    const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+    const cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    cv.getContext("2d").drawImage(img, 0, 0, w, h);
+    return cv.toDataURL("image/jpeg", 0.88);
+  } catch { return null; }
+}
+
 async function cropToBox(dataUrl, box) {
   // Every catalogue photo is a clean studio shot - white background, tap filling the frame.
   // The customer photographs a tap on a basin, with tiles and a window behind it. CLIP embeds the
@@ -181,7 +198,9 @@ export default function Find() {
     if (!file || analysing) return;
     setAi(null); setAnalysing(true); setModelResult(null);
     try {
-      const dataUrl = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); });
+      const rawUrl = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); });
+      // shrink the phone photo first - full-size ones are rejected by the vision API
+      const dataUrl = (await downscale(String(rawUrl), 1600)) || String(rawUrl);
       const base64 = String(dataUrl).split(",")[1];
       const mediaType = (String(dataUrl).match(/data:(.*?);/) || [])[1] || "image/jpeg";
       const resp = await fetch("/api/identify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ data: base64, mediaType }) });
