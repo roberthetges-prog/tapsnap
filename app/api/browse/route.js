@@ -1,23 +1,77 @@
 // Browse the LIVE catalogue (Supabase) by category.
 //
-// WHY THIS EXISTS: the toilet section of the finder was reading the bundled lib/parts.json,
-// which is a frozen snapshot with no photos on the seats. The database has the real catalogue -
-// 53 seats WITH pictures, not 12 without - and it grows every time we ingest. Anything the user
-// browses has to come from the DB, or newly added stock is invisible to them.
+// WHY THIS EXISTS: every "browse" screen in the finder used to read the bundled lib/parts.json -
+// a frozen snapshot. So the database could hold 328 basin mixers and 53 photographed toilet seats
+// while the app showed a stale handful with no pictures, and every product we ingested was
+// invisible until someone redeployed. Anything the user browses now comes from here, live.
 
 import { sbAdmin, sbRead } from "../../../lib/supabase.js";
 
 export const runtime = "nodejs";
 
-const CATS = ["toilet suite", "toilet seat", "toilet inlet valve", "toilet outlet valve", "flush button"];
-
-const LABEL = {
-  "toilet suite": "Toilet suite",
-  "toilet seat": "Toilet seat",
-  "toilet inlet valve": "Inlet (fill) valve",
-  "toilet outlet valve": "Outlet (flush) valve",
-  "flush button": "Flush button / plate",
+// The groups the user actually thinks in, and the DB categories behind each.
+const GROUPS = {
+  tap: {
+    label: "Tap / mixer",
+    icon: "🚰",
+    cats: [
+      ["basin mixer", "Basin mixer", "On the basin, has a spout."],
+      ["sink mixer", "Kitchen / sink mixer", "Over the sink, often a pull-out spray."],
+      ["shower mixer", "Shower mixer", "In the wall — faceplate and handle, no spout."],
+      ["bath mixer", "Bath mixer", "Fills the bath."],
+      ["cartridge", "Cartridge", "The part inside a single-lever mixer."],
+      ["aerator", "Aerator", "The screw-in tip of the spout."],
+      ["handle", "Handle / lever", ""],
+      ["spindle", "Spindle", ""],
+      ["headwork", "Headwork", ""],
+      ["washer/seal", "Washer / seal", ""],
+      ["faceplate", "Faceplate / cover plate", ""],
+      ["diverter", "Diverter", ""],
+    ],
+  },
+  shower: {
+    label: "Shower",
+    icon: "🚿",
+    cats: [
+      ["shower slide", "Slide shower / rail set", "Handpiece on a rail."],
+      ["shower head", "Shower head / rose", ""],
+      ["hand shower", "Hand shower", ""],
+      ["shower rail", "Shower rail", ""],
+      ["column shower", "Shower column", ""],
+      ["shower hose", "Shower hose", ""],
+      ["bath spout", "Bath spout", ""],
+    ],
+  },
+  valve: {
+    label: "Valve",
+    icon: "🎛",
+    cats: [
+      ["tempering valve", "Tempering valve", "Limits hot-water temperature."],
+      ["pressure limiting valve", "Pressure limiting valve", ""],
+      ["pressure reducing valve", "Pressure reducing valve", ""],
+      ["expansion control valve", "Expansion control valve", ""],
+      ["pressure & temperature relief valve", "Pressure & temperature relief valve", ""],
+      ["non-return valve", "Non-return valve", ""],
+      ["isolating valve", "Isolating valve", ""],
+      ["complete valve", "Complete valve", ""],
+      ["service kit", "Service kit", ""],
+    ],
+  },
+  toilet: {
+    label: "Toilet",
+    icon: "🚽",
+    cats: [
+      ["toilet suite", "Toilet suite", "Start here — the suite tells us the seat and the valves."],
+      ["toilet seat", "Toilet seat", "The most-replaced toilet part."],
+      ["toilet inlet valve", "Inlet (fill) valve", "Where the water pipe feeds in."],
+      ["toilet outlet valve", "Outlet (flush) valve", "The flush valve inside the cistern."],
+      ["flush button", "Flush button / plate", ""],
+    ],
+  },
 };
+
+const ALL_CATS = new Set();
+for (const g of Object.values(GROUPS)) for (const c of g.cats) ALL_CATS.add(c[0]);
 
 function shape(r) {
   return {
@@ -30,8 +84,19 @@ function shape(r) {
     fits: r.fits || "",
     photo: r.photo_url || "",
     buyUrl: r.buy_url || "",
+    exploded: r.exploded || "",
     confirm: !!r.confirm,
   };
+}
+
+async function countOf(sb, cat) {
+  const { count } = await sb
+    .from("products")
+    .select("id", { count: "exact", head: true })
+    .eq("category", cat)
+    .eq("active", true)
+    .not("photo_url", "is", null);
+  return count || 0;
 }
 
 export async function GET(request) {
@@ -40,34 +105,33 @@ export async function GET(request) {
 
   const url = new URL(request.url);
 
-  // ?counts=1 -> how many of each toilet category we actually hold, for the menu.
-  if (url.searchParams.get("counts") === "1") {
+  // ?groups=1 -> the whole menu, with live counts, so the app never shows a category we can't fill.
+  if (url.searchParams.get("groups") === "1") {
     const counts = {};
-    for (const c of CATS) {
-      const { count } = await sb
-        .from("products")
-        .select("id", { count: "exact", head: true })
-        .eq("category", c)
-        .eq("active", true)
-        .not("photo_url", "is", null);
-      counts[c] = count || 0;
-    }
-    return Response.json({ counts, labels: LABEL });
+    await Promise.all([...ALL_CATS].map(async (c) => { counts[c] = await countOf(sb, c); }));
+    const groups = Object.entries(GROUPS).map(([key, g]) => {
+      const cats = g.cats
+        .map(([cat, label, hint]) => ({ cat, label, hint, count: counts[cat] || 0 }))
+        .filter((c) => c.count > 0);
+      return { key, label: g.label, icon: g.icon, total: cats.reduce((a, c) => a + c.count, 0), cats };
+    }).filter((g) => g.total > 0);
+    return Response.json({ groups });
   }
 
   const cat = String(url.searchParams.get("category") || "").toLowerCase();
-  if (!CATS.includes(cat)) return Response.json({ error: "unknown category" }, { status: 400 });
+  if (!ALL_CATS.has(cat)) return Response.json({ error: "unknown category" }, { status: 400 });
 
   const brand = String(url.searchParams.get("brand") || "").trim();
 
   let q = sb
     .from("products")
-    .select("id,brand,model,category,part_no,size,fits,photo_url,buy_url,confirm")
+    .select("id,brand,model,category,part_no,size,fits,photo_url,buy_url,exploded,confirm")
     .eq("category", cat)
     .eq("active", true)
+    .not("photo_url", "is", null)
     .order("brand", { ascending: true })
     .order("model", { ascending: true })
-    .limit(400);
+    .limit(500);
   if (brand) q = q.eq("brand", brand);
 
   const { data, error } = await q;
@@ -82,5 +146,5 @@ export async function GET(request) {
     .map(([b, n]) => ({ brand: b, count: n }))
     .sort((a, b) => b.count - a.count || a.brand.localeCompare(b.brand));
 
-  return Response.json({ category: cat, label: LABEL[cat] || cat, items, brands });
+  return Response.json({ category: cat, items, brands });
 }
