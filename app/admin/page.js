@@ -11,9 +11,60 @@ export default function Admin() {
   const [added, setAdded] = useState([]);
   const [bfBusy, setBfBusy] = useState(false);
   const [bf, setBf] = useState(null);
-  const [rhBusy, setRhBusy] = useState(false);
-  const [rh, setRh] = useState(null);
+  const [bbBusy, setBbBusy] = useState(false);
+  const [bb, setBb] = useState(null);
   const set = (k) => (e) => setF({ ...f, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value });
+
+  // Some retailer CDNs (Mitre 10's, for one) serve a real browser but block our server's IP.
+  // Those images can never be fingerprinted the normal way. So: load the picture HERE, in the
+  // browser the CDN trusts, shrink it, and post the pixels to be fingerprinted.
+  async function toB64(url) {
+    const img = await new Promise((res) => {
+      const i = new Image();
+      i.crossOrigin = "anonymous";
+      i.onload = () => res(i);
+      i.onerror = () => res(null);
+      i.src = url;
+    });
+    if (!img || !img.naturalWidth) return null;
+    const side = Math.max(img.naturalWidth, img.naturalHeight);
+    const scale = Math.min(1, 512 / side);
+    const cv = document.createElement("canvas");
+    cv.width = Math.round(img.naturalWidth * scale);
+    cv.height = Math.round(img.naturalHeight * scale);
+    const cx = cv.getContext("2d");
+    cx.fillStyle = "#ffffff";
+    cx.fillRect(0, 0, cv.width, cv.height);
+    cx.drawImage(img, 0, 0, cv.width, cv.height);
+    try { return cv.toDataURL("image/jpeg", 0.9); } catch { return null; } // tainted canvas = no CORS
+  }
+
+  async function browserBackfill() {
+    if (!pw) { setBb({ err: "Enter the admin password first." }); return; }
+    setBbBusy(true); setBb(null);
+    try {
+      const lr = await fetch("/api/embed-image?list=1");
+      const lj = await lr.json();
+      const list = (lj && lj.items) || [];
+      if (!list.length) { setBb({ ok: "Nothing left — every photo has a fingerprint." }); setBbBusy(false); return; }
+      const items = [];
+      const failed = [];
+      for (const p of list) {
+        const d = await toB64(p.photo_url);
+        if (d) items.push({ id: p.id, data: d });
+        else failed.push(`${p.brand} ${p.model}`);
+      }
+      if (!items.length) {
+        setBb({ err: `Your browser couldn't load any of those ${list.length} images either — they may be genuinely gone.` });
+        setBbBusy(false); return;
+      }
+      const r = await fetch("/api/embed-image", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ password: pw, items }) });
+      const j = await r.json();
+      if (!r.ok) setBb({ err: j.error || "Failed" });
+      else setBb({ ok: `Fingerprinted ${j.embedded} image${j.embedded === 1 ? "" : "s"} through your browser. ${j.remaining} still without a fingerprint.`, failed });
+    } catch { setBb({ err: "Network error" }); }
+    setBbBusy(false);
+  }
 
   async function backfill() {
     if (!pw) { setBf({ err: "Enter the admin password first." }); return; }
@@ -25,20 +76,6 @@ export default function Admin() {
       else setBf({ ok: `Fingerprinted ${j.embedded} image${j.embedded === 1 ? "" : "s"}. ${j.remaining} still without a photo fingerprint.`, errors: (j.errors || []).length });
     } catch { setBf({ err: "Network error" }); }
     setBfBusy(false);
-  }
-
-  // Some suppliers block their images from loading on our site (hotlink protection), so the
-  // plumber sees a broken picture. This copies those images into our own storage for good.
-  async function rehost() {
-    if (!pw) { setRh({ err: "Enter the admin password first." }); return; }
-    setRhBusy(true); setRh(null);
-    try {
-      const r = await fetch("/api/rehost", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ password: pw }) });
-      const j = await r.json();
-      if (!r.ok) setRh({ err: j.error || "Failed" });
-      else setRh({ ok: `Re-hosted ${j.rehosted} image${j.rehosted === 1 ? "" : "s"} onto our own storage. ${j.remaining} still on the blocked host.` });
-    } catch { setRh({ err: "Network error" }); }
-    setRhBusy(false);
   }
 
   async function submit(e) {
@@ -88,9 +125,18 @@ export default function Admin() {
         <button type="button" className="btn" onClick={backfill} disabled={bfBusy} style={{ justifyContent: "center" }}>{bfBusy ? "Fingerprinting…" : "Fingerprint missing images"}</button>
         {bf && <div className={"aibar " + (bf.err ? "muted" : "")} style={{ marginTop: 12, color: bf.err ? "#b4413c" : undefined }}>{bf.err || bf.ok}{bf.errors ? ` (${bf.errors} couldn’t be fetched)` : ""}</div>}
 
-        <p className="sub" style={{ color: "#5b6875", marginTop: 20, fontSize: 14 }}>Some suppliers block their images from showing on our site, so customers see a broken picture. This copies those images into TapSnap&rsquo;s own storage so they always display.</p>
-        <button type="button" className="btn" onClick={rehost} disabled={rhBusy} style={{ justifyContent: "center" }}>{rhBusy ? "Copying…" : "Fix blocked images"}</button>
-        {rh && <div className={"aibar " + (rh.err ? "muted" : "")} style={{ marginTop: 12, color: rh.err ? "#b4413c" : undefined }}>{rh.err || rh.ok}</div>}
+        <p className="sub" style={{ color: "#5b6875", marginTop: 20, marginBottom: 6, fontSize: 14 }}>
+          Some retailers (Mitre 10 for one) serve pictures to a normal browser but block our server, so those
+          products can never be fingerprinted the usual way. This loads them here, in your browser, and sends
+          the pixels over. Use it for whatever the button above reports as &ldquo;couldn&rsquo;t be fetched&rdquo;.
+        </p>
+        <button type="button" className="btn" onClick={browserBackfill} disabled={bbBusy} style={{ justifyContent: "center" }}>{bbBusy ? "Fetching in your browser…" : "Fingerprint the blocked ones via my browser"}</button>
+        {bb && (
+          <div className={"aibar " + (bb.err ? "muted" : "")} style={{ marginTop: 12, color: bb.err ? "#b4413c" : undefined }}>
+            {bb.err || bb.ok}
+            {bb.failed && bb.failed.length ? <div style={{ marginTop: 6, fontSize: 13 }}>Your browser couldn&rsquo;t load: {bb.failed.join(", ")}</div> : null}
+          </div>
+        )}
       </div>
 
       {added.length > 0 && (
