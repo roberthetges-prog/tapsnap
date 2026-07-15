@@ -58,10 +58,17 @@ async function cropToBox(dataUrl, box) {
 }
 
 function inferType(ai) {
-  // What we hand the matcher to narrow on. It compares this against the catalogue category, so
-  // the best answer is the vision step's partType, which is drawn from those very categories -
-  // "toilet inlet valve" narrows straight to the inlet valves and nothing else.
+  // What we hand the matcher to narrow the search with.
+  //
+  // BE CAREFUL HERE. Narrowing on a guess is only safe when the guess is safe. We measured the
+  // vision step calling a textbook bottom-entry FILL valve - black cup float, threaded tail out
+  // the bottom - an "outlet valve", with high confidence. Had we narrowed on that, the correct
+  // part could not have appeared at all: a wrong label doesn't just mislead, it deletes the right
+  // answer from the pool. So for the two cistern valves we deliberately narrow only to the coarse
+  // "toilet" family and let the reranker - which sees the candidate photos side by side, and knows
+  // a float means inlet - make the call. Comparing pictures beats classifying one in isolation.
   const pt = String((ai && ai.partType) || "").toLowerCase().trim();
+  if (pt === "toilet inlet valve" || pt === "toilet outlet valve") return "toilet";
   if (pt) return pt;
   // Older/looser answers: fall back to the fixture. "basin" still narrows "basin mixer".
   const fx = String((ai && ai.fixture) || "").toLowerCase().trim();
