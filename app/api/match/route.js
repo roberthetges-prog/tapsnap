@@ -149,27 +149,23 @@ function narrowByFixture(cands, type) {
 
 // ---------- Claude vision rerank ----------
 const SYSTEM = [
-  "You are a New Zealand plumbing spare-parts visual-matching expert. You are shown ONE OR TWO CUSTOMER PHOTOS of the SAME item from different angles, then several numbered CATALOGUE photos of known products. The item may be a tap/mixer, a removed cartridge, a toilet cistern valve, a flush button, a seat, or a pressure/tempering valve.",
-  "Use every customer angle together - one angle may hide what the other reveals. Ignore finish, colour, background, lighting.",
+  "You are a New Zealand plumbing spare-parts visual-matching expert. You are shown ONE OR MORE CUSTOMER VIEWS of the SAME item, then several numbered CATALOGUE photos of known products. The item may be a tap/mixer, a cartridge, a toilet cistern valve, a flush button, a seat, or a pressure valve. Ignore finish, colour, background, lighting.",
   "",
-  "FIRST, DECIDE WHAT FAMILY THE CUSTOMER'S ITEM IS IN, and never match across families. A tap is not a cistern valve. An inlet valve is not an outlet valve. A candidate from the wrong family must score below 20 and same=false, however similar the plastic or metal looks.",
+  "NEVER MATCH ACROSS FAMILIES. A tap is not a cistern valve. An inlet (fill) valve - threaded tail, and a FLOAT - is not an outlet (flush) valve - a tower with a big seal and an overflow tube, no float. A candidate from the wrong family scores below 20 and same=false, however similar the metal or plastic looks.",
   "",
-  "IF IT IS A TAP / MIXER - FIXTURE TYPE COMES FIRST. Within a range the manufacturer sells a BASIN mixer and a SHOWER mixer as a matched pair: identical handle, near-identical faceplate. They are DIFFERENT products and must never be matched to each other.",
+  "IF IT IS A TAP / MIXER - WHAT ACTUALLY DECIDES IT. A working plumber's rule, and it is correct: THE SPOUT TELLS YOU ALMOST NOTHING. A long low chrome arc is common to a dozen brands buying the same casting. What gives a tap away is THE HANDLE, AND THE TRANSITION FROM BODY TO HANDLE. Judge these FIRST, and weight them ABOVE everything else:",
+  "  1. The lever outline - flat paddle vs rounded pin vs angular blade vs wing; does it sweep up, sit flat, or droop; its length against the body width; is the tip square, rounded or tapered.",
+  "  2. HOW THE LEVER MEETS THE BODY - the single most telling detail. Does the lever sit ON TOP of a collar, or CLAMP AROUND it? Is the junction a hard STEP, a gentle TAPER, or a smooth BLEND with no seam? Is there a visible grub screw, chrome ring or shoulder?",
+  "  3. The body under the lever - short and fat or tall and slim; straight-sided, waisted or tapered; how the base flare meets the bench.",
+  "Only after those, and with much less weight: spout arc, reach and cross-section. Two taps with the SAME spout but a different lever join are DIFFERENT taps. Two taps with different spouts but an identical lever and join are very likely the same range.",
+  "If a CLOSE-UP of the handle join is given as a second view, it is the most important picture in front of you.",
+  "",
+  "FIXTURE TYPE ALSO COMES FIRST. Within a range the manufacturer sells a BASIN mixer and a SHOWER mixer as a matched pair: identical handle, near-identical faceplate. They are DIFFERENT products and must never be matched to each other.",
   "- BASIN mixer: stands on the basin/vanity WITH A SPOUT that water pours from.",
   "- SHOWER mixer: mounted IN THE WALL - faceplate and handle, NO spout.",
   "- SINK/kitchen mixer: tall or gooseneck spout, often a pull-out spray.",
   "- BATH mixer: spout over a bath.",
   "A candidate whose FIXTURE differs from the customer photo must score below 30 and same=false, however alike the handle looks.",
-  "Judge: overall silhouette and proportions; spout shape and cross-section; handle/lever shape, size and where it joins the body; the base/escutcheon; mount type.",
-  "",
-  "IF IT IS A TOILET CISTERN PART, the two valves in a cistern are utterly different jobs and must never be matched to each other:",
-  "- INLET (fill) valve: has a threaded tail for the water pipe and usually a FLOAT (a cup on the shaft, or a ball on an arm). Let water IN.",
-  "- OUTLET (flush) valve: a tower over the hole in the cistern floor, big rubber seal at its base, usually an overflow tube. No float, no water connection. Lets water OUT.",
-  "Judge an inlet valve on: float style (cup vs ball-on-arm); where the tail leaves the body (bottom vs side/top); overall height; the shut-off mechanism on top.",
-  "Judge an outlet valve on: tower shape and height; single vs dual flush; push-rod vs cable vs lever operation; the seal diameter; whether an overflow tube is integral.",
-  "Judge a flush button on: round vs square vs rectangular; one button or two; raised/care button vs flush-fitting; the plate shape around it.",
-  "Judge a seat on: the pan shape it follows (D-shape, square, round/oval); slim vs wrap-over; hinge type.",
-  "Most cistern valves are unbranded white plastic and genuinely look alike. If they do, say so - see HONEST CONFIDENCE below.",
   "",
   "CRITICAL - HONEST CONFIDENCE. Being confidently wrong destroys this product. Most single-lever mixers, and most white plastic cistern valves, genuinely look alike; that is a FACT about plumbing hardware, not a failure of your eyesight.",
   "- AT MOST ONE candidate may have same=true. Never two.",
@@ -177,7 +173,7 @@ const SYSTEM = [
   "- If several candidates are equally plausible generic cylindrical mixers, set same=false for ALL of them. That is the correct and useful answer.",
   "- score is visual-design similarity 0-100. Do NOT compress everything into 80-95. If you cannot tell candidates apart they should sit at the SAME score, and none should be above 75.",
   "",
-  "DISCRIMINATING QUESTION. If no candidate earns same=true, look at your top 3 and find the ONE physical feature that separates them - something the customer can check by walking over and looking at the actual item. For a tap: spout cross-section round vs square; lever flat paddle vs round pin; base round vs square; a brand name on the body. For a cistern valve: does the water pipe enter at the bottom or the side; is the float a cup on the shaft or a ball on an arm; is it worked by a push rod or a cable; is there a name moulded into the plastic. Return it as question with 2-4 options; each option maps to the candidate ids it points to.",
+  "DISCRIMINATING QUESTION. If no candidate earns same=true, look at your top 3 and find the ONE physical feature that separates them - something the customer can check by walking to the tap and looking at it (spout cross-section round vs square; lever flat paddle vs round pin; base round vs square; body straight vs tapered; a brand name visible on the body or under the spout). Return it as question with 2-4 options; each option maps to the candidate ids it points to.",
   "",
   'Return STRICT JSON only: {"ranked":[{"id":<number>,"score":<0-100>,"same":<true|false>,"reason":"<max 10 words>"}],"question":"<question or empty>","options":[{"label":"<what they would see>","ids":[<ids>]}]}',
   "Include every candidate id (1..N) once, sorted by score descending.",
@@ -197,7 +193,15 @@ async function toInline(photo) {
 async function visionCall(key, shots, prepared) {
   const content = [];
   shots.forEach((s, i) => {
-    content.push({ type: "text", text: shots.length > 1 ? "CUSTOMER PHOTO - angle " + (i + 1) + " of " + shots.length + " (same tap):" : "CUSTOMER PHOTO (the tap to identify):" });
+    // View 1 is the whole item; view 2, when present, is a tight crop of the handle/body join.
+    // Labelling that "another angle" invites the model to treat it as a duplicate rather than
+    // as the detail that settles the answer.
+    const label = shots.length > 1
+      ? (i === 0
+          ? "CUSTOMER VIEW 1 of " + shots.length + " - the whole item:"
+          : "CUSTOMER VIEW " + (i + 1) + " of " + shots.length + " - CLOSE-UP OF THE HANDLE AND WHERE IT MEETS THE BODY. This is the deciding detail: weight it heaviest.")
+      : "CUSTOMER PHOTO (the item to identify):";
+    content.push({ type: "text", text: label });
     content.push({ type: "image", source: { type: "base64", media_type: s.mediaType || "image/jpeg", data: s.data } });
   });
   prepared.forEach((c, i) => {
