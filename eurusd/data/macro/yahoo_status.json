@@ -1,0 +1,1 @@
+{"_note": "all symbols FAILED: HTTP 429 Edge: Too Many Requests from query1/query2.finance.yahoo.com, 2026-11-10 17:55-19:10 UTC; rerun macro_fetch.py yahoo"}

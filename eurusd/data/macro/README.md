@@ -143,4 +143,9 @@ No official US CPI/NFP list before 2010 was reachable; bls.gov and bea.gov are b
 * The `datasets/employment-us`, `gdp-us`, `investor-flow-of-funds-us` repos are stale (2018-2025) and were not kept.
 
 ## Yahoo status at build time
-(filled in by the final run; also machine-readable in `yahoo_status.json`)
+**No Yahoo files were obtained.** Every request (both query1 and query2, default Python client, no UA spoofing)
+received HTTP 429 "Edge: Too Many Requests" continuously from 17:55 to 19:10 UTC on 2026-11-10 (probed every 90 s).
+The code path is complete and tested only up to the HTTP layer; re-run `python -I eurusd/src/eurusd/macro_fetch.py yahoo`
+later (expect ~27 requests; it writes `yahoo_status.json`). Until then the substitutes are: ^IRX/^FVX/^TNX/^TYX ->
+`fred_DGS2/DGS10/DGS30`, `fred_T10Y3M`; DX-Y.NYB -> `fred_DTWEXBGS` (broad index, not DXY); ^VIX -> `fred_VIXCLS`;
+^GSPC -> `fred_SP500` (10y); CL=F -> `datahub_wti_daily`; GC=F -> `datahub_gold_monthly`; EUR crosses -> `datahub_fx_fed_h10_daily`.
