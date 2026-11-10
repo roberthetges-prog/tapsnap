@@ -402,7 +402,9 @@ def build_cftc() -> None:
             "Other_Rept_Positions_Long_All": "other_rept_long", "Other_Rept_Positions_Short_All": "other_rept_short",
             "NonRept_Positions_Long_All": "nonrept_long", "NonRept_Positions_Short_All": "nonrept_short",
             "Traders_Tot_All": "traders_total"}
-    out = pd.DataFrame({"report_date": pd.to_datetime(t["Report_Date_as_YYYY-MM-DD"]).dt.strftime("%Y-%m-%d")})
+    # 2010-2012 files name the column Report_Date_as_MM_DD_YYYY but still hold YYYY-MM-DD values
+    rd = t["Report_Date_as_YYYY-MM-DD"].combine_first(t["Report_Date_as_MM_DD_YYYY"]) if "Report_Date_as_MM_DD_YYYY" in t else t["Report_Date_as_YYYY-MM-DD"]
+    out = pd.DataFrame({"report_date": pd.to_datetime(rd.str.strip(), format="%Y-%m-%d").dt.strftime("%Y-%m-%d")})
     for a, b in cols.items():
         out[b] = _num(t[a])
     for g in ["dealer", "asset_mgr", "lev_funds", "other_rept", "nonrept"]:
