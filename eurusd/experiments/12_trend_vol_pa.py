@@ -4,16 +4,14 @@ survival rules from eurusd.evaluate.  HOLDOUT is never touched.
 Usage:  python experiments/12_trend_vol_pa.py [--part NAME] [family ...]
         python experiments/12_trend_vol_pa.py --merge            (merge part CSVs into trend_vol_pa.csv)
 
-Extra care for limit-entry strategies (P07, P09, P10, P11, P01 'half'): the engine fills a limit and
-allows a take-profit on the same bar even when the bar opened beyond the limit, which is optimistic.
-Those trades are re-resolved with M1 data (`fix_limit_entries`): the first minute touching the limit is
-the fill; TP counts only if touched in a later minute before the stop; otherwise the trade is closed at
-the bar's close.  Statistics are recomputed after the fix.
+Limit-entry strategies (P07, P09, P10, P11, P01 'half') are run with ltf=M1 so the engine resolves the
+fill/target order inside the entry bar with minute data (the engine denies a same-bar target for limit fills
+otherwise).  All other families use the engine's default pessimistic same-bar resolution.
 """
 import sys, json, math, time, argparse, copy
 sys.path.insert(0, "/home/user/tapsnap/eurusd/src")
 import numpy as np, pandas as pd
-from eurusd.backtest import CostModel, BacktestResult, bootstrap_pvalue, PIP
+from eurusd.backtest import CostModel
 from eurusd.evaluate import run_one, grid, neighbourhood_ok, verdict, RESULTS_DIR
 from eurusd.data import load_ohlc
 import eurusd.strategies_trend_pa as S  # registers strategies
@@ -32,84 +30,15 @@ def tf(name):
 
 def m1():
     if "m1" not in M1:
-        m = load_ohlc("M1")[["high", "low"]]
-        M1["m1"] = m
+        M1["m1"] = load_ohlc("M1")[["high", "low"]]
     return M1["m1"]
 
 
 LIMIT_FAMILIES = {"harmonic", "supply_demand", "order_block", "fvg_retrace", "pin_bar"}
 
 
-def fix_limit_entries(res: BacktestResult, df: pd.DataFrame, cost: CostModel) -> tuple[BacktestResult, int]:
-    """Re-resolve same-bar limit-fill + TP trades with M1 data (see module docstring)."""
-    if res.tdf.empty:
-        return res, 0
-    o = df["open"].values
-    c = df["close"].values
-    idx = df.index
-    spread = cost.spread_pips * PIP
-    slip = cost.slippage_pips * PIP
-    n_fixed = 0
-    trades = res.trades
-    for t in trades:
-        if t.reason != "tp" or t.entry_i != t.exit_i:
-            continue
-        m = t.entry_i
-        if t.side > 0:
-            if not (t.entry < o[m] + spread - 1e-12):
-                continue  # filled at the open: TP after the fill is certain
-            limit = t.entry
-        else:
-            if not (t.entry > o[m] + 1e-12):
-                continue
-            limit = t.entry
-        n_fixed += 1
-        t1 = idx[m + 1] if m + 1 < len(idx) else idx[m] + (idx[m] - idx[m - 1])
-        seg = m1().loc[idx[m]:t1 - pd.Timedelta(seconds=1)]
-        hi, lo = seg["high"].values, seg["low"].values
-        if t.side > 0:
-            touch = np.flatnonzero(lo + spread <= limit)
-        else:
-            touch = np.flatnonzero(hi >= limit)
-        new_exit, reason = None, None
-        if len(touch):
-            k = touch[0]
-            if t.side > 0:
-                tp_hit = np.flatnonzero(hi[k + 1:] >= t.tp)
-                sl_hit = np.flatnonzero(lo[k + 1:] <= t.sl) if not math.isnan(t.sl) else np.array([])
-            else:
-                tp_hit = np.flatnonzero(lo[k + 1:] + spread <= t.tp)
-                sl_hit = np.flatnonzero(hi[k + 1:] + spread >= t.sl) if not math.isnan(t.sl) else np.array([])
-            i_tp = tp_hit[0] if len(tp_hit) else 10**9
-            i_sl = sl_hit[0] if len(sl_hit) else 10**9
-            if i_tp < i_sl:
-                continue  # TP genuinely after the fill: keep
-            if i_sl < 10**9:
-                new_exit, reason = (t.sl - slip if t.side > 0 else t.sl + slip), "sl"
-        if new_exit is None:
-            new_exit, reason = (c[m] if t.side > 0 else c[m] + spread), "time"
-        t.exit = new_exit
-        t.reason = reason
-        pnl = (t.exit - t.entry) * t.side
-        t.pips = pnl / PIP
-        risk = abs(t.entry - t.sl) if not math.isnan(t.sl) else math.nan
-        t.r = pnl / risk if risk and risk > 0 else math.nan
-    return BacktestResult(trades, df), n_fixed
-
-
-def evaluate(df, strat, params, period, fix_limits=False):
-    s, res = run_one(df, strat, params, period, COST)
-    n_fixed = 0
-    if fix_limits and s.get("trades", 0):
-        res, n_fixed = fix_limit_entries(res, res.df, COST)
-        s2 = res.summary()
-        s2.update({"strategy": strat, "period": period, "params": json.dumps(params, default=str)})
-        by = res.by_year()
-        s2["years_positive"] = float((by["sum_r"] > 0).mean())
-        s2["p_boot"] = bootstrap_pvalue(res.tdf["r"].values, n_boot=500)
-        s = s2
-    s["n_limit_fixed"] = n_fixed
-    return s, res
+def evaluate(df, strat, params, period, use_m1=False):
+    return run_one(df, strat, params, period, COST, ltf=m1() if use_m1 else None)
 
 
 # --------------------------------------------------------------------------- families
@@ -183,6 +112,10 @@ FAMILIES = {
     "p12_wyckoff_h4": ("P12", "wyckoff_spring", "H4", dict(max_range_atr=[3.0, 5.0], reclaim_bars=[1, 3], tp_mode=["range", "rr"])),
 }
 
+def clean_params(p):
+    return {k: (v if not (isinstance(v, float) and math.isnan(v)) else NAN) for k, v in p.items()}
+
+
 # ---- phase 2: filters (T06, V02, V03, V04) on fixed host presets (chosen from phase-1 TRAIN results)
 HOSTS = {
     "turtle_d1": ("D1", "turtle", dict(entry_n=20, exit_n=10, atr_n=20, sl_atr=2.0)),
@@ -194,7 +127,13 @@ HOSTS = {
     "nr7_d1": ("D1", "nr_breakout", dict(pattern="nr7", exit="day_close", hold_bars=3)),
     "insidebar_d1": ("D1", "inside_bar_breakout", dict(sl_mode="inside", rr=2.0, tp_mode="rr", hold_bars=5, expiry_bars=1)),
     "lw_d1": ("D1", "lw_vol_breakout", dict(k=0.5, range_lookback=1, sl_mult=2.0, tp_mult=2.0)),
+    "squeeze_h1": ("H1", "ttm_squeeze", None),  # filled from the phase-1 TRAIN best (the best trend entry found)
 }
+try:
+    _sq = pd.read_csv(RESULTS_DIR / "trend_vol_pa_part_a.csv").set_index("family").loc["t08_squeeze_h1", "params"]
+    HOSTS["squeeze_h1"] = ("H1", "ttm_squeeze", clean_params(json.loads(_sq)))
+except Exception:
+    HOSTS["squeeze_h1"] = ("H1", "ttm_squeeze", dict(direction="mom", sl_mode="atr", tp_atr=3.0, max_hold=60))
 
 
 def filter_family(cid, name, hosts, filt, extra):
@@ -208,11 +147,11 @@ def filter_family(cid, name, hosts, filt, extra):
     return out
 
 
-FAMILIES.update(filter_family("T06", "t06_adx", ["turtle_d1", "turtle_h4", "emapb_h4", "supertrend_h4", "macdrsi_h1"], "adx",
+FAMILIES.update(filter_family("T06", "t06_adx", ["turtle_d1", "turtle_h4", "emapb_h4", "supertrend_h4", "macdrsi_h1", "squeeze_h1"], "adx",
                               dict(adx_thr=[20, 25, 30], di_agree=[True])))
 FAMILIES.update(filter_family("V02", "v02_vol", ["insidebar_d1", "nr7_d1", "lw_d1", "turtle_d1"], "vol",
                               dict(mode=["contraction", "expansion"], ratio=[0.8, 1.2])))
-FAMILIES.update(filter_family("V03", "v03_garch", ["turtle_d1", "ichimoku_d1", "emapb_h4", "supertrend_h4"], "garch",
+FAMILIES.update(filter_family("V03", "v03_garch", ["turtle_d1", "ichimoku_d1", "emapb_h4", "supertrend_h4", "squeeze_h1"], "garch",
                               dict(regime_keep=[(1,), (0, 1), (1, 2), (0,), (2,)])))
 FAMILIES.update(filter_family("V04", "v04_vix", ["turtle_d1", "ichimoku_d1", "nr7_d1", "insidebar_d1"], "vix",
                               dict(vix_mode=["low", "mid", "high", "notstress"], vix_lo=[15.0], vix_hi=[30.0])))
@@ -220,14 +159,10 @@ FAMILIES.update(filter_family("V04", "v04_vix", ["turtle_d1", "ichimoku_d1", "nr
 PHASE2 = [f for f in FAMILIES if f.startswith(("t06_", "v02_", "v03_", "v04_"))]
 
 
-def clean_params(p):
-    return {k: (v if not (isinstance(v, float) and math.isnan(v)) else NAN) for k, v in p.items()}
-
-
 def run_family(fam, log):
     cid, strat, tfname, g = FAMILIES[fam]
     df = tf(tfname)
-    fix = strat in LIMIT_FAMILIES
+    fix = strat in LIMIT_FAMILIES  # -> ltf=M1
     t0 = time.time()
     rows = []
     combos = grid(g)
@@ -266,7 +201,7 @@ def run_family(fam, log):
                val_pf=val.get("profit_factor", NAN) if has_r else val.get("profit_factor_pips", NAN),
                val_t=val.get("t_stat", NAN) if has_r else val.get("t_stat_pips", NAN),
                val_years_pos=val.get("years_positive", NAN), val_sl_rate=val.get("sl_rate", NAN),
-               n_limit_fixed=int(best.get("n_limit_fixed", 0)) + int(val.get("n_limit_fixed", 0)),
+               engine="fixed_4fe754c",
                survives=ok, reason=why, secs=round(time.time() - t0))
     print(json.dumps(row, default=str), file=log, flush=True)
     # sanity sample of validate trades

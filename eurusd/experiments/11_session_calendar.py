@@ -3,6 +3,8 @@ S01-S19, B01, C01-C06, Q04): grid on TRAIN, chosen parameters once on VALIDATE, 
 HOLDOUT is never touched.  Usage:
     python experiments/11_session_calendar.py [family ...]        # default: all families
     python experiments/11_session_calendar.py analysis            # S12 ratio buckets + C02 hour statistics
+    python experiments/11_session_calendar.py report              # merge CSVs, write reports/catalogue_session_calendar.md
+Parallel runs: SC_OUT=session_calendar_A.csv python ... (one output file per process, merged by `report`).
 Results: experiments/results/session_calendar.csv (one row per family), per-grid CSVs in results/.
 """
 import sys, json, math, time
@@ -265,10 +267,107 @@ def analysis():
     print(pd.DataFrame(out).pivot(index="hour_et", columns="period", values=["p_high", "p_low"]).round(3).to_string())
 
 
+def _fmt(x, n=2):
+    return "" if pd.isna(x) else f"{x:.{n}f}"
+
+
+def _stats(r, p):
+    if pd.isna(r.get(f"{p}_trades")) or r.get(f"{p}_trades", 0) == 0:
+        return "no trades"
+    u = r.get("unit", "R")
+    return (f"n={int(r[f'{p}_trades'])}, wr={_fmt(r[f'{p}_wr'])}, avg={_fmt(r[f'{p}_avg'], 3)}{u}, PF={_fmt(r[f'{p}_pf'])}, "
+            f"t={_fmt(r[f'{p}_t'])}, yrs+={_fmt(r[f'{p}_years_pos'])}")
+
+
+def report():
+    """Merge the per-process CSVs into session_calendar.csv and write reports/catalogue_session_calendar.md."""
+    parts = [pd.read_csv(RESULTS_DIR / f) for f in ("session_calendar.csv", "session_calendar_A.csv", "session_calendar_B.csv")
+             if (RESULTS_DIR / f).exists()]  # per-process files are newer than the merged file
+    df = pd.concat(parts).drop_duplicates("family", keep="last")
+    df.to_csv(RESULTS_DIR / "session_calendar.csv", index=False)
+    order = {k: i for i, k in enumerate(["S%02d" % i for i in range(1, 20)] + ["B01"] + ["C%02d" % i for i in range(1, 7)] + ["Q04"])}
+    df["o"] = df["id"].map(order)
+    df = df.sort_values(["o", "family"])
+    L = ["# Catalogue test: session / time-of-day, microstructure and calendar entries", "",
+         "Scope: research/strategies.json ids S01-S19, B01, C01-C06, Q04, Q07, Q08 (C07-C10 need event data, left to another agent).",
+         "Engine: `eurusd.backtest` (bid data, 1.0 pip spread + 0.2 pip slippage per fill, pessimistic SL-first inside a bar).",
+         "Protocol: grid on TRAIN 2003-2015 (best point = avg x sqrt(n) among points with enough trades), the chosen point run once on",
+         "VALIDATE 2016-2022; HOLDOUT 2023+ never touched. Survival: val avg > 0, t >= 2, PF >= 1.15, >= 60 % years positive, >= 30",
+         "trades, parameter neighbourhood positive on TRAIN. `R` = profit / initial stop; families without a stop are judged in pips.",
+         "Code: `src/eurusd/strategies_session.py`; driver `experiments/11_session_calendar.py`; rows `experiments/results/session_calendar.csv`;",
+         "per-grid CSVs `experiments/results/*_sc_<family>_train.csv`; S12 buckets `session_calendar_s12_buckets.csv`; C02 `session_calendar_c02_hours.csv`.",
+         "", "Local-time rules use `tz_convert` (Europe/London, America/New_York, Europe/Berlin); the per-trade timestamps were checked by",
+         "hand (e.g. S18 enters 07:00 London = 02:00 ET in winter / 03:00 ET in summer; S15 fires 15:00 London in GMT and BST).",
+         "ICT entries (S07-S10, S19), S04-S06 and S11 are mechanical RECONSTRUCTIONS of discretionary rules (the docstrings say exactly what).",
+         "", "Engine version: all market- and limit-entry families (every family except S02_m15, S12_hostA, S12_hostB, S13_m15, B01_m15,",
+         "which use stop entries only and are unaffected) were re-run on the fixed engine of commit 4fe754c (no same-bar target for limit",
+         "fills without M1 proof; market/stop fills may take profit on the entry bar when the stop is not touched).",
+         "", "## Summary", "",
+         f"* {df['id'].nunique()} catalogue ids implemented in {len(df)} families; **none survives validation**.",
+         "* Not implementable: Q07 (evidence base, not a strategy), Q08 (GitHub repo inaccessible from this session), S15's equity-rebalancing",
+         "  sign (needs MSCI US/Europe monthly returns - Yahoo is rate-limited here; only the price-only month-end variant was tested),",
+         "  C02 (a filter, statistic reproduced below, no stand-alone trade).",
+         "* Near-miss: S18_nostop (short EUR/USD 07:00-13:00 London, no stop): val +1.46 pips/day, t 2.05, PF 1.14, 7/7 years positive -",
+         "  fails only PF >= 1.15; the 0.3-0.5 ADR stop versions and the long US-hours leg are negative on validation (confirms the lead's H01).",
+         "* S12 (Asian range width / ADR as breakout filter): on TRAIN the lead's ARB host is best for ratio < 0.4 (avg +0.06R, t 1.8) and the",
+         "  0.4-0.6 bucket is negative, but the filtered breakout is flat on VALIDATE (avg -0.006R, t -0.1). The fade leg (Judas, ratio >= 0.6)",
+         "  is +0.23R on train in the 0.6-0.8 bucket (n=161) and -0.17R on validate. The width filter does not rescue the London breakout.",
+         "* S04/S07 (sweep-and-reverse mirror image): S07 with the 'contra prior-day' bias and TP = opposite side if >= 2R is +0.11-0.14R on",
+         "  TRAIN (t 1.2-1.5, n ~420) and -0.10R on VALIDATE; the H1 Frankfurt trap (S04) is negative in both periods. The mirror image of the",
+         "  breakout loses too: early-London false breaks are not systematically reversed after costs.",
+         "* The Backtrex S01 settings exactly (SL 35 / TP 70 pips, 07-10 UTC entry, flat 12 UTC) give avg -0.026R, PF 0.93, t -1.6 on TRAIN -",
+         "  consistent with the vendor's PF 0.87.",
+         "", "## Results (one row per family; several families per catalogue id where the catalogue gives variants)", "",
+         "| id | family | tf | implemented rules | train best params | TRAIN | VALIDATE | verdict |", "|---|---|---|---|---|---|---|---|"]
+    for _, r in df.iterrows():
+        try:
+            p = json.loads(r["params"]) if isinstance(r["params"], str) else {}
+        except Exception:
+            p = {}
+        p = {k: v for k, v in p.items() if not (isinstance(v, float) and math.isnan(v))}
+        ps = ", ".join(f"{k}={v}" for k, v in p.items())
+        v = "**SURVIVES**" if r.get("survives") else "fails"
+        L.append(f"| {r['id']} | {r['family']} | {r['tf']} | {r['desc']} | {ps} | {_stats(r, 'train')} | {_stats(r, 'val')} | {v}: {r['reason']} |")
+    L += ["", "Notes: `tp_val=70` with `tp_mode=rr` (S01) is effectively 'no target' (time exit). Stop/limit OCO pairs are resolved on the",
+          "bars (the side that triggers first is the one placed), so the breakout rows are not biased toward the long side.", ""]
+    nb = RESULTS_DIR / "session_calendar_s12_buckets.csv"
+    if nb.exists():
+        b = pd.read_csv(nb)
+        L += ["## S12: expectancy by Asian-range / ADR(14) bucket (TRAIN only)", "",
+              "| host | bucket | n | win rate | avg R | PF | t | years+ |", "|---|---|---|---|---|---|---|---|"]
+        for _, r in b.iterrows():
+            L.append(f"| {r['host']} | {r['bucket']} | {int(r['trades'])} | {_fmt(r['win_rate'])} | {_fmt(r['avg_r'], 3)} | {_fmt(r['pf'])} | {_fmt(r['t'])} | {_fmt(r['years_pos'])} |")
+        L.append("")
+    nc = RESULTS_DIR / "session_calendar_c02_hours.csv"
+    if nc.exists():
+        c = pd.read_csv(nc)
+        pv = c.pivot(index="hour_et", columns="period", values=["p_high", "p_low"])
+        L += ["## C02: share of NY-close days whose high / low is set in each ET hour (random = 0.042)", "",
+              "| hour ET | P(high) train | P(high) validate | P(low) train | P(low) validate |", "|---|---|---|---|---|"]
+        for hr, r in pv.iterrows():
+            L.append(f"| {hr:02d} | {_fmt(r[('p_high', 'train')], 3)} | {_fmt(r[('p_high', 'validate')], 3)} | {_fmt(r[('p_low', 'train')], 3)} | {_fmt(r[('p_low', 'validate')], 3)} |")
+        L += ["", "The DailyFX pattern is reproduced: the 08-11 ET block sets the daily extreme ~7-9 % per hour (random 4.2 %), the 02-04 ET",
+              "(European open) block 5-6 %, and 17 ET (NY close / Asian open) 4-9 %; 22-01 ET almost never. It is a stop-placement / filter",
+              "fact, not a trade.", ""]
+    L += ["## Not implementable / not tested", "",
+          "| id | reason |", "|---|---|",
+          "| S15 (signal) | needs MSCI US vs Europe monthly returns (no equity index data in data/macro; Yahoo returns HTTP 429 here); price-only variant tested above |",
+          "| C02 | filter / statistic only (reproduced above) |",
+          "| Q07 | academic evidence base for M03/M04 (1-min mean reversion), not a strategy |",
+          "| Q08 | GitHub repository not reachable from this session (gh api 403); no rules in the catalogue to reconstruct |",
+          "| C07-C10 | out of scope (event data being collected by another agent) |", ""]
+    out = "/home/user/tapsnap/eurusd/reports/catalogue_session_calendar.md"
+    open(out, "w").write("\n".join(L))
+    print("wrote", out, len(df), "rows")
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     if args == ["analysis"]:
         analysis()
+        sys.exit(0)
+    if args == ["report"]:
+        report()
         sys.exit(0)
     fams = args or list(FAMILIES)
     rows = []
