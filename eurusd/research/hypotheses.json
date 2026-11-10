@@ -1,0 +1,513 @@
+[
+  {
+    "id": "H01",
+    "name": "Local-hours EUR depreciation: short EUR/USD in European hours",
+    "source": "Breedon & Ranaldo (2013) JMCB 45(5); Ranaldo (2009) JBF 33(12)",
+    "exact_definition": "Timeframe: hourly. Each weekday sell EUR/USD at the 08:00 GMT bar open and buy back at the 14:00 GMT bar open (approx. 03:00-09:00 ET, the window described for the paper's EUR/USD strategy). No stop/target; flat outside the window. Skip FOMC/ECB days and US/EU holidays in a robustness variant.",
+    "expected_effect": "Positive gross return; paper reports EUR/USD the only pair profitable net of bid-ask (1997-2007). bp/day not reported.",
+    "expected_sign": "EUR/USD down during 08:00-14:00 GMT",
+    "data_needed": "EUR/USD hourly OHLC (bid/ask or spread estimate), holiday calendar",
+    "caveats": "Last published sample ends May 2007; windows are a secondary description, re-optimise window boundaries out-of-sample only; costs dominate for non-ECN execution."
+  },
+  {
+    "id": "H02",
+    "name": "Local-hours USD depreciation: long EUR/USD in US hours",
+    "source": "Breedon & Ranaldo (2013); Cornett, Schwarz & Szakmary (1995) JBF",
+    "exact_definition": "Timeframe: hourly. Buy EUR/USD at 16:00 GMT bar open, sell at 20:00 GMT bar open (approx. 11:00-15:00 ET) each weekday. No stop/target.",
+    "expected_effect": "Positive; magnitude not reported. Cornett et al. report foreign currencies appreciate significantly during US hours (1977-1991 futures).",
+    "expected_sign": "EUR/USD up during 16:00-20:00 GMT",
+    "data_needed": "EUR/USD hourly OHLC",
+    "caveats": "Overlaps the post-London-fix bounce (H04), so attribute carefully; Breedon & Ranaldo find no significant pattern in foreign hours in one specification."
+  },
+  {
+    "id": "H03",
+    "name": "Pre-London-fix USD strength",
+    "source": "Krohn, Mueller & Whelan (2024) J. Finance 79(1); Evans (2018) JBF",
+    "exact_definition": "Timeframe: 5-minute. Sell EUR/USD at 15:00 London local time, cover at 16:00 London (the WMR fix). No stop/target. Variant: 15:30-16:00.",
+    "expected_effect": "USD appreciates gradually ahead of the fix across 9 currencies (magnitude not reported in sources reached).",
+    "expected_sign": "EUR/USD down 15:00-16:00 London",
+    "data_needed": "EUR/USD 5-min OHLC with London-time stamps (BST/GMT aware)",
+    "caveats": "Evans: intra-month moves not economically exploitable after costs; FCA says reversals faded after 2015 window widening."
+  },
+  {
+    "id": "H04",
+    "name": "Post-London-fix reversal (long EUR/USD after 16:00)",
+    "source": "Krohn, Mueller & Whelan (2024); Evans (2018): ~2 bp reversal in first minute, ~5 bp by 16:15",
+    "exact_definition": "Timeframe: 1-minute. Buy EUR/USD at 16:00:00 London, sell at 16:15:00 London. Variant: hold to 17:00. No stop.",
+    "expected_effect": "~+5 bp average over 15 min (Evans, all days pooled, likely less now); larger at month-end.",
+    "expected_sign": "EUR/USD up 16:00-16:15 London",
+    "data_needed": "EUR/USD 1-min OHLC with bid/ask",
+    "caveats": "5 bp is at or below retail round-trip cost; only viable with sub-pip spreads. Post-2015 decay documented by FCA OP46."
+  },
+  {
+    "id": "H05",
+    "name": "Month-end fix spike-and-reversal",
+    "source": "Evans (2018); Marsh, Panagiotou & Payne (2017): +/-15 bp month-end vs +/-7 bp intra-month relative to 15:45",
+    "exact_definition": "Timeframe: 1-minute, last London business day of each month only. Measure r = log(P16:00 / P15:45). At 16:00 take a position opposite to sign(r) with size proportional to |r|; exit at 16:15 (variant 16:30). Also test the pre-fix leg: enter at 15:45 in the direction of the 15:00-15:45 move, exit at 16:00.",
+    "expected_effect": "Reversal of a meaningful fraction of a ~15 bp average absolute pre-fix move; strong negative serial correlation on last trading day.",
+    "expected_sign": "Negative autocorrelation between 15:45-16:00 and 16:00-16:15 returns at month-end",
+    "data_needed": "EUR/USD 1-min OHLC, month-end calendar (London business days)",
+    "caveats": "Only ~12 events/year -> low power; effect size post-2015 unknown; quarter-ends may differ."
+  },
+  {
+    "id": "H06",
+    "name": "Pre-ECB-fix (14:15 CET) USD strength and reversal",
+    "source": "Krohn, Mueller & Whelan (2024)",
+    "exact_definition": "Timeframe: 5-minute. Sell EUR/USD at 13:45 CET, cover at 14:15 CET; then buy at 14:15 CET, sell at 14:45 CET. No stop/target.",
+    "expected_effect": "Part of the documented W-shaped intraday USD pattern; magnitude not reported.",
+    "expected_sign": "EUR/USD down into 14:15 CET, up after",
+    "data_needed": "EUR/USD 5-min OHLC with CET stamps",
+    "caveats": "Window is partly inside European hours (H01) and may overlap US data releases at 14:30 CET (08:30 ET) - exclude release days in a variant."
+  },
+  {
+    "id": "H07",
+    "name": "Pre-Tokyo-fix (09:55 JST) USD strength and reversal in EUR/USD",
+    "source": "Krohn, Mueller & Whelan (2024); Ito & Yamada (2017) JIE",
+    "exact_definition": "Timeframe: 5-minute. Sell EUR/USD at 09:25 JST, cover at 09:55 JST; buy at 09:55 JST, sell at 10:25 JST. Variant: only on Japanese 'gotobi' days (5th,10th,15th,20th,25th, month-end).",
+    "expected_effect": "USD demand at Tokyo fix spills into all pairs (KMW); magnitude for EUR/USD not reported.",
+    "expected_sign": "EUR/USD down into 09:55 JST, up after",
+    "data_needed": "EUR/USD 5-min OHLC with JST stamps, Japanese holiday calendar",
+    "caveats": "Primary evidence is USD/JPY; Asian-session EUR/USD spreads are wider (0.3-1.2 pips)."
+  },
+  {
+    "id": "H08",
+    "name": "FOMC-day long EUR/USD (short-USD premium)",
+    "source": "Mueller, Tahbaz-Salehi & Vedolin (2017) J. Finance 72(3)",
+    "exact_definition": "Timeframe: daily. On each scheduled FOMC decision day, buy EUR/USD at the prior day's 17:00 ET close and sell at 17:00 ET on the decision day. No stop/target. Variant: enter at 17:00 ET two days before (captures pre-announcement drift).",
+    "expected_effect": "Excess return 'an order of magnitude larger' than on non-FOMC days; larger in easing cycles and when MP uncertainty is high.",
+    "expected_sign": "EUR/USD up",
+    "data_needed": "EUR/USD daily (NY-close) OHLC, FOMC meeting calendar, optional MP-uncertainty proxy (MOVE or fed-funds-futures dispersion)",
+    "caveats": "Only 8 events/year; much of the effect is pre-announcement drift; sample 1994-2013."
+  },
+  {
+    "id": "H09",
+    "name": "Conditional pre-FOMC dollar drift signed by fed-funds futures",
+    "source": "Karnaukh (2018 WP) 'The Dollar Ahead of FOMC Target Rate Changes'; Borisenko & Pozdeev",
+    "exact_definition": "Timeframe: daily. Two trading days before a scheduled FOMC decision, compute implied change from fed-funds futures. If implied probability of a hike > 50%: sell EUR/USD; if cut > 50%: buy EUR/USD; else flat. Exit at 14:00 ET on decision day. Filter variant: only when EUR/USD 1-month implied vol is above its 1-year median.",
+    "expected_effect": "USD +~20 bp before hikes, -~32 bp (or 25 bp) before cuts over the two days; futures explain drift with R2 ~22%.",
+    "expected_sign": "EUR/USD moves opposite to the expected Fed move",
+    "data_needed": "EUR/USD daily OHLC, FOMC calendar, fed-funds futures (ZQ) or CME FedWatch history, EUR/USD 1m implied vol",
+    "caveats": "Effect absent when no change is expected; sample 1994-2017; few events per year."
+  },
+  {
+    "id": "H10",
+    "name": "Post-FOMC reversal 12-24h after announcement",
+    "source": "Lee & Wang (2025) Review of Asset Pricing Studies 15(3-4)",
+    "exact_definition": "Timeframe: hourly. Let d = EUR/USD return from 17:00 ET two days before FOMC to 14:00 ET on FOMC day. At 02:00 ET the next day (12h after), take a position of sign -sign(d), exit at 14:00 ET (24h after). No stop.",
+    "expected_effect": "Post-announcement returns offset ~65% of the pre-FOMC drift, concentrated 12-24h after.",
+    "expected_sign": "Opposite to the pre-FOMC drift",
+    "data_needed": "EUR/USD hourly OHLC, FOMC calendar with announcement times",
+    "caveats": "Based on G10 pooled results; EUR/USD-specific magnitude not reported."
+  },
+  {
+    "id": "H11",
+    "name": "NFP surprise jump trade",
+    "source": "Andersen, Bollerslev, Diebold & Vega (2003) AER 93(1); Faust et al. (2007) JME",
+    "exact_definition": "Timeframe: 1-minute. At 08:30:00 ET on NFP release, surprise z = (actual - consensus)/sd(surprises over trailing 5y). If z > +0.5 sell EUR/USD, if z < -0.5 buy, at the first available price after release; exit at 08:35 (variant 09:00). Stop 25 pips.",
+    "expected_effect": "Conditional-mean jump completed within ~5 minutes; direction significant; pips per sd not reported in sources reached; sensitivity declined since early 1990s.",
+    "expected_sign": "Positive US surprise -> EUR/USD down",
+    "data_needed": "EUR/USD 1-min OHLC, consensus and actual for NFP (Bloomberg/MMS-type survey), release timestamps",
+    "caveats": "Requires execution within seconds; spreads blow out at release; most of the move is in the first tick for a retail system."
+  },
+  {
+    "id": "H12",
+    "name": "CPI surprise jump trade",
+    "source": "ABDV (2003); Faust et al. (2007)",
+    "exact_definition": "Same as H11 applied to US CPI (core and headline, use core if both released), 08:30 ET; threshold |z| > 0.5; exit 08:35 or 09:00.",
+    "expected_effect": "Significant jump; magnitude not reported.",
+    "expected_sign": "Positive inflation surprise -> EUR/USD down",
+    "data_needed": "EUR/USD 1-min OHLC, CPI consensus/actual",
+    "caveats": "As H11."
+  },
+  {
+    "id": "H13",
+    "name": "No post-announcement drift (null test)",
+    "source": "FMG DP258; Norges Bank Staff Memo 5/2026; Faust et al. (2007)",
+
+    "exact_definition": "Timeframe: hourly. After NFP/CPI/FOMC surprise |z| > 1, enter in the direction of the first-15-minute move at 08:45 ET and hold 1, 2 and 3 days.",
+    "expected_effect": "Literature: news effects lose significance beyond short windows -> expected ~0 after costs.",
+    "expected_sign": "None (null)",
+    "data_needed": "EUR/USD hourly OHLC, release consensus/actuals",
+    "caveats": "Included to confirm the absence of drift before any 'momentum after news' rule is built."
+  },
+  {
+    "id": "H14",
+    "name": "ECB press-conference OIS-surprise direction",
+    "source": "Altavilla et al. (2019) JME 108 (EA-MPD); Comazzi et al. (2026) VoxEU: ~16% of press-conference variance",
+    "exact_definition": "Timeframe: 5-minute. On ECB decision days measure the change in the 2-year EUR OIS (or Euribor/Schatz futures proxy) from 14:25 to 15:35 CET. If > +3 bp buy EUR/USD at 15:35 CET; if < -3 bp sell; exit at 17:00 CET or next day 08:00 CET. Stop 30 pips.",
+    "expected_effect": "Contemporaneous explanatory power ~16%; post-window continuation not reported.",
+    "expected_sign": "Hawkish surprise -> EUR/USD up",
+    "data_needed": "EUR/USD 5-min OHLC, ECB meeting calendar, 2y OIS or Schatz/Euribor futures intraday (or EA-MPD CSV)",
+    "caveats": "The documented effect is within-window; the trade tests for continuation, which is not established."
+  },
+  {
+    "id": "H15",
+    "name": "Weekend-gap reversal (large gaps)",
+    "source": "Dao (2016) J. Multinational Financial Management 37-38",
+    "exact_definition": "Timeframe: daily/hourly. gap = log(Monday 00:00 GMT open / Friday 21:00 GMT close). If |gap| > 1.0 x 20-day ATR/5 (i.e., a large gap), take position of sign -sign(gap) at Monday 00:00 GMT (or first liquid price), exit at Friday close (variants: 1, 2, 3, 5 days). No stop.",
+    "expected_effect": "Reversal significant in 15 of 16 pairs 2002-2014; magnitude not reported.",
+    "expected_sign": "Opposite to the gap",
+    "data_needed": "EUR/USD hourly OHLC incl. Friday close and Sunday/Monday open",
+    "caveats": "Large gaps are often news-driven and can extend; sample ends 2014."
+  },
+  {
+    "id": "H16",
+    "name": "Weekend small-gap fill",
+    "source": "Practitioner claims (vendor: 88.4% 48h fill for gaps < 0.5 ATR); Finance Magnates 2001-2020 gap count",
+    "exact_definition": "Timeframe: hourly. If 0 < |gap| < 0.5 x daily ATR(14), fade the gap at Sunday open; exit when Friday close is touched or after 48h, whichever first. Stop = 1.0 x ATR.",
+    "expected_effect": "High fill frequency claimed; profit after spread not established.",
+    "expected_sign": "Toward Friday close",
+    "data_needed": "EUR/USD hourly OHLC with Sunday session, spread at open",
+    "caveats": "Not peer-reviewed; Sunday-open spreads are wide; fill rate is not expected return."
+  },
+  {
+    "id": "H17",
+    "name": "12-month time-series momentum",
+    "source": "Moskowitz, Ooi & Pedersen (2012) JFE 104(2)",
+    "exact_definition": "Timeframe: daily, rebalance monthly (last business day). Signal = sign of EUR/USD excess return over past 252 trading days (spot return + EUR-USD 1m deposit differential carry). Position = signal x (0.40 / ex-ante annualised vol from EWMA of daily returns, 60-day centre of mass). Hold one month.",
+    "expected_effect": "Positive for all 58 contracts incl. 12 FX pairs 1985-2009; single-pair Sharpe not reported (expected low).",
+    "expected_sign": "Continuation",
+    "data_needed": "EUR/USD daily close, 1m deposit/OIS rates EUR and USD",
+    "caveats": "Post-2010 FX trend returns weaker; single-asset Sharpe far below diversified 1.3."
+  },
+  {
+    "id": "H18",
+    "name": "Multi-horizon TSMOM (1/3/12 months)",
+    "source": "Hurst, Ooi & Pedersen (AQR 2014/2017)",
+    "exact_definition": "Timeframe: daily, monthly rebalance. Three signals: sign of past 21-, 63-, 252-day excess returns; position = average of the three signs, vol-scaled to 10% annualised target. Hold one month.",
+    "expected_effect": "Combined-portfolio net Sharpe 0.77 (1880-2013, all assets); currency-only not reported.",
+    "expected_sign": "Continuation",
+    "data_needed": "EUR/USD daily close, deposit rates",
+    "caveats": "Diversification is the source of the published Sharpe; expect <0.4 stand-alone."
+  },
+  {
+    "id": "H19",
+    "name": "1-month momentum (prior-month sign)",
+    "source": "Burnside, Eichenbaum & Rebelo (2011): momentum 4.4% p.a., Sharpe 0.60 on 20-currency basket; Menkhoff et al. (2012): f=1,h=1 strongest",
+    "exact_definition": "Timeframe: daily, monthly rebalance. Long EUR/USD if prior-calendar-month excess return > 0, short otherwise; hold one month; no vol scaling.",
+    "expected_effect": "Basket result 4.4% p.a.; single-pair expectation not reported.",
+    "expected_sign": "Continuation",
+    "data_needed": "EUR/USD daily close, 1m deposit rates",
+    "caveats": "Menkhoff: momentum concentrated in high-cost/EM currencies, so EUR/USD is likely the weakest leg."
+  },
+  {
+    "id": "H20",
+    "name": "Dual moving-average crossover (expected dead)",
+    "source": "Levich & Thomas (1993); LeBaron (1999); Neely, Weller & Ulrich (2009): vanished by early 1990s",
+    "exact_definition": "Timeframe: daily. Rules: MA(1,200), MA(5,20), MA(1,150). Long when short MA > long MA at close, short otherwise; always in the market; rebalance daily.",
+    "expected_effect": "Post-1992 excess return ~0 or negative after costs.",
+    "expected_sign": "Continuation (historically); expected null now",
+    "data_needed": "EUR/USD daily close",
+    "caveats": "Benchmark/control hypothesis; a positive result in-sample should be treated as snooping unless confirmed OOS with SPA test."
+  },
+  {
+    "id": "H21",
+    "name": "Filter rule (expected dead)",
+    "source": "Levich & Thomas (1993); Neely, Weller & Ulrich (2009)",
+    "exact_definition": "Timeframe: daily. x in {0.5%, 1%, 2%}: buy when close rises x% above the most recent trough since the last signal, sell short when it falls x% below the most recent peak; always in the market.",
+    "expected_effect": "Null post-1990s.",
+    "expected_sign": "Continuation; expected null",
+    "data_needed": "EUR/USD daily OHLC",
+    "caveats": "Control hypothesis."
+  },
+  {
+    "id": "H22",
+    "name": "Channel (Donchian) breakout",
+    "source": "Qi & Wu (2006); Neely, Weller & Ulrich (2009): less-studied rules 'declined but probably not completely disappeared'; Hsu, Taylor & Wang (2016)",
+    "exact_definition": "Timeframe: daily. n in {20, 50}: buy at close above the highest high of the prior n days, sell short at close below the lowest low; exit on opposite signal or 2 x ATR(20) trailing stop.",
+    "expected_effect": "Weak positive at best; break-even cost analysis required.",
+    "expected_sign": "Continuation",
+    "data_needed": "EUR/USD daily OHLC",
+    "caveats": "Evaluate with White Reality Check / stepwise SPA across the rule family."
+  },
+  {
+    "id": "H23",
+    "name": "G10 cross-sectional momentum (basket, EUR/USD leg)",
+    "source": "Menkhoff et al. (2012): up to 10% p.a. gross; Okunev & White (2003)",
+    "exact_definition": "Timeframe: monthly. Universe: G10 vs USD. Rank by prior 1-month excess return; long top 3, short bottom 3, equal weight; hold 1 month. Record the EUR/USD leg's contribution and the basket's return.",
+    "expected_effect": "Up to 10% p.a. gross on 48 currencies; much lower on G10 after bid-ask.",
+    "expected_sign": "Winners continue",
+    "data_needed": "G10 spot daily closes, 1m deposit rates, bid-ask",
+    "caveats": "Requires multi-pair execution; post-GFC momentum returns reported ~0 in one 2025 study."
+  },
+  {
+    "id": "H24",
+    "name": "Carry sign on EUR/USD (expected null/flipped)",
+    "source": "Fama (1984); Bussiere, Chinn, Ferrara & Heipertz (2018/2022) 'New Fama Puzzle'; Burnside et al. (2011) carry Sharpe 0.86 (basket)",
+    "exact_definition": "Timeframe: monthly. Long EUR/USD if 1m EUR deposit (or OIS) rate > 1m USD rate, else short; hold 1 month; include carry in P&L.",
+    "expected_effect": "Pre-2008: beta < 0 (carry profitable); post-2008: beta large positive (carry sign loses).",
+    "expected_sign": "Long the higher-yielder; expected unreliable post-2008",
+    "data_needed": "EUR/USD daily close, 1m EUR/USD deposit or OIS rates",
+    "caveats": "Single-pair carry is dominated by the dollar factor; test sub-samples pre/post-2008."
+  },
+  {
+    "id": "H25",
+    "name": "Dollar carry via average forward discount (AFD)",
+    "source": "Lustig, Roussanov & Verdelhan (2014) JFE 111(3): Sharpe > 0.5; R2 up to 25% at 12m",
+    "exact_definition": "Timeframe: monthly. AFD = mean over G10 ex-USD of (1m foreign rate - 1m USD rate). If AFD > 0, long EUR/USD (short USD); if AFD < 0, short EUR/USD. Hold 1 month. Variant: scale by AFD magnitude and add US industrial production growth as second regressor in a rolling forecast of next-month EUR/USD return.",
+    "expected_effect": "Basket Sharpe > 0.50; EUR/USD-only not reported.",
+    "expected_sign": "Dollar weakens when foreign rates exceed US rates on average",
+    "data_needed": "G10 1m deposit/OIS rates, EUR/USD daily close, US industrial production (real-time vintages ideally)",
+    "caveats": "Slow-moving; 2008-2015 near-zero rates compress AFD."
+  },
+  {
+    "id": "H26",
+    "name": "US-DE 2-year yield differential change",
+    "source": "Practitioner: SocGen (R2 > 0.7 pre-2015, ~0 after), BBH (60d corr of changes 0.56 in 2017), BNP 2024; daily model ~5% R2",
+    "exact_definition": "Timeframe: daily. d = change over past 5 days in (US 2y - DE 2y yield). If d > +10 bp sell EUR/USD at next open, if d < -10 bp buy; hold 5 days. Also report rolling 60-day correlation of daily changes to detect regime.",
+    "expected_effect": "Contemporaneous correlation strong in some regimes; predictive power weak (~5% daily R2 contemporaneous, lagged not reported).",
+    "expected_sign": "Widening US-DE spread -> EUR/USD down",
+    "data_needed": "US 2y and German 2y daily yields, EUR/USD daily OHLC",
+    "caveats": "Mostly contemporaneous; expect lagged version to be near zero."
+  },
+  {
+    "id": "H27",
+    "name": "Yield-curve changes predict excess returns (Ang-Chen)",
+    "source": "Ang & Chen (2010); Chen & Tsang (2013) REStat",
+    "exact_definition": "Timeframe: monthly. x1 = 1-month change in (EUR 3m rate - USD 3m rate); x2 = 1-month change in ((EUR 10y - EUR 3m) - (USD 10y - USD 3m)). Rolling 10-year OLS of next-month EUR/USD excess return on x1, x2; trade sign of fitted value; hold 1 month.",
+    "expected_effect": "Significant predictability up to 12 months in G10 panel; EUR/USD-only magnitude not reported.",
+    "expected_sign": "Per fitted coefficient (paper: rate increases and steepening predict appreciation of that currency)",
+    "data_needed": "EUR and USD 3m and 10y yields monthly, EUR/USD monthly close",
+    "caveats": "Panel result; single-pair rolling regression is noisy."
+  },
+  {
+    "id": "H28",
+    "name": "Taylor-rule fundamentals monthly forecast",
+    "source": "Molodtsova & Papell (2009) JIE 77(2); Molodtsova, Nikolsko-Rzhevskyy & Papell 'Taylor Rules and the Euro'; Ince & Molodtsova (2015)",
+    "exact_definition": "Timeframe: monthly. Forecast Delta s(t+1) = a + b1*(pi_EA - pi_US) + b2*(gap_EA - gap_US) + b3*(i_EA - i_US)(smoothing) using real-time inflation (HICP/CPI yoy) and output gap (HP-filtered industrial production), rolling window; go long EUR/USD if forecast > 0. Benchmark: RW without drift, Clark-West test.",
+    "expected_effect": "Significant short-horizon predictability for 11/12 currencies and for EUR/USD 1999-2007; survives post-2008 with real-time data.",
+    "expected_sign": "Currency whose central bank is predicted to tighten more appreciates",
+    "data_needed": "Real-time HICP, US CPI, industrial production EA and US, policy rates, EUR/USD monthly",
+    "caveats": "Predictability found only in specs without the real exchange rate; economic value after costs not reported."
+  },
+  {
+    "id": "H29",
+    "name": "PPP mean reversion anchor",
+    "source": "Rogoff (1996) JEL: half-life 3-5 years",
+    "exact_definition": "Timeframe: monthly. q = log EUR/USD + log(CPI_EA/CPI_US) rebased to 1999-2024 mean. If q > +15% sell EUR/USD; if q < -15% buy; hold until |q| < 5% or 36 months.",
+    "expected_effect": "Half-life 3-5 years (CI 1 year to infinity).",
+    "expected_sign": "Toward PPP",
+    "data_needed": "EUR/USD monthly, EA HICP, US CPI",
+    "caveats": "Horizon too long for a trading system; use only as a tilt."
+  },
+  {
+    "id": "H30",
+    "name": "CME 6E signed-volume order-flow proxy",
+    "source": "Evans & Lyons (2002) JPE 110(1): R2 > 60% daily DM/USD on interdealer flow; $1bn -> ~0.5%",
+    "exact_definition": "Timeframe: daily. Build daily signed volume from 6E 1-min bars via tick rule (volume x sign of close-to-close change). Regress same-day and next-day EUR/USD return on signed volume (rolling 1y). Trade next-day sign of fitted value if R2(next-day) > 2%.",
+    "expected_effect": "Contemporaneous R2 high for true order flow; next-day predictability not established (Evans-Lyons report short-horizon OOS gains only).",
+    "expected_sign": "Net buying -> up (contemporaneous)",
+    "data_needed": "CME 6E 1-min OHLCV, EUR/USD daily close",
+    "caveats": "Tick-rule futures volume is a poor proxy for interdealer flow; expect contemporaneous only."
+  },
+  {
+    "id": "H31",
+    "name": "CFTC COT extreme-positioning contrarian (expected null)",
+    "source": "Klitgaard & Weir (2004) FRBNY EPR; Hossfeld & Rothig (2016) FRL 18",
+    "exact_definition": "Timeframe: weekly. z = (non-commercial net EUR position - 52-week mean)/52-week sd, using data as published (Friday release for Tuesday). If z > +2 sell EUR/USD at Monday open, if z < -2 buy; hold 1-4 weeks.",
+    "expected_effect": "No predictive power for next-week returns; evidence collapses under multiple-testing control.",
+    "expected_sign": "Contrarian; expected null",
+    "data_needed": "CFTC COT legacy/TFF reports for EUR futures, EUR/USD weekly",
+    "caveats": "Positions follow the rate, not vice versa."
+  },
+  {
+    "id": "H32",
+    "name": "COT position-change momentum (expected null)",
+    "source": "Klitgaard & Weir (2004): 75% same-week direction agreement, no next-week power",
+    "exact_definition": "Timeframe: weekly. Sign of week-over-week change in non-commercial net EUR position (published Friday) -> trade that sign from Monday open to Friday close.",
+    "expected_effect": "~0 (release lag removes the contemporaneous relation).",
+    "expected_sign": "Continuation; expected null",
+    "data_needed": "CFTC COT, EUR/USD weekly",
+    "caveats": "Control hypothesis."
+  },
+  {
+    "id": "H33",
+    "name": "Retail sentiment contrarian (expected null)",
+    "source": "No academic study found; practitioner convention (IG/DailyFX client sentiment)",
+    "exact_definition": "Timeframe: daily. If % of retail clients long EUR/USD > 70% sell at next open; if < 30% buy; hold 5 days.",
+    "expected_effect": "Not established.",
+    "expected_sign": "Contrarian; expected null",
+    "data_needed": "Historical broker sentiment series (IG/OANDA), EUR/USD daily",
+    "caveats": "Data are proprietary and survivorship-biased; treat as null until shown otherwise."
+  },
+  {
+    "id": "H34",
+    "name": "HAR-RV (+ implied vol) volatility forecast for sizing",
+    "source": "Plihal & Lyocsa (2021) IREF 71: OOS gains 17.3% (1d), 42.1% (1w), 22.8% (1m) from adding IV; Corsi HAR",
+    "exact_definition": "Timeframe: daily. RV_d = sum of squared 5-min log returns (00:00-24:00 GMT). HAR: RV(t+1) = b0 + b1*RV_d + b2*mean(RV over 5d) + b3*mean(RV over 22d) [+ b4*IV_1w(t)]. Re-estimate monthly on a 2-year window. Use forecast to set position size = target_vol / forecast_vol and stop = k x forecast daily sd.",
+    "expected_effect": "Forecast accuracy, not return; HAR beats GARCH(1,1) OOS in cited studies.",
+    "expected_sign": "n/a (not directional)",
+    "data_needed": "EUR/USD 5-min OHLC; optional EUR/USD 1w/1m ATM implied vol",
+    "caveats": "Directional information: none expected."
+  },
+  {
+    "id": "H35",
+    "name": "Volatility-targeting overlay on any directional signal",
+    "source": "Moskowitz, Ooi & Pedersen (2012) vol scaling; general vol-managed-portfolio literature",
+    "exact_definition": "Timeframe: daily. position_t = raw_signal_t x min(3, sigma_target / sigma_hat_t), sigma_hat from H34 or EWMA(0.94). Compare Sharpe and drawdown of scaled vs unscaled versions of H17-H19.",
+    "expected_effect": "Sharpe improvement via lower exposure in high-vol regimes; magnitude for FX not reported.",
+    "expected_sign": "n/a",
+    "data_needed": "As H34",
+    "caveats": "Leverage cap needed; FX vol clustering weaker than equities."
+  },
+  {
+    "id": "H36",
+    "name": "Garman-Klass range vol regime filter",
+    "source": "Molnar (2012) IRFA 23: GK efficiency 7.4 vs Parkinson 4.9 vs close-to-close 1",
+    "exact_definition": "Timeframe: daily. GK_t = 0.5*(ln(H/L))^2 - (2ln2-1)*(ln(C/O))^2. Regime = high if 10-day mean GK > 60th percentile of trailing 1y. Test each directional hypothesis separately in high and low regimes.",
+    "expected_effect": "Conditioning variable only; literature finds no directional content in vol level.",
+    "expected_sign": "n/a",
+    "data_needed": "EUR/USD daily OHLC (define day as 21:00-21:00 GMT)",
+    "caveats": "Sqrt of GK is a biased sd estimator; Monday range includes weekend gap."
+  },
+  {
+    "id": "H37",
+    "name": "Volatility risk premium (IV - RV) direction signal",
+    "source": "Della Corte, Ramadorai & Sarno (2016) JFE: high-VRP currencies underperform, 1996-2011, up to 20 currencies; Ornelas (BCB WP 454)",
+    "exact_definition": "Timeframe: monthly. VRP = 1m ATM implied vol (EUR/USD) - realised vol over past 21 days. Cross-sectional version: rank G10 by VRP, short top/long bottom vs USD. Single-pair version: compare EUR/USD VRP to its own 2-year z-score; z > 1 -> short EUR/USD, z < -1 -> long; hold 1 month.",
+    "expected_effect": "Significant cross-sectional predictability; single-pair mapping not established.",
+    "expected_sign": "High VRP -> that currency depreciates vs USD (cross-section)",
+    "data_needed": "EUR/USD (and G10) 1m ATM implied vols, 5-min or daily realised vol",
+    "caveats": "A single-pair VRP conflates EUR and USD premia; sample ends 2011."
+  },
+  {
+    "id": "H38",
+    "name": "25-delta risk-reversal as short-horizon direction signal",
+    "source": "Hoque, Le & Hassan (2020): smirk predicts only very short horizons; Jurek (2009): RR explains little future skew; BIS conf: RR tracks forward bias",
+    "exact_definition": "Timeframe: daily. RR = 1m 25d call vol - 25d put vol (EUR calls over puts). If 5-day change in RR > +0.3 vol buy EUR/USD next open, < -0.3 sell; hold 1-3 days.",
+    "expected_effect": "At most very-short-horizon; likely nil after costs.",
+    "expected_sign": "RR rises -> EUR/USD up (short horizon)",
+    "data_needed": "EUR/USD 1m 25d risk reversal history, daily OHLC",
+    "caveats": "Weak prior; mostly reflects the spot/vol correlation."
+  },
+  {
+    "id": "H39",
+    "name": "Friday effect (expected null)",
+    "source": "Seasonax (vendor) claims euro strong Fridays; no academic support; Yamori & Kurihara (2004) find day effects gone in 1990s",
+    "exact_definition": "Timeframe: daily. Long EUR/USD from Thursday 21:00 GMT close to Friday 21:00 GMT close every week.",
+    "expected_effect": "~0.",
+    "expected_sign": "Up; expected null",
+    "data_needed": "EUR/USD daily close",
+    "caveats": "Control hypothesis; NFP Fridays contaminate."
+  },
+  {
+    "id": "H40",
+    "name": "Monday effect (regime-bound)",
+    "source": "Bush & Stephens (IJFE): Monday effect in 3 pairs 2010-2012 only; Grammatikos (1991): Monday volatility lowest",
+    "exact_definition": "Timeframe: daily. Short EUR/USD from Friday close to Monday close. Report by 3-year sub-period.",
+    "expected_effect": "Sporadic; absent 1999-2009.",
+    "expected_sign": "Down; expected null overall",
+    "data_needed": "EUR/USD daily close",
+    "caveats": "Overlaps weekend-gap hypotheses H15/H16."
+  },
+  {
+    "id": "H41",
+    "name": "Turn-of-month window (T-1 to T+3)",
+    "source": "Etula et al. (2020) RFS (equities/bonds, T-4 reversal); practitioner month-end flow models; no FX academic study",
+    "exact_definition": "Timeframe: daily. Measure average EUR/USD return on each of days T-5...T+5 around month-end (London business days). Test (a) long EUR/USD T-1 close to T+3 close; (b) reversal between T-8..T-4 and T-3..T-1 returns.",
+    "expected_effect": "Unknown for FX; equities show T-4 reversal and T+1 reinvestment.",
+    "expected_sign": "Unspecified",
+    "data_needed": "EUR/USD daily close, business-day calendar",
+    "caveats": "Exploratory; apply multiple-testing correction over the 11 day-slots."
+  },
+  {
+    "id": "H42",
+    "name": "Month-end equity-rebalancing hedge flow signal",
+    "source": "Practitioner (SocGen, Forex.com 2014-15 models); HSBC Donnelly reports the trade stopped working; indirect support from Evans (2018)/Marsh et al. fix moves",
+    "exact_definition": "Timeframe: daily/intraday. m = (S&P 500 month-to-date % return) - (Euro Stoxx 50 month-to-date % return) measured at T-1 close. If m > +3% expect USD selling at the month-end fix: buy EUR/USD at 15:00 London on T, exit at 16:00 fix; if m < -3% the reverse.",
+    "expected_effect": "Not established academically; practitioner claims it decayed.",
+    "expected_sign": "US equity outperformance -> EUR/USD up into month-end fix",
+    "data_needed": "S&P 500, Euro Stoxx 50 daily, EUR/USD 1-min around month-end",
+    "caveats": "12 events/year; mechanism plausible (hedge-ratio rebalancing) but evidence is anecdotal."
+  },
+  {
+    "id": "H43",
+    "name": "Year-end turn: liquidity avoidance",
+    "source": "CME (2022) USD funding differential -107 bp from mid-Dec peak to early Jan; Du, Tepper & Verdelhan (2018) CIP basis; Krohn & Sushko (BIS 836)",
+    "exact_definition": "Timeframe: daily. Rule: zero exposure and 2x normal cost assumption from 15 December to 2 January and on the last 2 business days of each quarter. Measure realised spread and slippage in those windows vs the rest of the year.",
+    "expected_effect": "Wider spreads and lower liquidity; no established directional effect on spot.",
+    "expected_sign": "n/a",
+    "data_needed": "EUR/USD bid/ask tick or 1-min data",
+    "caveats": "Risk management, not alpha."
+  },
+  {
+    "id": "H44",
+    "name": "Session-of-day execution filter",
+    "source": "Ito & Hashimoto (2006) NBER 12413 (spreads widest at Tokyo open, overlap concentration); practitioner spread tables (Asian 0.3-1.2 pips, London/NY 0.0-0.2)",
+    "exact_definition": "Timeframe: 1-min. Compute median spread and realised vol by hour of day (GMT). Only allow entries where hourly median spread < 0.3 pips and hourly vol percentile > 30; otherwise defer. Compare net P&L of every directional hypothesis with and without the filter.",
+    "expected_effect": "Lower costs; no direction.",
+    "expected_sign": "n/a",
+    "data_needed": "EUR/USD 1-min bid/ask",
+    "caveats": "Cost model only; avoid 21:00-00:00 GMT and 17:00-18:00 CT futures break."
+  },
+  {
+    "id": "H45",
+    "name": "Intraday vol seasonality normalisation",
+    "source": "Ito & Hashimoto (2006): U-shape within Tokyo and London sessions, not NY; RBA (2007) overlap vol peak",
+    "exact_definition": "Timeframe: 5-min. Estimate the 288-slot average |return| profile over a trailing 60 days; divide each bar's return by its slot average before computing any intraday z-scores, breakouts or stops.",
+    "expected_effect": "Improves intraday signal calibration; no direction.",
+    "expected_sign": "n/a",
+    "data_needed": "EUR/USD 5-min OHLC",
+    "caveats": "DST shifts move the profile by an hour twice a year (US and EU on different dates)."
+  },
+  {
+    "id": "H46",
+    "name": "LSTM daily direction classifier (benchmark, expected ~50%)",
+    "source": "Fed FEDS 2025-089; arXiv 2606.15058 (only linear beats RW); Sezer et al. (2020) survey; EXFormer (2025) baselines negative after costs",
+    "exact_definition": "Timeframe: daily. Inputs: last 60 daily log returns, GK vol, 2y spread change. Target: sign of next-day return. Walk-forward: train 5y, test 1y, roll. Trade sign when P > 0.55. Report directional accuracy with binomial test and DM test vs RW-no-drift; apply 1 pip round-trip cost.",
+    "expected_effect": "DA ~50-52%, negative net return.",
+    "expected_sign": "n/a",
+    "data_needed": "EUR/USD daily OHLC, yields",
+    "caveats": "Included as a negative control for any ML claims."
+  },
+  {
+    "id": "H47",
+    "name": "Linear fundamentals regression direction (Amat-type)",
+    "source": "Amat et al. (2018) reviewed: OLS on fundamentals gives DA > 50%; arXiv 2606.15058: linear beats RW on CAD/USD",
+    "exact_definition": "Timeframe: monthly. OLS of next-month EUR/USD return on Taylor-rule differential (H28 inputs), 2y spread change, 12m momentum, AFD; rolling 10y; trade sign of forecast; shrink coefficients toward zero (ridge) in a variant.",
+    "expected_effect": "DA marginally > 50%; economic value small.",
+    "expected_sign": "Per fitted model",
+    "data_needed": "As H25-H28",
+    "caveats": "Compare against RW-no-drift with Clark-West; few parameters per Rossi (2013)."
+  },
+  {
+    "id": "H48",
+    "name": "ECB decision-day volatility (non-directional)",
+    "source": "Altavilla et al. (2019); FXStreet anecdotes of mixed reactions",
+    "exact_definition": "Timeframe: 5-min. On ECB decision days measure |return| 14:25-15:35 CET vs the same window on non-decision days; test a long-straddle proxy: buy a 1-day ATM straddle at 13:00 CET, close at 16:00 CET (or synthetic: bracket order +/- 0.5 x expected move with stop at entry).",
+    "expected_effect": "Elevated absolute move; average size not reported.",
+    "expected_sign": "n/a",
+    "data_needed": "EUR/USD 5-min OHLC, ECB calendar, optional 1-day implied vol",
+    "caveats": "Implied vol already prices the event; profitability of a straddle not established."
+  },
+  {
+    "id": "H49",
+    "name": "Sentiment-conditioned reversal (media)",
+    "source": "Filippou, Taylor & Wang (2023) JFQA: low-sentiment currencies outperform next month (48 rates)",
+    "exact_definition": "Timeframe: monthly. Score EUR and USD news sentiment (e.g., GDELT tone or news-count sentiment for 'euro'/'ECB' vs 'dollar'/'Fed'); s = EUR sentiment - USD sentiment, z-scored over 3y. If z > 1 short EUR/USD, z < -1 long; hold 1 month.",
+    "expected_effect": "Sentiment factor is a strong negative predictor in the cross-section; single-pair not reported.",
+    "expected_sign": "Contrarian to sentiment",
+    "data_needed": "News sentiment time series (GDELT/RavenPack), EUR/USD monthly",
+    "caveats": "Construction of the single-pair score is ad hoc."
+  },
+  {
+    "id": "H50",
+    "name": "Post-fix EUR/USD strength carries into US afternoon",
+    "source": "Krohn, Mueller & Whelan (2024): after the London fix all currencies appreciate vs USD (yen exception in one version)",
+    "exact_definition": "Timeframe: 5-min. Buy EUR/USD at 16:05 London, sell at 20:00 GMT (NY 15:00/16:00 ET depending on DST). No stop.",
+    "expected_effect": "Positive; magnitude not reported.",
+    "expected_sign": "EUR/USD up",
+    "data_needed": "EUR/USD 5-min OHLC",
+    "caveats": "Overlaps H02; test jointly to avoid double counting."
+  },
+  {
+    "id": "H51",
+    "name": "Intra-month fix fade (expected not exploitable)",
+    "source": "Evans (2018): intra-month reversals not economically exploitable; FCA OP46: reversals faded post-2015",
+    "exact_definition": "Timeframe: 1-min. On non-month-end days, at 16:00 London take position opposite to sign of 15:55-16:00 return, exit 16:05.",
+    "expected_effect": "~2 bp gross in the first minute historically; below costs.",
+    "expected_sign": "Reversal; expected null net",
+    "data_needed": "EUR/USD 1-min bid/ask",
+    "caveats": "Control hypothesis for H05."
+  }
+]

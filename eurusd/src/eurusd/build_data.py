@@ -7,9 +7,14 @@ Re-runnable / idempotent:
 
 Sources
 -------
-1. HistData.com ASCII 1-minute bars (bid), EST (UTC-5, no DST). Converted to UTC
-   by adding 5 hours.  Full-year files for past years, monthly files for the
-   current year.  The list of available years/months is discovered from the
+1. HistData.com ASCII 1-minute bars (bid).  HistData documents the stamps as
+   "EST without DST", but checking the data against ECB 14:15 CET fixings and
+   against the 08:30 New York release minute of NFP/CPI shows the stamps follow
+   US daylight saving (they are America/New_York local time).  Default
+   conversion is therefore tz_localize("America/New_York") -> UTC
+   (``--tz-mode ny-local``); ``--tz-mode est-fixed`` adds a flat 5 hours
+   instead.  See data/DATA_QUALITY.md section "Timezone verification".
+   Full-year files for past years, monthly files for the current year.  The list of available years/months is discovered from the
    HistData index page so the script keeps working as new months appear.
 2. Yahoo Finance chart API (EURUSD=X daily/hourly, 6E=F daily), UTC timestamps.
 3. ECB daily reference rate (EXR/D.USD.EUR.SP00.A), CSV.
@@ -53,6 +58,7 @@ HISTDATA_GET = f"{HISTDATA_BASE}/get.php"
 UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0 Safari/537.36")
 
+PRICE_MIN, PRICE_MAX = 0.5, 2.0
 TIMEFRAMES = {"M5": "5min", "M15": "15min", "M30": "30min", "H1": "1h", "H4": "4h", "D1": "1D"}
 MAX_CONCURRENT_DOWNLOADS = 2
 
@@ -175,8 +181,24 @@ def download_all_histdata(periods: list[str] | None = None) -> list[tuple[str, P
 # --------------------------------------------------------------------------- #
 # Parse + build
 # --------------------------------------------------------------------------- #
-def read_histdata_zip(path: Path) -> pd.DataFrame:
+TZ_MODE = "ny-local"   # or "est-fixed"; set from main()
+
+
+def stamps_to_utc(ts: pd.Series, mode: str = "ny-local") -> pd.DatetimeIndex:
+    """Convert raw HistData stamps (naive) to a UTC DatetimeIndex."""
+    naive = pd.DatetimeIndex(ts)
+    if mode == "est-fixed":
+        return (naive + pd.Timedelta(hours=5)).tz_localize("UTC")
+    if mode == "ny-local":
+        # FX is closed at 02:00 Sunday local when US clocks change, so ambiguous /
+        # nonexistent stamps do not occur in practice; map any that do to NaT.
+        return naive.tz_localize("America/New_York", ambiguous="NaT", nonexistent="NaT").tz_convert("UTC")
+    raise ValueError(mode)
+
+
+def read_histdata_zip(path: Path, tz_mode: str | None = None) -> pd.DataFrame:
     """Parse one HistData M1 zip into a UTC-indexed OHLCV frame (no dedupe)."""
+    tz_mode = tz_mode or TZ_MODE
     with zipfile.ZipFile(path) as zf:
         name = [n for n in zf.namelist() if n.endswith(".csv")][0]
         with zf.open(name) as fh:
@@ -193,8 +215,13 @@ def read_histdata_zip(path: Path) -> pd.DataFrame:
     if bad:
         log.warning("%s: %d unparseable timestamps dropped", path.name, bad)
     df = df.loc[~ts.isna()].copy()
-    # HistData ASCII is EST without DST (UTC-5) -> UTC by adding 5 hours.
-    df.index = pd.DatetimeIndex(ts[~ts.isna()] + pd.Timedelta(hours=5), name="time").tz_localize("UTC")
+    idx = stamps_to_utc(ts[~ts.isna()], tz_mode)
+    if idx.isna().any():
+        log.warning("%s: %d stamps fell in a DST transition and were dropped", path.name, int(idx.isna().sum()))
+        df = df.loc[~idx.isna()]
+        idx = idx[~idx.isna()]
+    df.index = idx
+    df.index.name = "time"
     df = df.drop(columns="ts")
     df.attrs["source_file"] = path.name
     return df
@@ -212,9 +239,21 @@ def build_m1(zips: list[Path]) -> tuple[pd.DataFrame, dict]:
     dup_mask = m1.index.duplicated(keep="last")
     n_dup = int(dup_mask.sum())
     m1 = m1.loc[~dup_mask]
+    # Remove physically impossible bars (EUR/USD has never traded outside 0.8-1.6;
+    # the bounds below only catch corrupt ticks such as 1965.0 or -0.0001).
+    px = m1[["open", "high", "low", "close"]]
+    bad_mask = ((px < PRICE_MIN) | (px > PRICE_MAX)).any(axis=1)
+    bad_rows = m1.loc[bad_mask]
+    for t, row in bad_rows.iterrows():
+        log.warning("dropping impossible bar %s: %s", t, row.to_dict())
+    m1 = m1.loc[~bad_mask]
     m1 = m1[["open", "high", "low", "close", "volume"]].astype(
         {"open": "float64", "high": "float64", "low": "float64", "close": "float64", "volume": "int64"})
-    stats = {"rows_raw": int(n_raw), "duplicates_removed": n_dup, "rows": int(len(m1)), "per_file": per_file}
+    stats = {"rows_raw": int(n_raw), "duplicates_removed": n_dup,
+             "impossible_price_rows_removed": int(bad_mask.sum()),
+             "impossible_price_rows": [{"time": str(t), **{k: float(v) for k, v in r.items()}}
+                                       for t, r in bad_rows.iterrows()],
+             "tz_mode": TZ_MODE, "rows": int(len(m1)), "per_file": per_file}
     return m1, stats
 
 
@@ -246,10 +285,33 @@ def build_all_timeframes(m1: pd.DataFrame) -> dict[str, Path]:
 # --------------------------------------------------------------------------- #
 # Yahoo + ECB
 # --------------------------------------------------------------------------- #
-def fetch_yahoo(symbol: str, rng: str, interval: str) -> pd.DataFrame:
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
-    r = _session().get(url, params={"range": rng, "interval": interval, "includePrePost": "false"}, timeout=60)
-    r.raise_for_status()
+YAHOO_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
+
+
+def fetch_yahoo(symbol: str, rng: str | None, interval: str, retries: int = 4,
+                period1: int | None = None, period2: int | None = None) -> pd.DataFrame:
+    """Yahoo chart API. Returns 429 'Too Many Requests' erratically from shared egress
+    IPs (it normally wants an A1/A3 cookie from fc.yahoo.com, which may be blocked), so
+    we alternate query2/query1 hosts and back off between attempts."""
+    last = None
+    for attempt in range(retries):
+        host = "query2" if attempt % 2 == 0 else "query1"
+        url = f"https://{host}.finance.yahoo.com/v8/finance/chart/{symbol}"
+        params = {"interval": interval, "includePrePost": "false"}
+        if period1 is not None:   # explicit window: 'range=max&interval=1d' silently returns MONTHLY bars
+            params.update(period1=int(period1), period2=int(period2 or time.time()))
+        else:
+            params["range"] = rng
+        r = requests.get(url, params=params,
+                         headers={"User-Agent": YAHOO_UA, "Accept": "application/json"}, timeout=60)
+        if r.status_code == 200:
+            break
+        last = f"{r.status_code} from {host}: {r.text[:80]!r}"
+        log.warning("yahoo %s attempt %d: %s", symbol, attempt + 1, last)
+        time.sleep(15 * (attempt + 1))
+    else:
+        raise RuntimeError(f"yahoo {symbol} failed: {last}")
     js = r.json()
     res = js["chart"]["result"][0]
     q = res["indicators"]["quote"][0]
@@ -277,7 +339,11 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-download", action="store_true", help="only rebuild from existing zips")
     ap.add_argument("--skip-external", action="store_true", help="skip Yahoo/ECB fetches")
+    ap.add_argument("--tz-mode", choices=["ny-local", "est-fixed"], default="ny-local",
+                    help="how to interpret HistData stamps (default ny-local, see docstring)")
     args = ap.parse_args(argv)
+    global TZ_MODE
+    TZ_MODE = args.tz_mode
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
     if not args.no_download:
@@ -285,18 +351,19 @@ def main(argv: list[str] | None = None) -> int:
     zips = [p for p in sorted(RAW_DIR.glob("DAT_ASCII_EURUSD_M1_*.zip")) if is_valid_zip(p)]
     log.info("valid zips: %d", len(zips))
     m1, stats = build_m1(zips)
-    log.info("M1 rows=%d (raw %d, dups removed %d) range %s .. %s",
-             stats["rows"], stats["rows_raw"], stats["duplicates_removed"], m1.index.min(), m1.index.max())
+    log.info("M1 rows=%d (raw %d, dups removed %d, impossible removed %d, tz=%s) range %s .. %s",
+             stats["rows"], stats["rows_raw"], stats["duplicates_removed"],
+             stats["impossible_price_rows_removed"], TZ_MODE, m1.index.min(), m1.index.max())
     with open(PROC_DIR / "build_stats.json", "w") as fh:
         json.dump(stats, fh, indent=1)
     build_all_timeframes(m1)
 
     if not args.skip_external:
-        for sym, rng, iv, name in [("EURUSD=X", "max", "1d", "yahoo_EURUSD_D1"),
-                                   ("EURUSD=X", "730d", "1h", "yahoo_EURUSD_H1"),
-                                   ("6E=F", "max", "1d", "yahoo_6E_D1")]:
+        for sym, rng, iv, name, p1 in [("EURUSD=X", None, "1d", "yahoo_EURUSD_D1", 946684800),
+                                       ("EURUSD=X", "730d", "1h", "yahoo_EURUSD_H1", None),
+                                       ("6E=F", None, "1d", "yahoo_6E_D1", 946684800)]:
             try:
-                df = fetch_yahoo(sym, rng, iv)
+                df = fetch_yahoo(sym, rng, iv, period1=p1)
                 df.to_parquet(PROC_DIR / f"{name}.parquet")
                 log.info("%s: %d rows %s .. %s meta=%s", name, len(df), df.index.min(), df.index.max(), df.attrs["meta"])
             except Exception as e:  # noqa: BLE001

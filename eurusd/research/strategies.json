@@ -1,0 +1,3301 @@
+{
+ "generated": "2026-11-10",
+ "instrument": "EUR/USD",
+ "entry_count": 102,
+ "evidence_quality_scale": [
+  "rigorous backtest",
+  "vendor backtest",
+  "forum anecdote",
+  "textbook description, no stats"
+ ],
+ "note": "claimed_performance is quoted as reported by the source; nothing is independently verified. reconstruction=true marks rules written by the researcher from vague descriptions.",
+ "strategies": [
+  {
+   "id": "S01",
+   "name": "London open breakout (Asian range breakout), classic",
+   "category": "session",
+   "timeframes": [
+    "M15",
+    "H1"
+   ],
+   "entry_rule": "Define Asian range = high/low from 00:00 to 07:00 UTC (variants: 00:00-06:00 UTC, 23:00-06:00). After 07:00 UTC, enter long on first close (or stop order) above the range high; short on first close below the range low. One trade per day; cancel untriggered side once one fills. Backtrex implementation: H1 bars, breakout of Asian range after London open, 2016-10-02 to 2026-10-01.",
+   "exit_rule": "Fixed SL/TP or close at a time cutoff (commonly 12:00 UTC or NY close) if neither is hit.",
+   "stop_loss_rule": "Backtrex: fixed 35 pips. Common retail variants: opposite side of the Asian range, or range midpoint.",
+   "take_profit_rule": "Backtrex: fixed 70 pips (2:1). Variants: 1x range height projected from breakout, or trailing.",
+   "parameters": {
+    "range_start_utc": "00:00",
+    "range_end_utc": "07:00",
+    "entry_window_utc": "07:00-10:00",
+    "sl_pips": 35,
+    "tp_pips": 70,
+    "max_trades_per_day": 1
+   },
+   "session_filter": "London open window only (07:00-10:00 UTC)",
+   "claimed_performance": "Backtrex (vendor backtest, EUR/USD H1, 2016-10-02 to 2026-10-01): 1,230 trades, 36.3% winners, profit factor 0.87, total return -28.0%, CAGR -3.2%, max drawdown -31.4%, only 3 of 11 calendar years positive (none by more than 2.5%); buy-and-hold +0.1%. Same vendor on GBP/USD M15: PF 0.72, total return -60.0%, CAGR -8.8% over 10 years.",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://backtrex.com/en/backtests/london-breakout-eur-usd",
+    "https://backtrex.com/en/backtests/london-breakout-gbp-usd",
+    "https://forums.babypips.com/t/london-breakout-strategy-1h-timeframe-modified/326993",
+    "https://www.mql5.com/en/blogs/post/777540"
+   ],
+   "notes": "The most-cited intraday EUR/USD strategy and the clearest negative result found. Backtrex notes >100 trades/year makes costs decisive. A gold (XAUUSD) 3.7-year MQL5 study of the same idea exists but is not EUR/USD. Range window definitions differ by source; treat the window as a parameter to sweep.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "reconstruction": false
+  },
+  {
+   "id": "S02",
+   "name": "Statistical London breakout (babypips thread variant)",
+   "category": "session",
+   "timeframes": [
+    "M15",
+    "M30"
+   ],
+   "entry_rule": "Reconstruction of the long-running babypips 'Statistical London Breakout' thread: measure the range from 00:00 to 07:00 GMT (some posters use 02:00-07:00 ex-Sydney noise); place buy stop a few pips above the high and sell stop a few pips below the low at 07:00-08:00 GMT; skip the day if the Asian range exceeds ~50% of the 14-day ADR (breakout 'already happened').",
+   "exit_rule": "Close at 12:00 GMT or when TP/SL is hit; cancel the other pending order on fill.",
+   "stop_loss_rule": "Opposite side of the range or ~20-30 pips, whichever is smaller (thread varies).",
+   "take_profit_rule": "Range height (1:1) or 1/2 of 14-day ADR.",
+   "parameters": {
+    "range_window_gmt": "00:00-07:00",
+    "buffer_pips": 3,
+    "max_range_pct_of_ADR": 50,
+    "time_exit_gmt": "12:00"
+   },
+   "session_filter": "London open",
+   "evidence_quality": "forum anecdote",
+   "reconstruction": true,
+   "sources": [
+    "https://forums.babypips.com/t/statistical-london-breakout-strategy/46146",
+    "https://forums.babypips.com/t/london-breakout-strategy-1h-timeframe-modified/326993?page=10"
+   ],
+   "notes": "No verifiable aggregate statistics in the thread excerpts found; one poster reports avoiding EURUSD/EURGBP because they move before London open. Treat the range-width filter as the one idea worth testing on top of S01.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "claimed_performance": "none found"
+  },
+  {
+   "id": "S03",
+   "name": "'London Ripper' Tokyo-box breakout (TradingView open-source script)",
+   "category": "session",
+   "timeframes": [
+    "M5",
+    "M15",
+    "M30"
+   ],
+   "entry_rule": "Script defines the Asia box as 05:00-06:55 GMT (last two hours before London), and enters on the first decisive break of the box when London liquidity arrives (first bar closing outside the box after 07:00 GMT).",
+   "exit_rule": "Script-defined SL/TP (not visible in search excerpts); author recommends charts <= 30 min.",
+   "stop_loss_rule": "Not confirmed from excerpts; typical: opposite box edge.",
+   "take_profit_rule": "Not confirmed from excerpts.",
+   "parameters": {
+    "box_window_gmt": "05:00-06:55",
+    "default_risk_per_trade_pct": 5
+   },
+   "session_filter": "London open",
+   "evidence_quality": "textbook description, no stats",
+   "reconstruction": true,
+   "sources": [
+    "https://www.tradingview.com/script/5DjyzjBd-LONDON-RIPPER-Breakout-Daytrade-EURUSD/"
+   ],
+   "notes": "Included because it is a concrete, narrow-window version of the London breakout (2-hour pre-London box) distinct from the full Asian range. The script warns London news spikes blow through stops.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "claimed_performance": "none found"
+  },
+  {
+   "id": "S04",
+   "name": "Frankfurt open trap / 07:00 GMT fake move fade",
+   "category": "session",
+   "timeframes": [
+    "M5",
+    "M15",
+    "H1"
+   ],
+   "entry_rule": "If the 07:00 GMT (Frankfurt open) hourly candle breaks the Asian range high (low) and price closes back inside the range by the close of the 08:00 GMT candle (the 08:00 candle engulfs the 07:00 candle), sell (buy) on re-entry into the range. Skip if a high-impact release is scheduled 07:00-08:00 GMT.",
+   "exit_rule": "Target the opposite side of the Asian range; time-stop at 12:00 GMT.",
+   "stop_loss_rule": "Beyond the 07:00 spike extreme (+3-5 pips).",
+   "take_profit_rule": "Opposite Asian range boundary (or 1:1.5 R).",
+   "parameters": {
+    "trap_hour_gmt": "07:00",
+    "confirm_hour_gmt": "08:00",
+    "buffer_pips": 3
+   },
+   "session_filter": "07:00-09:00 GMT",
+   "evidence_quality": "forum anecdote",
+   "reconstruction": true,
+   "sources": [
+    "https://fxnx.com/en/blog/london-breakout-strategy-how-outsmart-frankfurt-trap",
+    "https://takeprofitapp.com/en/learn/ict-judas-swing-explained",
+    "https://www.dailyfx.com/forex/education/trading_tips/chart_of_the_day/2015/05/21/FX-Reversals-EURUSD-False-Breakout.html"
+   ],
+   "notes": "No statistics found. Essentially the same hypothesis as the ICT Judas swing (S07) with a fixed 07:00 GMT trigger. Should be tested jointly with S01: if S01 loses because early breakouts fail, S04 should show the mirror image.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "claimed_performance": "none found"
+  },
+  {
+   "id": "S05",
+   "name": "New York open reversal (fade the London move at the NY open)",
+   "category": "session",
+   "timeframes": [
+    "M15",
+    "H1"
+   ],
+   "entry_rule": "Reconstruction: measure the London-session move from 07:00 GMT to 12:30 GMT. If price is at/through a higher-timeframe level (prior day high/low, H4 swing) at the 12:30-13:30 GMT window and prints a rejection candle (pin bar/engulfing) on M15, enter against the London direction.",
+   "exit_rule": "Target the London session midpoint or VWAP of the day; close by 16:00 GMT (London fix) at the latest.",
+   "stop_loss_rule": "Beyond the NY-open extreme + 5 pips.",
+   "take_profit_rule": "50% retracement of the London range (first target), London open price (second).",
+   "parameters": {
+    "window_gmt": "12:30-14:00",
+    "min_london_move_pips": 40
+   },
+   "session_filter": "NY open window",
+   "evidence_quality": "textbook description, no stats",
+   "reconstruction": true,
+   "sources": [
+    "https://www.whselfinvest.de/en-de/trading-platform/free-trading-strategies/tradingsystem/93-london-reversal-system",
+    "https://www.tradingview.com/ideas/londonsession"
+   ],
+   "notes": "Related: Breedon & Ranaldo's finding that EUR/USD depreciates in European hours and appreciates in US hours (S18) gives a directional prior: NY-open reversals of a London EUR sell-off should be the stronger half of this setup. No numbers found for the setup itself.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "claimed_performance": "none found"
+  },
+  {
+   "id": "S06",
+   "name": "London close reversal scalp (16:00 London / 11:00 ET)",
+   "category": "session",
+   "timeframes": [
+    "M5",
+    "M15"
+   ],
+   "entry_rule": "Between 11:00 and 12:30 ET (16:00-17:30 London), fade the day's dominant direction after a last push to a new session extreme that fails to close beyond it on M5/M15 (position squaring at the London close).",
+   "exit_rule": "Fixed ~10 pip target per the TradingView source; or close by 13:00 ET.",
+   "stop_loss_rule": "Beyond session extreme (+5 pips) or 10-15 pips.",
+   "take_profit_rule": "10 pips (source) or 1:1.",
+   "parameters": {
+    "window_et": "11:00-12:30",
+    "tp_pips": 10,
+    "sl_pips": 12
+   },
+   "session_filter": "London close window",
+   "evidence_quality": "forum anecdote",
+   "reconstruction": true,
+   "sources": [
+    "https://br.tradingview.com/chart/EURUSD/uH2ugvS5-WHAT-IS-THE-BEST-PAIR-TO-TRADE-LONDON-CLOSE/",
+    "https://papriceaction.blogspot.com/p/london-close-tactic.html"
+   ],
+   "notes": "Academic support for a reversal around the 4pm London fix exists (Krohn-Mueller-Whelan, S14) but for a USD portfolio, not an EUR/USD scalp; 10-pip targets are below many retail spreads+slippage during the fix.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "claimed_performance": "none found"
+  },
+  {
+   "id": "S07",
+   "name": "ICT Judas swing (London killzone sweep of the Asian range)",
+   "category": "session",
+   "timeframes": [
+    "M5",
+    "M15"
+   ],
+   "entry_rule": "Killzone 02:00-05:00 ET (07:00-10:00 UTC). Price sweeps the Asian session high (low) by a few pips and closes back inside the range (M5/M15 close), ideally with a displacement candle and a fair value gap; enter short (long) on the retrace into the FVG/order block in the direction of the daily bias (prior-day direction or HTF structure).",
+   "exit_rule": "Target the opposite side of the Asian range, then the prior day's low/high.",
+   "stop_loss_rule": "Above/below the sweep wick (+2-5 pips).",
+   "take_profit_rule": "1:2 minimum; opposite liquidity pool.",
+   "parameters": {
+    "killzone_et": "02:00-05:00",
+    "sweep_min_pips": 3,
+    "rr_min": 2
+   },
+   "session_filter": "London killzone",
+   "claimed_performance": "Take Profit app (vendor): 198 setups, 138 'successful reversals' (69.7%), avg R:R 1:1.8, PF 2.45, '250 trading days 2024-2025', no rules or methodology published. MQL5 blog (18 years of GOLD, not EUR/USD): Judas-swing rest-of-day reversal 50.0% of 4,841 days, i.e. coin flip without filters. Another page claims London killzone forms the definitive daily high/low 58-64% of the time (unsourced).",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://takeprofitapp.com/en/learn/ict-judas-swing-explained",
+    "https://www.mql5.com/en/blogs/post/778873",
+    "https://www.luxalgo.com/library/concept/judas-swing.md",
+    "https://backtrex.com/en/blog/london-kill-zone-ict-times-strategy"
+   ],
+   "notes": "Vendor win rates (70%) conflict with the only large-sample test (gold, 50%). The daily-bias filter is the untested ingredient; both sources say unfiltered sweeps have no edge.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "reconstruction": false
+  },
+  {
+   "id": "S08",
+   "name": "ICT killzone + fair value gap (NY AM killzone)",
+   "category": "session",
+   "timeframes": [
+    "M15"
+   ],
+   "entry_rule": "Backtrex implementation (GBP/USD, M15): in the NY AM killzone (07:00-10:00 ET) wait for a 3-candle fair value gap (candle1 high < candle3 low for bullish); enter on the retrace into the gap in the direction of the displacement.",
+   "exit_rule": "Fixed SL/TP.",
+   "stop_loss_rule": "Beyond the gap/candle extreme.",
+   "take_profit_rule": "Next liquidity level or fixed 1:2.",
+   "parameters": {
+    "killzone_et": "07:00-10:00",
+    "rr": 2
+   },
+   "session_filter": "NY AM killzone",
+   "claimed_performance": "Backtrex (vendor backtest, GBP/USD M15, 2016-10-02 to 2026-10-01): 1,009 trades, win rate 33.89%, PF 0.80, total -30% (~-3.5%/yr), max DD -33.5%, longest losing streak 14; buy-and-hold +2%. No EUR/USD run published.",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://backtrex.com/en/backtests/ict-kill-zone-fvg-gbp-usd",
+    "https://backtrex.com/en/blog/fair-value-gap-trading-strategy"
+   ],
+   "notes": "Negative result on the sister pair. EUR/USD likely similar or worse (lower volatility, more range days). FVG definition is mechanical and easy to replicate.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "reconstruction": false
+  },
+  {
+   "id": "S09",
+   "name": "ICT Silver Bullet (10:00-11:00 ET FVG entry)",
+   "category": "session",
+   "timeframes": [
+    "M1",
+    "M5"
+   ],
+   "entry_rule": "Between 10:00 and 11:00 ET only: after a liquidity sweep (prior session high/low or equal highs/lows), enter on the first M1-M5 fair value gap formed by the displacement away from the swept level, in the direction of the displacement.",
+   "exit_rule": "Target the next liquidity pool (session high/low, prior day high/low).",
+   "stop_loss_rule": "Below/above the sweep extreme.",
+   "take_profit_rule": "Minimum 1:2; close all by 11:00-11:30 ET.",
+   "parameters": {
+    "window_et": "10:00-11:00",
+    "timeframe": "M5",
+    "rr_min": 2
+   },
+   "session_filter": "10:00-11:00 ET",
+   "claimed_performance": "Take Profit app (vendor): EURUSD M5, 2024-2025, 134 setups, 81 wins (60.4%), avg R:R 1:2.3, PF 2.81 (ranked below NAS100 and gold). Offbeat Forex mechanical bot test (not EURUSD-only, one year): 29.6% win rate, PF 0.81; discretionary EURUSD M15 version 40.4% win rate. LuxAlgo claims 70-80% 'when conditions are respected', no data.",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://takeprofitapp.com/en/learn/ict-silver-bullet-strategy",
+    "https://offbeatforex.com/is-ict-strategy-profitable/",
+    "https://www.luxalgo.com/library/concept/silver-bullet/",
+    "https://backtrex.com/en/blog/ict-silver-bullet-strategy-trading-guide"
+   ],
+   "notes": "Claims span 30% to 80% win rate depending on who is selling what. A mechanical definition (sweep + FVG in a one-hour window) is testable; expect the 10-11 ET window itself (post-US-open vol) to carry most of any effect.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "reconstruction": false
+  },
+  {
+   "id": "S10",
+   "name": "ICT Power of Three (accumulation-manipulation-distribution) daily model",
+   "category": "session",
+   "timeframes": [
+    "M15",
+    "H1",
+    "D1"
+   ],
+   "entry_rule": "Asian session (17:00-23:00 ET or 00:00-07:00 UTC) = accumulation range; London (02:00-05:00 ET) = manipulation (false move against the day's eventual direction); NY (07:00-10:00 ET) = distribution. Rule: after London sweeps one side of the Asian range and reverses back through the daily open, trade in the direction of the reversal, targeting expansion through the other side of the range during NY.",
+   "exit_rule": "Close at NY lunch (12:00 ET) or at the opposite-side liquidity target.",
+   "stop_loss_rule": "Beyond the manipulation extreme.",
+   "take_profit_rule": "Opposite side of Asian range, then prior day high/low.",
+   "parameters": {
+    "accumulation_utc": "00:00-07:00",
+    "manipulation_et": "02:00-05:00",
+    "distribution_et": "07:00-10:00"
+   },
+   "session_filter": "full-day model",
+   "claimed_performance": "MQL5 blog test on 18 years of gold (not EUR/USD): unfiltered PO3/Judas patterns near 50% ('coin flip', 4,841 days); author suggests killzone, HTF direction and key-level filters. No EUR/USD statistics found.",
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://www.mql5.com/en/blogs/post/771729",
+    "https://www.mql5.com/en/blogs/post/778873",
+    "https://backtrex.com/en/blog/ict-power-of-three-amd-strategy",
+    "https://fxopen.com/blog/en/what-is-ict-po3-and-how-do-traders-use-it/"
+   ],
+   "notes": "Equivalent to 'daily open mean reversion + continuation' framed as narrative; the testable statistic is: P(day's close is on the opposite side of the open from the London-session extreme). See fact F-18.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "reconstruction": false
+  },
+  {
+   "id": "S11",
+   "name": "Asian session range fade (Tokyo mean reversion)",
+   "category": "session",
+   "timeframes": [
+    "M5",
+    "M15"
+   ],
+   "entry_rule": "From 00:00 to 06:00 UTC (variants 22:00-02:00 UTC), after the range from 22:00 UTC is at least 15 pips but under 40 pips, sell at the range high / buy at the range low when price touches it with RSI(14, M5) > 70 / < 30, targeting the range midpoint.",
+   "exit_rule": "Range midpoint or 06:00 UTC time stop (before Frankfurt/London).",
+   "stop_loss_rule": "8-12 pips beyond the range edge.",
+   "take_profit_rule": "Range midpoint (typically 10-20 pips).",
+   "parameters": {
+    "window_utc": "00:00-06:00",
+    "min_range_pips": 15,
+    "max_range_pips": 40,
+    "sl_pips": 10,
+    "rsi_len": 14,
+    "rsi_ob": 70,
+    "rsi_os": 30
+   },
+   "session_filter": "Asian session",
+   "claimed_performance": "Blog (no verification): EUR/USD stays within 30-50 pips of the 22:00 UTC open on ~70-80% of days; projected 65-75% win rate with average winner 15-20 pips vs loser 20-25 pips, expectancy +1 to +5 pips/trade. Another blog gives a Tokyo-only window average of 14 pips range. Spread in Asia on raw accounts 0.3-0.8 pips.",
+   "evidence_quality": "forum anecdote",
+   "reconstruction": true,
+   "sources": [
+    "https://tradingonmt5.pages.dev/eurusd-asia-mean-reversion.html",
+    "https://asiatradingguide-com.pages.dev/artigos/asian-session-london-overlap-trading-strategies-2026",
+    "https://gomarkets.com/en-eu/articles/5-traps-traders-face-during-the-asian-session-and-how-to-navigate-them"
+   ],
+   "notes": "Thin expectancy after spread; the real content is the base rate that the Asian range is small, which is better used as a filter for S01/S07 than as a strategy.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)"
+  },
+  {
+   "id": "S12",
+   "name": "Asian/overnight range width as a regime filter",
+   "category": "session",
+   "timeframes": [
+    "H1",
+    "D1"
+   ],
+   "entry_rule": "Not a stand-alone strategy. Compute R_asia = Asian range (00:00-07:00 UTC) / ADR(14). Rule used by multiple sources: take breakout trades (S01) only when R_asia < 0.5; take fade/reversal trades (S07, S11) when R_asia > 0.6 ('the move already happened').",
+   "exit_rule": "Per host strategy.",
+   "stop_loss_rule": "Per host strategy.",
+   "take_profit_rule": "Per host strategy.",
+   "parameters": {
+    "adr_len": 14,
+    "breakout_max_ratio": 0.5,
+    "fade_min_ratio": 0.6
+   },
+   "session_filter": "computed at 07:00 UTC",
+   "evidence_quality": "forum anecdote",
+   "reconstruction": true,
+   "sources": [
+    "https://forums.babypips.com/t/statistical-london-breakout-strategy/46146",
+    "https://www.mql5.com/en/blogs/post/774527"
+   ],
+   "notes": "No published test. Cheap to test and directly addresses why S01 loses.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "claimed_performance": "none found"
+  },
+  {
+   "id": "S13",
+   "name": "Opening range breakout (first 30/60 minutes of London)",
+   "category": "session",
+   "timeframes": [
+    "M5",
+    "M15"
+   ],
+   "entry_rule": "FXStreet 2014 rule set: take the range of the half hour before the London open (07:30-08:00 London time; some use 08:00-08:30 or 08:00-09:00 London) and buy/sell a break of that range +/- 10 pips (or +/- 1/10 of the daily ATR).",
+   "exit_rule": "Fixed target or close at 12:00 London.",
+   "stop_loss_rule": "Opposite side of the opening range.",
+   "take_profit_rule": "1x or 2x the opening range; ORB statistics scripts also track retest and extension targets.",
+   "parameters": {
+    "or_window_london": "08:00-08:30",
+    "buffer_pips": 10,
+    "buffer_alt": "0.1*ATR(14,D1)",
+    "time_exit_london": "12:00"
+   },
+   "session_filter": "London first hour",
+   "claimed_performance": "Informal Scribd study (EURUSD 2001-2011, 2-3am ET window): a move beyond 30% of ADR in the first 30 minutes was followed by continuation to >=100% of ADR with a stated 98% significance; unreviewed. Edgeful (3-month sample, cited by TradeThatSwing): the London 3am-8am ET range is broken 95.45% of the time, 70% one side only, 26% both sides, 5% neither.",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://www.scribd.com/document/65690331/ephyquantarticle1",
+    "https://www.fxstreet.com/analysis/indices-insider/2014/04/23/07",
+    "https://tradethatswing.com/eurusd-daily-volatility-and-price-movement-tendencies/",
+    "https://in.tradingview.com/script/NCTr00I4-Opening-Range-Breakout-Statistics-ORB-kronos/"
+   ],
+   "notes": "The 95% 'London range gets broken' statistic says little (the London range is a subset of the day). The 30%-of-ADR early-move continuation claim is the testable one.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "reconstruction": false
+  },
+  {
+   "id": "S14",
+   "name": "4pm London fix intraday pattern (USD rises into fixes, reverses after)",
+   "category": "session",
+   "timeframes": [
+    "M5",
+    "H1"
+   ],
+   "entry_rule": "Krohn, Mueller & Whelan (J. Finance 2024, 5-min data 1999-2019, 9 G10 pairs incl. EUR): USD appreciates in the hours before the Tokyo, Frankfurt(ECB 14:15 CET) and London 16:00 fixes and depreciates afterwards (W-shaped 24h pattern). Strategy: short EUR/USD from ~13:00 London to 16:00 London; long EUR/USD from 16:00 London to ~20:00 London (reverse after fix).",
+   "exit_rule": "Time-based: exit at the fix / 4 hours after.",
+   "stop_loss_rule": "None in the academic version; practical 0.5 x ADR.",
+   "take_profit_rule": "Time exit.",
+   "parameters": {
+    "pre_fix_window_london": "13:00-16:00",
+    "post_fix_window_london": "16:00-20:00"
+   },
+   "session_filter": "around 16:00 London (WM/Reuters)",
+   "claimed_performance": "Paper: 30-40% of daily volume executes in the 3 hours before and 1 hour after the London fix; pattern not driven by stale quotes; magnitudes are for a dollar portfolio, EUR/USD-specific pip sizes not extracted. The Full FX month-end case studies show 10-20 pip spikes/reversals within the 5-minute WM window on some month-ends and nothing on others.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://econpapers.repec.org/RePEc:bla:jfinan:v:79:y:2024:i:1:p:541-578",
+    "https://www.bankofcanada.ca/2021/10/staff-working-paper-2021-48/",
+    "https://www.bis.org/events/221213_bis_bdi_ecb_exchange_rates/mueller.pdf",
+    "https://thefullfx.com/what-happened-at-the-month-end-fix-39/"
+   ],
+   "notes": "Best-documented intraday seasonality in FX. Returns are small per day and must beat spread; the paper attributes it to dealer hedging of client fix orders. Month-end amplifies it (S15).",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "reconstruction": false
+  },
+  {
+   "id": "S15",
+   "name": "Month-end fix flows (rebalancing into the last-business-day 16:00 London fix)",
+   "category": "session",
+   "timeframes": [
+    "H1",
+    "D1"
+   ],
+   "entry_rule": "Reconstruction of sell-side practice: on the last business day of the month, estimate rebalancing direction from the month's relative equity performance (if US equities outperformed European equities in the month, foreign managers sell USD to rebalance -> expect EUR/USD bid into the 16:00 London fix, and vice versa). Enter 2-3 hours before the fix in that direction; exit at the fix; optionally fade after the fix.",
+   "exit_rule": "Flat at 16:00 London; optional reverse position held to NY close.",
+   "stop_loss_rule": "0.3-0.5 x ADR.",
+   "take_profit_rule": "Time exit at the fix.",
+   "parameters": {
+    "signal": "sign(MSCI US m/m return - MSCI Europe m/m return)",
+    "entry_london": "13:00",
+    "exit_london": "16:00"
+   },
+   "session_filter": "last business day of month",
+   "claimed_performance": "No aggregate statistics found. The Full FX publishes monthly case studies: e.g., a January month-end where EUR/USD rose ~20 points in the 5 minutes before the window and fell ~12 pips within 2 minutes after; other months (July, Nov 2025) showed no reversal and lighter-than-expected flows.",
+   "evidence_quality": "forum anecdote",
+   "reconstruction": true,
+   "sources": [
+    "https://thefullfx.com/what-happened-at-the-month-end-fix-39/",
+    "https://www.cityindex.com/en-uk/news-and-analysis/us-dollar-selling-and-eurusd-buying-into-month-end/",
+    "https://www.forexlive.com/technical-analysis/!/dollar-moves-back-higherfixing-and-stocks-to-blame-20150827"
+   ],
+   "notes": "Bank 'month-end model' signals are routinely published by Citi/Barclays desks but no public hit-rate exists. Testable with daily data: sign of EUR/USD 13:00-16:00 London move on last business day vs relative equity returns.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)"
+  },
+  {
+   "id": "S16",
+   "name": "Sunday/weekend gap fill",
+   "category": "session",
+   "timeframes": [
+    "H1",
+    "D1"
+   ],
+   "entry_rule": "If the Sunday 22:00 UTC (Monday Asia) open differs from Friday's 21:00/22:00 UTC close by more than X pips, trade toward Friday's close (short a gap-up, long a gap-down). Filter by gap size relative to ATR.",
+   "exit_rule": "Friday close (gap filled) or time stop Wednesday London (DailyForex finding).",
+   "stop_loss_rule": "1x gap size beyond the open (or 0.5 x ATR(14)).",
+   "take_profit_rule": "Friday close.",
+   "parameters": {
+    "min_gap_pips": 10,
+    "max_gap_atr_ratio": 0.5,
+    "time_stop": "Wednesday 08:00 London"
+   },
+   "session_filter": "Sunday open",
+   "claimed_performance": "DailyForex (EUR/USD 2001-2020): 204 gaps; all size buckets were 'more likely than not' filled by Wednesday London. ForexFactory post: EUR/USD gaps filled 66.15% (period unstated; GBP/USD 72.18% for 2002-2010). fxnx (500 Sunday opens, EUR/USD+GBP/USD+USD/JPY, methodology undisclosed): gaps < 0.50x daily ATR filled within 48h 88.4% (EUR/USD); gaps > 0.75x ATR filled within 24h only 28.2%, within the week 41.9%. EarnForex: average weekly gap ~70% of Friday's open-close range; no correlation between gap size and surrounding ranges. MQL5 forum anecdote: 98% of gaps over 18 months filled 'at some point'.",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://www.dailyforex.com/forex-articles/2020/06/forex-gap-trading/144786",
+    "https://www.forexfactory.com/thread/post/6522850",
+    "https://fxnx.com/en/blog/forex-weekend-gap-size-500-sunday-opens-their-fill-rates",
+    "https://earnforex.com/guides/forex-weekly-gap-statistics",
+    "https://www.poundsterlinglive.com/eurusd/6708-eur-usd-increased-chance-of-gap-being-filled"
+   ],
+   "notes": "Fill rates of 65-90% are consistent across sources but are mostly 'eventually filled' numbers; small gaps are also only a few pips, so after spread the edge is thin. Large (news) gaps fill much less often.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "reconstruction": false
+  },
+  {
+   "id": "S17",
+   "name": "RSI range-trading restricted to 14:00-06:00 ET (DailyFX time-of-day study)",
+   "category": "session",
+   "timeframes": [
+    "M15",
+    "H1"
+   ],
+   "entry_rule": "DailyFX/FXCM 2011-2015 study: a simple RSI(14) range strategy (buy when RSI crosses up through 30, sell when it crosses down through 70) was unprofitable on EUR/USD 24h over 10 years but produced a rising equity curve when trades were only opened between 14:00 ET and 06:00 ET (i.e., outside London/NY overlap).",
+   "exit_rule": "Opposite RSI signal or fixed target.",
+   "stop_loss_rule": "Not specified in excerpts; FXCM recommended >= 1:1 reward:risk.",
+   "take_profit_rule": "Not specified.",
+   "parameters": {
+    "rsi_len": 14,
+    "os": 30,
+    "ob": 70,
+    "allowed_hours_et": "14:00-06:00"
+   },
+   "session_filter": "Asian + late-NY hours only",
+   "claimed_performance": "Qualitative: 'results not good' 24h; positive equity curve with time filter for EUR/USD and USD/CHF, 'fairly well' GBP/USD, no positive curve for USD/JPY, AUD/USD, NZD/USD over 6 years. A separate FXCM traits study: EUR/USD retail trades were profitable 59% of the time but average loss > average gain. No win rate for the filtered strategy found.",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://dailyfx.com/forex/technical/article/special_report/2011/12/12/When_is_the_Best_Time_of_Day_to_Trade_Forex.html",
+    "https://www.fxcm.com/eu/insights/top-5-traits-of-successful-traders/",
+    "https://www.dailyfx.com/forex/technical/article/special_report/2012/07/21/Improving_Profitability_with_Intraday_Seasonality.html"
+   ],
+   "notes": "Broker research; still one of the few published hour-of-day conditional results for EUR/USD mean reversion.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "reconstruction": false
+  },
+  {
+   "id": "S18",
+   "name": "Local-trading-hours depreciation (Breedon & Ranaldo): short EUR in European hours, long in US hours",
+   "category": "session",
+   "timeframes": [
+    "H1"
+   ],
+   "entry_rule": "Breedon & Ranaldo (SNB WP 2011-04; 10 years of high-frequency data): currencies depreciate during their own local trading hours. Strategy: sell EUR/USD at the European open (07:00-08:00 London), cover at ~13:00 London; buy EUR/USD at the US open (13:00-14:00 London) and close at the NY close.",
+   "exit_rule": "Time-based.",
+   "stop_loss_rule": "None in paper.",
+   "take_profit_rule": "Time exit.",
+   "parameters": {
+    "short_window_london": "08:00-13:00",
+    "long_window_london": "13:00-21:00"
+   },
+   "session_filter": "full-day",
+   "claimed_performance": "Authors state the pattern yields a 'simple, profitable trading strategy' for EUR/USD and appears in order flow (local participants net buy foreign currency in their hours); magnitudes not extracted from excerpts.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://www.snb.ch/en/publications/research/working-papers/2011/working_paper_2011_04",
+    "https://econpapers.repec.org/RePEc:qmw:qmwecw:694",
+    "https://swlb1.aeaweb.org/conference/2009/retrieve.php?pdfid=301"
+   ],
+   "notes": "Consistent with S14 (fix-related USD demand). Easy to replicate on hourly data; must be re-checked post-2011.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "reconstruction": false
+  },
+  {
+   "id": "S19",
+   "name": "Liquidity sweep reversal with killzone filter (Backtrex 5-year test)",
+   "category": "session",
+   "timeframes": [
+    "H1",
+    "M15"
+   ],
+   "entry_rule": "Backtrex rules: identify equal highs/lows (liquidity) on H1; a sweep = price exceeds the level by >= 3 pips and the candle closes back inside; all conditions evaluated on the previous confirmed candle; only take setups inside ICT killzones (London 02:00-05:00 ET, NY 07:00-10:00 ET); enter at next open against the sweep.",
+   "exit_rule": "Fixed R multiple.",
+   "stop_loss_rule": "Beyond the sweep extreme.",
+   "take_profit_rule": "Next liquidity level or fixed 1:2.",
+   "parameters": {
+    "sweep_min_pips": 3,
+    "liquidity_tf": "H1",
+    "killzones_et": [
+     "02:00-05:00",
+     "07:00-10:00"
+    ]
+   },
+   "session_filter": "killzones",
+   "claimed_performance": "Backtrex blog (vendor, 2019-2024, 'OHLC tick-faithful'): EURUSD H1 win rate 52.8%, PF 1.63; XAUUSD 53.7%, PF 1.75; combined 1,247 trades, PF 1.68, win 53.2%. Internal inconsistencies: per-instrument trade counts quoted elsewhere on the page (1,743 and 1,504, and '74 trades' in another excerpt) do not reconcile with 1,247.",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://backtrex.com/en/blog/liquidity-sweep-strategy-backtest-results",
+    "https://backtrex.com/en/blog/new-york-killzone-ict-liquidity-sweep-strategy-guide",
+    "https://backtrex.com/en/blog/ict-turtle-soup-reversal-strategy"
+   ],
+   "notes": "Only positive vendor ICT result found and it comes from a blog post (marketing) rather than the vendor's 'backtests' section, whose published EUR/USD and GBP/USD ICT runs all lose. Treat PF 1.6 as an upper bound.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "reconstruction": false
+  },
+  {
+   "id": "T01",
+   "name": "Turtle System 1 / Donchian 20-10 on daily bars",
+   "category": "breakout_trend",
+   "timeframes": [
+    "D1",
+    "H4"
+   ],
+   "entry_rule": "Buy stop at the highest high of the last 20 days; sell stop at the lowest low of the last 20 days (original Turtle rule skips the signal if the previous S1 trade was a winner).",
+   "exit_rule": "Long: close below the 10-day low; short: close above the 10-day high.",
+   "stop_loss_rule": "2 x N where N = 20-day ATR (original); Backtrex stop not confirmed.",
+   "take_profit_rule": "None (trailing channel exit).",
+   "parameters": {
+    "entry_len": 20,
+    "exit_len": 10,
+    "atr_len": 20,
+    "stop_atr_mult": 2,
+    "units": "risk 1% per N"
+   },
+   "claimed_performance": "Backtrex (vendor, EUR/USD D1, 2016-10-02 to 2026-10-01): 80 trades, PF 0.94, total -2.7%, max DD -14.6%; buy-and-hold +0.1%; one search summary quoted 40% win rate (unconfirmed). Take Profit app (vendor, EURUSD H4 20/10, '250 trading days' 2024-2025): 84 setups, 50.0% win rate, avg R:R 1:3.4, PF 2.15. MQL5 default-setting run on EURUSD H4 (2026): PF 0.88-0.89. 10-pair 2015-2024 blog: 20-period Donchian average win rate 38%, avg win 2.8x avg loss (not EUR/USD-specific).",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://backtrex.com/en/backtests/turtle-trading-eur-usd",
+    "https://takeprofitapp.com/pl/learn/donchian-channels-trading",
+    "https://www.mql5.com/en/blogs/post/773712",
+    "https://en.wikipedia.org/wiki/Donchian_channel",
+    "https://tradingwithrayner.com/turtle-trading-rules"
+   ],
+   "notes": "Decade result is essentially zero after costs: EUR/USD spent 2016-2026 in a 1.03-1.25 band. The one positive number (PF 2.15) is a one-year vendor sample that includes the 2025 trend.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "T02",
+   "name": "Turtle System 2 / Donchian 55-20",
+   "category": "breakout_trend",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "Enter on a 55-day high (low) breakout, no skip rule.",
+   "exit_rule": "20-day opposite breakout.",
+   "stop_loss_rule": "2 x ATR(20).",
+   "take_profit_rule": "None.",
+   "parameters": {
+    "entry_len": 55,
+    "exit_len": 20,
+    "stop_atr_mult": 2
+   },
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://en.wikipedia.org/wiki/Donchian_channel",
+    "https://therighttrader.com/learn/indicator-strategies/donchian-channels-and-adx-strategy"
+   ],
+   "notes": "No EUR/USD decade-long result found. Expect ~2-4 trades/year; the 2014-15 and 2022 and 2025 trends are the only large winners in the last decade.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  },
+  {
+   "id": "T03",
+   "name": "Golden/death cross: SMA50 x SMA200 (daily)",
+   "category": "breakout_trend",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "Long when SMA(50) closes above SMA(200); short when it closes below.",
+   "exit_rule": "Opposite cross.",
+   "stop_loss_rule": "None (or 3 x ATR(14)).",
+   "take_profit_rule": "None.",
+   "parameters": {
+    "fast": 50,
+    "slow": 200,
+    "type": "SMA (EMA variant common)"
+   },
+   "claimed_performance": "No decade-long EUR/USD result found. TradesViz community SMA-cross test: 27 trades, PF 0.60, max DD -2.94% (period unstated). Forextester daily 3-month test (2021) with 36 trades was loss-making and internally inconsistent. Golden-cross Pine scripts quoting PF 2-3 are on NFLX/AAPL/NVDA, not FX.",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://www.tradesviz.com/shared/backtests/6fb14389-9523-4fa0-8157-992f2cf45333/",
+    "https://forextester.com/blog/ma-crossover-strategy",
+    "https://www.luxalgo.com/blog/2-moving-average-crossover-strategies-explained/"
+   ],
+   "notes": "Most common lengths cited for EUR/USD by retail sources: 50/200 (daily), 20/50 EMA (H4/H1), 10/20 SMA (daily), 7/14 (Dukascopy contest example, M1/H1), 9/21 EMA (intraday).",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "T04",
+   "name": "EMA 20/50 crossover with price filter (H4/H1)",
+   "category": "breakout_trend",
+   "timeframes": [
+    "H1",
+    "H4"
+   ],
+   "entry_rule": "Long when EMA(20) > EMA(50) and price closes above EMA(20) after a pullback to it; short mirrored. Dukascopy contest sample: MA(7) x MA(14) on M1/H1 with TP 10 / SL 20 pips.",
+   "exit_rule": "Opposite cross, or fixed TP/SL.",
+   "stop_loss_rule": "Below the pullback swing low or 1.5 x ATR(14).",
+   "take_profit_rule": "2 x risk, or trail with EMA(50).",
+   "parameters": {
+    "fast": 20,
+    "slow": 50,
+    "atr_len": 14,
+    "sl_atr": 1.5,
+    "rr": 2
+   },
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://www.dukascopy.com/swiss/english/forex/jforex/forum/viewtopic.php?p=15097",
+    "https://forextester.com/blog/ema-rsi-strategy",
+    "https://www.tradingview.com/script/Is0LQdiz-Smoothed-Heikin-Ashi-Trend-on-Chart-TraderHalai-BACKTEST"
+   ],
+   "notes": "Ubiquitous; no credible EUR/USD stat found. Backtrex's MACD+RSI H1 result (T05) is the closest proxy for 'fast indicator crossover on H1' and it is strongly negative.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  },
+  {
+   "id": "T05",
+   "name": "MACD(12,26,9) signal cross, with RSI filter (Backtrex) or alone",
+   "category": "breakout_trend",
+   "timeframes": [
+    "H1",
+    "D1"
+   ],
+   "entry_rule": "Backtrex H1: long when MACD line crosses above signal and RSI(14) > 50; short mirrored. Plain: MACD line crosses signal line.",
+   "exit_rule": "Fixed SL/TP (Backtrex) or opposite cross.",
+   "stop_loss_rule": "Backtrex: 45 pips.",
+   "take_profit_rule": "Backtrex: 90 pips.",
+   "parameters": {
+    "fast": 12,
+    "slow": 26,
+    "signal": 9,
+    "rsi_len": 14,
+    "sl_pips": 45,
+    "tp_pips": 90
+   },
+   "claimed_performance": "Backtrex (vendor, EUR/USD H1, 2016-10-02 to 2026-10-01): 1,977 trades, PF 0.80, total -53.4%, max DD -56.7%; buy-and-hold ~flat. TradesViz daily 12/26/9 long-only with stops: PF 1.34 on 13 trades (instrument unconfirmed). Liberated Stock Trader on DJIA daily: 3% 'success rate' (not FX).",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://backtrex.com/en/backtests/macd-rsi-eur-usd",
+    "https://www.tradesviz.com/shared/backtests/e9c97fb3-1d4b-448d-83ad-32f876b77f1c/",
+    "https://liberatedstocktrader.com/?p=24867"
+   ],
+   "notes": "Backtrex's explanation: H1 signals fire constantly inside ranges while the pair went nowhere for a decade.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "T06",
+   "name": "ADX(14) > 25 trend filter on any trend entry",
+   "category": "breakout_trend",
+   "timeframes": [
+    "H1",
+    "H4",
+    "D1"
+   ],
+   "entry_rule": "Take trend-following entries (T01-T05) only when ADX(14) > 25 and +DI/-DI agree with direction; stand aside when ADX < 20. Variant: ADXR smoothed.",
+   "exit_rule": "Host strategy; some exit when ADX turns down from > 40.",
+   "stop_loss_rule": "Host strategy.",
+   "take_profit_rule": "Host strategy.",
+   "parameters": {
+    "adx_len": 14,
+    "trend_threshold": 25,
+    "no_trade_threshold": 20
+   },
+   "claimed_performance": "Babypips HLHB system (EUR/USD H1, 2016-2017): adding ADX(14) raised win rate and average pips per win but reduced total pips vs the unfiltered version; author suspected it filtered out real trends. A marketing page shows -$7.23 net on an ADX EURUSD hourly strategy. No rigorous result.",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://www.babypips.com/trading/forex-hlhb-system-20170212",
+    "https://www.babypips.com/trading/forex-hlhb-system-20170219",
+    "https://www.mql5.com/en/articles/22754"
+   ],
+   "notes": "Standard filter; the only public EUR/USD evidence is mixed.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "T07",
+   "name": "Ichimoku (9/26/52) Kumo breakout / Chikou cross",
+   "category": "breakout_trend",
+   "timeframes": [
+    "D1",
+    "H4"
+   ],
+   "entry_rule": "Long when price closes above the Kumo, Tenkan > Kijun, and Chikou span is above price 26 bars ago; short mirrored. EarnForex EA variant: entry on Chikou span crossing price.",
+   "exit_rule": "Tenkan/Kijun cross against position or close back inside the cloud.",
+   "stop_loss_rule": "Below Kijun-sen or cloud bottom.",
+   "take_profit_rule": "None (trend exit).",
+   "parameters": {
+    "tenkan": 9,
+    "kijun": 26,
+    "senkou_b": 52,
+    "displacement": 26
+   },
+   "claimed_performance": "EarnForex Ichimoku Chikou Cross EA, EUR/USD D1 2001-2013: net profit $6,696 on $10,000 (+67%), max relative DD 8.08%; the same EA on 2013-01-01 to 2022-04-14 'complete account wipeout'. Babypips forum claim: 30,341 pips over 5 years on D1 with no SL/TP (unverified). MQL5 signal 'Tochi Flow EURUSD only': PF 239.86 on 247 trades but 66.02% equity drawdown (grid-style).",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://www.earnforex.com/metatrader-expert-advisors/Ichimoku-Chikou-Cross",
+    "https://forums.babypips.com/t/ichimoku-kinko-hyo-methodology-used-on-school-of-pipsology/49727",
+    "https://www.mql5.com/en/signals/2346630"
+   ],
+   "notes": "Clear regime dependence: profitable in the trending 2001-2013 era, wiped out 2013-2022.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "T08",
+   "name": "Bollinger/Keltner squeeze (TTM squeeze) breakout",
+   "category": "breakout_trend",
+   "timeframes": [
+    "H1",
+    "H4",
+    "D1"
+   ],
+   "entry_rule": "Squeeze on when Bollinger(20, 2.0) upper/lower are inside Keltner(20, 1.5 x ATR(20)). Enter on the first bar where the bands move back outside the Keltner channel, in the direction of momentum (close - midpoint of (highest high + lowest low)/2 and SMA, linear-regression slope) or the direction of the breakout candle.",
+   "exit_rule": "Momentum histogram turns toward zero, or opposite band touch.",
+   "stop_loss_rule": "Opposite Keltner band or 1.5 x ATR.",
+   "take_profit_rule": "2 x ATR or band walk exit.",
+   "parameters": {
+    "bb_len": 20,
+    "bb_mult": 2.0,
+    "kc_len": 20,
+    "kc_mult": 1.5,
+    "atr_len": 20
+   },
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://www.luxalgo.com/library/concept/ttm-squeeze.md",
+    "https://medium.com/superalgos/a-quantitative-study-of-the-bollinger-bands-squeeze-strategy-9f47143f33fb",
+    "https://therighttrader.com/pt/learn/indicators/ttm-squeeze"
+   ],
+   "notes": "No EUR/USD performance numbers found anywhere. John Carter never published a win rate; different Keltner formulas make vendor results non-comparable.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  },
+  {
+   "id": "T09",
+   "name": "Inside-bar (inside day) breakout",
+   "category": "breakout_trend",
+   "timeframes": [
+    "D1",
+    "H4"
+   ],
+   "entry_rule": "Inside day = today's high < yesterday's high and today's low > yesterday's low. Place buy stop at mother-bar high + 2 pips and sell stop at mother-bar low - 2 pips for the next session; cancel the other on fill.",
+   "exit_rule": "Fixed R or close after N days.",
+   "stop_loss_rule": "Opposite side of the inside bar (tight) or of the mother bar (wide).",
+   "take_profit_rule": "1x mother-bar range, or 2R.",
+   "parameters": {
+    "buffer_pips": 2,
+    "stop": "inside bar opposite side",
+    "target_R": 2,
+    "hold_days_max": 5
+   },
+   "claimed_performance": "Currency Trader (Chris Peters) study, 7 pairs incl. EUR/USD, daily, Jan 1993-Sep 2008: 4,174 inside days (avg 596 per pair, ~3/month/pair); inside days were followed by positive (upward-biased) moves over the following week; per-day averages roughly 0.1-0.3% (table garbled in available copy). Forum study (EUR/USD daily since 2003): average inside-bar range 82.7 pips vs ~117 pips average day; average range of the day after an inside bar 124 pips. MQL5 post: EUR/USD M15 was the only inside-bar setup stable in both back and forward test (no figures).",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://www.scribd.com/document/496411061/CurrencyTrader1108s4",
+    "https://www.forexpeacearmy.com/community/threads/eur-usd-study.13340/latest",
+    "https://www.mql5.com/en/blogs/post/771362",
+    "https://www.edgeful.com/blog/posts/inside-bars-report"
+   ],
+   "notes": "The range-expansion-after-contraction fact (124 vs 82.7 pips) is the useful bit; direction is not predicted.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "T10",
+   "name": "NR7 / ID-NR4 range-contraction breakout (Crabel)",
+   "category": "breakout_trend",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "NR7: today's high-low range is the narrowest of the last 7 days. Next day, buy stop at today's high + buffer, sell stop at today's low - buffer (ID/NR4: inside day that is also the narrowest of 4).",
+   "exit_rule": "Close of the breakout day (Crabel's original) or trailing.",
+   "stop_loss_rule": "Opposite side of the NR7 bar.",
+   "take_profit_rule": "End of day or 1x ADR(10).",
+   "parameters": {
+    "lookback": 7,
+    "buffer_pips": 2,
+    "exit": "breakout-day close"
+   },
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://tradingsetupsreview.com/inside-daynr4",
+    "https://www.marketinout.com/stock-screener/nr7-inside-day/europe?view=charts"
+   ],
+   "notes": "No EUR/USD NR7 statistics found. Overlaps T09; the 2023 minimum daily range of 28 pips (Aug) shows how small NR days can get.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  },
+  {
+   "id": "T11",
+   "name": "Supertrend (10, 3) trend following",
+   "category": "breakout_trend",
+   "timeframes": [
+    "H1",
+    "H4",
+    "D1"
+   ],
+   "entry_rule": "Long when close crosses above the Supertrend line (ATR(10) x 3 band flip); short when it crosses below.",
+   "exit_rule": "Opposite flip.",
+   "stop_loss_rule": "The Supertrend line itself (trailing).",
+   "take_profit_rule": "None.",
+   "parameters": {
+    "atr_len": 10,
+    "mult": 3.0
+   },
+   "claimed_performance": "HackerNoon multi-year test of TradingView's Supertrend strategy on NZDUSD (not EUR/USD): M15/H1/H4 all lost, PF 0.80-0.86; D1 the only positive line with 3 trades making 88% of profit. No EUR/USD figures.",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://hackernoon.com/the-truth-about-tradingviews-supertrend-strategy-after-67-years-of-backtesting",
+    "https://www.mql5.com/en/blogs/post/759888",
+    "https://forextester.com/blog/supertrend-indicator/"
+   ],
+   "notes": "Expect the same profile on EUR/USD: whipsaw losses intraday, a few big daily winners.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "T12",
+   "name": "Parabolic SAR (0.02, 0.2) flip",
+   "category": "breakout_trend",
+   "timeframes": [
+    "M30",
+    "D1"
+   ],
+   "entry_rule": "Long when price closes above the SAR dots (SAR flips below price); short when it flips above.",
+   "exit_rule": "Next flip.",
+   "stop_loss_rule": "SAR value (trailing).",
+   "take_profit_rule": "None.",
+   "parameters": {
+    "af_start": 0.02,
+    "af_step": 0.02,
+    "af_max": 0.2
+   },
+   "claimed_performance": "EA31337 gist: SAR on EURUSD M30, one month, PF 0.59. DEV Community 'AI-evolved' SAR on EURUSD D1: +150% in-sample over 2,680 candles, 336 trades, max DD 7.4%, PF 2.3 (an earlier draft said 2.62), self-described experiment, in-sample only.",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://gist.github.com/EA31337-Tester/a3bdfd7893207e24d1a6f664e71ddfac",
+    "https://dev.to/howiprompt/how-our-ai-agents-evolved-parabolicsar-on-eurusd-to-150-backtested-1-evolutions-2c0l",
+    "https://www.mql5.com/en/forum/177353/page2"
+   ],
+   "notes": "Nothing credible. Useful only as a trailing-stop mechanism.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "T13",
+   "name": "Heikin-Ashi trend continuation with EMA filter",
+   "category": "breakout_trend",
+   "timeframes": [
+    "H1",
+    "H4"
+   ],
+   "entry_rule": "Long after two consecutive bullish Heikin-Ashi candles with no lower wick while price is above EMA(100) (MQL5 variant) or EMA(20) > EMA(50) (TradingView variant); short mirrored.",
+   "exit_rule": "First opposite-colour HA candle with a wick, or EMA cross.",
+   "stop_loss_rule": "Below the last HA swing low / 1.5 x ATR.",
+   "take_profit_rule": "Trail.",
+   "parameters": {
+    "ema_filter": 100,
+    "confirm_candles": 2
+   },
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://www.mql5.com/en/forum/450268",
+    "https://www.tradingview.com/script/Is0LQdiz-Smoothed-Heikin-Ashi-Trend-on-Chart-TraderHalai-BACKTEST",
+    "https://www.prorealcode.com/prorealtime-trading-strategies/heikin-ashi-during-trend"
+   ],
+   "notes": "MQL5 EUR/USD M30 test (Jan 2022-Jul 2023) reported no figures. No stats found.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  },
+  {
+   "id": "T14",
+   "name": "ATR trailing stop / Chandelier exit as the exit engine",
+   "category": "breakout_trend",
+   "timeframes": [
+    "H1",
+    "H4",
+    "D1"
+   ],
+   "entry_rule": "Not an entry. Chandelier exit: long stop = highest high(22) - 3 x ATR(22); short stop = lowest low(22) + 3 x ATR(22). Generic ATR trail: stop = close - k x ATR(14), k in [1.5, 3], ratcheted only in the trade's favour.",
+   "exit_rule": "Stop hit.",
+   "stop_loss_rule": "As above.",
+   "take_profit_rule": "None.",
+   "parameters": {
+    "chandelier_len": 22,
+    "chandelier_mult": 3.0,
+    "atr_len": 14,
+    "k_range": [
+     1.5,
+     3.0
+    ]
+   },
+   "claimed_performance": "No EUR/USD comparison of multipliers found; a student grid search (daily EURUSD, ATR mult 0.75-1.5, R:R 1.5-3) reported underperformance attributed to timeframe, figures not shown.",
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://tamaraabu4-cell.github.io/quant-study-notes/projects/turtle-soup.html",
+    "https://in.tradingview.com/script/U4hsXLAF-ATR-1-5-FX-Stop-Loss",
+    "https://fr.tradingview.com/script/KO7Qe4Xb-Strategy-Validation-Framework-Standardised-ATR-Exits-1-Ris/"
+   ],
+   "notes": "Parameter sweep is cheap; this is an exit module for T01/T03/T11.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "T15",
+   "name": "Larry Williams volatility breakout: open +/- k x previous range",
+   "category": "breakout_trend",
+   "timeframes": [
+    "M5",
+    "D1"
+   ],
+   "entry_rule": "At the day's open: buy stop = open + k x (previous day high - low); sell stop = open - k x (previous range). WHS default k = 0.25, 5-minute chart. Variant: use yesterday's true range or 3-day average range.",
+   "exit_rule": "Close at 21:59 (WHS time filter) if neither stop nor target hit; one trade per day.",
+   "stop_loss_rule": "2 x the breakout band (WHS default) or opposite band.",
+   "take_profit_rule": "2 x the breakout band.",
+   "parameters": {
+    "k": 0.25,
+    "range_lookback": 1,
+    "sl_mult": 2,
+    "tp_mult": 2,
+    "time_exit": "21:59 platform time"
+   },
+   "claimed_performance": "WHS (broker marketing): 'backtests over several years show variable but never negative profits' (no figures published). MQL5 forum opinion: EUR/USD lacks the volatility for this, GBP/USD better. ProRealCode: ATR 'doesn't change much for EURUSD' explaining weak volatility-system results. RogueQuant 15-market 2014-2024 test did not clearly report EURUSD.",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://whselfinvest.com/en-be/trading-platform/free-trading-strategies/tradingsystem/56-volatility-break-out-larry-williams-free",
+    "https://www.mql5.com/en/forum/173441/page7",
+    "https://prorealcode.com/prorealtime-trading-strategies/eurusd-volatilitybreakout-strategy/?pnum=3",
+    "https://roguequant.substack.com/p/i-backtested-larry-williams-trading"
+   ],
+   "notes": "Daily-open-anchored cousin of S01; k and the 'open' definition (00:00 UTC vs 22:00 UTC vs London open) are the key parameters.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "T16",
+   "name": "Previous day high/low breakout (continuation)",
+   "category": "breakout_trend",
+   "timeframes": [
+    "H1",
+    "M15"
+   ],
+   "entry_rule": "Buy stop at previous day's high + buffer, sell stop at previous day's low - buffer, active during London/NY; Backtrex GBP/USD H1 implementation.",
+   "exit_rule": "Fixed SL/TP or end-of-day.",
+   "stop_loss_rule": "Fixed pips or midpoint of prior day.",
+   "take_profit_rule": "Fixed pips, 1-2x risk.",
+   "parameters": {
+    "buffer_pips": 2,
+    "session": "07:00-17:00 London"
+   },
+   "claimed_performance": "Backtrex (vendor, GBP/USD H1, 2016-2026): listed as losing money; win rate/PF not visible in search excerpts. No EUR/USD run found. MQL5 forum pivot study (EUR/USD 2003-2010): daily high exceeded R1 43.1%, R2 20.4%, R3 6.3%; low below S1 45.3%, S2 21.5%, S3 6.6% (pivot-based, not PDH/PDL).",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://backtrex.com/en/backtests/previous-day-high-low-breakout-gbp-usd",
+    "https://www.edgeful.com/blog/posts/previous-days-range-report",
+    "https://mql5.com/en/forum/2724"
+   ],
+   "notes": "Probability of taking out PDH or PDL for EUR/USD specifically was not found; see facts section for the pivot-level proxies. Edgeful sells this exact report.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "T17",
+   "name": "Time-series momentum (12-month, 1-month, 3-month lookbacks)",
+   "category": "breakout_trend",
+   "timeframes": [
+    "D1",
+    "MN"
+   ],
+   "entry_rule": "At month end (or daily with monthly rebalance): long EUR/USD if the trailing 12-month return (excess of carry) > 0, short if < 0; variants use 1-, 3-, 12-month signals equally weighted (Hurst-Ooi-Pedersen) and scale position to 10-40% annualized vol target.",
+   "exit_rule": "Signal flip at rebalance.",
+   "stop_loss_rule": "None (vol scaling).",
+   "take_profit_rule": "None.",
+   "parameters": {
+    "lookbacks_months": [
+     1,
+     3,
+     12
+    ],
+    "vol_target": 0.1,
+    "rebalance": "monthly",
+    "skip_month": false
+   },
+   "claimed_performance": "EPAT walk-forward study (7 majors, 2003-2025, out-of-sample): only USD/JPY (Sharpe 0.78) and EUR/USD (Sharpe ~0.54) cleared a 0.5 Sharpe bar using time-series momentum; best equal-weight portfolio CAGR 1.24%, Sharpe 0.43, max DD -8.25%. Hurst-Ooi-Pedersen (1880-2016, 67 assets): 1/3/12-month TSMOM positive in every decade; a skip month hurts. Quantpedia cross-sectional 12m FX momentum: Sharpe 0.3, max DD -45.87%. Krohn et al.: G10 momentum profits accrue mostly overnight.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://www.quantinsti.com/articles/trend-following-strategies-major-currency-markets-epat-project/",
+    "https://quantpedia.com/strategies/currency-momentum-factor",
+    "https://www.cxoadvisory.com/momentum-investing/trend-following-with-intrinsic-momentum-over-the-very-long-run",
+    "https://acfr.aut.ac.nz/__data/assets/pdf_file/0007/190753/Krohn_Mueller_Whelan_Jun2018_FXPremiaAroundTheClock.pdf"
+   ],
+   "notes": "Low Sharpe but the only trend approach with out-of-sample academic support on EUR/USD; signal is slow (a few flips per year).",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "T18",
+   "name": "Fractal breakout intraday (ProRealCode EUR/USD H1 system)",
+   "category": "breakout_trend",
+   "timeframes": [
+    "H1"
+   ],
+   "entry_rule": "Williams fractal (5-bar) high/low on H1; buy stop above the most recent up-fractal, sell stop below the most recent down-fractal, London/NY hours only (community system, many iterations in thread).",
+   "exit_rule": "Fixed TP/SL plus time exit.",
+   "stop_loss_rule": "Opposite fractal or fixed ~30 pips.",
+   "take_profit_rule": "Fixed ~40-60 pips or trailing.",
+   "parameters": {
+    "fractal_len": 5,
+    "hours": "08:00-20:00 CET"
+   },
+   "evidence_quality": "forum anecdote",
+   "reconstruction": true,
+   "sources": [
+    "https://www.prorealcode.com/reply/32837",
+    "https://www.prorealcode.com/topic/fractal-breakout-intraday-strategy-eurusd-1h/page/20/"
+   ],
+   "notes": "20+ page forum thread with screenshots only; no reproducible stats extracted.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found"
+  },
+  {
+   "id": "M01",
+   "name": "Connors RSI(2) on daily bars",
+   "category": "mean_reversion",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "Long when close > SMA(200) and RSI(2) < 5 (StockCharts/Backtrex) or < 10 (common variant); short when close < SMA(200) and RSI(2) > 95 (or > 90). Entry at close.",
+   "exit_rule": "Close > SMA(5) for longs (close < SMA(5) for shorts); Backtrex also exits if price crosses the 200-day SMA.",
+   "stop_loss_rule": "None in original.",
+   "take_profit_rule": "SMA(5) exit.",
+   "parameters": {
+    "rsi_len": 2,
+    "long_threshold": 5,
+    "short_threshold": 95,
+    "trend_sma": 200,
+    "exit_sma": 5
+   },
+   "claimed_performance": "Backtrex (vendor, EUR/USD D1, 2016-10-02 to 2026-10-01): 75 trades, 54.7% winners, PF 0.78, total -4.5%, max DD -6.6%; average loss 0.62% > average win 0.41%. Vendor's explanation: indices supply mean reversion plus upward drift, EUR/USD has only weak mean reversion and no drift. TradingView 80-symbol 2007-2014 community test: 58.4% wins, +32,552 pips, no costs/out-of-sample.",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://backtrex.com/en/backtests/connors-rsi-2-eur-usd",
+    "https://chartschool.stockcharts.com/table-of-contents/trading-strategies-and-models/trading-strategies/rsi-2",
+    "https://www.mql5.com/en/articles/17636",
+    "https://it.tradingview.com/scripts/rsi-2/page-7"
+   ],
+   "notes": "Clean negative result on EUR/USD; high win rate, negative expectancy.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "M02",
+   "name": "RSI(14) 30/70 extremes (daily or H4)",
+   "category": "mean_reversion",
+   "timeframes": [
+    "H4",
+    "D1"
+   ],
+   "entry_rule": "Long when RSI(14) crosses back above 30; short when it crosses back below 70. Variants add divergence or require a candle confirmation.",
+   "exit_rule": "RSI(14) reaches 50 (or the opposite band), or fixed R.",
+   "stop_loss_rule": "Recent swing beyond the extreme, or 1.5 x ATR(14).",
+   "take_profit_rule": "RSI 50 / middle Bollinger band.",
+   "parameters": {
+    "rsi_len": 14,
+    "os": 30,
+    "ob": 70
+   },
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://dailyfx.com/forex/technical/article/special_report/2011/12/12/When_is_the_Best_Time_of_Day_to_Trade_Forex.html",
+    "https://www.babypips.com/school/what-is-the-most-profitable-indicator.html"
+   ],
+   "notes": "No EUR/USD daily win rate found. The only conditional result is DailyFX's hour-of-day filter (S17).",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  },
+  {
+   "id": "M03",
+   "name": "Bollinger band (20, 2) fade to the middle band",
+   "category": "mean_reversion",
+   "timeframes": [
+    "H1",
+    "D1",
+    "M1"
+   ],
+   "entry_rule": "Long when close < lower band (20, 2.0) and (optionally) RSI(14) < 30; short when close > upper band and RSI > 70. NautilusTrader tutorial: BBMeanReversion with RSI filter on 1-minute bars.",
+   "exit_rule": "Close crosses the 20-period SMA (middle band).",
+   "stop_loss_rule": "1 x band width beyond entry, or 2 x ATR(14).",
+   "take_profit_rule": "Middle band.",
+   "parameters": {
+    "len": 20,
+    "mult": 2.0,
+    "rsi_filter": [
+     30,
+     70
+    ]
+   },
+   "claimed_performance": "AvaTrade 'demo backtest' (no dates/timeframe): 120 trades, 56% win rate, PF 1.45. cTrader bot listings: 56-61% win rates, PF 1.2+ on ~100 trades (sales pages). NautilusTrader Dec-2025 1-minute example: no win rate; notes 'mean reversion without a regime filter pays the spread on every cycle' and the month trended. QuantConnect snippet: 6% win rate, negative (settings unknown).",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://www.avatrade.com/education/technical-analysis-indicators-strategies/bollinger-bands-trading-strategies",
+    "https://nautilustrader.io/docs/latest/tutorials/fx_mean_reversion_ax/",
+    "https://www.prorealcode.com/topic/mean-reversion-trading-system-eur-usd-1h",
+    "https://ctrader.com/products/2304"
+   ],
+   "notes": "Nothing above 'vendor demo' quality. The ProRealCode EUR/USD 1H thread's 'too good to be true' results used spread 0.8.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "M04",
+   "name": "Z-score of price vs SMA(20) (+/-2 sigma fade)",
+   "category": "mean_reversion",
+   "timeframes": [
+    "M5",
+    "H1",
+    "D1"
+   ],
+   "entry_rule": "z = (close - SMA(20)) / stdev(20). Long when z crosses below -2 and then back above -2 (re-entry); short when z crosses above +2 and back below.",
+   "exit_rule": "z crosses 0.",
+   "stop_loss_rule": "z beyond +/-3, or 2 x ATR.",
+   "take_profit_rule": "z = 0.",
+   "parameters": {
+    "len": 20,
+    "entry_z": 2.0,
+    "exit_z": 0.0,
+    "stop_z": 3.0
+   },
+   "claimed_performance": "Community scripts claim '68% win rate on 1-5 min' (unverified). Backtrex guide gives generic targets (max DD < 15-20% over 3 years, Sharpe > 0.8) rather than results. Cautionary example cited everywhere: 2014-15 EUR/USD 1.40->1.05 decline repeatedly stopped out z-score faders.",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://it.tradingview.com/script/IlUJulqm-Z-Score-Mean-Reversion-EURUSD",
+    "https://backtrex.com/en/blog/mean-reversion-strategy-backtesting-guide",
+    "https://www.mql5.com/en/articles/24652"
+   ],
+   "notes": "Mathematically the same trade as M03. Academic support for intraday mean reversion in EUR/USD exists (Wisniewska 2014 1-min; Middleton et al. 2021) but not at the daily horizon.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "M05",
+   "name": "Classic (floor) pivot point bounce/break",
+   "category": "mean_reversion",
+   "timeframes": [
+    "M15",
+    "H1"
+   ],
+   "entry_rule": "PP = (H + L + C)/3; R1 = 2PP - L; S1 = 2PP - H; R2 = PP + (H - L); S2 = PP - (H - L); R3 = H + 2(PP - L); S3 = L - 2(H - PP), using the prior day's 00:00-24:00 UTC (or NY-close) bar. Bounce rule: buy at S1 (sell at R1) on a rejection candle when the day opened between S1 and R1; breakout rule: buy a close above R1 targeting R2.",
+   "exit_rule": "PP (for bounces) / next level (for breaks); end of day.",
+   "stop_loss_rule": "Halfway to the next level (e.g., below S2 for an S1 long: 0.5 x (S1 - S2)).",
+   "take_profit_rule": "PP for bounces; R2/S2 for breaks.",
+   "parameters": {
+    "pivot_type": "classic",
+    "day_boundary": "00:00 UTC"
+   },
+   "claimed_performance": "MQL5 forum study (EUR/USD, 1,965 days, Jan 2003-Nov 2010): high exceeded PP 87.38% / low below PP 85.90% of days; high reached R1 43.10%, R2 20.41%, R3 6.26%; low reached S1 45.34%, S2 21.48%, S3 6.56%. Conditional: when the open was below PP, lows reached S1 50.42% vs 36.20% when the open was above PP.",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://mql5.com/en/forum/2724",
+    "https://www.babypips.com/learn/forex/other-pivot-point-calculation-methods",
+    "https://capital.com/en-au/learn/trading-strategies/pivot-point-trading"
+   ],
+   "notes": "These touch frequencies imply R1/S1 are hit on fewer than half of days, which argues for fading R1/S1 rather than buying breaks of them; data is 15 years old.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "M06",
+   "name": "Fibonacci pivot points",
+   "category": "mean_reversion",
+   "timeframes": [
+    "M15",
+    "H1"
+   ],
+   "entry_rule": "PP = (H + L + C)/3; R1 = PP + 0.382 x (H - L); R2 = PP + 0.618 x (H - L); R3 = PP + 1.000 x (H - L); S1 = PP - 0.382 x (H - L); S2 = PP - 0.618 x (H - L); S3 = PP - 1.000 x (H - L). Same bounce/break rules as M05.",
+   "exit_rule": "As M05.",
+   "stop_loss_rule": "As M05.",
+   "take_profit_rule": "As M05.",
+   "parameters": {
+    "ratios": [
+     0.382,
+     0.618,
+     1.0
+    ]
+   },
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://www.babypips.com/learn/forex/other-pivot-point-calculation-methods",
+    "https://www.luxalgo.com/library/concept/fibonacci-pivots.md"
+   ],
+   "notes": "No EUR/USD hit-rate statistics found for this variant.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  },
+  {
+   "id": "M07",
+   "name": "Camarilla pivots (H3/L3 fade, H4/L4 breakout)",
+   "category": "mean_reversion",
+   "timeframes": [
+    "M15",
+    "H1"
+   ],
+   "entry_rule": "Range = H - L of prior day. H1 = C + Range x 0.0916 (=1.1/12); H2 = C + Range x 0.183 (1.1/6); H3 = C + Range x 0.275 (1.1/4); H4 = C + Range x 0.55 (1.1/2); H5 = (H/L) x C (some vendors); L1..L4 mirrored below C (L3 = C - Range x 0.275, L4 = C - Range x 0.55). Rule: sell at H3 / buy at L3 (expect reversion) with stop beyond H4/L4; if H4/L4 breaks, go with the breakout.",
+   "exit_rule": "Fade: target the opposite inner level (L3 from H3) or C. Break: target H5/L5 or 1x range.",
+   "stop_loss_rule": "Fade: just beyond H4/L4. Break: back inside H3/L3.",
+   "take_profit_rule": "As exit.",
+   "parameters": {
+    "multipliers": {
+     "L1/H1": 0.0916,
+     "L2/H2": 0.183,
+     "L3/H3": 0.275,
+     "L4/H4": 0.55
+    }
+   },
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://www.babypips.com/learn/forex/other-pivot-point-calculation-methods",
+    "https://www.strike.money/?p=5102",
+    "https://in.tradingview.com/scripts/camarillapivot/"
+   ],
+   "notes": "Sources agree on 1.1/12, 1.1/6, 1.1/4, 1.1/2 multipliers; one source quotes H4 = C + 1.5 x range which is a different convention. No EUR/USD statistics.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  },
+  {
+   "id": "M08",
+   "name": "Woodie pivots",
+   "category": "mean_reversion",
+   "timeframes": [
+    "M15",
+    "H1"
+   ],
+   "entry_rule": "PP = (H + L + 2C)/4 (some platforms use the current session's open instead of C: (H + L + 2O)/4); R1 = 2PP - L; R2 = PP + (H - L); S1 = 2PP - H; S2 = PP - (H - L). Same rules as M05.",
+   "exit_rule": "As M05.",
+   "stop_loss_rule": "As M05.",
+   "take_profit_rule": "As M05.",
+   "parameters": {
+    "close_weight": 2
+   },
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://www.luxalgo.com/library/concept/woodie-pivots.md",
+    "https://www.babypips.com/learn/forex/other-pivot-point-calculation-methods"
+   ],
+   "notes": "No statistics.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  },
+  {
+   "id": "M09",
+   "name": "Round-number (x.xx00 / x.xx50) reaction and breakout acceleration",
+   "category": "mean_reversion",
+   "timeframes": [
+    "M5",
+    "M15",
+    "H1"
+   ],
+   "entry_rule": "Osler (J. Finance 2003, bank order data): take-profit orders cluster exactly on round numbers (00), stop-loss orders cluster just beyond them (buy stops just above, sell stops just below). Rules: (a) fade the first touch of a 00/50 level from a trend (expect reversal); (b) if price closes > 10-15 pips through a 00 level, go with the break (stop cascade). Lallouache & Abergel (EBS EUR/USD order book): volume clusters at round prices, which then act as barriers.",
+   "exit_rule": "(a) 20-30 pips or next 50-level; (b) next 00 level.",
+   "stop_loss_rule": "(a) 15 pips beyond the level; (b) back below the level.",
+   "take_profit_rule": "As exit.",
+   "parameters": {
+    "levels": [
+     "00",
+     "50"
+    ],
+    "break_confirm_pips": 12,
+    "fade_stop_pips": 15
+   },
+   "claimed_performance": "Qualitative academic evidence only (reversal at round numbers; acceleration after breaks). A TradingView post claims ~40% reversal at a level in a given hourly window (unpublished backtest). No EUR/USD hit-rate study found.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://ideas.repec.org/a/bla/jfinan/v58y2003i5p1791-1819.html",
+    "https://ar5iv.arxiv.org/html/1307.5440",
+    "https://tradeciety.com/the-order-clustering-effect-around-round-numbers",
+    "https://icmaif.soc.uoc.gr/Year/8conf/docs/Osler-Price%20Cascades-03-03.doc"
+   ],
+   "notes": "Evidence is for the mechanism, not for a tradable rule's expectancy. Easy to test: conditional 30-min forward return after first touch of a 00 level vs random levels.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "M10",
+   "name": "Previous-day high/low fade ('turtle soup' / failed breakout)",
+   "category": "mean_reversion",
+   "timeframes": [
+    "M15",
+    "H1"
+   ],
+   "entry_rule": "Price trades beyond the prior day's high (low) by 3-10 pips and the M15/H1 candle closes back inside the prior day's range; enter short (long) at the next open with the swept extreme as the stop (Warrior_EA research definition; Connors-Raschke turtle soup uses 20-day highs).",
+   "exit_rule": "Prior day's midpoint or opposite extreme; time stop end of day.",
+   "stop_loss_rule": "Beyond the sweep extreme + 2 pips.",
+   "take_profit_rule": "Midpoint of prior day range (1st), opposite side (2nd).",
+   "parameters": {
+    "sweep_min_pips": 3,
+    "sweep_max_pips": 15,
+    "confirm_tf": "M15"
+   },
+   "claimed_performance": "No EUR/USD-specific published statistics; Backtrex's liquidity-sweep test (S19) is the nearest (52.8% / PF 1.63, vendor). Vendor material: sweeps typically extend 10-25 pips beyond the level (unmeasured).",
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://forge.mql5.io/animatedread/Warrior_EA/src/branch/main/research/test_liquidity.py",
+    "https://backtrex.com/en/blog/ict-turtle-soup-reversal-strategy",
+    "https://dailypriceaction.com/blog/liquidity-sweep-reversals/"
+   ],
+   "notes": "Mirror of T16; the two should be tested together (if PDH breaks continue, T16 wins; if they fail, M10 wins).",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "M11",
+   "name": "Weekly-open mean reversion",
+   "category": "mean_reversion",
+   "timeframes": [
+    "H1",
+    "H4"
+   ],
+   "entry_rule": "Reference = Sunday 22:00 UTC open. If by Tuesday/Wednesday price is > 1 x ADR(14) from the weekly open, fade toward the weekly open; alternatively buy the first H4 close back through the weekly open after a failed move.",
+   "exit_rule": "Weekly open touch or Friday 15:00 London.",
+   "stop_loss_rule": "1 x ADR beyond entry.",
+   "take_profit_rule": "Weekly open.",
+   "parameters": {
+    "distance_adr": 1.0,
+    "time_stop": "Friday 15:00 London"
+   },
+   "claimed_performance": "A self-labelled proprietary page reports a 199-week EUR/USD weekly-open study with 49.7% long win rate (unverifiable). No other statistics found.",
+   "evidence_quality": "forum anecdote",
+   "reconstruction": true,
+   "sources": [
+    "https://kalaya-research-portal.pages.dev/EURUSD/position",
+    "https://www.tastyfx.com/news/mean-reversion-in-forex-trading-230712/"
+   ],
+   "notes": "Base rate for 'price returns to the weekly open during the week' not found; must be computed.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none"
+  },
+  {
+   "id": "M12",
+   "name": "Daily-open mean reversion (return to the daily open)",
+   "category": "mean_reversion",
+   "timeframes": [
+    "M15",
+    "H1"
+   ],
+   "entry_rule": "Reference = 00:00 UTC (or 22:00 UTC / 17:00 NY) open. After the London session moves >= 0.5 x ADR away from the open without a pullback, fade toward the open in the NY session (variant of S05/S10).",
+   "exit_rule": "Daily open or NY close.",
+   "stop_loss_rule": "0.5 x ADR beyond the session extreme.",
+   "take_profit_rule": "Daily open.",
+   "parameters": {
+    "open_def": "00:00 UTC",
+    "min_excursion_adr": 0.5
+   },
+   "claimed_performance": "No study measuring how often EUR/USD revisits its daily open was found. NumXL (EUR/USD daily 2010-2012): open-to-close returns indistinguishable from zero, near-Gaussian. ForexFactory: EUR/USD closed above its open 50.42% of days since inception (1,666 of 3,304; 36 unchanged).",
+   "evidence_quality": "textbook description, no stats",
+   "reconstruction": true,
+   "sources": [
+    "https://support.numxl.com/hc/en-us/articles/360032493932-Predict-This",
+    "https://www.forexfactory.com/thread/post/6036885",
+    "https://www.edgeful.com/blog/posts/gap-fill-report"
+   ],
+   "notes": "Key statistic to compute in-house: P(price trades back through the daily open after an excursion of x ADR).",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none"
+  },
+  {
+   "id": "M13",
+   "name": "Fade multi-day directional streaks (tastyfx 3-day streak study)",
+   "category": "mean_reversion",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "After three consecutive daily closes in the same direction with cumulative move > 1% (tastyfx threshold; they also define a 0.5% day as 'outsized'), enter against the streak at the third close.",
+   "exit_rule": "Next day's close (one-day hold) or 2-3 days.",
+   "stop_loss_rule": "None in study; practical 1 x ATR.",
+   "take_profit_rule": "Time exit.",
+   "parameters": {
+    "streak_days": 3,
+    "min_cum_move_pct": 1.0,
+    "hold_days": 1
+   },
+   "claimed_performance": "tastyfx (broker, ~6 years of daily closes, major USD pairs): fading 3-day streaks > 1% had win rates > 50% on all majors, EUR/USD highest at 59%; momentum entries underperformed. Sample size, period, costs not disclosed.",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://prod.wsprod.tastyfx.com/news/fading-multi-day-dollar-moves-a-quantitative-case-for-mean-reversion",
+    "https://www.tastyfx.com/news/trading-fx-volatility-shocks-fade-or-follow/"
+   ],
+   "notes": "Consistent with the academic next-day contrarian finding (M14); cheap to verify on 20+ years.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "M14",
+   "name": "Abnormal-day momentum then next-day contrarian (Caporale-Plastun)",
+   "category": "mean_reversion",
+   "timeframes": [
+    "H1",
+    "D1"
+   ],
+   "entry_rule": "Caporale & Plastun (J. Econ. Studies 2020; EURUSD, USDJPY, USDCAD, AUDUSD, EURJPY; 2008-2018 daily and intraday): define an abnormal day as a daily return beyond mean +/- 2 sigma (rolling). On the abnormal day, price continues in the direction of the abnormal move (intraday momentum: enter in the direction once the day is flagged abnormal, exit at close). Next day: price moves against the abnormal day (contrarian: enter at close against the abnormal day, exit next close).",
+   "exit_rule": "Close of the same day (momentum leg) / next close (contrarian leg).",
+   "stop_loss_rule": "None in paper.",
+   "take_profit_rule": "Time exit.",
+   "parameters": {
+    "abnormal_sigma": 2,
+    "window_days": 20
+   },
+   "claimed_performance": "Paper reports 'strong momentum effect on days with abnormal price changes' and opposite-direction moves the following day; a 2019 Brunel working paper finds the contrarian-after-overreaction strategy 'does not generate profits in FOREX and commodities, but in some cases it does'. A 2014 CESifo paper (EURUSD/USDJPY/GBPCHF) found larger contrarian moves after abnormal days than after normal days. 1994-2019 seven-pair frequency study says abnormal returns 'can be the basis of profitable strategies'. Exact EURUSD returns not extracted.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://ideas.repec.org/a/eme/jespps/jes-11-2019-0503.html",
+    "https://www.brunel.ac.uk/economics-finance-and-accounting/research/pdf/1909-Mar-GMC-Overreactions-and-trading-strategies.pdf",
+    "https://cesifo.org/DocDL/cesifo1_wp5066.pdf",
+    "https://cesifo.org/DocDL/cesifo1_wp8196.pdf"
+   ],
+   "notes": "Closest thing to a peer-reviewed EUR/USD daily rule; profitability after costs is contested by the authors themselves.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "M15",
+   "name": "Quantified Strategies EUR/USD pair strategy (daily)",
+   "category": "mean_reversion",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "Rules not fully visible in excerpts (page sells the code); page compares 1-day vs 2-day holding periods, implying a short-term mean-reversion entry on daily bars.",
+   "exit_rule": "Time exit after 1 (or 2) days.",
+   "stop_loss_rule": "None reported.",
+   "take_profit_rule": "Time exit.",
+   "parameters": {
+    "hold_days": 1
+   },
+   "claimed_performance": "Quantified Strategies (vendor, EUR/USD daily): 713 trades, 53.30% win rate, average win 0.53%, average loss -0.47%, CAGR 1.85%, time in market 13.29% (the page text's '53% per trade' is a typo). Implied expectancy ~0.06%/trade (own calculation).",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://www.quantifiedstrategies.com/eurusd-pair-trading-strategy/",
+    "https://www.quantifiedstrategies.com/?p=1198321",
+    "https://quantifiedstrategies.substack.com/p/gbpusd-forex-strategy-python-code"
+   ],
+   "notes": "Positive but tiny edge, before spread (0.06% ~ 6-7 pips at 1.10; a 1-pip round trip is ~15% of it). Their GBP/USD mean-reversion sibling: 315 trades, 1.4% average gain (period unstated).",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "V01",
+   "name": "ATR-based stop/target sizing module",
+   "category": "volatility",
+   "timeframes": [
+    "M15",
+    "H1",
+    "H4",
+    "D1"
+   ],
+   "entry_rule": "Not an entry. SL = entry -/+ a x ATR(14); TP = entry +/- b x ATR(14); common pairs (a,b) = (1.5, 3), (2, 2), (1, 2); position size = risk% x equity / (a x ATR x pip value). Chandelier: 3 x ATR(22) from highest high.",
+   "exit_rule": "SL/TP.",
+   "stop_loss_rule": "a x ATR.",
+   "take_profit_rule": "b x ATR.",
+   "parameters": {
+    "atr_len": 14,
+    "a": 1.5,
+    "b": 3.0,
+    "risk_pct": 1.0
+   },
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://www.fxstreet.com/education/atr-indicator-explained-201703301902",
+    "https://in.tradingview.com/script/U4hsXLAF-ATR-1-5-FX-Stop-Loss",
+    "https://www.vestinda.com/academy/atr-backtesting-strategies-explore-proven-techniques-for-precision-analysis"
+   ],
+   "notes": "Reference ATR(14, D1) values found: ~102 pips (Dec 2022), 69 pips (2019, with 180-day ATR 57), 87 pips average daily range (2023), 60 pips 10-week average (mid-2026). No EUR/USD multiplier comparison published.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  },
+  {
+   "id": "V02",
+   "name": "Range contraction -> expansion (ATR percentile / NR-day) filter",
+   "category": "volatility",
+   "timeframes": [
+    "D1",
+    "H4"
+   ],
+   "entry_rule": "Trade breakouts (S01, T09, T10, T15) only when ATR(5)/ATR(20) < 0.8 or yesterday's range is in the bottom 20% of the last 50 days; trade fades (M03, M04) only when ATR(5)/ATR(20) > 1.2.",
+   "exit_rule": "Host strategy.",
+   "stop_loss_rule": "Host strategy.",
+   "take_profit_rule": "Host strategy.",
+   "parameters": {
+    "short_atr": 5,
+    "long_atr": 20,
+    "contraction_ratio": 0.8,
+    "expansion_ratio": 1.2
+   },
+   "claimed_performance": "Supporting fact only: EUR/USD day after an inside bar averaged 124 pips vs 82.7-pip inside bar and ~117-pip average day (forum study since 2003).",
+   "evidence_quality": "forum anecdote",
+   "reconstruction": true,
+   "sources": [
+    "https://www.forexpeacearmy.com/community/threads/eur-usd-study.13340/latest",
+    "https://www.luxalgo.com/blog/inside-bar-breakouts-tight-risk-big-reward/"
+   ],
+   "notes": "Direction-agnostic; the expansion fact is well established, the profitability of trading it is not.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none"
+  },
+  {
+   "id": "V03",
+   "name": "GARCH / Markov-switching volatility regime filter",
+   "category": "volatility",
+   "timeframes": [
+    "H1",
+    "H4",
+    "D1"
+   ],
+   "entry_rule": "Fit GARCH(1,1) or MS-GARCH (3 regimes) on EUR/USD log returns; forecast next-period variance; trade trend systems only in the mid-vol regime, mean reversion in the low-vol regime, stand aside (or widen stops) in the high-vol regime. Entropy filter: suppress trades when regime probability entropy is high.",
+   "exit_rule": "Host strategy.",
+   "stop_loss_rule": "Host strategy; scaled by forecast sigma.",
+   "take_profit_rule": "Host strategy.",
+   "parameters": {
+    "model": "GJR-GARCH(1,1) or MS-GARCH(3)",
+    "data": "1-min mid resampled to H1/H4/D1, 2015-2025"
+   },
+   "claimed_performance": "arXiv 2606.06190 (2026 preprint, EUR/USD 2015-2025): MS-GARCH beats GARCH on out-of-sample volatility forecasting; smoothed Spearman IC 0.5371 vs 0.5264; regime classification certainty 'moderate'; no trading P&L. Robot Wealth ARIMA+GARCH forex test: direction forecasts not clearly profitable after costs.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://arxiv.org/abs/2606.06190",
+    "https://robotwealth.com/fitting-time-series-models-to-the-forex-market-are-arimagarch-predictions-profitable",
+    "https://www.mql5.com/en/articles/22438"
+   ],
+   "notes": "Volatility is forecastable; direction is not. Use as a filter/position sizer, not a signal.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "V04",
+   "name": "Implied-volatility / VIX regime filter",
+   "category": "volatility",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "Use EUR/USD 1-month implied vol (or VIX as a risk proxy): when 1M IV < 6 (2024-25 lows 4.9-5.5), expect range days -> favour fades and pivot bounces; when 1M IV > 9 (2022-23 levels, 9.4-11), favour breakouts and widen ATR stops. VIX > 30: EUR/USD-S&P correlation regime shifts (see F-facts).",
+   "exit_rule": "Host strategy.",
+   "stop_loss_rule": "Host strategy.",
+   "take_profit_rule": "Host strategy.",
+   "parameters": {
+    "iv_low": 6.0,
+    "iv_high": 9.0,
+    "vix_stress": 30
+   },
+   "claimed_performance": "No EUR/USD strategy test with a VIX/IV filter found. IV reference points (Tickmill/ING/Commerzbank 2024-2025): 1M IV 11.0 (Jan 2025) -> 9.0 (Feb) -> 6.5; 7.8 on 21 Jan 2025 from 9.4 peak; 8.35 (Sep 2025) from 9.8; 3M IV 6.47% (3 Oct 2025, lowest since Nov 2024); 1M realised 4.8% vs traded 6.5% (Nov 2025); 1M IV 5.2% 'lowest since before the energy crisis' (undated, ~2024); 1M IV 5.45 vs 2-yr low 4.9 late Mar, 7.1 mid-Apr, realised 4.3 (~2024).",
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://www.tickmill.com/blog/fx-options-insights-210125",
+    "https://www.tickmill.com/blog/fx-options-insights-19925",
+    "https://www.fxstreet.com/news/eur-holding-up-ing-202511190827",
+    "https://www.vtmarkets.com/?p=33252"
+   ],
+   "notes": "Level table is useful for regime labelling in backtests.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "V05",
+   "name": "NFP straddle (pending orders both sides)",
+   "category": "volatility",
+   "timeframes": [
+    "M1",
+    "M5"
+   ],
+   "entry_rule": "At 08:25 ET on NFP Friday (first Friday, 08:30 ET release), place buy stop at pre-release 15-minute high + 5-10 pips and sell stop at low - 5-10 pips (sources quote 12, 15-20, 25-30 pip offsets from mid); cancel the other on fill (OCO).",
+   "exit_rule": "Fixed TP or time exit at 09:30 ET; many sources advise exiting within 30 minutes.",
+   "stop_loss_rule": "Opposite pending order level (15-30 pips).",
+   "take_profit_rule": "30-50 pips or trail.",
+   "parameters": {
+    "offset_pips": 12,
+    "sl_pips": 20,
+    "tp_pips": 40,
+    "time_exit_et": "09:30"
+   },
+   "claimed_performance": "FXStreet NFP stress test (2026, six releases): EUR/USD first-hour range median 47.1 pips vs 13.1 pips on a normal weekday hour (3.6x); individual first-hour ranges 21.4, 52.3, 74.4, 53.2, 41.8, 32.3 pips. FXStreet 2018: average 28 pips in the 15 minutes after release and 49 pips over 4 hours (five releases); another 2018 sample: 34-37 pips/15 min, 50-63 pips/4h. FXStreet 2021: almost all pairs return to pre-release levels within an hour. FXStreet 2015: surprises under +/-25K rarely move EUR/USD > 40 pips. Spread widening to 5-10 pips (up to 25 pips) and slippage reported. A blog's 1,000-run Monte Carlo of a 12-pip-offset straddle reflects its own assumptions; thenexttrade quotes 50-60% win rate 'but slippage hurts' (unsourced).",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://www.fxstreet.com/analysis/nfp-stress-test-six-payrolls-releases-measured-in-daily-loss-limits-202611050906",
+    "https://www.fxstreet.com/analysis/how-to-trade-the-us-nfp-with-eur-usd-201808021440",
+    "https://fxstreet.com/analysis/nfp-cheat-sheet-three-last-minute-things-to-consider-when-trading-the-event-202106041115",
+    "https://forex.com/ie/trading-academy/courses/advanced-strategies/the-non-farm-payrolls-v-shaped-reversal",
+    "https://alphatradecircle.pages.dev/blog/prop-firm-news-trading-straddles"
+   ],
+   "notes": "Median first-hour range of ~47 pips against 20-40 pips of spread+slippage+offset makes the straddle marginal; the 'returns to pre-release level within an hour' finding supports a post-spike fade (V06) instead.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "V06",
+   "name": "Post-announcement fade (NFP/CPI V-reversal)",
+   "category": "volatility",
+   "timeframes": [
+    "M1",
+    "M5"
+   ],
+   "entry_rule": "FOREX.com 'NFP V-shaped reversal': wait for the initial spike (first 5-10 minutes), then enter against it when a M5 candle closes back toward the pre-release level, targeting the pre-release price. CPI analogue at 08:30 ET.",
+   "exit_rule": "Pre-release level or 60 minutes after release.",
+   "stop_loss_rule": "Beyond the spike extreme.",
+   "take_profit_rule": "Pre-release price.",
+   "parameters": {
+    "wait_minutes": 10,
+    "max_hold_minutes": 60
+   },
+   "claimed_performance": "FOREX.com single example: EUR/USD fell ~30 pips in 10 minutes then rallied > 60 pips above entry. FXStreet 2021: pairs typically back at pre-release levels within an hour. US CPI (FXStreet 2018 samples): EUR/USD moved 34-37 pips in 15 minutes and 50-63 pips over 4 hours on average; Dec 2022 CPI: 1.0555 -> 1.0648 (+93 pips) immediately.",
+   "evidence_quality": "forum anecdote",
+   "reconstruction": true,
+   "sources": [
+    "https://forex.com/ie/trading-academy/courses/advanced-strategies/the-non-farm-payrolls-v-shaped-reversal",
+    "https://www.fxstreet.com/analysis/how-to-trade-the-us-inflation-data-with-eur-usd-201807111106",
+    "https://www.fxstreet.com/news/eur-usd-soars-as-us-cpi-comes-in-below-expectations-202212131348"
+   ],
+   "notes": "Contradicts the straddle (V05): both cannot be right on the same release; the base rate of 'spike reverses within 60 min' is the number to compute.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none"
+  },
+  {
+   "id": "P01",
+   "name": "Pin bar (hammer/shooting star) reversal",
+   "category": "price_action",
+   "timeframes": [
+    "H4",
+    "D1"
+   ],
+   "entry_rule": "TradingHeroes 'Trending Pin Bar' (EUR/USD H4): tail >= 2/3 of candle, body in the top/bottom third, pin bar forms in the direction of the H4 trend (above/below EMA); enter at the close or on a 50% retrace of the pin.",
+   "exit_rule": "Next major support/resistance.",
+   "stop_loss_rule": "~5 pips beyond the pin-bar tail.",
+   "take_profit_rule": "Next S/R level (variable R).",
+   "parameters": {
+    "tail_ratio": 0.667,
+    "sl_buffer_pips": 5
+   },
+   "claimed_performance": "TradingHeroes Forex Tester run (EUR/USD H4): 78% win rate, 446.13% compounded return (period, trade count, costs not given; author warns of backtest limits). Same author on a pin-bar + RSI variant: 'mediocre' return despite a good win rate. 'EBP daily bias strategy 88% proven win rate' video claim (unverified).",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://www.tradingheroes.com/?p=15765",
+    "https://www.tradingheroes.com/?p=10805",
+    "https://recapio.com/digest/the-most-profitable-daily-bias-strategy-ebp-88-proven-win-rate-by-omar-agag"
+   ],
+   "notes": "Discretionary S/R targets make this non-reproducible; code a fixed-R version.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "P02",
+   "name": "Engulfing candle reversal",
+   "category": "price_action",
+   "timeframes": [
+    "H1",
+    "H4",
+    "D1"
+   ],
+   "entry_rule": "Bearish engulfing: candle opens above and closes below the prior candle's body (strict: full range). Enter at the close of the engulfing bar, counter to the prior move.",
+   "exit_rule": "2R or opposite signal.",
+   "stop_loss_rule": "Beyond the engulfing candle's extreme.",
+   "take_profit_rule": "2R.",
+   "parameters": {
+    "strict_range": false,
+    "rr": 2
+   },
+   "claimed_performance": "ForexOp MetaTrader detector test on EUR/USD: after a bearish engulfing, next move up 50.9% / down 49.1% (coin flip). DailyFX 2023 'Mystery of bearish engulfings' reached a similar sceptical conclusion. Video claims of 80%+ win rates are unverified.",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://forexop.com/strategy/engulfing-candle-trade/",
+    "https://www.dailyfx.com/analysis/the-mystery-of-bearish-engulfings-do-they-reliably-predict-forex-price-reversals-20230528.html"
+   ],
+   "notes": "The one systematic test says no edge on EUR/USD.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "P03",
+   "name": "Outside bar (engulfing range) momentum",
+   "category": "price_action",
+   "timeframes": [
+    "H1",
+    "H4",
+    "D1"
+   ],
+   "entry_rule": "DailyForex test: outside bar = high > prior high and low < prior low; enter in the direction of the outside bar's close on the next bar open; filter: only in the direction of a longer-term trend.",
+   "exit_rule": "Fixed R / N bars.",
+   "stop_loss_rule": "Opposite side of the outside bar.",
+   "take_profit_rule": "1-2R.",
+   "parameters": {
+    "filter": "trend direction"
+   },
+   "claimed_performance": "DailyForex backtest (EUR/USD, GBP/USD, USD/JPY; D1/H4/H1): only USD/JPY had positive expectancy > 50% of trades; EUR/USD 'slightly profitable'; a trend filter 'improved EUR/USD results significantly' (figures not shown).",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://www.dailyforex.com/forex-articles/2013/12/outside-bar-trading-strategy-in-momentum-trading/27094"
+   ],
+   "notes": "Weak positive, undated (2013).",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "P04",
+   "name": "Double top / double bottom",
+   "category": "price_action",
+   "timeframes": [
+    "H4",
+    "D1"
+   ],
+   "entry_rule": "Two peaks within ~0.5 x ATR of each other separated by a trough; enter short on a close below the trough (neckline); mirror for bottoms. Measured move target = pattern height.",
+   "exit_rule": "Target or stop.",
+   "stop_loss_rule": "Above the second peak.",
+   "take_profit_rule": "Pattern height projected from the neckline.",
+   "parameters": {
+    "peak_tolerance_atr": 0.5,
+    "min_bars_between": 5
+   },
+   "claimed_performance": "Bulkowski (mostly US stocks; forex sample 1991-2005 not broken out): double top 'success rate >= break-even 73%, average decline 14%' per one summary; another summary cites a 65% failure rate for double tops; no EUR/USD numbers.",
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://thepatternsite.com/ppEEDT.html",
+    "https://www.thepatternsite.com/id84.html",
+    "https://mytradingskills.com/?p=2321"
+   ],
+   "notes": "Secondary Bulkowski figures contradict each other; stock-derived anyway.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "P05",
+   "name": "Head and shoulders",
+   "category": "price_action",
+   "timeframes": [
+    "H4",
+    "D1"
+   ],
+   "entry_rule": "Three peaks with the middle highest; short on a close below the neckline; target = head-to-neckline distance.",
+   "exit_rule": "Target or stop.",
+   "stop_loss_rule": "Above the right shoulder.",
+   "take_profit_rule": "Measured move.",
+   "parameters": {
+    "shoulder_symmetry_tolerance": 0.3
+   },
+   "claimed_performance": "Bulkowski secondary citations: H&S top break-even failure rate 19% (bull market) / 5% (bear); '93% success' (38,500 patterns) and '81% see a >= 5% move' quoted by course sites; inverse H&S 83%. Not EUR/USD. FOREX.com notes 'busted' EUR/USD H&S patterns.",
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://research.titanfx.com/technical-analysis/candlestick-chart/head-and-shoulders-top-bottom",
+    "https://www.liberatedstocktrader.com/chart-patterns-reliable-profitable/",
+    "https://www.forex.com/en-us/market-analysis/latest-research/eurusd-busted-bearish-headandshoulders-becomes-bullish-headandshoulders/"
+   ],
+   "notes": "No FX-specific statistics; pattern detection is itself discretionary.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "P06",
+   "name": "Flags / pennants (continuation)",
+   "category": "price_action",
+   "timeframes": [
+    "M15",
+    "H1",
+    "H4"
+   ],
+   "entry_rule": "Impulse (pole) of >= 1.5 x ATR followed by a 5-20 bar counter-trend channel retracing < 50% of the pole; enter on a close out of the channel in the pole's direction.",
+   "exit_rule": "Pole length projected from the breakout.",
+   "stop_loss_rule": "Opposite side of the flag.",
+   "take_profit_rule": "1x pole.",
+   "parameters": {
+    "pole_min_atr": 1.5,
+    "max_retrace": 0.5,
+    "flag_bars": [
+     5,
+     20
+    ]
+   },
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://tradingcenter.org/index.php/learn/chart-patterns",
+    "https://www.tradingpedia.com/day-trading-academy/positioning-within-trading-channels"
+   ],
+   "notes": "No EUR/USD statistics found.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  },
+  {
+   "id": "P07",
+   "name": "Harmonic patterns (Gartley / Bat / Butterfly / Crab)",
+   "category": "price_action",
+   "timeframes": [
+    "H1",
+    "H4"
+   ],
+   "entry_rule": "XABCD legs with Fibonacci ratios: Gartley B = 0.618 XA, D = 0.786 XA; Bat B = 0.382-0.5 XA, D = 0.886 XA; Butterfly B = 0.786 XA, D = 1.27-1.618 XA; Crab D = 1.618 XA. Enter at D (potential reversal zone) against the CD leg.",
+   "exit_rule": "Targets at 0.382 and 0.618 retracement of AD.",
+   "stop_loss_rule": "Beyond X (Gartley/Bat) or beyond the 1.618 extension (Butterfly).",
+   "take_profit_rule": "T1 = 0.382 AD, T2 = 0.618 AD.",
+   "parameters": {
+    "tolerance": 0.03
+   },
+   "claimed_performance": "Take Profit app (vendor): EURUSD H4 Gartley 32 valid patterns, 23 wins (71.9%), avg R:R 1:2.6, PF 3.31. TradingView user: Gartley+Bat+Cypher 68.6% win rate on EURUSD since 2016 (no method). ES futures 2020-2024 independent-style test: Butterfly 58.6% (29 trades), Crab 42.9% / PF 0.43. Carney (2007) cited: 60-65% reach first target. HKUST student project tested four patterns across stocks/forex/crypto (EUR/USD figures not retrieved).",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://takeprofitapp.com/en/learn/gartley-pattern-trading",
+    "https://in.tradingview.com/chart/EURUSD/MZSdHs7Y-I-ve-done-backtesting-Harmonic-Pattern-on-EURUSD-60/",
+    "https://cse.hkust.edu.hk/~rossiter/independent_studies_projects/trading_harmonic_patterns/trading_harmonic_patterns.pdf",
+    "https://anupshindedotcom.pages.dev/harmonic-patterns-backtested/"
+   ],
+   "notes": "Win rates of 60-70% to the first (0.382) target are roughly what a random entry with a close target and far stop produces; no evidence of edge.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "P08",
+   "name": "Fibonacci retracement entries (38.2 / 50 / 61.8)",
+   "category": "price_action",
+   "timeframes": [
+    "H1",
+    "H4",
+    "D1"
+   ],
+   "entry_rule": "After an impulse swing, buy the pullback at 38.2%, 50% or 61.8% retracement with a rejection candle; stop below 78.6%; target the swing high (100%) and 127.2%/161.8% extensions.",
+   "exit_rule": "Extensions.",
+   "stop_loss_rule": "Below 78.6% (or below swing origin).",
+   "take_profit_rule": "100%, 127.2%, 161.8%.",
+   "parameters": {
+    "levels": [
+     0.382,
+     0.5,
+     0.618
+    ],
+    "stop_level": 0.786,
+    "targets": [
+     1.0,
+     1.272,
+     1.618
+    ]
+   },
+   "claimed_performance": "ForexOp (1-minute data, G10 vs USD incl. EUR/USD, Oct 2003-May 2016): retracement depths landing near Fibonacci levels are explained by chance (with four levels between 23.6% and 61.8% a retrace lands near one by construction). Reddit multi-asset 61.8% backtest (50 FX pairs incl. EURUSD, 1m-1d): 'not profitable' (anecdotal).",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://forexop.com/strategy/fibonacci-fact-or-fiction/",
+    "https://www.forex.com/en-us/news-and-analysis/fibonacci-in-financial-markets/",
+    "https://reddit.sentinel-team.org/posts/1pn9xhn/snapshots/2025-12-16T04%3A42%3A12.068155Z"
+   ],
+   "notes": "The only quantitative test found says Fibonacci levels are not special; 50% retracement of the prior day's range is still a sensible generic target.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "P09",
+   "name": "Supply/demand zones (rally-base-drop, drop-base-rally)",
+   "category": "price_action",
+   "timeframes": [
+    "H1",
+    "H4"
+   ],
+   "entry_rule": "Identify a base (<= 3 small candles) followed by an impulsive departure (>= 2 x ATR); mark the base's range as the zone; enter on the first return to the zone with a limit at its proximal edge.",
+   "exit_rule": "2-3R or opposite zone.",
+   "stop_loss_rule": "Beyond the distal edge of the zone + buffer.",
+   "take_profit_rule": "Opposite zone / 3R.",
+   "parameters": {
+    "max_base_candles": 3,
+    "departure_atr": 2,
+    "rr": 3
+   },
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://www.luxalgo.com/blog/inside-bar-breakouts-tight-risk-big-reward/",
+    "https://backtrex.com/en/blog/what-is-smart-money-concepts-trading"
+   ],
+   "notes": "Search found no backtest statistics at all for supply/demand zones on EUR/USD.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  },
+  {
+   "id": "P10",
+   "name": "Order blocks (last opposite candle before displacement)",
+   "category": "price_action",
+   "timeframes": [
+    "M15",
+    "H1",
+    "H4"
+   ],
+   "entry_rule": "Bullish OB = last bearish candle before an impulsive up-move that breaks structure; enter long on the first retrace into the OB's range (open-to-low or full candle); bearish mirrored.",
+   "exit_rule": "Next liquidity level or 2R.",
+   "stop_loss_rule": "Below the OB low.",
+   "take_profit_rule": "1:2 minimum.",
+   "parameters": {
+    "displacement_atr": 1.5,
+    "zone": "open-to-low of OB candle"
+   },
+   "claimed_performance": "TradingView placebo study (OB vs matched random levels): no tested configuration showed a reliable difference between real order blocks and placebo levels. DEV Community Pine v5 OB+FVG strategy (1H): EURUSD PF 1.18, max DD -6.1%, 184 trades after adding filters (earlier version 35% win rate). Backtrex GBP/USD order-block backtest exists (result not captured; the vendor's ICT backtests all lose). TradingView 'EURUSD 4H 69% win rate, 12.75R' on 13 trades with acknowledged look-ahead bias.",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://de.tradingview.com/script/yFmy3VBi-Order-Block-OB-Statistics-Real-Win-Rate-vs-Random-Levels/",
+    "https://dev.to/isabelle_dubuis_d858453d7/ict-order-block-fvg-strategy-in-pine-script-v5-backtest-results-full-code-l5c",
+    "https://backtrex.com/en/backtests/order-block-gbp-usd",
+    "https://my.tradingview.com/chart/EURUSD/NMjYOOqi-EURUSD-4H-backtest-69-Win-rate-12-75-R"
+   ],
+   "notes": "Placebo comparison is the right methodology and found nothing; PF ~1.2 after filter-fitting is consistent with no edge.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "P11",
+   "name": "Fair value gap (imbalance) retrace entry",
+   "category": "price_action",
+   "timeframes": [
+    "M5",
+    "M15",
+    "H1"
+   ],
+   "entry_rule": "Bullish FVG: candle1.high < candle3.low (three-candle gap). Enter long with a limit at the top (or 50% 'consequent encroachment') of the gap on the first retrace; bearish mirrored. Usually combined with a killzone (S08) or a sweep (S09).",
+   "exit_rule": "Next swing high/low or 2R.",
+   "stop_loss_rule": "Below the gap (candle1 high for bullish) + buffer.",
+   "take_profit_rule": "1:2.",
+   "parameters": {
+    "entry_level": "gap top or 50%",
+    "rr": 2
+   },
+   "claimed_performance": "See S08 (GBP/USD M15 killzone FVG: 33.89% win, PF 0.80, 1,009 trades, 2016-2026, vendor). Forextester FVG article gives no numbers.",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://backtrex.com/en/blog/fair-value-gap-trading-strategy",
+    "https://backtrex.com/en/backtests/ict-kill-zone-fvg-gbp-usd",
+    "https://forextester.com/blog/fair-value-gap/"
+   ],
+   "notes": "Mechanically well-defined, which is why it can be shown to lose.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "P12",
+   "name": "Wyckoff spring / upthrust (false break of a trading range)",
+   "category": "price_action",
+   "timeframes": [
+    "M30",
+    "H4"
+   ],
+   "entry_rule": "After >= 20 bars of range, price breaks the range low on expanding volume (tick volume) and closes back inside within 1-3 bars (spring); buy the close back inside; upthrust mirrored.",
+   "exit_rule": "Range top (spring) / range bottom (upthrust); or 2R.",
+   "stop_loss_rule": "Below the spring low.",
+   "take_profit_rule": "Opposite range boundary.",
+   "parameters": {
+    "min_range_bars": 20,
+    "reclaim_bars": 3
+   },
+   "claimed_performance": "Take Profit app (vendor, VSA page): EURUSD Spring 32 setups, 22 wins (68.8%), R:R 1:2.3, PF 5.06; no data/period/method. MQL5 article automates spring/upthrust detection on EURUSD, no results shown. TradingView 4H '69% / 13 trades' (too small).",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://takeprofitapp.com/en/learn/volume-spread-analysis-vsa",
+    "https://www.mql5.com/en/articles/22628",
+    "https://doc.stocksharp.com/en/api-examples/0107_Upthrust_Reversal"
+   ],
+   "notes": "Same hypothesis as M10/S19 (failed breakout reversal) with a range-length precondition.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "C01",
+   "name": "Day-of-week: short Monday, long Friday",
+   "category": "calendar",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "Seasonax (2000-Feb 2018): EUR/USD average annualised return -1.90% on Mondays, +1.73% on Fridays. Rule: short at Monday open (Sunday 22:00 UTC) to Monday close; long Friday open to Friday close. Popovic & Durovic (hourly EUR/USD, Jan 2004-Jan 2014, ANOVA): day x hour interaction anomalies exist; strongest on Fridays with trades at 00:00 and 03:00.",
+   "exit_rule": "Same-day close.",
+   "stop_loss_rule": "None (seasonal study).",
+   "take_profit_rule": "Time exit.",
+   "parameters": {
+    "short_day": "Monday",
+    "long_day": "Friday"
+   },
+   "claimed_performance": "Seasonax: -1.90% annualised (Mon), +1.73% annualised (Fri), 2000-2018, no significance tests, in-sample. Bush & Stephens (JBEF 2016): Monday effect in EUR/USD varies with EUR strength/weakness across six sub-periods; a sister paper found no Monday effect 1999-2004 or 2005-2009 and a significant one 2010-2012 for three pairs. TradingView 'no secret profit day in EURUSD' post found nothing. ForexFactory 2017 YTD: Monday the most likely up day, Friday second.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://www.seasonax.com/market-efficiency-the-euro-is-looking-forward-to-the-weekend",
+    "https://ideas.repec.org/a/eee/beexfi/v10y2016icp72-74.html",
+    "https://ideas.repec.org/a/taf/applec/v46y2014i32p3968-3979.html",
+    "https://www.tradingview.com/chart/EURUSD/Zda9xaUn-Is-there-a-secret-profit-day-in-EURUSD/"
+   ],
+   "notes": "Annualised 1.7-1.9% per weekday is a few pips per day: real but not tradeable after spread unless combined with another signal; the effect is regime-dependent.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "C02",
+   "name": "Hour-of-day extremes and the time the daily high/low is set",
+   "category": "calendar",
+   "timeframes": [
+    "H1"
+   ],
+   "entry_rule": "DailyFX (EUR/USD 2005-2009): the 18:00 ET hour (Asian open) set the day's high 8% / low 6% of days (random = 4.17%/hour); the 03:00-05:00 ET window (European open) set the high 12% / low 11% (random 8.33%); the 09:00-12:00 ET window (US open + data) set the high 20% / low 21% (random 12.5%). Rule: place stops beyond, and expect extremes during, these windows; avoid initiating mean-reversion trades at 09:00-12:00 ET.",
+   "exit_rule": "n/a (filter).",
+   "stop_loss_rule": "n/a",
+   "take_profit_rule": "n/a",
+   "parameters": {
+    "extreme_windows_et": [
+     "18:00",
+     "03:00-05:00",
+     "09:00-12:00"
+    ]
+   },
+   "claimed_performance": "As stated; the full hour-by-hour table is an image not retrieved. QuantHedge (14 years): the three hours from NY open to London close are the most volatile, then London open to Tokyo close (figures not retrieved). TradingView seasonality study: ATR peaks ~28 pips/hour near 07:00 GMT and ~34 pips/hour 13:00-15:00 GMT.",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://www.dailyfx.com/forex/technical/article/special_report/2012/07/21/Improving_Profitability_with_Intraday_Seasonality.html",
+    "https://quanthedge.substack.com/p/eurusd-profile-a-statistical-view",
+    "https://my.tradingview.com/chart/EURUSD/O5OLT3x1-Seasonality-Intra-day-Trading-System"
+   ],
+   "notes": "Combined with S14/S18 this gives a full intraday map: volatility 07:00-10:00 and 13:00-16:00 GMT, extremes most often in the US morning.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "C03",
+   "name": "Monthly seasonality (December long, May short)",
+   "category": "calendar",
+   "timeframes": [
+    "MN"
+   ],
+   "entry_rule": "Long EUR/USD from the last trading day of November to the last trading day of December; short for May. Vendors (StoneX/FOREX.com) publish monthly notes using 50+ years of DEM/EUR data.",
+   "exit_rule": "Month end.",
+   "stop_loss_rule": "None.",
+   "take_profit_rule": "Time exit.",
+   "parameters": {
+    "long_months": [
+     "December"
+    ],
+    "short_months": [
+     "May"
+    ]
+   },
+   "claimed_performance": "TickerLeague (1971-2026): December best month, average +1.24%, positive in 65% of years. StoneX: May average -0.62%, June +0.52% over 50+ years. StoneX Sep-2026 note implies August is seasonally weak (EUR/USD 'bucked its seasonal weakness' with +0.7%). FactorResearch 'January effect': 76% of years 1972-2025 set the annual high or low in January; only 37.5% (3 of 8) in the last 8 years.",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://tickerleague.com/forex/eurusd/seasonality",
+    "https://www.stonex.com/en-gb/news-and-analysis/forex-seasonality-september-2026-can-eur-usd-extend-its-gains-to-three-straight-months/",
+    "https://www.forex.com/en-us/news-and-analysis/forex-seasonality-june-2026-will-eur-usd-rally-back-toward-1-18/",
+    "https://www.peterlbrandt.com/wp-content/uploads/2026/03/January-Effect_for-2026.pdf",
+    "https://www.nasdaq.com/articles/eurusd-january-effect-fact-or-fiction-2016-01-05"
+   ],
+   "notes": "December effect is plausibly year-end USD funding/rebalancing; the January high/low effect is a 'range-setting' not a direction.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "C04",
+   "name": "Turn-of-month / first trading day of month",
+   "category": "calendar",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "CXO window: from the close 5 trading days before the last trading day of the month to the close 4 trading days after. Hypothesis for EUR/USD: USD weakens into/after month end (equity rebalancing, corporate flows). Rule: long EUR/USD from T-1 close to T+1 close (month end = T).",
+   "exit_rule": "T+1 (or T+4) close.",
+   "stop_loss_rule": "None.",
+   "take_profit_rule": "Time exit.",
+   "parameters": {
+    "window": "T-1 to T+1"
+   },
+   "claimed_performance": "No EUR/USD-specific study found. Related: Indian-rupee study found turn-of-month returns significantly lower (USD/INR, JPY/INR). CXO results paywalled.",
+   "evidence_quality": "textbook description, no stats",
+   "reconstruction": true,
+   "sources": [
+    "https://www.cxoadvisory.com/?p=43042",
+    "https://www.emeraldinsight.com/insight/content/doi/10.1108/IJMF-05-2014-0068/full/html",
+    "https://www.fxempire.com/education/article/fx-seasonality-what-still-works-and-what-doesnt-in-2026-1545003"
+   ],
+   "notes": "Compute from daily data; combine with S15.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none"
+  },
+  {
+   "id": "C05",
+   "name": "Friday afternoon position-squaring reversal",
+   "category": "calendar",
+   "timeframes": [
+    "H1"
+   ],
+   "entry_rule": "If EUR/USD has moved >= 1% over Mon-Thu in one direction, fade that direction from Friday 13:00 London to the Friday close (profit-taking into the weekend).",
+   "exit_rule": "Friday 21:00 UTC.",
+   "stop_loss_rule": "0.5 x ADR.",
+   "take_profit_rule": "Time exit.",
+   "parameters": {
+    "min_weekly_move_pct": 1.0,
+    "entry_london": "13:00"
+   },
+   "claimed_performance": "Anecdotal only (FXStreet/FXEmpire/ForexLive commentary on Friday profit-taking after 4-5 day streaks). Seasonax Friday strength (C01) argues for a long bias on Fridays regardless. FXStreet 2015 tip: 'why some strategies are so effective except on Fridays' (no data).",
+   "evidence_quality": "forum anecdote",
+   "reconstruction": true,
+   "sources": [
+    "https://www.fxstreet.com/news/eur-usd-recovers-with-profit-taking-in-the-dollar-bull-run-at-the-end-of-the-week-202411151156",
+    "https://www.forexlive.com/news/!/profit-taking-not-fundamentals-driving-euro-toward-the-close-20150123",
+    "https://www.fxstreet.com/amp/education/your-daily-educational-tip-201504090000"
+   ],
+   "notes": "Overlaps M13 (streak fade); test Friday as a conditioning variable in M13.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none"
+  },
+  {
+   "id": "C06",
+   "name": "Holiday-week behaviour (Thanksgiving, Christmas/New Year)",
+   "category": "calendar",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "Hypotheses from commentary: (a) narrow ranges and continuation of the pre-holiday trend (Lien); (b) occasional outsized moves on thin liquidity ('Thanksgiving breakouts'). Rule for a test: measure ADR and trend continuation for the US Thanksgiving week and 24 Dec-2 Jan vs matched weeks.",
+   "exit_rule": "n/a",
+   "stop_loss_rule": "n/a",
+   "take_profit_rule": "n/a",
+   "parameters": {
+    "holiday_windows": [
+     "US Thanksgiving week",
+     "Dec 24-Jan 2"
+    ]
+   },
+   "claimed_performance": "Anecdotes: 1M implied vol fell 9.6% -> 7.4% into a Thanksgiving (GlobalCapital); EUR/USD hit a 1-month high on Thanksgiving 2017 and an 11-month low Thanksgiving week 2016 (Lien); Dec 2024 final day ~30-pip range; Dec 2025 'calm 1.1750-1.18'.",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://uk.investing.com/analysis/fx-and-the-possibility-of-thanksgiving-breakouts-200434665",
+    "https://www.globalcapital.com/article/28mssnrew086objo4qxho/derivatives/euro-dollar-vols-drift-down-for-thanksgiving",
+    "https://www.fxstreet.com/news/eur-usd-stays-in-tight-range-amid-thin-trading-volume-in-holiday-shortened-week-202412270743"
+   ],
+   "notes": "No statistics; useful mainly as a 'do not trade breakouts' filter.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "C07",
+   "name": "Pre-FOMC dollar drift (two days before the decision)",
+   "category": "calendar",
+   "timeframes": [
+    "D1",
+    "H1"
+   ],
+   "entry_rule": "Karnaukh ('The Dollar Ahead of FOMC Target Rate Changes'): over the two days before a scheduled FOMC decision, the USD rises when fed funds futures imply a hike and falls when they imply a cut. Rule: if futures-implied change < 0 (cut expected) go long EUR/USD at the close two days before; if > 0 go short; exit at the 14:00 ET announcement.",
+   "exit_rule": "At the announcement.",
+   "stop_loss_rule": "None in paper.",
+   "take_profit_rule": "Time exit.",
+   "parameters": {
+    "signal": "sign of futures-implied rate change",
+    "window": "T-2 close to T 14:00 ET"
+   },
+   "claimed_performance": "Macrosynergy summary of Karnaukh: USD -32 bp before expected cuts, +20 bp before expected hikes over the two-day window; stronger when FX implied vol is high; no rise in realised vol/illiquidity pre-FOMC. Mueller, Tahbaz-Salehi & Vedolin: USD excess returns significantly larger on FOMC days (pre- and post-announcement components), larger for high-rate-differential currencies. Borisenko & Pozdeev: the pre-decision drift is common to most currencies before their own central bank's cuts and 'the dollar drift ... averages to zero across specifications' (robustness contested). Lucca-Moench equity drift is not found for other macro releases.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://acfr.aut.ac.nz/__data/assets/pdf_file/0019/190315/DollarAheadFOMC_NinaKarnaukh.pdf",
+    "https://macrosynergy.com/?p=41075",
+    "https://conference.nber.org/conf_papers/f64395/f64395.pdf",
+    "https://acfr.aut.ac.nz/__data/assets/pdf_file/0011/105500/90345-Borisenko-and-Pozdeev,-Monetary-Policy-and-Currency-Returns-the-Foresight-Saga.pdf"
+   ],
+   "notes": "Eight events per year; the EUR/USD-only estimate is not isolated in the sources.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "C08",
+   "name": "FOMC day statement spike / press-conference reversal",
+   "category": "calendar",
+   "timeframes": [
+    "M5",
+    "H1"
+   ],
+   "entry_rule": "Hypothesis: the 14:00 ET statement sets an initial direction that the 14:30 ET press conference often reverses. Rule to test: fade the 14:00-14:30 move at 14:35 if it exceeds 0.4% and the move is retracing; else follow it.",
+   "exit_rule": "NY close.",
+   "stop_loss_rule": "Beyond the 14:00-14:30 extreme.",
+   "take_profit_rule": "Pre-statement level.",
+   "parameters": {
+    "spike_threshold_pct": 0.4
+   },
+   "claimed_performance": "Anecdotes only: Sep 2025 EUR/USD spiked on the statement then closed -0.5% after Powell; Sep 2023 fell ~80 pips post-FOMC; Jan 2019 +50 pips in seconds; Jun 2026 -60 pips in minutes without reversal. No base rate found.",
+   "evidence_quality": "forum anecdote",
+   "reconstruction": true,
+   "sources": [
+    "https://www.marketpulse.com/markets/eurusd-technical-euro-bullish-trend-intact-despite-12-sell-off-after-fomc/",
+    "https://www.fxstreet.com/analysis/eur-usd-forecast-sharp-reversal-after-fed-leaves-the-euro-vulnerable-202309202026",
+    "https://www.fxstreet.com/news/euro-folds-as-the-fed-trades-cuts-for-hikes-202606171818"
+   ],
+   "notes": "~16 events in two years; needs 10+ years of 1-minute data to say anything.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none"
+  },
+  {
+   "id": "C09",
+   "name": "ECB decision / press conference reaction",
+   "category": "calendar",
+   "timeframes": [
+    "M5",
+    "M15"
+   ],
+   "entry_rule": "Decision 14:15 CET (13:15 London), press conference 14:45 CET. Hypothesis: the statement move is small and the press conference carries the larger move; trade the press-conference break of the 14:15-14:45 range.",
+   "exit_rule": "16:00 London fix or 1:2.",
+   "stop_loss_rule": "Opposite side of the 14:15-14:45 range.",
+   "take_profit_rule": "1x range or 1:2.",
+   "parameters": {
+    "range_window_cet": "14:15-14:45"
+   },
+   "claimed_performance": "FundedFast tool: average 19.3 pips in the first 60 minutes over the last 9 ECB decisions (methodology unclear). Examples: +72 pips in the first half hour of a Draghi speech (2018); ~100-pip post-ECB rally that fizzled (2020); ~50-pip loss during a 2026 Lagarde conference; 5-day average vol 40 pips before decisions (2026 note).",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://fundedfast.com/tools/event-reactions/ecb",
+    "https://www.babypips.com/news/headline-why-eurusd-fell-after-the-ecb-opened-the-door-to-a-september-hike2026-07-24",
+    "https://www.fxstreet.com/news/eur-usd-declines-following-ecbs-decision-lagardes-press-conference-202401251502"
+   ],
+   "notes": "Average 60-minute move of ~19 pips is small relative to NFP (~47 pips).",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "C10",
+   "name": "Fed-vs-ECB policy divergence trade (2-year swap spread momentum)",
+   "category": "calendar",
+   "timeframes": [
+    "D1",
+    "W1"
+   ],
+   "entry_rule": "Track the EUR-USD 2-year swap (or OIS) differential. Go long EUR/USD when the differential has widened in EUR's favour by >= 20 bp over 4 weeks; short when it narrows by >= 20 bp; or regress and trade residuals (see F01).",
+   "exit_rule": "Differential momentum flips.",
+   "stop_loss_rule": "2 x weekly ATR.",
+   "take_profit_rule": "None.",
+   "parameters": {
+    "spread_change_bp": 20,
+    "lookback_weeks": 4
+   },
+   "claimed_performance": "ING (Mar 2025): 2y swap gap -145 bp -> short-term fair value 1.067. ING (May 2026): gap widened 20 bp from -80 to -100 bp in a week, removing EUR support. ING 2023: regression coefficient on the 2y swap spread 'very close to zero' in that period. BNP (daily data since 2019): correlation of EUR/USD level with 1y differential 66%, 2y 62%, 10y only 5%. Centralbank.watch claims the Fed-minus-ECB policy rate tracks the EUR/USD level better than any single variable over 1-3 years (unverified).",
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://think.ing.com/articles/fx-daily-dont-rush-to-pick-the-eur-usd-top",
+    "https://think.ing.com/articles/eur-usd-real-interest-rates-still-important/",
+    "https://economic-research.bnpparibas.com/html/en-US/multiple-factors-underpinning-renewed-strength-euro-against-dollar-4/17/2023,48485",
+    "https://centralbank.watch/compare/currency-pair-deep-dives/eur-usd/"
+   ],
+   "notes": "The relationship is strong in levels in some years and absent in others (2023, 2025-26 when growth/tariffs dominated); use rolling-window estimation.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "F01",
+   "name": "2-year yield (swap) differential regression fair value",
+   "category": "fundamental",
+   "timeframes": [
+    "D1",
+    "W1"
+   ],
+   "entry_rule": "Fit EUR/USD_t = a + b x (DE2y - US2y)_t [+ c x terms-of-trade] on a rolling 1-year window of daily data; residual z = (spot - fitted)/sigma_resid. Go long when z < -1.5, short when z > +1.5; exit at z = 0.",
+   "exit_rule": "Residual crosses zero.",
+   "stop_loss_rule": "z beyond +/-2.5.",
+   "take_profit_rule": "z = 0.",
+   "parameters": {
+    "window_days": 250,
+    "entry_z": 1.5,
+    "stop_z": 2.5,
+    "regressor": "DE-US 2y swap, optionally relative terms of trade"
+   },
+   "claimed_performance": "MNI/Citi short-term fair value model (2y swap differential + relative terms of trade, 1-year window): R^2 87%. An academic-style daily-change regression on 2y and 10y US/German yields explained only ~5% of daily EUR/USD fluctuations (2y US yield the largest term). BNP: level correlation since 2019: 1y 66%, 2y 62%, 10y 5%. Bond Vigilantes: capital-key-weighted euro-area yield better than Bund; relationship 'breaking down more recently' but useful over long horizons.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://marketnews.com/eur-usd-cheap-to-short-term-fair-value-but-risks-still-loom",
+    "https://economic-research.bnpparibas.com/html/en-US/multiple-factors-underpinning-renewed-strength-euro-against-dollar-4/17/2023,48485",
+    "https://bondvigilantes.com/?p=16105",
+    "https://think.ing.com/downloads/pdf/article/heres-why-eur-usd-is-not-trading-higher-on-the-fed-repricing"
+   ],
+   "notes": "Levels R^2 is high; daily-change R^2 is tiny. A residual mean-reversion trade is the standard sell-side use; coefficients drift so no fixed beta.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "F02",
+   "name": "Real rate differential (2y real swap / 10y TIPS-Bund)",
+   "category": "fundamental",
+   "timeframes": [
+    "W1"
+   ],
+   "entry_rule": "Real 2y differential = (US 2y swap - US 2y inflation swap) - (EUR 2y swap - EUR 2y inflation swap). Trade the residual of EUR/USD vs this spread as in F01.",
+   "exit_rule": "As F01.",
+   "stop_loss_rule": "As F01.",
+   "take_profit_rule": "As F01.",
+   "parameters": {
+    "tenor": "2y",
+    "window": "rolling 2y"
+   },
+   "claimed_performance": "ING (Mar 2026): scatter of EUR/USD vs 2y real swap differential described as a 'stable relationship'; argues real, not nominal, spreads matter. BNP (Jan 2021): since 2011 the correlation between the real 10y TIPS-Bund differential and EUR/USD was positive, i.e. the wrong sign for the capital-flow model. BNP 2024: Bund yields moving less than Treasuries than history predicts.",
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://think.ing.com/articles/eur-usd-real-interest-rates-still-important/",
+    "https://economic-research.bnpparibas.com/pdf/en-US/surprising-weakening-dollar-could-change-1/22/2021,40727",
+    "https://economic-research.bnpparibas.com/html/en-US/US-versus-Eurozone-inflation-divergence-causes-monetary-desynchronization-lowers-bond-market-correlation-4/22/2024,49528"
+   ],
+   "notes": "Sign instability at the 10y tenor; the 2y real spread is the one practitioners use.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "F03",
+   "name": "DXY relationship (EUR is 57.6% of DXY)",
+   "category": "fundamental",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "Not a signal on its own (near-identity). Use: trade EUR/USD when DXY breaks a technical level EUR/USD has not yet confirmed (lead/lag of a few minutes at most); or use DXY ex-EUR (JPY, GBP, CAD, SEK, CHF basket) as a USD-strength filter.",
+   "exit_rule": "n/a",
+   "stop_loss_rule": "n/a",
+   "take_profit_rule": "n/a",
+   "parameters": {
+    "eur_weight_in_dxy": 0.576
+   },
+   "claimed_performance": "Convextrade: daily-return correlation EUR/USD vs broad trade-weighted USD index -0.820 (2024), -0.905 (2025). FXStreet '+90% correlation' is a level comparison.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://convextrade.com/compare/eurusd-vs-dxy/correlation",
+    "https://www.fxstreet.com/analysis/eur-usd-vs-dxy-averages-1-to-10-years-202404221036"
+   ],
+   "notes": "Mechanical; little independent information.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "F04",
+   "name": "Risk sentiment (S&P 500) correlation regime",
+   "category": "fundamental",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "Compute 60-day rolling correlation of EUR/USD and S&P 500 daily returns. Risk-on regime (corr > +0.3): trade EUR/USD in the direction of equity momentum; USD-safe-haven regime. In 2024-25 the sign flipped (USD and S&P rose together), so the rule must be regime-conditional.",
+   "exit_rule": "Regime change.",
+   "stop_loss_rule": "n/a",
+   "take_profit_rule": "n/a",
+   "parameters": {
+    "corr_window": 60,
+    "threshold": 0.3
+   },
+   "claimed_performance": "FXStreet: USD-S&P correlation predominantly negative 2022-2024; 20- and 60-day rolling correlations briefly positive in 2023; from early 2024 USD and S&P 500 'rising nearly in sync'. Investing.com (Jun 2025): 120-day EUR-S&P correlation chart flagged as 'most important macro chart' (values not retrieved).",
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://www.fxstreet.com/analysis/sp-500-vs-eur-usd-unpacking-the-2024-2025-shift-202504281941",
+    "https://ng.investing.com/analysis/eurosp-500-correlation-raises-red-flags-for-us-dollar-stability-209521",
+    "https://macrohive.com/fx-short-valuation/what-is-our-eur-usd-correlation-cheat-sheet-telling-us"
+   ],
+   "notes": "Correlation sign is unstable; only useful with regime detection.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "F05",
+   "name": "Gold and oil as EUR/USD proxies",
+   "category": "fundamental",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "Gold: positive but weak correlation; oil: unstable. Use at most as a confirmation filter (e.g., gold up > 1% on the day supports USD weakness).",
+   "exit_rule": "n/a",
+   "stop_loss_rule": "n/a",
+   "take_profit_rule": "n/a",
+   "parameters": {},
+   "claimed_performance": "Convextrade EUR/USD vs spot gold yearly Pearson (daily returns): +0.418 (2023), +0.288 (2024), +0.362 (2025); 1-year +0.39. Gold vs DXY latest -0.50. Oil: 'long-run correlation fairly high but net below zero over this period' (broker page); FXStreet 2026: oil shifted to negative correlation with USD.",
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://convextrade.com/compare/dexuseu-vs-gold/correlation",
+    "https://www.fxstreet.com/analysis/five-market-relationships-traders-rely-on-which-ones-still-work-202609091047",
+    "https://www.earnforex.com/forex-course/intermarket-correlations/"
+   ],
+   "notes": "Too weak to trade on.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "F06",
+   "name": "Bund-Treasury 10-year spread",
+   "category": "fundamental",
+   "timeframes": [
+    "W1"
+   ],
+   "entry_rule": "Same residual approach as F01 using the 10y DE-US spread.",
+   "exit_rule": "As F01.",
+   "stop_loss_rule": "As F01.",
+   "take_profit_rule": "As F01.",
+   "parameters": {
+    "tenor": "10y"
+   },
+   "claimed_performance": "BNP: correlation of EUR/USD level with the 10y differential only ~5% (daily data since 2019) vs 62-66% for 1-2y. Bond Vigilantes: 2y gap works better than 10y; ECB QE depressed Bund yields.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://economic-research.bnpparibas.com/html/en-US/multiple-factors-underpinning-renewed-strength-euro-against-dollar-4/17/2023,48485",
+    "https://bondvigilantes.com/?p=16105"
+   ],
+   "notes": "Dominated by the front end; keep for completeness.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "F07",
+   "name": "PPP / BEER long-run valuation anchor",
+   "category": "fundamental",
+   "timeframes": [
+    "MN"
+   ],
+   "entry_rule": "Fair value from OECD PPP (or ING's BEER: terms of trade, productivity, current account, government spending). Rule: multi-month bias long when spot is > 15% below PPP and the 12-month trend turns up; never as a timing signal.",
+   "exit_rule": "Spot within 5% of fair value.",
+   "stop_loss_rule": "None.",
+   "take_profit_rule": "Fair value.",
+   "parameters": {
+    "undervaluation_threshold_pct": 15
+   },
+   "claimed_performance": "OECD PPP: fair value ~$1.38 (2019, euro ~22% undervalued, cheap for five years); 1.4060 with spot 15% undervalued (MNI, 2020). ING BEER: ~9-10% overvalued in real terms in 2022 (fair value near parity); ~5% undervalued late 2024. SocGen 2017 fair value note exists. No 2024-25 OECD PPP figure retrieved.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://www.fxstreet.com/analysis/great-graphic-euros-oecd-ppp-201906131134",
+    "https://mnimarkets.com/eurusd-spot-rate-vs-purchasing-power-parity",
+    "https://think.ing.com/articles/eur-usd-not-as-cheap-as-it-looks",
+    "https://think.ing.com/articles/g10-fx-valuation-round-up"
+   ],
+   "notes": "Meese-Rogoff: macro models do not beat a random walk at < 1-year horizons; PPP works, if at all, over 3-5 years.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "F08",
+   "name": "Taylor-rule fundamentals model (Molodtsova-Papell)",
+   "category": "fundamental",
+   "timeframes": [
+    "MN"
+   ],
+   "entry_rule": "Forecast the monthly change in EUR/USD from the difference in Taylor-rule implied rates: i* - i = a + 1.5 x (pi_EA - pi_US) + 0.5 x (gap_EA - gap_US) [+ smoothing, real exchange rate term]; go long EUR when the model's predicted change > 0 (sign-based, monthly).",
+   "exit_rule": "Monthly re-estimate.",
+   "stop_loss_rule": "None.",
+   "take_profit_rule": "Time exit.",
+   "parameters": {
+    "inflation_coef": 1.5,
+    "gap_coef": 0.5,
+    "horizon": "1 month"
+   },
+   "claimed_performance": "Molodtsova & Papell (JIE 2009): short-horizon out-of-sample predictability for 11 of 12 USD pairs post-Bretton Woods, beating interest-rate, PPP and monetary models. Molodtsova, Nikolsko-Rzhevskyy & Papell ('Taylor rules and the euro', real-time 1999-2007): predictability only for specifications without the real exchange rate; persists through the crisis (2012). Ince, Molodtsova & Papell (2016, 1973-2014): strong evidence for Taylor-rule fundamentals vs random walk; Ince & Molodtsova real-time 15-country study: does not beat a random walk in some specifications.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://econpapers.repec.org/RePEc:eee:inecon:v:77:y:2009:i:2:p:167-180",
+    "https://www.appstate.edu/~molodtsovat/Taylor_Euro.pdf",
+    "https://projects.nber.org/confer/2012/ISOM12/Molodtsova_Papell.pdf",
+    "https://academicnewsletter.sufe.edu.cn/info/299294"
+   ],
+   "notes": "Statistical predictability (Clark-West tests) is not the same as tradeable Sharpe; monthly frequency.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "F09",
+   "name": "Carry (EUR/USD interest differential) with time-of-day split",
+   "category": "fundamental",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "Hold the higher-yielding leg (short EUR/USD when US rates > EUR rates, as 2022-2025). Krohn-Mueller-Whelan: carry returns are earned intraday (US hours) and are ~zero overnight; momentum returns are earned overnight.",
+   "exit_rule": "Differential sign flip.",
+   "stop_loss_rule": "Vol-scaled.",
+   "take_profit_rule": "None.",
+   "parameters": {
+    "signal": "sign(US 3m - EUR 3m)"
+   },
+   "claimed_performance": "Krohn et al. ('UIP in high frequency'): during the overnight period carry risk premia are essentially zero; the carry portfolio appreciates significantly during the day. No EUR/USD-only carry Sharpe retrieved; EUR/USD is a low-carry pair (differential ~2% in 2025).",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://jbs.cam.ac.uk/wp-content/uploads/2024/11/uncovered-interest-parity-in-high-frequency.pdf",
+    "https://acfr.aut.ac.nz/__data/assets/pdf_file/0007/190753/Krohn_Mueller_Whelan_Jun2018_FXPremiaAroundTheClock.pdf",
+    "https://quantpedia.com/fx-carry-value-momentum-strategies-over-their-200-year-history/"
+   ],
+   "notes": "Implication for intraday systems: USD-positive drift during US hours when USD is the high-yielder.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "F10",
+   "name": "COT positioning extremes (CME Euro FX 099741) as contrarian signal",
+   "category": "fundamental",
+   "timeframes": [
+    "W1"
+   ],
+   "entry_rule": "Compute the 3-year percentile (or z-score) of large-speculator net EUR futures position (COT, Tuesday data released Friday). Contrarian: short EUR/USD when net long is in the top 5% and the weekly change turns negative; long when net short is in the bottom 5% and the change turns positive.",
+   "exit_rule": "Percentile returns to 50%, or 8 weeks.",
+   "stop_loss_rule": "3% adverse move.",
+   "take_profit_rule": "Percentile 50%.",
+   "parameters": {
+    "lookback_years": 3,
+    "extreme_pct": 5,
+    "require_turn": true
+   },
+   "claimed_performance": "No hit-rate study found. FXStreet (Oct 2026): euro positioning at a '343-report extreme' pointing to a medium-term floor. StoneX/FOREX.com notes: net long most bullish since Jul 2023 (early 2026); Jan 2025 'tentative signs of reversal'; 2017 Schaeffer's event study suggested weaker euro a year after large-spec extremes (no table). Commentary consistently treats extremes as 'late' signals.",
+   "evidence_quality": "forum anecdote",
+   "reconstruction": true,
+   "sources": [
+    "https://www.fxstreet.com/analysis/euro-positioning-reaches-343-report-extreme-as-cot-data-points-toward-a-potential-medium-term-floor-202610041903",
+    "https://forex.com/en/news-and-analysis/tentative-signs-of-reversals-for-eurusd-commodity-fx-cot-report-2025-01-14",
+    "https://www.schaeffersresearch.com/content/bgs/2017/09/25/signal-suggests-short-term-gains-long-term-pain-for-euro"
+   ],
+   "notes": "Weekly data, ~5-10 signals a decade; needs the full CFTC history to evaluate.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none"
+  },
+  {
+   "id": "F11",
+   "name": "Retail client sentiment (IG/OANDA) contrarian",
+   "category": "fundamental",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "IG: fade the retail crowd when % net-long is extreme (e.g., > 65% net long -> bearish; < 35% -> bullish) and the week-on-week change confirms (crowd getting more one-sided).",
+   "exit_rule": "Sentiment back to 45-55%.",
+   "stop_loss_rule": "1.5 x ATR(14, D1).",
+   "take_profit_rule": "n/a",
+   "parameters": {
+    "long_extreme_pct": 65,
+    "short_extreme_pct": 35
+   },
+   "claimed_performance": "No published hit rate. IG snapshots: 29% net long (Aug 2020), 69% net long read as bearish (Oct 2023), 47.85% net long / 1.09 short-long ratio (May 2024). DailyFX (IG Group) 2024: 'contrarian signals aren't foolproof'. FXCM traits study: retail EUR/USD trades won 59% of the time but lost money on average.",
+   "evidence_quality": "forum anecdote",
+   "sources": [
+    "https://www.ig.com/uk/news-and-trade-ideas/euro-may-rise-as-retail-eur-usd-upside-exposure-fades-200930",
+    "https://www.ig.com/en-ch/news-and-trade-ideas/euro-faces-six-weeks-of-losses-as-retail-traders-persistently-re-230823",
+    "https://www.dailyfx.com/analysis/forex-usd-dollar-outlook-sentiment-analysis-eur-usd-gbp-usd-usd-chf-20240409.html"
+   ],
+   "notes": "Broker-published, non-reproducible history; retail is structurally net long in downtrends because they fade, so the 'signal' is largely trend.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "F12",
+   "name": "Option risk reversals (25-delta) as a directional signal",
+   "category": "fundamental",
+   "timeframes": [
+    "D1",
+    "W1"
+   ],
+   "entry_rule": "Trade in the direction of the 1-month 25d risk-reversal skew (EUR calls over puts = bullish) or fade extremes.",
+   "exit_rule": "n/a",
+   "stop_loss_rule": "n/a",
+   "take_profit_rule": "n/a",
+   "parameters": {
+    "tenor": "1M",
+    "delta": 25
+   },
+   "claimed_performance": "GlobalCapital/Derivia Granger-causality tests of 1y 25d risk reversals vs spot: 'risk reversals cause spot' strongly rejected for all currencies except EUR/JPY; risk reversals react to spot. Practitioner view: skew measures positioning, not physical probability.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://www.globalcapital.com/article/28mwtvkodfvd096o6jzeo/derivatives/risk-reversals-their-relationship-with-spot",
+    "https://www.mql5.com/en/blogs/post/777056",
+    "https://www.risk.net/our-take/7961941/turn-of-the-skew-fx-options-dealers-balance-fragile-market"
+   ],
+   "notes": "Negative result; keep only as a positioning gauge.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "B01",
+   "name": "London range vs New York: 'London sets the range, NY breaks it' statistic",
+   "category": "microstructure",
+   "timeframes": [
+    "H1"
+   ],
+   "entry_rule": "Statistic: the London 03:00-08:00 ET range is broken during the rest of the day 95.45% of the time (70% one side only, 26% both sides, 5% neither; Edgeful, 3-month sample). Trading use: after 08:00 ET, place stop orders at the London high/low expecting at least one break; fade the second break if both sides break (26%).",
+   "exit_rule": "End of NY.",
+   "stop_loss_rule": "Midpoint of the London range.",
+   "take_profit_rule": "1x London range.",
+   "parameters": {
+    "london_window_et": "03:00-08:00"
+   },
+   "claimed_performance": "As stated (short sample). Average daily range in the same source: 60 pips (10-week average, mid-2026), 53 pips (5-week).",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://tradethatswing.com/eurusd-daily-volatility-and-price-movement-tendencies/",
+    "https://www.edgeful.com/blog/posts/market-session-breakout-report"
+   ],
+   "notes": "A 95% break rate is close to what a random walk gives for a 5-hour sub-range of a 24-hour day; the 26% 'both sides' number is the one with information.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "B02",
+   "name": "Order-book imbalance on CME 6E futures (short-horizon)",
+   "category": "microstructure",
+   "timeframes": [
+    "tick",
+    "M1"
+   ],
+   "entry_rule": "Imbalance = (bid depth - ask depth)/(bid + ask) at top N levels; trade when |imbalance| > threshold for next-k-tick direction (GitHub research project; results not accessible from this session).",
+   "exit_rule": "k ticks / seconds.",
+   "stop_loss_rule": "1-2 ticks.",
+   "take_profit_rule": "1 tick.",
+   "parameters": {
+    "levels": 5,
+    "threshold": 0.3
+   },
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://github.com/olegvart/eurusd-futures-order-book-imbalance",
+    "https://www.cmegroup.com/markets/fx/g10/euro-fx.html"
+   ],
+   "notes": "Needs depth data; outside the scope of a retail spot-data project but listed because it is one of the few genuinely documented short-horizon edges in FX literature (cost-aware).",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  },
+  {
+   "id": "Q01",
+   "name": "Backtrex EUR/USD backtest suite (vendor negative results)",
+   "category": "systematic",
+   "timeframes": [
+    "H1",
+    "D1"
+   ],
+   "entry_rule": "Four published EUR/USD runs, 2016-10-02 to 2026-10-01: London breakout (H1, SL 35 / TP 70), MACD+RSI (H1, SL 45 / TP 90), Turtle 20/10 (D1), Connors RSI(2) (D1, RSI < 5, exit SMA5 or below SMA200).",
+   "exit_rule": "See individual entries S01, T05, T01, M01.",
+   "stop_loss_rule": "See entries.",
+   "take_profit_rule": "See entries.",
+   "parameters": {},
+   "claimed_performance": "London breakout: 1,230 trades, 36.3%, PF 0.87, -28.0%, DD -31.4%. MACD+RSI: 1,977 trades, PF 0.80, -53.4%, DD -56.7%. Turtle: 80 trades, PF 0.94, -2.7%, DD -14.6%. RSI(2): 75 trades, 54.7%, PF 0.78, -4.5%, DD -6.6%. Buy-and-hold over the decade: +0.1%. Sister pair GBP/USD: London breakout M15 PF 0.72 / -60%; ICT killzone FVG M15 33.89% / PF 0.80 / 1,009 trades / DD -33.5%; PDH/PDL breakout H1 loses (figures not captured); order block (figures not captured).",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://backtrex.com/en/backtests",
+    "https://backtrex.com/en/backtests/london-breakout-eur-usd",
+    "https://backtrex.com/en/backtests/macd-rsi-eur-usd",
+    "https://backtrex.com/en/backtests/turtle-trading-eur-usd",
+    "https://backtrex.com/en/backtests/connors-rsi-2-eur-usd",
+    "https://backtrex.com/en/backtests/ict-kill-zone-fvg-gbp-usd"
+   ],
+   "notes": "Every textbook strategy the vendor tested on EUR/USD lost over 2016-2026. Vendor sells the tool, but the direction of the results is consistent with independent evidence (coin-flip candle patterns, placebo order blocks).",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "Q02",
+   "name": "Dukascopy JForex strategy contest (rules and sample strategy)",
+   "category": "systematic",
+   "timeframes": [
+    "M1",
+    "H1"
+   ],
+   "entry_rule": "Contest sample (official): MA(7) crosses MA(14) on EURUSD (M1 or H1 variants), TP 10 pips, SL 20 pips, demo account USD 100,000; strategies fully scripted in JForex, no external files, winners must publish source. A 'MaBreak_Contest' MA-breakout file and a Bollinger-band breakout entry (allegedly copied from a prior winner) circulate on the forum.",
+   "exit_rule": "TP/SL.",
+   "stop_loss_rule": "20 pips.",
+   "take_profit_rule": "10 pips.",
+   "parameters": {
+    "fast": 7,
+    "slow": 14,
+    "tp_pips": 10,
+    "sl_pips": 20
+   },
+   "claimed_performance": "Monthly ranking on four criteria (400 points, 'performance' up to 100); no winner statistics retrieved.",
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://www.dukascopy.com/swiss/english/forex/jforex/forum/viewtopic.php?p=15097",
+    "https://www.dukascopy.com/swiss/english/forex/jforex/forum/download/file.php?id=823",
+    "https://www.dukascopy.com/swiss/english/forex/jforex/forum/viewtopic.php?p=64747"
+   ],
+   "notes": "Winning contest strategies are typically high-leverage, short-window demo results; not evidence of edge.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "Q03",
+   "name": "MQL5 Market EA claims (grid/martingale/scalper audit)",
+   "category": "systematic",
+   "timeframes": [
+    "M5",
+    "M15"
+   ],
+   "entry_rule": "n/a (meta-entry). Audit findings on best-selling EURUSD EAs.",
+   "exit_rule": "n/a",
+   "stop_loss_rule": "n/a",
+   "take_profit_rule": "n/a",
+   "parameters": {},
+   "claimed_performance": "MQL5 blog audit of 10 best-selling scalping/martingale EAs: only 3 of 10 disclosed grid/martingale logic; one shipped with stop-loss disabled by default. A EURUSD grid EA: PF 2.32 but 45.13% max equity DD (Jan 2023-Jun 2026). Buyer flag: 75.91% max deposit load. 'Nova FI' free EA claim: 63% win rate EURUSD M15 (set file, unverified). 'MSX AI scalper' EURUSD M15 tester report Aug 2026 (vendor). Blog summary: 'the backtest won, the account lost'.",
+   "evidence_quality": "vendor backtest",
+   "sources": [
+    "https://www.mql5.com/en/blogs/post/777027",
+    "https://www.mql5.com/en/blogs/post/776786",
+    "https://www.mql5.com/en/blogs/post/768748",
+    "https://www.mql5.com/en/blogs/post/776182",
+    "https://www.mql5.com/en/articles/21833"
+   ],
+   "notes": "Any EURUSD EA with PF > 2 and DD < 10% over 10 years in a vendor report should be presumed to use grid/martingale or tick-data curve fitting.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "Q04",
+   "name": "Hour-of-day x day-of-week anomaly strategy (Popovic & Durovic)",
+   "category": "systematic",
+   "timeframes": [
+    "H1"
+   ],
+   "entry_rule": "Applied Economics 46(32) 2014, hourly EUR/USD Jan 2004-Jan 2014 (Swiss market data), ANOVA of mean returns by day, hour and day x hour: significant interaction anomalies; the strongest 'arbitrage' on Fridays using trades at 00:00 and 03:00 the same day (direction not extracted from abstract).",
+   "exit_rule": "Hour-based.",
+   "stop_loss_rule": "None.",
+   "take_profit_rule": "Time exit.",
+   "parameters": {
+    "day": "Friday",
+    "hours": [
+     "00:00",
+     "03:00"
+    ]
+   },
+   "claimed_performance": "Statistical significance reported; economic magnitude and post-2014 persistence unknown.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://ideas.repec.org/a/taf/applec/v46y2014i32p3968-3979.html",
+    "https://econbiz.de/Record/intraweek-and-intraday-trade-anomalies-evidence-from-forex-market-popovi-sa%C5%A1a/10010971380"
+   ],
+   "notes": "Replicable with hourly data; combine with C01 and S18.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "Q05",
+   "name": "EPAT walk-forward trend-following study (7 majors, 2003-2025)",
+   "category": "systematic",
+   "timeframes": [
+    "D1"
+   ],
+   "entry_rule": "Time-series momentum and other trend rules tested walk-forward (in/out-of-sample) on 7 USD majors with crisis-window checks (incl. 2011 euro debt crisis).",
+   "exit_rule": "Signal-based.",
+   "stop_loss_rule": "n/a",
+   "take_profit_rule": "n/a",
+   "parameters": {},
+   "claimed_performance": "Only 2 of 7 pairs cleared a 0.5 Sharpe bar out-of-sample: USD/JPY 0.78 and EUR/USD ~0.54 (time-series momentum); best equal-weight portfolio CAGR 1.24%, Sharpe 0.43, max DD -8.25%.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://www.quantinsti.com/articles/trend-following-strategies-major-currency-markets-epat-project/",
+    "https://www.quantinsti.com/articles/trend-following-strategies-major-currency-markets/"
+   ],
+   "notes": "Low but positive; duplicate of T17 from the evidence side.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "Q06",
+   "name": "LSTM / neural-network direction prediction",
+   "category": "systematic",
+   "timeframes": [
+    "H1",
+    "D1"
+   ],
+   "entry_rule": "Train LSTM on OHLC + technical (+ macro) features to predict next-bar direction; trade the sign when predicted probability > 0.55.",
+   "exit_rule": "Next bar.",
+   "stop_loss_rule": "n/a",
+   "take_profit_rule": "n/a",
+   "parameters": {
+    "features": "technical + macro",
+    "threshold": 0.55
+   },
+   "claimed_performance": "Yildirim, Toroslu & Fiore (Financial Innovation 2021): hybrid LSTM on EUR/USD with technical and macro inputs 'significantly improved prediction accuracy' (no random-walk benchmark in excerpt). Frontiers 2025 monthly study: LSTM beats MLP/RF on R^2 (no directional/RW comparison). BSc thesis repo 'eurusd-lstm-garch-trading' asks whether LSTM+GARCH pays its own costs ('honest answer', content not accessible). Vontobel: 'the random walk remains the baseline to beat, and too often it is not beaten at all' (Meese-Rogoff 1983). Robot Wealth ARIMA+GARCH: not clearly profitable after costs. cond-mat/0304469: daily FX Hurst > 0.5 but EUR 'closest to Gaussian, least correlated'.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://link.springer.com/doi/10.1186/s40854-020-00220-2",
+    "https://www.frontiersin.org/articles/10.3389/fams.2025.1654093",
+    "https://github.com/francisco-carcano/eurusd-lstm-garch-trading",
+    "https://am.vontobel.com/fr/insights/machine-learning-in-fx-learning-the-unlearnable",
+    "https://robotwealth.com/fitting-time-series-models-to-the-forex-market-are-arimagarch-predictions-profitable"
+   ],
+   "notes": "Published 'accuracy' numbers are almost always in-sample or lack a cost-adjusted random-walk benchmark; the few honest write-ups find ~50-53% directional accuracy, which does not cover spread at hourly/daily frequency.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "Q07",
+   "name": "Intraday mean-reversion regime evidence (academic)",
+   "category": "systematic",
+   "timeframes": [
+    "M1",
+    "M5"
+   ],
+   "entry_rule": "Not a strategy: evidence base for M03/M04. Wisniewska (2014, 1-min EUR/USD): intraday mean reversion present, ADF rejects unit root at 1-min horizon. Middleton, Dodd & Rijavec (arXiv 2109.08242): EUR/USD high-frequency 'net style' is mean-reverting, more so than daily US stocks. Zeman & Marsik (2013): random-walk tests at 5-min/H1/H4/D1 (results not extracted).",
+   "exit_rule": "n/a",
+   "stop_loss_rule": "n/a",
+   "take_profit_rule": "n/a",
+   "parameters": {},
+   "claimed_performance": "Statistical, no P&L.",
+   "evidence_quality": "rigorous backtest",
+   "sources": [
+    "https://reference-global.com/article/10.1515/foli-2015-0014",
+    "https://pdf.arxiv.org/pdf/2109.08242",
+    "https://ideas.repec.org/a/mup/actaun/actaun_2013061072965.html"
+   ],
+   "notes": "Mean reversion at 1-minute horizons is largely bid-ask bounce; the tradeable horizon after spread is the open question.",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "reconstruction": false
+  },
+  {
+   "id": "Q08",
+   "name": "Quantheus 45 EUR/USD M5 hypotheses (IS/OOS prop-trading study)",
+   "category": "systematic",
+   "timeframes": [
+    "M5"
+   ],
+   "entry_rule": "Public GitHub repo claiming systematic in-sample/out-of-sample testing of 45 EURUSD M5 strategies for prop-firm rules; contents not accessible from this session (API access blocked).",
+   "exit_rule": "n/a",
+   "stop_loss_rule": "n/a",
+   "take_profit_rule": "n/a",
+   "parameters": {},
+   "evidence_quality": "textbook description, no stats",
+   "sources": [
+    "https://github.com/Quantheus/EURUSD_45Hypotheses_Research",
+    "https://github.com/euro-macromechanica-backtest/results",
+    "https://github.com/YannVladimir/fx-structural-momentum-bot"
+   ],
+   "notes": "Listed as a lead for the next pass (also: 'Euro Macromechanica' M5 model 2003-Aug 2025 with SHA-256/GPG-signed results; 'fx-structural-momentum-bot' candle-range-theory EA).",
+   "instrument_notes": "EUR/USD spot (retail CFD/spot FX quotes; pip = 0.0001)",
+   "session_filter": "none",
+   "claimed_performance": "none found",
+   "reconstruction": false
+  }
+ ],
+ "behaviour_facts": [
+  {
+   "statistic": "Average daily range (high-low), 2020",
+   "value": "74 pips (same article also says 70); max daily range 332 pips on 19 Mar 2020",
+   "data_period": "2020",
+   "source": "https://www.forex.in.rs/how-many-pips-does-eurusd-move-daily",
+   "quality": "retail blog, internally inconsistent"
+  },
+  {
+   "statistic": "Average daily range, 2021",
+   "value": "44 pips listed for EUR/USD in a majors table (pair average 54); method unstated",
+   "data_period": "2021",
+   "source": "https://www.forex.in.rs/how-many-pips-does-eurusd-move-daily",
+   "quality": "retail blog, looks low"
+  },
+  {
+   "statistic": "Average daily range, 2023",
+   "value": "87 pips; max 243 pips (15 Mar 2023); min 28 pips (Aug 2023)",
+   "data_period": "2023",
+   "source": "https://www.forex.in.rs/how-many-pips-does-eurusd-move-daily",
+   "quality": "retail blog"
+  },
+  {
+   "statistic": "Average daily range, 'several years'",
+   "value": "75 pips",
+   "data_period": "undated",
+   "source": "https://www.forex.in.rs/how-many-pips-does-eurusd-move-daily",
+   "quality": "retail blog"
+  },
+  {
+   "statistic": "Average daily range, recent",
+   "value": "60 pips (10-week avg), 53 pips (5-week avg); 'most of the last 5 years above 60, occasionally above 110'",
+   "data_period": "mid-2026",
+   "source": "https://tradethatswing.com/eurusd-daily-volatility-and-price-movement-tendencies/",
+   "quality": "blog, computed from data"
+  },
+  {
+   "statistic": "ATR(14) daily reference points",
+   "value": "~102 pips (Dec 2022, 'above 100 = volatile'); 69 pips vs 180-day ATR 57 (2019); 78 pips on an undated tool page",
+   "data_period": "2019-2022",
+   "source": "https://fxstreet.com/analysis/eur-usd-effective-bullish-domination-continues-202212190844",
+   "quality": "analyst notes"
+  },
+  {
+   "statistic": "Daily range typical band",
+   "value": "60-100 pips (FXPro); 50-80 pips (TradeTheDay)",
+   "data_period": "undated",
+   "source": "https://fxpro.com/trading/forex/eurusd",
+   "quality": "broker pages"
+  },
+  {
+   "statistic": "Annual high-low range",
+   "value": "2019: 691 pips; 2020: 1,637 pips; 2023: 828 pips (2nd-lowest since 1999); 2023 'dominant trend' -828 pips with sub-trends +692/-414; 2024 high 1.1214 (25 Sep) low 1.0334 (22 Nov), avg 1.0821",
+   "data_period": "2019-2024",
+   "source": "https://investinglive.com/technical-analysis/!/eurusd-has-an-above-average-trading-range-for-2020-after-non-trending-2019-20201228",
+   "quality": "ForexLive/CityIndex/PoundSterlingLive"
+  },
+  {
+   "statistic": "All-time range",
+   "value": "High 1.599, low 0.827 (1994-2016 daily series, 5,930 days)",
+   "data_period": "1994-2016",
+   "source": "https://www.fxstreet.com/education/the-most-detailed-historical-analysis-of-eurusd-201701130858",
+   "quality": "FXStreet/ColibriTrader"
+  },
+  {
+   "statistic": "Monthly range examples",
+   "value": "258 pips (Jul 2016), 468 (Jun 2016), 352 (Aug 2016), 398 (Oct 2016); Q1 2024 ~300-pip range; 700-pip range over 18 months to mid-2024",
+   "data_period": "2016, 2024",
+   "source": "https://www.fxstreet.com/analysis/eur-usd-v-dxy-monthly-levels-ranges-targets-201611070501",
+   "quality": "analyst notes"
+  },
+  {
+   "statistic": "Weekly range examples",
+   "value": "100+ pip weeks in 4 of 7 weeks (May 2024); 136-pip week (2022); ~60-pip week late Dec 2024",
+   "data_period": "2022-2024",
+   "source": "https://fxstreet.com/analysis/fed-interest-rate-move-contains-the-power-to-significantly-move-currency-prices-202405231251",
+   "quality": "analyst notes"
+  },
+  {
+   "statistic": "Hourly volatility profile",
+   "value": "Two peaks: ~28 pips max ATR near 07:00 GMT and ~34 pips 13:00-15:00 GMT (TradingView seasonality study, years unstated); EarnForex: first vol area in early European hours, peak when US opens with Europe still active; QuantHedge (14 yrs): NY open-to-London close is the most volatile 3 hours, then London open-to-Tokyo close; 06:00-08:00 UTC widest spreads/lowest volume (TitanFX)",
+   "data_period": "various",
+   "source": "https://my.tradingview.com/chart/EURUSD/O5OLT3x1-Seasonality-Intra-day-Trading-System",
+   "quality": "mixed quality"
+  },
+  {
+   "statistic": "Per-hour session ranges",
+   "value": "London ~10 pips/hour (Babypips); Asia 15-25 pips/hour rising to 30-50 around London open (guide); one lesson table claims 114 pips for the London session (method unknown); NY 'about 71 pips' historical reference",
+   "data_period": "undated",
+   "source": "https://babypips.com/learn/forex/london-session",
+   "quality": "education pages, not comparable"
+  },
+  {
+   "statistic": "Which hour sets the daily high/low",
+   "value": "18:00 ET hour: high 8% / low 6% of days (random 4.17%); 03:00-05:00 ET: high 12% / low 11% (random 8.33%); 09:00-12:00 ET: high 20% / low 21% (random 12.5%)",
+   "data_period": "2005-2009",
+   "source": "https://www.dailyfx.com/forex/technical/article/special_report/2012/07/21/Improving_Profitability_with_Intraday_Seasonality.html",
+   "quality": "DailyFX, 5-year sample"
+  },
+  {
+   "statistic": "London range broken later in the day",
+   "value": "95.45% of days (70% one side, 26% both sides, 5% neither), London = 03:00-08:00 ET",
+   "data_period": "3-month sample, 2026",
+   "source": "https://tradethatswing.com/eurusd-daily-volatility-and-price-movement-tendencies/",
+   "quality": "Edgeful via blog, short sample"
+  },
+  {
+   "statistic": "Asian range size",
+   "value": "EUR/USD within 30-50 pips of the 22:00 UTC open on ~70-80% of days (blog); Tokyo-only window averages ~14 pips (blog)",
+   "data_period": "undated",
+   "source": "https://tradingonmt5.pages.dev/eurusd-asia-mean-reversion.html",
+   "quality": "low quality"
+  },
+  {
+   "statistic": "Share of days closing above open",
+   "value": "50.42% (1,666 up, 1,602 down, 36 unchanged of 3,304 days 'since inception'); distribution bell-shaped with heavy tails",
+   "data_period": "~1999-2012",
+   "source": "https://www.forexfactory.com/thread/post/6036885",
+   "quality": "forum computation"
+  },
+  {
+   "statistic": "Open-to-close daily return",
+   "value": "Mean not significantly different from zero, symmetric, near-Gaussian tails (NumXL, Mar 2010-Apr 2012)",
+   "data_period": "2010-2012",
+   "source": "https://support.numxl.com/hc/en-us/articles/360032493932-Predict-This",
+   "quality": "vendor tutorial"
+  },
+  {
+   "statistic": "Daily pivot touch frequencies",
+   "value": "High > PP 87.38%, low < PP 85.90%; high >= R1 43.10%, R2 20.41%, R3 6.26%; low <= S1 45.34%, S2 21.48%, S3 6.56% (1,965 days); low <= S1 50.42% when open < PP vs 36.20% when open > PP",
+   "data_period": "Jan 2003-Nov 2010",
+   "source": "https://mql5.com/en/forum/2724",
+   "quality": "forum study, old data"
+  },
+  {
+   "statistic": "Probability of taking out previous day high/low",
+   "value": "Not found for EUR/USD; pivot proxies above; Edgeful sells a 'previous day's range' report",
+   "data_period": "n/a",
+   "source": "https://www.edgeful.com/blog/posts/previous-days-range-report",
+   "quality": "gap in evidence"
+  },
+  {
+   "statistic": "Inside days",
+   "value": "4,174 inside days across 7 pairs Jan 1993-Sep 2008 (avg 596/pair, ~3/month); followed by upward-biased moves the next week. EUR/USD daily since 2003: inside-bar avg range 82.7 pips vs ~117 avg day; day after inside bar avg 124 pips",
+   "data_period": "1993-2008; 2003-",
+   "source": "https://www.scribd.com/document/496411061/CurrencyTrader1108s4",
+   "quality": "magazine study + forum"
+  },
+  {
+   "statistic": "Engulfing candle follow-through",
+   "value": "After a bearish engulfing on EUR/USD: up 50.9% / down 49.1%",
+   "data_period": "undated",
+   "source": "https://forexop.com/strategy/engulfing-candle-trade/",
+   "quality": "blog test"
+  },
+  {
+   "statistic": "Fibonacci retracement levels",
+   "value": "Retracement depths near 23.6/38.2/50/61.8% explained by chance (G10 vs USD, 1-min data Oct 2003-May 2016)",
+   "data_period": "2003-2016",
+   "source": "https://forexop.com/strategy/fibonacci-fact-or-fiction/",
+   "quality": "blog test"
+  },
+  {
+   "statistic": "Day-of-week returns",
+   "value": "Monday -1.90% annualised, Friday +1.73% annualised (2000-Feb 2018, Seasonax); Monday effect present 2010-2012 but not 1999-2009 (Bush & Stephens sister paper); Friday 00:00/03:00 anomalies 2004-2014 (Popovic & Durovic)",
+   "data_period": "2000-2018",
+   "source": "https://www.seasonax.com/market-efficiency-the-euro-is-looking-forward-to-the-weekend",
+   "quality": "vendor + academic"
+  },
+  {
+   "statistic": "Monthly seasonality",
+   "value": "December +1.24% avg, positive 65% of years (1971-2026); May -0.62%, June +0.52% (50+ yrs, StoneX); August seasonally weak (implied)",
+   "data_period": "1971-2026",
+   "source": "https://tickerleague.com/forex/eurusd/seasonality",
+   "quality": "vendor seasonality"
+  },
+  {
+   "statistic": "January effect",
+   "value": "Annual high or low set in January in 76% of years 1972-2025; only 3 of 8 (37.5%) in the last 8 years",
+   "data_period": "1972-2025",
+   "source": "https://www.peterlbrandt.com/wp-content/uploads/2026/03/January-Effect_for-2026.pdf",
+   "quality": "FactorResearch note"
+  },
+  {
+   "statistic": "Streak reversal",
+   "value": "Fading 3-day streaks with >1% cumulative move: win rate 59% on EUR/USD (highest of majors), ~6 years of daily data",
+   "data_period": "~2019-2025",
+   "source": "https://prod.wsprod.tastyfx.com/news/fading-multi-day-dollar-moves-a-quantitative-case-for-mean-reversion",
+   "quality": "broker backtest, no details"
+  },
+  {
+   "statistic": "Abnormal-day behaviour",
+   "value": "Momentum within the abnormal day, reversal the next day (EURUSD and 4 others, 2008-2018); profitability contested",
+   "data_period": "2008-2018",
+   "source": "https://ideas.repec.org/a/eme/jespps/jes-11-2019-0503.html",
+   "quality": "peer-reviewed"
+  },
+  {
+   "statistic": "Autocorrelation / Hurst",
+   "value": "Daily returns: essentially zero autocorrelation; Hurst ~0.5 at daily-weekly horizons, ~0.33 at long horizons (blog, 1985-2023); 10-second returns H ~0.5 (arXiv 1906.07834); older multi-currency study: daily H > 0.5 with EUR 'closest to Gaussian'; intraday 1-min: mean-reverting (Wisniewska 2014; Middleton et al. 2021)",
+   "data_period": "various",
+   "source": "https://pdf.arxiv.org/pdf/2109.08242",
+   "quality": "academic + blog"
+  },
+  {
+   "statistic": "Intraday return seasonality (academic)",
+   "value": "USD appreciates into Tokyo/Frankfurt/London fixes and depreciates after (W-shape; 5-min data 1999-2019, 9 currencies); 30-40% of daily volume in the 3h before + 1h after the London fix; EUR/USD depreciates in European hours, appreciates in US hours (Breedon-Ranaldo, 10 yrs HF data); carry earned intraday, momentum earned overnight",
+   "data_period": "1999-2019",
+   "source": "https://econpapers.repec.org/RePEc:bla:jfinan:v:79:y:2024:i:1:p:541-578",
+   "quality": "peer-reviewed"
+  },
+  {
+   "statistic": "Pre-FOMC drift",
+   "value": "USD -32 bp before expected cuts, +20 bp before expected hikes over the 2 days pre-decision; no realised-vol increase pre-FOMC",
+   "data_period": "~1994-2015",
+   "source": "https://macrosynergy.com/?p=41075",
+   "quality": "academic via summary"
+  },
+  {
+   "statistic": "NFP first-hour range",
+   "value": "Median 47.1 pips vs 13.1 pips normal weekday hour (3.6x); six releases: 21.4, 52.3, 74.4, 53.2, 41.8, 32.3 pips",
+   "data_period": "2026",
+   "source": "https://www.fxstreet.com/analysis/nfp-stress-test-six-payrolls-releases-measured-in-daily-loss-limits-202611050906",
+   "quality": "FXStreet"
+  },
+  {
+   "statistic": "NFP 15-min / 4-hour moves",
+   "value": "28 pips / 49 pips (five releases, Aug 2018); 34-37 pips / 50-63 pips (other 2018 samples); surprises < +/-25K rarely > 40 pips (2015); most pairs back to pre-release levels within an hour (2021)",
+   "data_period": "2015-2021",
+   "source": "https://www.fxstreet.com/analysis/how-to-trade-the-us-nfp-with-eur-usd-201808021440",
+   "quality": "FXStreet"
+  },
+  {
+   "statistic": "US CPI reaction",
+   "value": "34-37 pips in 15 min, 50-63 pips in 4h (2018 samples); Dec 2022: 1.0555 -> 1.0648 immediately (+93 pips), >1% on the day; 2019 example: +24 pips in 5 min, 37 pips total",
+   "data_period": "2018-2022",
+   "source": "https://www.fxstreet.com/analysis/how-to-trade-the-us-inflation-data-with-eur-usd-201807111106",
+   "quality": "FXStreet"
+  },
+  {
+   "statistic": "ECB decision reaction",
+   "value": "Average 19.3 pips in the first 60 minutes over 9 decisions (FundedFast); single events 50-100 pips",
+   "data_period": "2024-2026",
+   "source": "https://fundedfast.com/tools/event-reactions/ecb",
+   "quality": "vendor tool"
+  },
+  {
+   "statistic": "FOMC day examples",
+   "value": "+50 pips in seconds (Jan 2019); ~-80 pips (Sep 2023); statement spike then -0.5% close (17 Sep 2025); -60 pips in minutes (Jun 2026)",
+   "data_period": "2019-2026",
+   "source": "https://www.marketpulse.com/markets/eurusd-technical-euro-bullish-trend-intact-despite-12-sell-off-after-fomc/",
+   "quality": "anecdotes"
+  },
+  {
+   "statistic": "Month-end fix behaviour",
+   "value": "Case studies: ~+20 pts in 5 min before the WM window then -12 pips within 2 min after (a January); sharp spike and reversal after ~1 min (another month); no reversal at some month-ends (July; Nov 2025 fix = Siren rate exactly); estimated 'savings' $0-675 per million",
+   "data_period": "2023-2025",
+   "source": "https://thefullfx.com/what-happened-at-the-month-end-fix-39/",
+   "quality": "The Full FX case studies"
+  },
+  {
+   "statistic": "Weekend gap fill rates",
+   "value": "66.15% (ForexFactory, period unstated); 70-75% within days (guide); all 204 gaps 2001-2020 'more likely than not' filled by Wednesday London (DailyForex); gaps < 0.5x ATR filled within 48h 88.4%, gaps > 0.75x ATR filled within 24h 28.2% / within week 41.9% (fxnx, 500 Sunday opens, method undisclosed); avg weekly gap ~70% of Friday's open-close range (EarnForex); '98% filled at some point' over 18 months (MQL5 forum)",
+   "data_period": "2001-2025",
+   "source": "https://www.dailyforex.com/forex-articles/2020/06/forex-gap-trading/144786",
+   "quality": "mixed"
+  },
+  {
+   "statistic": "Spreads",
+   "value": "ECN/raw London session 0.0-0.2 pips (Pepperstone avg 0.1; IC Markets 0.1 + $3.50/side; Exness 0.07); 200-broker ECN average 0.17 pips; standard accounts 0.8-1.6 pips; Asia 0.3-0.8 pips raw; rollover spikes 1-3 pips for 1-3 minutes; NFP widening to 5-10 pips, up to 25",
+   "data_period": "2024-2026",
+   "source": "https://www.compareforexbrokers.com/our-methodology/forex-fees/tightest-spreads",
+   "quality": "broker comparison sites"
+  },
+  {
+   "statistic": "Implied / realised volatility",
+   "value": "1M IV: 11.0 (Jan 2025) -> 9.0 (Feb) -> 6.5 (lowest since Sep 2024); 7.8 on 21 Jan 2025 from 9.4 peak; 8.35 (Sep 2025) from 9.8; 3M IV 6.47% (3 Oct 2025, lowest since Nov 2024); 1M realised 4.8% vs traded 6.5% (Nov 2025); 1M IV 5.2% 'lowest since before the energy crisis' (undated); 1M IV 5.45 vs 2-yr low 4.9 late Mar / 7.1 mid-Apr, realised 4.3 (~2024); 1-week realised < 7.0 (Jul 2025); 1M IV 9.6 -> 7.4 into a Thanksgiving",
+   "data_period": "2024-2025",
+   "source": "https://www.tickmill.com/blog/fx-options-insights-210125",
+   "quality": "options desks"
+  },
+  {
+   "statistic": "Correlations (daily returns)",
+   "value": "EUR/USD vs broad USD index: -0.820 (2024), -0.905 (2025); vs gold: +0.418 (2023), +0.288 (2024), +0.362 (2025), 1-yr +0.39; gold vs DXY -0.50 (latest); USD vs S&P mostly negative 2022-24, briefly positive 2023, rising together early 2024; oil-USD shifted negative (2026)",
+   "data_period": "2023-2026",
+   "source": "https://convextrade.com/compare/eurusd-vs-dxy/correlation",
+   "quality": "data site + commentary"
+  },
+  {
+   "statistic": "Yield-differential explanatory power",
+   "value": "Level correlation with EUR/USD since 2019 (daily): 1y differential 66%, 2y 62%, 10y 5% (BNP); 2y+terms-of-trade model R^2 87% on 1-yr window (MNI/Citi); daily-change regression on 2y/10y yields R^2 ~5%; ING 2023: 2y swap coefficient ~0; 2y swap gap -145 bp -> FV 1.067 (Mar 2025); -80 -> -100 bp in a week (May 2026)",
+   "data_period": "2019-2026",
+   "source": "https://economic-research.bnpparibas.com/html/en-US/multiple-factors-underpinning-renewed-strength-euro-against-dollar-4/17/2023,48485",
+   "quality": "bank research"
+  },
+  {
+   "statistic": "Valuation",
+   "value": "OECD PPP fair value ~$1.38 (2019; euro ~22% undervalued, cheap 5 yrs); 1.4060 with spot 15% undervalued (2020); ING BEER: ~9-10% overvalued 2022 (FV near parity), ~5% undervalued late 2024",
+   "data_period": "2019-2024",
+   "source": "https://www.fxstreet.com/analysis/great-graphic-euros-oecd-ppp-201906131134",
+   "quality": "bank/OECD"
+  },
+  {
+   "statistic": "Retail positioning snapshots (IG)",
+   "value": "29% net long (Aug 2020); ~69% net long (Oct 2023); 47.85% net long, 1.09 short:long (May 2024); FXCM: retail EUR/USD trades profitable 59% of the time but net losing",
+   "data_period": "2020-2024",
+   "source": "https://www.ig.com/en-ch/news-and-trade-ideas/euro-faces-six-weeks-of-losses-as-retail-traders-persistently-re-230823",
+   "quality": "broker"
+  },
+  {
+   "statistic": "COT",
+   "value": "Large-spec EUR net long most bullish since Jul 2023 (early 2026); '343-report extreme' (Oct 2026); CME Euro FX code 099741",
+   "data_period": "2023-2026",
+   "source": "https://www.fxstreet.com/analysis/euro-positioning-reaches-343-report-extreme-as-cot-data-points-toward-a-potential-medium-term-floor-202610041903",
+   "quality": "commentary"
+  },
+  {
+   "statistic": "Round numbers",
+   "value": "Take-profit orders cluster on 00 levels, stop-loss orders just beyond them (bank order data, Osler 2003); EBS EUR/USD order-book volume clusters at round prices and acts as barriers (Lallouache & Abergel)",
+   "data_period": "2003; 2013",
+   "source": "https://ideas.repec.org/a/bla/jfinan/v58y2003i5p1791-1819.html",
+   "quality": "peer-reviewed"
+  },
+  {
+   "statistic": "Trend-following Sharpe",
+   "value": "Time-series momentum EUR/USD out-of-sample Sharpe ~0.54 (2003-2025, EPAT); cross-sectional 12m FX momentum Sharpe 0.3, max DD -45.87% (Quantpedia)",
+   "data_period": "2003-2025",
+   "source": "https://www.quantinsti.com/articles/trend-following-strategies-major-currency-markets-epat-project/",
+   "quality": "student/vendor research"
+  },
+  {
+   "statistic": "Decade buy-and-hold",
+   "value": "EUR/USD +0.1% from 2 Oct 2016 to 1 Oct 2026 (Backtrex); GBP/USD +2%",
+   "data_period": "2016-2026",
+   "source": "https://backtrex.com/en/backtests/london-breakout-eur-usd",
+   "quality": "vendor"
+  }
+ ]
+}

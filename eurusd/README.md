@@ -18,8 +18,12 @@ repository is an unrelated Next.js app).
 
 ## Data conventions
 
-* HistData 1-minute bars are **bid** prices in EST (UTC-5, no DST). We shift to UTC.
-* All indexes are tz-aware UTC. "NY-close days" start at 22:00 UTC.
+* HistData 1-minute bars are **bid** prices stamped in New York local time **with** US daylight
+  saving (verified against ECB fixings and NFP release spikes; HistData's own "EST" label is wrong).
+  `build_data.py` converts with `America/New_York` -> UTC.
+* All indexes are tz-aware UTC. The trading day starts at 17:00 New York (22:00 UTC in winter,
+  21:00 UTC in summer). Strategies defined in London/New York local time must `tz_convert` first.
+* Known data holes: Feb-Jul 2023 is missing 763 hours at the source; 2000-2002 is thin. See `data/DATA_QUALITY.md`.
 * 1 pip = 0.0001. Costs: 1.0 pip spread + 0.2 pip slippage per fill unless stated.
 
 ## Evaluation protocol (fixed in advance)

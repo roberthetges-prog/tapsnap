@@ -5,11 +5,15 @@ Timezone conventions
 * Every DataFrame returned here has a tz-aware ``DatetimeIndex`` in **UTC**,
   named ``time``.  The index value is the **start** of the bar (a 2015-01-15
   09:30 H1 bar covers 09:30:00-10:29:59 UTC).
-* The underlying HistData ASCII files are stamped in EST (UTC-5) **without**
-  daylight-saving changes; ``build_data.py`` adds exactly 5 hours to get UTC.
-  Consequently the weekly FX session runs Sunday ~22:00 UTC to Friday ~22:00 UTC
-  all year round (17:00 New York standard time), i.e. during US summer time the
-  data's "5pm New York" is actually 18:00 EDT.
+* HistData *documents* its ASCII stamps as "EST without daylight saving", but
+  the data itself (ECB 14:15 CET fixings, 08:30 New York payroll spikes) shows
+  the stamps follow US DST, i.e. they are America/New_York local time.
+  ``build_data.py`` therefore converts with
+  ``tz_localize("America/New_York").tz_convert("UTC")`` (default
+  ``--tz-mode ny-local``; the evidence is in data/DATA_QUALITY.md, section 2a).
+  Consequently the weekly FX session runs Sunday 17:00 to Friday 17:00 New York
+  time = 22:00 UTC in winter and 21:00 UTC during US summer time, with a few
+  odd weeks (US on DST, Europe not) opening at 20:00 UTC.
 * Daily bars (``D1``) are UTC calendar days (00:00-23:59:59 UTC), *not* the
   New York 17:00 "forex day".  Use ``resample`` on M1/H1 with ``offset`` if you
   need a different day boundary.
