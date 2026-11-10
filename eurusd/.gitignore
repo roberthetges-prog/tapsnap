@@ -1,0 +1,6 @@
+# Raw downloads (HistData zips) and the two largest processed files are too big for git.
+data/raw/
+data/processed/EURUSD_M1.parquet
+data/processed/EURUSD_M5.parquet
+__pycache__/
+*.pyc

@@ -1,0 +1,12 @@
+pandas>=2.2
+numpy
+pyarrow
+scipy
+statsmodels
+scikit-learn
+lightgbm
+matplotlib
+numba
+tqdm
+tabulate
+requests
