@@ -394,7 +394,7 @@ def build_cftc() -> None:
         df = df[df["CFTC_Contract_Market_Code"].str.strip() == EUROFX_CODE]
         tff.append(df)
     t = pd.concat(tff, ignore_index=True)
-    assert t["Market_and_Exchange_Names"].str.strip().eq("EURO FX - CHICAGO MERCANTILE EXCHANGE").all()
+    assert t["Market_and_Exchange_Names"].str.strip().str.startswith("EURO FX - ").all(), t["Market_and_Exchange_Names"].unique()
     cols = {"Open_Interest_All": "open_interest",
             "Dealer_Positions_Long_All": "dealer_long", "Dealer_Positions_Short_All": "dealer_short",
             "Asset_Mgr_Positions_Long_All": "asset_mgr_long", "Asset_Mgr_Positions_Short_All": "asset_mgr_short",
@@ -420,7 +420,8 @@ def build_cftc() -> None:
         leg.append(df)
     l = pd.concat(leg, ignore_index=True)
     name_col = next(c for c in l.columns if "Market and Exchange" in c)
-    assert l[name_col].str.strip().eq("EURO FX - CHICAGO MERCANTILE EXCHANGE").all()
+    # 1999..mid-2000 files call the contract "EURO FX - INTERNATIONAL MONETARY MARKET" (same code 099741)
+    assert l[name_col].str.strip().str.startswith("EURO FX - ").all(), l[name_col].unique()
     date_col = next(c for c in l.columns if "YYYY-MM-DD" in c)
 
     def col(prefix: str) -> str:
@@ -600,7 +601,9 @@ def build_fomc() -> pd.DataFrame:
     rule_utc = [datetime.combine(dd.date(), datetime.strptime(tt, "%H:%M").time(), ET).astimezone(timezone.utc)
                 for dd, tt in zip(d, rule_time)]
     out["statement_utc"] = out["release_utc"].combine_first(out["release_utc_rule"]).combine_first(pd.Series(rule_utc, index=out.index))
-    out["time_quality"] = out["time_quality"].fillna(np.where(out["release_utc_rule"].notna(), "rule:14:00ET(gcmbo)", "rule:" + pd.Series(rule_time, index=out.index) + "ET"))
+    fallback = pd.Series(np.where(out["release_utc_rule"].notna(), "rule:14:00ET(gcmbo)",
+                                  "rule:" + pd.Series(rule_time, index=out.index) + "ET"), index=out.index)
+    out["time_quality"] = out["time_quality"].fillna(fallback)
     out["statement_utc"] = pd.to_datetime(out["statement_utc"], utc=True).dt.strftime("%Y-%m-%dT%H:%M:%SZ")
     out["in_wikipedia_actions_table"] = out["fed_funds_target"].notna()
     cols = ["date", "statement_utc", "time_quality", "scheduled", "has_sep", "status", "chair", "fed_funds_target",
@@ -664,7 +667,8 @@ def build_ecb() -> pd.DataFrame:
 def build_us_releases() -> pd.DataFrame:
     cal = RAW / "calendar_github"
     g = pd.read_csv(cal / "gcmbo_events_bls.csv")
-    g = pd.DataFrame({"release_utc": pd.to_datetime(g["ts_utc"], utc=True), "release": g["name"].str.replace(" (NFP)", "", regex=False),
+    g = pd.DataFrame({"release_utc": pd.to_datetime(g["ts_utc"], utc=True).dt.tz_localize(None),
+                      "release": g["name"].str.replace(" (NFP)", "", regex=False),
                       "source": "bls.gov schedule pages via web.archive.org (GC-MBO-ML mirror)", "time_quality": "verified(bls schedule archive)"})
     # extend backwards (2010..2016) from the ForexFactory archive, 8:30 ET rows for NFP and CPI
     ff = _load_spoluan()

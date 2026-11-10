@@ -1,0 +1,47 @@
+series,description,frequency,mirror_url,rows,first,last
+DGS2,"US Treasury 2y constant maturity yield, %",daily,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/DGS2.csv,12604,1976-06-01,2026-11-04
+DGS10,"US Treasury 10y constant maturity yield, %",daily,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/DGS10.csv,16196,1962-01-02,2026-11-04
+DGS30,"US Treasury 30y constant maturity yield, %",daily,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/DGS30.csv,12426,1977-02-15,2026-11-04
+T10Y2Y,"10y minus 2y Treasury spread, pp",daily,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/T10Y2Y.csv,12605,1976-06-01,2026-11-05
+T10Y3M,"10y minus 3m Treasury spread, pp",daily,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/T10Y3M.csv,11214,1982-01-04,2026-11-05
+FEDFUNDS,"Effective fed funds rate, monthly avg %",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/FEDFUNDS.csv,868,1954-07-01,2026-10-01
+DTWEXBGS,Nominal broad USD index (Jan2006=100),daily,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/DTWEXBGS.csv,5222,2006-01-02,2026-10-30
+CPIAUCSL,"US CPI all items SA, index 1982-84=100",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/CPIAUCSL.csv,956,1947-01-01,2026-09-01
+CPILFESL,"US core CPI SA, index",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/CPILFESL.csv,836,1957-01-01,2026-09-01
+PCEPI,US PCE price index SA,monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/PCEPI.csv,813,1959-01-01,2026-09-01
+PCEPILFE,US core PCE price index SA,monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/PCEPILFE.csv,813,1959-01-01,2026-09-01
+PAYEMS,"US nonfarm payrolls SA, thousands",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/PAYEMS.csv,1053,1939-01-01,2026-09-01
+UNRATE,"US unemployment rate SA, %",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/UNRATE.csv,944,1948-01-01,2026-09-01
+ICSA,"US initial jobless claims SA, persons",weekly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/ICSA.csv,3122,1967-01-07,2026-10-31
+CES0500000003,"US avg hourly earnings, private, $",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/CES0500000003.csv,248,2006-03-01,2026-10-01
+JTSJOL,"US job openings (JOLTS), thousands",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/JTSJOL.csv,310,2000-12-01,2026-09-01
+INDPRO,US industrial production index,monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/INDPRO.csv,1293,1919-01-01,2026-09-01
+RSAFS,"US retail sales SA, $mn",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/RSAFS.csv,417,1992-01-01,2026-09-01
+HOUST,"US housing starts SAAR, thousands",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/HOUST.csv,813,1959-01-01,2026-09-01
+GDPC1,"US real GDP SAAR, $bn 2017",quarterly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/GDPC1.csv,319,1947-01-01,2026-07-01
+M2SL,"US M2 money stock SA, $bn",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/M2SL.csv,813,1959-01-01,2026-09-01
+BOPGSTB,"US trade balance goods&services SA, $mn",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/BOPGSTB.csv,417,1992-01-01,2026-09-01
+MORTGAGE30US,"US 30y fixed mortgage rate, %",weekly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/MORTGAGE30US.csv,2902,1971-04-02,2026-11-05
+VIXCLS,CBOE VIX close,daily,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/VIXCLS.csv,9310,1990-01-02,2026-11-04
+SP500,"S&P 500 close (FRED, last 10y only)",daily,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/SP500.csv,2512,2016-11-07,2026-11-04
+NASDAQCOM,NASDAQ Composite close,daily,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/NASDAQCOM.csv,14057,1971-02-05,2026-11-05
+GASREGW,"US regular gasoline price, $/gal",weekly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/GASREGW.csv,1884,1990-08-20,2026-11-02
+PPIACO,US PPI all commodities,monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/PPIACO.csv,1365,1913-01-01,2026-09-01
+SAHMREALTIME,"Sahm rule recession indicator, pp",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/SAHMREALTIME.csv,801,1959-12-01,2026-09-01
+CP0000EZ19M086NEST,"Euro area HICP all items, index 2015=100 (FRED copy)",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/CP0000EZ19M086NEST.csv,358,1996-12-01,2026-09-01
+LRHUTTTTDEM156S,"Germany harmonised unemployment rate, %",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/LRHUTTTTDEM156S.csv,428,1991-01-01,2026-08-01
+EFFR,"Effective fed funds rate, daily %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/EFFR.csv,1216,2022-01-03,2026-11-06
+SOFR,"SOFR, daily %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/SOFR.csv,1210,2022-01-03,2026-11-06
+IORB,"Interest on reserve balances, %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/IORB.csv,1775,2022-01-01,2026-11-10
+T10YIE,"10y breakeven inflation, %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/T10YIE.csv,1213,2022-01-03,2026-11-09
+DFII10,"10y TIPS real yield, %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/DFII10.csv,1212,2022-01-03,2026-11-06
+BAMLH0A0HYM2,"ICE BofA US HY OAS, %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/BAMLH0A0HYM2.csv,784,2023-11-10,2026-11-06
+WALCL,"Fed total assets, $mn",weekly,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/WALCL.csv,253,2022-01-05,2026-11-04
+RRPONTSYD,"Fed overnight reverse repo usage, $bn",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/RRPONTSYD.csv,1211,2022-01-03,2026-11-09
+WRESBAL,"Reserve balances with Fed banks, $mn",weekly,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/WRESBAL.csv,253,2022-01-05,2026-11-04
+STLFSI4,St Louis Fed financial stress index,weekly,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/STLFSI4.csv,252,2022-01-07,2026-10-30
+ANFCI,Chicago Fed adjusted NFCI,weekly,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/ANFCI.csv,252,2022-01-07,2026-10-30
+NFCI,Chicago Fed NFCI,weekly,https://raw.githubusercontent.com/maybern-tripp-smith/fedjev-bench/main/data/raw/fred/NFCI.csv,2906,1971-01-08,2026-09-11
+DFEDTAR,"Fed funds target rate (single, to 2008-12-15), %",daily,https://raw.githubusercontent.com/maybern-tripp-smith/fedjev-bench/main/data/raw/fred/DFEDTAR.csv,9577,1982-09-27,2008-12-15
+DFEDTARL,"Fed funds target range lower bound, %",daily,https://raw.githubusercontent.com/maybern-tripp-smith/fedjev-bench/main/data/raw/fred/DFEDTARL.csv,6488,2008-12-16,2026-09-20
+DFEDTARU,"Fed funds target range upper bound, %",daily,https://raw.githubusercontent.com/maybern-tripp-smith/fedjev-bench/main/data/raw/fred/DFEDTARU.csv,6488,2008-12-16,2026-09-20

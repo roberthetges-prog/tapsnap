@@ -1,0 +1,330 @@
+date,statement_utc,time_quality,scheduled,has_sep,status,chair,fed_funds_target,discount_rate,votes,in_hillenbrand_meeting_list,in_wikipedia_actions_table,note
+1989-07-07,1989-07-07T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1989-08-23,1989-08-23T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1989-10-04,1989-10-04T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1989-11-15,1989-11-15T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1989-12-20,1989-12-20T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1990-02-08,1990-02-08T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1990-03-28,1990-03-28T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1990-05-16,1990-05-16T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1990-07-05,1990-07-05T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1990-08-22,1990-08-22T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1990-10-03,1990-10-03T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1990-11-14,1990-11-14T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1990-12-18,1990-12-18T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1991-02-07,1991-02-07T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1991-03-27,1991-03-27T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1991-05-15,1991-05-15T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1991-07-05,1991-07-05T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1991-08-21,1991-08-21T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1991-10-02,1991-10-02T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1991-11-06,1991-11-06T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1991-12-18,1991-12-18T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1992-02-06,1992-02-06T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1992-04-01,1992-04-01T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1992-05-20,1992-05-20T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1992-07-02,1992-07-02T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1992-08-19,1992-08-19T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1992-10-07,1992-10-07T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1992-11-18,1992-11-18T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1992-12-23,1992-12-23T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1993-02-04,1993-02-04T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1993-03-24,1993-03-24T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1993-05-19,1993-05-19T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1993-07-08,1993-07-08T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1993-08-18,1993-08-18T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1993-09-22,1993-09-22T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1993-11-17,1993-11-17T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1993-12-22,1993-12-22T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1994-02-04,1994-02-04T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1994-03-22,1994-03-22T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1994-05-17,1994-05-17T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1994-07-06,1994-07-06T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1994-08-16,1994-08-16T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1994-09-27,1994-09-27T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1994-11-15,1994-11-15T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1994-12-20,1994-12-20T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1995-02-01,1995-02-01T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1995-03-28,1995-03-28T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1995-05-23,1995-05-23T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1995-07-06,1995-07-06T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1995-08-22,1995-08-22T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1995-09-26,1995-09-26T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1995-11-15,1995-11-15T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1995-12-19,1995-12-19T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1996-01-31,1996-01-31T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1996-03-26,1996-03-26T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1996-05-21,1996-05-21T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1996-07-03,1996-07-03T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1996-08-20,1996-08-20T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1996-09-24,1996-09-24T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1996-11-13,1996-11-13T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1996-12-17,1996-12-17T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1997-02-05,1997-02-05T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1997-03-25,1997-03-25T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1997-05-20,1997-05-20T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1997-07-02,1997-07-02T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1997-08-19,1997-08-19T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1997-09-30,1997-09-30T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1997-11-12,1997-11-12T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1997-12-16,1997-12-16T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1998-02-04,1998-02-04T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1998-03-31,1998-03-31T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1998-05-19,1998-05-19T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1998-07-01,1998-07-01T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1998-08-18,1998-08-18T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1998-09-29,1998-09-29T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1998-11-17,1998-11-17T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1998-12-22,1998-12-22T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1999-02-03,1999-02-03T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1999-03-30,1999-03-30T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1999-05-18,1999-05-18T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1999-06-30,1999-06-30T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1999-08-24,1999-08-24T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1999-10-05,1999-10-05T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1999-11-16,1999-11-16T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+1999-12-21,1999-12-21T19:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+2000-02-02,2000-02-02T19:15:00Z,rule:14:15ET,True,,held,,5.75%,5.25%,,True,True,Official statement
+2000-03-21,2000-03-21T19:15:00Z,rule:14:15ET,True,,held,,6.00%,5.50%,,True,True,Official statement
+2000-05-16,2000-05-16T18:15:00Z,rule:14:15ET,True,,held,,6.50%,6.00%,,True,True,Official statement
+2000-06-28,2000-06-28T18:15:00Z,rule:14:15ET,True,,held,,6.50%,6.00%,,True,True,Official statement
+2000-08-22,2000-08-22T18:15:00Z,rule:14:15ET,True,,held,,6.50%,6.00%,,True,True,Official statement
+2000-10-03,2000-10-03T18:15:00Z,rule:14:15ET,True,,held,,6.50%,6.00%,,True,True,Official statement
+2000-11-15,2000-11-15T19:15:00Z,rule:14:15ET,True,,held,,6.50%,6.00%,,True,True,Official statement
+2000-12-19,2000-12-19T19:15:00Z,rule:14:15ET,True,,held,,6.50%,6.00%,,True,True,Official statement
+2001-01-03,2001-01-03T19:15:00Z,rule:14:15ET,False,,held,,6.00%,5.75%,,,True,Official statement Conference Call
+2001-01-31,2001-01-31T19:15:00Z,rule:14:15ET,True,,held,,5.50%,5.00%,,True,True,Official statement
+2001-03-20,2001-03-20T19:15:00Z,rule:14:15ET,True,,held,,5.00%,4.50%,,True,True,Official statement
+2001-04-18,2001-04-18T18:15:00Z,rule:14:15ET,False,,held,,4.50%,4.00%,,,True,Official statement Conference Call
+2001-05-15,2001-05-15T18:15:00Z,rule:14:15ET,True,,held,,4.00%,3.50%,,True,True,Official statement
+2001-06-27,2001-06-27T18:15:00Z,rule:14:15ET,True,,held,,3.75%,3.25%,,True,True,Official statement
+2001-08-21,2001-08-21T18:15:00Z,rule:14:15ET,True,,held,,3.50%,3.00%,,True,True,Official statement
+2001-09-17,2001-09-17T18:15:00Z,rule:14:15ET,False,,held,,3.00%,2.50%,,,True,"Official statement In reaction to the terrorist attacks of September 11, 2001 the FOMC held two conference calls on September 13 and September 17."
+2001-10-02,2001-10-02T18:15:00Z,rule:14:15ET,True,,held,,2.50%,2.00%,,True,True,Official statement
+2001-11-06,2001-11-06T19:15:00Z,rule:14:15ET,True,,held,,2.00%,1.50%,,True,True,Official statement
+2001-12-11,2001-12-11T19:15:00Z,rule:14:15ET,True,,held,,1.75%,1.25%,,True,True,Official statement
+2002-01-30,2002-01-30T19:15:00Z,rule:14:15ET,True,,held,,1.75%,1.25%,,True,True,Official statement
+2002-03-19,2002-03-19T19:15:00Z,rule:14:15ET,True,,held,,1.75%,1.25%,10-0,True,True,Official statement
+2002-05-07,2002-05-07T18:15:00Z,rule:14:15ET,True,,held,,1.75%,1.25%,10-0,True,True,Official statement
+2002-06-26,2002-06-26T18:15:00Z,rule:14:15ET,True,,held,,1.75%,1.25%,10-0,True,True,Official statement
+2002-08-13,2002-08-13T18:15:00Z,rule:14:15ET,True,,held,,1.75%,1.25%,12-0,True,True,Official statement
+2002-09-24,2002-09-24T18:15:00Z,rule:14:15ET,True,,held,,1.75%,1.25%,10-2,True,True,Official statement Governors Edward M. Gramlich and Robert D. McTeer Jr. voted against the action (in favor of a reduction of the fed funds rate target).
+2002-11-06,2002-11-06T19:15:00Z,rule:14:15ET,True,,held,,1.25%,0.75%,12–0,True,True,Official statement
+2002-12-10,2002-12-10T19:15:00Z,rule:14:15ET,True,,held,,1.25%,0.75%,12–0,True,True,Official statement
+2003-01-09,2003-01-09T19:15:00Z,rule:14:15ET,False,,held,,1.25%,2.25%,,,True,"No meeting, but new discount window rules introduced in October were implemented. These mandated a discount rate 100 basis points higher than the federal funds rate, effectively hiking it by 150 basis"
+2003-01-29,2003-01-29T19:15:00Z,rule:14:15ET,True,,held,,1.25%,2.25%,12–0,True,True,Official statement
+2003-03-18,2003-03-18T19:15:00Z,rule:14:15ET,True,,held,,1.25%,2.25%,12–0,True,True,Official statement
+2003-05-06,2003-05-06T18:15:00Z,rule:14:15ET,True,,held,,1.25%,2.25%,12–0,True,True,Official statement
+2003-06-25,2003-06-25T18:15:00Z,rule:14:15ET,True,,held,,1.00%,2.00%,11–1,True,True,"Parry dissented, preferring a 50 basis point cut. Official statement"
+2003-08-12,2003-08-12T18:15:00Z,rule:14:15ET,True,,held,,1.00%,2.00%,12–0,True,True,Official statement
+2003-09-16,2003-09-16T18:15:00Z,rule:14:15ET,True,,held,,1.00%,2.00%,12–0,True,True,Official statement
+2003-10-28,2003-10-28T19:15:00Z,rule:14:15ET,True,,held,,1.00%,2.00%,12–0,True,True,Official statement
+2003-12-09,2003-12-09T19:15:00Z,rule:14:15ET,True,,held,,1.00%,2.00%,12–0,True,True,Official statement
+2004-01-28,2004-01-28T19:15:00Z,rule:14:15ET,True,,held,,1.00%,2.00%,12–0,True,True,Official statement
+2004-03-16,2004-03-16T19:15:00Z,rule:14:15ET,True,,held,,1.00%,2.00%,12–0,True,True,Official statement
+2004-05-04,2004-05-04T18:15:00Z,rule:14:15ET,True,,held,,1.00%,2.00%,12–0,True,True,Official statement
+2004-06-30,2004-06-30T18:15:00Z,rule:14:15ET,True,,held,,1.25%,2.25%,12–0,True,True,Official statement
+2004-08-10,2004-08-10T18:15:00Z,rule:14:15ET,True,,held,,1.50%,2.50%,12–0,True,True,Official statement
+2004-09-21,2004-09-21T18:15:00Z,rule:14:15ET,True,,held,,1.75%,2.75%,12–0,True,True,Official statement
+2004-11-10,2004-11-10T19:15:00Z,rule:14:15ET,True,,held,,2.00%,3.00%,12–0,True,True,Official statement
+2004-12-14,2004-12-14T19:15:00Z,rule:14:15ET,True,,held,,2.25%,3.25%,12–0,True,True,"The FOMC changed their previous policy on the release of the minutes from each meeting. Previously, the minutes were released only after the next meeting had already finished, rendering them only of h"
+2005-02-02,2005-02-02T19:15:00Z,rule:14:15ET,True,,held,,2.50%,3.50%,12–0,True,True,Official statement
+2005-03-22,2005-03-22T19:15:00Z,rule:14:15ET,True,,held,,2.75%,3.75%,12–0,True,True,Official statement
+2005-05-03,2005-05-03T18:15:00Z,rule:14:15ET,True,,held,,3.00%,4.00%,11–0,True,True,"Ben Bernanke not voting, as his appointment and departure for the Council of Economic Advisers to the White House in June has already been announced. Official statement"
+2005-06-30,2005-06-30T18:15:00Z,rule:14:15ET,True,,held,,3.25%,4.25%,11–0,True,True,Official statement
+2005-08-09,2005-08-09T18:15:00Z,rule:14:15ET,True,,held,,3.50%,4.50%,10–0,True,True,"Edward Gramlich not voting, as his return to the University of Michigan in September has already been announced. Official statement"
+2005-09-20,2005-09-20T18:15:00Z,rule:14:15ET,True,,held,,3.75%,4.75%,9–1,True,True,"Olson dissented, preferring no change. Official statement"
+2005-11-01,2005-11-01T19:15:00Z,rule:14:15ET,True,,held,,4.00%,5.00%,10–0,True,True,Official statement
+2005-12-13,2005-12-13T19:15:00Z,rule:14:15ET,True,,held,,4.25%,5.25%,10–0,True,True,Official statement
+2006-01-31,2006-01-31T19:15:00Z,rule:14:15ET,True,,held,,4.50%,5.50%,10–0,True,True,Official statement
+2006-03-28,2006-03-28T19:15:00Z,rule:14:15ET,True,,held,,4.75%,5.75%,11–0,True,True,"This was Ben Bernanke's first meeting as new chairman, replacing Alan Greenspan. He continued Greenspan's policy of gradual tightening and pledged increased transparency for the Federal Reserve. Offic"
+2006-05-10,2006-05-10T18:15:00Z,rule:14:15ET,True,,held,,5.00%,6.00%,11–0,True,True,Official statement
+2006-06-29,2006-06-29T18:15:00Z,rule:14:15ET,True,,held,,5.25%,6.25%,10–0,True,True,"Mark W. Olson not voting, as his appointment and departure for the Public Company Accounting Oversight Board in July has already been announced. Official statement"
+2006-08-08,2006-08-08T18:15:00Z,rule:14:15ET,True,,held,,5.25%,6.25%,9–1,True,True,"The Fed kept rates stable this meeting; they had raised the rates by 25 basis points for seventeen consecutive meetings prior. Lacker dissented, preferring a 25 basis point increase. Official statemen"
+2006-09-20,2006-09-20T18:15:00Z,rule:14:15ET,True,,held,,5.25%,6.25%,10–1,True,True,"Lacker dissented, preferring a 25 basis point increase. First vote from Frederic Mishkin after his appointment. Official statement"
+2006-10-25,2006-10-25T18:15:00Z,rule:14:15ET,True,,held,,5.25%,6.25%,10–1,True,True,"Lacker dissented, preferring a 25 basis point increase. Official statement"
+2006-12-12,2006-12-12T19:15:00Z,rule:14:15ET,True,,held,,5.25%,6.25%,10–1,True,True,"Lacker dissented, preferring a 25 basis point increase. Official statement"
+2007-01-31,2007-01-31T19:15:00Z,rule:14:15ET,True,,held,,5.25%,6.25%,11–0,True,True,Official statement
+2007-03-21,2007-03-21T18:15:00Z,rule:14:15ET,True,,held,,5.25%,6.25%,10–0,True,True,Bies recused herself. Official statement
+2007-05-09,2007-05-09T18:15:00Z,rule:14:15ET,True,,held,,5.25%,6.25%,10–0,True,True,Official statement
+2007-06-28,2007-06-28T18:15:00Z,rule:14:15ET,True,,held,,5.25%,6.25%,10–0,True,True,Official statement
+2007-08-07,2007-08-07T18:15:00Z,rule:14:15ET,True,,held,,5.25%,6.25%,10–0,True,True,Official statement
+2007-08-17,2007-08-17T18:15:00Z,rule:14:15ET,False,,held,,5.25%,5.75%,10–0,,True,"The subprime mortgage crisis roiled the markets shortly after the Fed's August 7 meeting, causing the board to release a statement on August 10 saying that they were prepared to act in response to the"
+2007-09-18,2007-09-18T18:15:00Z,rule:14:15ET,True,,held,,4.75%,5.25%,10–0,True,True,Official statement
+2007-10-31,2007-10-31T18:15:00Z,rule:14:15ET,True,,held,,4.50%,5.00%,9–1,True,True,"Hoenig dissented, preferring no change. Official statement"
+2007-12-11,2007-12-11T19:15:00Z,rule:14:15ET,True,,held,,4.25%,4.75%,9–1,True,True,"Rosengren dissented, preferring a 50 basis point cut. The markets, disappointed with a 25 basis point cut, fell in response; the Fed issued a statement the day after (December 12) pledging an increase"
+2008-01-22,2008-01-22T19:15:00Z,rule:14:15ET,False,,held,,3.50%,4.00%,8–1,,True,"This was an intermeeting rate cut held in response to the January stock downturn, with the results announced Tuesday morning before the U.S. market opened. Poole dissented, saying that emergency actio"
+2008-01-30,2008-01-30T19:15:00Z,rule:14:15ET,True,,held,,3.00%,3.50%,9–1,True,True,"Fisher dissented, preferring no change. Official statement"
+2008-03-16,2008-03-16T18:15:00Z,rule:14:15ET,False,,held,,3.00%,3.25%,10–0,,True,This was an emergency unscheduled meeting in response to the meltdown at Bear Stearns. The FOMC arranged loan securities for JPMorgan Chase and greased a buyout of Bear Stearns to make certain that Be
+2008-03-18,2008-03-18T18:15:00Z,rule:14:15ET,True,,held,,2.25%,2.50%,8–2,True,True,"The FOMC made another unusually large cut, slashing 75 basis points off the federal funds rate in response to turmoil in the markets and the collapse of Bear Stearns. Despite some predicting an even l"
+2008-04-30,2008-04-30T18:15:00Z,rule:14:15ET,True,,held,,2.00%,2.25%,8–2,True,True,"The FOMC cut rates by 25 basis points. They drew back on their easing bias somewhat by removing ""downside risks to growth remain"" from its statement, but left no sign of a future pause to the interest"
+2008-06-25,2008-06-25T18:15:00Z,rule:14:15ET,True,,held,,,,,True,False,
+2008-08-05,2008-08-05T18:15:00Z,rule:14:15ET,True,,held,,2.00%,2.25%,10–1,True,True,The Federal Open Market Committee decided today to keep its target for the federal funds rate at 2 percent. Official statement
+2008-09-16,2008-09-16T18:15:00Z,rule:14:15ET,True,,held,,2.00%,2.25%,10-0,True,True,The FOMC left rates unchanged the day after the Bankruptcy of Lehman Brothers. Official Statement
+2008-10-08,2008-10-08T18:15:00Z,rule:14:15ET,False,,held,,1.50%,1.75%,,,True,"This was an emergency unscheduled meeting in response to a rapidly weakening economy, made in coordination with several other central banks around the world. Official statement"
+2008-10-29,2008-10-29T18:15:00Z,rule:14:15ET,True,,held,,1.00%,1.25%,10–0,True,True,Official statement
+2008-12-16,2008-12-16T19:15:00Z,verified:regular_schedule,True,,held,,0.00%–0.25%,0.50%,10–0,True,True,Official statement See also: ZIRP
+2009-01-28,2009-01-28T19:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2009-03-18,2009-03-18T18:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2009-04-29,2009-04-29T18:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2009-06-24,2009-06-24T18:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2009-08-12,2009-08-12T18:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2009-09-23,2009-09-23T18:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2009-11-04,2009-11-04T19:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2009-12-16,2009-12-16T19:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2010-01-27,2010-01-27T19:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2010-03-16,2010-03-16T18:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2010-04-28,2010-04-28T18:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2010-06-23,2010-06-23T18:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2010-08-10,2010-08-10T18:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2010-09-21,2010-09-21T18:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2010-11-03,2010-11-03T18:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2010-12-14,2010-12-14T19:15:00Z,verified:regular_schedule,True,,held,,,,,True,False,
+2011-01-26,2011-01-26T19:15:00Z,verified:regular_schedule,True,False,held,Bernanke,,,,True,False,
+2011-03-15,2011-03-15T18:15:00Z,verified:regular_schedule,True,True,held,Bernanke,,,,True,False,
+2011-04-27,2011-04-27T16:30:00Z,verified:press_conference_page,True,False,held,Bernanke,,,,True,False,
+2011-06-22,2011-06-22T16:30:00Z,verified:press_conference_page,True,True,held,Bernanke,0.00%–0.25%,0.75%,10–0,True,True,Official statement
+2011-08-09,2011-08-09T18:15:00Z,verified:regular_schedule,True,False,held,Bernanke,,,,True,False,
+2011-09-21,2011-09-21T18:15:00Z,verified:regular_schedule,True,True,held,Bernanke,,,,True,False,
+2011-11-02,2011-11-02T16:30:00Z,verified:press_conference_page,True,False,held,Bernanke,,,,True,False,
+2011-12-13,2011-12-13T19:15:00Z,verified:regular_schedule,True,True,held,Bernanke,,,,True,False,
+2012-01-25,2012-01-25T17:30:00Z,verified:press_conference_page,True,False,held,Bernanke,,,,True,False,
+2012-03-13,2012-03-13T18:15:00Z,verified:regular_schedule,True,True,held,Bernanke,,,,True,False,
+2012-04-25,2012-04-25T16:30:00Z,verified:press_conference_page,True,False,held,Bernanke,,,,True,False,
+2012-06-20,2012-06-20T16:30:00Z,verified:press_conference_page,True,True,held,Bernanke,,,,True,False,
+2012-08-01,2012-08-01T18:15:00Z,verified:regular_schedule,True,False,held,Bernanke,,,,True,False,
+2012-09-13,2012-09-13T16:30:00Z,verified:press_conference_page,True,True,held,Bernanke,,,,True,False,
+2012-10-24,2012-10-24T18:15:00Z,verified:regular_schedule,True,False,held,Bernanke,,,,True,False,
+2012-12-12,2012-12-12T17:30:00Z,verified:press_conference_page,True,True,held,Bernanke,,,,True,False,
+2013-01-30,2013-01-30T19:15:00Z,verified:regular_schedule,True,False,held,Bernanke,,,,True,False,
+2013-03-20,2013-03-20T18:00:00Z,verified:press_conference_page,True,True,held,Bernanke,,,,True,False,
+2013-05-01,2013-05-01T18:00:00Z,verified:regular_schedule,True,False,held,Bernanke,,,,True,False,
+2013-06-19,2013-06-19T18:00:00Z,verified:press_conference_page,True,True,held,Bernanke,,,,True,False,
+2013-07-31,2013-07-31T18:00:00Z,verified:regular_schedule,True,False,held,Bernanke,,,,True,False,
+2013-09-18,2013-09-18T18:00:00Z,verified:press_conference_page,True,True,held,Bernanke,,,,True,False,
+2013-10-30,2013-10-30T18:00:00Z,verified:regular_schedule,True,False,held,Bernanke,,,,True,False,
+2013-12-18,2013-12-18T19:00:00Z,verified:press_conference_page,True,True,held,Bernanke,,,,True,False,
+2014-01-29,2014-01-29T19:00:00Z,verified:regular_schedule,True,False,held,Bernanke,,,,True,False,
+2014-03-19,2014-03-19T18:00:00Z,verified:press_conference_page,True,True,held,Yellen,,,,True,False,
+2014-04-30,2014-04-30T18:00:00Z,verified:regular_schedule,True,False,held,Yellen,,,,True,False,
+2014-06-18,2014-06-18T18:00:00Z,verified:press_conference_page,True,True,held,Yellen,,,,True,False,
+2014-07-30,2014-07-30T18:00:00Z,verified:regular_schedule,True,False,held,Yellen,,,,True,False,
+2014-09-17,2014-09-17T18:00:00Z,verified:press_conference_page,True,True,held,Yellen,,,,True,False,
+2014-10-29,2014-10-29T18:00:00Z,verified:regular_schedule,True,False,held,Yellen,,,,True,False,
+2014-12-17,2014-12-17T19:00:00Z,verified:press_conference_page,True,True,held,Yellen,,,,True,False,
+2015-01-28,2015-01-28T19:00:00Z,verified:regular_schedule,True,False,held,Yellen,,,,True,False,
+2015-03-18,2015-03-18T18:00:00Z,verified:press_conference_page,True,True,held,Yellen,,,,True,False,
+2015-04-29,2015-04-29T18:00:00Z,verified:regular_schedule,True,False,held,Yellen,,,,True,False,
+2015-06-17,2015-06-17T18:00:00Z,verified:press_conference_page,True,True,held,Yellen,,,,,False,
+2015-06-18,2015-06-18T18:00:00Z,rule:14:00ET,True,,held,,,,,True,False,
+2015-07-28,2015-07-28T18:00:00Z,rule:14:00ET,True,,held,,,,,True,False,
+2015-07-29,2015-07-29T18:00:00Z,verified:regular_schedule,True,False,held,Yellen,,,,,False,
+2015-09-17,2015-09-17T18:00:00Z,verified:press_conference_page,True,True,held,Yellen,,,,,False,
+2015-09-29,2015-09-29T18:00:00Z,rule:14:00ET,True,,held,,,,,True,False,
+2015-10-27,2015-10-27T18:00:00Z,rule:14:00ET,True,,held,,,,,True,False,
+2015-10-28,2015-10-28T18:00:00Z,verified:regular_schedule,True,False,held,Yellen,,,,,False,
+2015-12-16,2015-12-16T19:00:00Z,verified:press_conference_page,True,True,held,Yellen,0.25%–0.50%,1.00%,10–0,True,True,Official statement
+2016-01-27,2016-01-27T19:00:00Z,verified:statement_page,True,False,held,Yellen,,,,True,False,
+2016-03-16,2016-03-16T18:00:00Z,verified:statement_page,True,True,held,Yellen,,,,True,False,
+2016-04-27,2016-04-27T18:00:00Z,verified:statement_page,True,False,held,Yellen,,,,True,False,
+2016-06-15,2016-06-15T18:00:00Z,verified:statement_page,True,True,held,Yellen,,,,True,False,
+2016-07-27,2016-07-27T18:00:00Z,verified:statement_page,True,False,held,Yellen,,,,True,False,
+2016-09-21,2016-09-21T18:00:00Z,verified:statement_page,True,True,held,Yellen,,,,True,False,
+2016-11-02,2016-11-02T18:00:00Z,verified:statement_page,True,False,held,Yellen,,,,True,False,
+2016-12-14,2016-12-14T19:00:00Z,verified:statement_page,True,True,held,Yellen,0.50%–0.75%,1.25%,10–0,True,True,Official statement
+2017-02-01,2017-02-01T19:00:00Z,verified:statement_page,True,False,held,Yellen,,,,True,False,
+2017-03-15,2017-03-15T18:00:00Z,verified:statement_page,True,True,held,Yellen,0.75%–1.00%,1.50%,9–1,True,True,Official statement
+2017-05-03,2017-05-03T18:00:00Z,verified:statement_page,True,False,held,Yellen,,,,True,False,
+2017-06-14,2017-06-14T18:00:00Z,verified:statement_page,True,True,held,Yellen,1.00%–1.25%,1.75%,8–1,True,True,Official statement
+2017-07-26,2017-07-26T18:00:00Z,verified:statement_page,True,False,held,Yellen,,,,True,False,
+2017-09-20,2017-09-20T18:00:00Z,verified:statement_page,True,True,held,Yellen,,,,True,False,
+2017-11-01,2017-11-01T18:00:00Z,verified:statement_page,True,False,held,Yellen,,,,True,False,
+2017-12-13,2017-12-13T19:00:00Z,verified:statement_page,True,True,held,Yellen,1.25%–1.50%,2.00%,7–2,True,True,Kashkari and Evans both dissented due to flattening yield curve concerns. Official statement
+2018-01-31,2018-01-31T19:00:00Z,verified:statement_page,True,,held,,,,,True,False,
+2018-03-21,2018-03-21T18:00:00Z,verified:statement_page,True,True,held,Powell,1.50%–1.75%,2.25%,8–0,True,True,Official statement
+2018-05-02,2018-05-02T18:00:00Z,verified:statement_page,True,,held,,,,,True,False,
+2018-06-13,2018-06-13T18:00:00Z,verified:statement_page,True,True,held,Powell,1.75%–2.00%,2.50%,8–0,True,True,Official statement
+2018-08-01,2018-08-01T18:00:00Z,verified:statement_page,True,,held,,,,,True,False,
+2018-09-26,2018-09-26T18:00:00Z,verified:statement_page,True,True,held,Powell,2.00%–2.25%,2.75%,9–0,True,True,Official statement
+2018-11-08,2018-11-08T19:00:00Z,verified:statement_page,True,,held,,,,,True,False,
+2018-12-19,2018-12-19T19:00:00Z,verified:statement_page,True,True,held,Powell,2.25%–2.50%,3.00%,10–0,True,True,Discount rate minutes
+2019-01-30,2019-01-30T19:00:00Z,verified:statement_page,True,False,held,Powell,,,,True,False,
+2019-03-20,2019-03-20T18:00:00Z,verified:statement_page,True,True,held,Powell,,,,True,False,
+2019-05-01,2019-05-01T18:00:00Z,verified:statement_page,True,False,held,Powell,,,,True,False,
+2019-06-19,2019-06-19T18:00:00Z,verified:statement_page,True,True,held,Powell,,,,True,False,
+2019-07-31,2019-07-31T18:00:00Z,verified:statement_page,True,False,held,Powell,2.00%–2.25%,2.75%[24],8–2,True,True,President Donald Trump demanded a cut though a bigger one.[25] Official statement
+2019-09-18,2019-09-18T18:00:00Z,verified:statement_page,True,True,held,Powell,1.75%–2.00%,2.75%,7–3,True,True,Official statement
+2019-10-30,2019-10-30T18:00:00Z,verified:statement_page,True,False,held,Powell,1.50%–1.75%,2.75%,8–2,True,True,Official statement
+2019-12-11,2019-12-11T19:00:00Z,verified:statement_page,True,True,held,Powell,,,,True,False,
+2020-01-29,2020-01-29T19:00:00Z,verified:statement_page,True,False,held,Powell,,,,True,False,
+2020-03-03,2020-03-03T15:00:00Z,verified:statement_page,False,False,held,Powell,1%–1.25%,2.75%,10–0,,True,This was an emergency unscheduled meeting in response to the Coronavirus pandemic in the United States. Official statement
+2020-03-15,2020-03-15T18:00:00Z,rule:14:00ET,False,False,held,Powell,0%–0.25%,0.25%,9–1,,True,This was an emergency unscheduled meeting in response to the Coronavirus pandemic in the United States. Official statement
+2020-03-19,2020-03-19T18:00:00Z,rule:14:00ET,False,,held,,0%–0.25%,0.25%,,,True,This was an emergency action in response to the Coronavirus pandemic in the United States. The Federal Reserve announced the establishment of temporary U.S. dollar liquidity arrangements with other ce
+2020-03-23,2020-03-23T12:00:00Z,verified:statement_page,False,,held,,0%–0.25%,0.25%,10-0,,True,This was an emergency action in response to the Coronavirus pandemic in the United States. The FOMC announced to widen its treasury securities and agency mortgage-backed securities purchase operations
+2020-03-31,2020-03-31T18:00:00Z,rule:14:00ET,False,,held,,0%–0.25%,0.25%,,,True,This was an emergency action in response to the Coronavirus pandemic in the United States. The Federal Reserve announced to open a temporary repurchase agreement facility accessible to foreign and int
+2020-04-29,2020-04-29T18:00:00Z,verified:statement_page,True,False,held,Powell,0%–0.25%,0.25%,10-0,True,True,Official statement
+2020-06-10,2020-06-10T18:00:00Z,verified:statement_page,True,True,held,Powell,0%–0.25%,0.25%,10-0,True,True,Official statement
+2020-07-29,2020-07-29T18:00:00Z,verified:statement_page,True,False,held,Powell,0%–0.25%,0.25%,10-0,True,True,Official statement
+2020-08-27,2020-08-27T18:00:00Z,rule:14:00ET,False,,held,,0%–0.25%,0.25%,unanimous,,True,"No meeting, but announcement of approval of updates to the statement on longer-run goals and monetary policy strategy. Most importantly, the FOMC decided to adjusts its strategy towards an average inf"
+2020-09-16,2020-09-16T18:00:00Z,verified:statement_page,True,True,held,Powell,0%–0.25%,0.25%,8-2,True,True,"Kaplan dissented, preferring ""the Committee [to] retain greater policy rate flexibility"". Kashkari dissented, preferring a stronger message regarding to keep ""the current target range until core infla"
+2020-11-05,2020-11-05T19:00:00Z,verified:statement_page,True,False,held,Powell,0%–0.25%,0.25%,10-0,True,True,Official statement
+2020-12-16,2020-12-16T19:00:00Z,verified:statement_page,True,True,held,Powell,0%–0.25%,0.25%,10-0,True,True,Official statement
+2021-01-27,2021-01-27T19:00:00Z,verified:statement_page,True,False,held,Powell,0%–0.25%,0.25%,11-0,True,True,Official statement
+2021-03-17,2021-03-17T18:00:00Z,verified:statement_page,True,True,held,Powell,0%–0.25%,0.25%,11-0,True,True,Official statement
+2021-04-28,2021-04-28T18:00:00Z,verified:statement_page,True,False,held,Powell,0%–0.25%,0.25%,11-0,True,True,Official statement
+2021-06-16,2021-06-16T18:00:00Z,verified:statement_page,True,True,held,Powell,0%–0.25%,0.25%,11-0,True,True,Official statement
+2021-07-28,2021-07-28T18:00:00Z,verified:statement_page,True,False,held,Powell,0%–0.25%,0.25%,11-0,True,True,Official statement
+2021-09-22,2021-09-22T18:00:00Z,verified:statement_page,True,True,held,Powell,0%–0.25%,0.25%,11-0,True,True,Official statement
+2021-11-03,2021-11-03T18:00:00Z,verified:statement_page,True,False,held,Powell,0%–0.25%,0.25%,11-0,True,True,Official statement
+2021-12-15,2021-12-15T19:00:00Z,verified:statement_page,True,True,held,Powell,0%–0.25%,0.25%,11-0,True,True,Official statement
+2022-01-26,2022-01-26T19:00:00Z,verified:statement_page,True,False,held,Powell,,,,True,False,
+2022-03-16,2022-03-16T18:00:00Z,verified:statement_page,True,True,held,Powell,0.25%–0.50%,0.50%,8–1,True,True,"Bullard dissented, preferring a 50-basis-point upward adjustment to the policy rate, reaching a policy rate above 3% in 2022.[23] Official statement"
+2022-05-04,2022-05-04T18:00:00Z,verified:statement_page,True,False,held,Powell,0.75%–1.00%,1.00%,9–0,True,True,Announced biggest rate hike since May 2000 to combat inflation. Official statement
+2022-06-15,2022-06-15T18:00:00Z,verified:statement_page,True,True,held,Powell,1.50%–1.75%,1.75%,8–1,True,True,"Announced biggest rate hike since 1994 to continue combat inflation. George dissented, preferring a 50-basis-point upward adjustment to the policy rate. Official statement"
+2022-07-27,2022-07-27T18:00:00Z,verified:statement_page,True,False,held,Powell,2.25%–2.50%,2.50%,12–0,True,True,Official statement
+2022-09-21,2022-09-21T18:00:00Z,verified:statement_page,True,True,held,Powell,3.00%–3.25%,3.25%,12–0,True,True,Official statement
+2022-11-02,2022-11-02T18:00:00Z,verified:statement_page,True,False,held,Powell,3.75%–4.00%,4.00%,12–0,True,True,Official statement
+2022-12-14,2022-12-14T19:00:00Z,verified:statement_page,True,True,held,Powell,4.25%–4.50%,4.50%,12–0,True,True,Official statement
+2023-02-01,2023-02-01T19:00:00Z,verified:statement_page,True,False,held,Powell,4.50%–4.75%,4.75%,12–0,True,True,Official statement
+2023-03-22,2023-03-22T18:00:00Z,verified:statement_page,True,True,held,Powell,4.75%–5.00%,5.00%,11–0,True,True,Official statement
+2023-05-03,2023-05-03T18:00:00Z,verified:statement_page,True,False,held,Powell,5.00%–5.25%,5.25%,11–0,True,True,Official statement
+2023-06-14,2023-06-14T18:00:00Z,verified:statement_page,True,True,held,Powell,5.00%–5.25%,5.25%,11–0,True,True,Official statement
+2023-07-26,2023-07-26T18:00:00Z,verified:statement_page,True,False,held,Powell,5.25%–5.50%,5.50%,11–0,True,True,Official statement
+2023-09-20,2023-09-20T18:00:00Z,verified:statement_page,True,True,held,Powell,5.25%–5.50%,5.50%,12–0,True,True,Official statement
+2023-11-01,2023-11-01T18:00:00Z,verified:statement_page,True,False,held,Powell,5.25%–5.50%,5.50%,12–0,True,True,Official statement
+2023-12-13,2023-12-13T19:00:00Z,verified:statement_page,True,True,held,Powell,5.25%–5.50%,5.50%,12–0,True,True,Official statement
+2024-01-31,2024-01-31T19:00:00Z,verified:statement_page,True,False,held,Powell,5.25%–5.50%,5.50%,12–0,True,True,Official statement
+2024-03-20,2024-03-20T18:00:00Z,verified:statement_page,True,True,held,Powell,5.25%–5.50%,5.50%,12–0,True,True,Official statement
+2024-05-01,2024-05-01T18:00:00Z,verified:statement_page,True,False,held,Powell,5.25%–5.50%,5.50%,12–0,True,True,Official statement
+2024-06-12,2024-06-12T18:00:00Z,verified:statement_page,True,True,held,Powell,5.25%–5.50%,5.50%,12–0,True,True,Official statement
+2024-07-31,2024-07-31T18:00:00Z,verified:statement_page,True,False,held,Powell,5.25%–5.50%,5.50%,12–0,True,True,Official statement
+2024-09-18,2024-09-18T18:00:00Z,verified:statement_page,True,True,held,Powell,4.75%–5.00%,5.00%,11–1,True,True,Michelle Bowman preferred a lower 25-basis-point cut. Official statement
+2024-10-30,2024-10-30T18:00:00Z,rule:14:00ET,True,,held,,,,,True,False,
+2024-11-07,2024-11-07T19:00:00Z,verified:statement_page,True,False,held,Powell,4.50%–4.75%,4.75%,12–0,,True,Official statement
+2024-12-11,2024-12-11T19:00:00Z,rule:14:00ET,True,,held,,,,,True,False,
+2024-12-18,2024-12-18T19:00:00Z,verified:statement_page,True,True,held,Powell,4.25%–4.50%,4.50%,11–1,,True,Beth M. Hammack preferred to maintain the rate. Official statement
+2025-01-29,2025-01-29T19:00:00Z,verified:statement_page,True,False,held,Powell,4.25%–4.50%,4.50%,12–0,,True,Official statement
+2025-03-19,2025-03-19T18:00:00Z,verified:statement_page,True,True,held,Powell,4.25%–4.50%,4.50%,11–1,,True,"Christopher Waller preferred to ""continue the current pace of decline in securities holdings"", while supporting no change for the federal funds target range. Official statement"
+2025-05-07,2025-05-07T18:00:00Z,verified:statement_page,True,False,held,Powell,4.25%–4.50%,4.50%,12–0,,True,Official statement
+2025-06-18,2025-06-18T18:00:00Z,verified:statement_page,True,True,held,Powell,4.25%–4.50%,4.50%,12–0,,True,Official statement
+2025-07-30,2025-07-30T18:00:00Z,verified:statement_page,True,False,held,Powell,4.25%–4.50%,4.50%,9–2,,True,Michelle Bowman and Christopher Waller preferred a 25-basis-point cut. Official statement
+2025-08-22,2025-08-22T18:00:00Z,rule:14:00ET,True,False,held,Powell,,,,,False,
+2025-09-17,2025-09-17T18:00:00Z,verified:statement_page,True,True,held,Powell,4.00%–4.25%,4.25%,11–1,,True,Stephen Miran preferred a higher 50-basis-point cut. Official statement
+2025-10-29,2025-10-29T18:00:00Z,verified:statement_page,True,False,held,Powell,3.75%–4.00%,4.00%,10–2,,True,"Stephen Miran preferred a higher 50-basis-point cut, while Jeffrey Schmid preferred to maintain the rate. Official statement"
+2025-12-10,2025-12-10T19:00:00Z,verified:statement_page,True,True,held,Powell,3.50%–3.75%,3.75%,9–3,,True,"Stephen Miran preferred a higher 50-basis-point cut, while Austan Goolsbee and Jeffrey Schmid preferred to maintain the rate. Official statement"
+2026-01-28,2026-01-28T19:00:00Z,verified:statement_page,True,False,held,Powell,3.50%–3.75%,3.75%,10–2,,True,Stephen Miran and Christopher Waller preferred a 25-basis-point cut. Official statement
+2026-03-18,2026-03-18T18:00:00Z,verified:statement_page,True,True,held,Powell,3.50%–3.75%,3.75%,11–1,,True,Stephen Miran preferred a 25-basis-point cut. Official statement
+2026-04-29,2026-04-29T18:00:00Z,rule:14:00ET(gcmbo),True,False,held,Powell,3.50%–3.75%,3.75%,8–4,,True,"Stephen Miran preferred a 25-basis-point cut. Beth Hammack, Neel Kashkari, and Lorie Logan agreed with maintaining the rate, but did not support inclusion of an easing bias in the statement at this ti"
+2026-06-17,2026-06-17T18:00:00Z,rule:14:00ET(gcmbo),True,True,held,Powell,3.50%–3.75%,3.75%,12–0,,True,Official statement
+2026-07-29,2026-07-29T18:00:00Z,rule:14:00ET(gcmbo),True,False,held,Powell,3.50%–3.75%,3.75%,9–3,,True,"Beth Hammack, Neel Kashkari, and Lorie Logan preferred a 25-basis-point increase. Official statement"
+2026-09-16,2026-09-16T18:00:00Z,rule:14:00ET(gcmbo),True,True,held,Powell,3.75%–4.00%,4.00%,12–0,,True,Official Statement
+2026-10-28,2026-10-28T18:00:00Z,rule:14:00ET(gcmbo),True,False,scheduled,,3.75%–4.00%,4.00%,10–2,,True,Lisa Cook and Beth Hammack preferred a 25-basis-point increase. Official Statement
+2026-12-09,2026-12-09T19:00:00Z,rule:14:00ET(gcmbo),True,True,scheduled,,,,,,False,
+2027-01-27,2027-01-27T19:00:00Z,rule:14:00ET,True,False,tentative,,,,,,False,
+2027-03-17,2027-03-17T18:00:00Z,rule:14:00ET,True,True,tentative,,,,,,False,
+2027-04-28,2027-04-28T18:00:00Z,rule:14:00ET,True,False,tentative,,,,,,False,
+2027-06-09,2027-06-09T18:00:00Z,rule:14:00ET,True,True,tentative,,,,,,False,
+2027-07-28,2027-07-28T18:00:00Z,rule:14:00ET,True,False,tentative,,,,,,False,
+2027-09-15,2027-09-15T18:00:00Z,rule:14:00ET,True,True,tentative,,,,,,False,
+2027-10-27,2027-10-27T18:00:00Z,rule:14:00ET,True,False,tentative,,,,,,False,
+2027-12-08,2027-12-08T19:00:00Z,rule:14:00ET,True,True,tentative,,,,,,False,
