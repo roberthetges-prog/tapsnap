@@ -272,11 +272,13 @@ def leak_checks(final: str, cost_pips: float = 1.2, seed: int = 0) -> pd.DataFra
     Ds["fwd_1d"] = rng.permutation(D["fwd_1d"].values)
     _, _, t = run_variant(Ds, method, mapping, signals, cost_pips, "shuffled_labels")
     out.append(t.assign(check="shuffled_labels"))
-    # (2) features lagged by one extra session
-    Dl = D.copy()
-    Dl[signals] = D[signals].shift(1)
-    _, _, t = run_variant(Dl, method, mapping, signals, cost_pips, "features_shift_plus1")
-    out.append(t.assign(check="features_shift_plus1"))
+    # (2) features lagged by one extra session (and by 5 / 21 sessions: most signals are slow, so a 1-session lag is
+    #     a weak test for them; the fast ones (fomc, gap, tom, dow, season) are mis-timed already at lag 1)
+    for lag in (1, 5, 21):
+        Dl = D.copy()
+        Dl[signals] = D[signals].shift(lag)
+        _, _, t = run_variant(Dl, method, mapping, signals, cost_pips, f"features_shift_plus{lag}")
+        out.append(t.assign(check=f"features_shift_plus{lag}"))
     # (2b) look-ahead control: features shifted back by one session (uses the next session's signals); this must
     # NOT be read as a result, it only shows the harness would have exposed a look-ahead
     Da = D.copy()
@@ -297,7 +299,7 @@ if __name__ == "__main__":
     final = rep.loc[rep["final"], "variant"].iloc[0]
     lc = leak_checks(final, cost_pips=cost)
     lc.to_csv(RES / f"{ARM}_leakchecks.csv", index=False)
-    for chk in ("shuffled_labels", "features_shift_plus1", "features_shift_minus1_lookahead_control"):
+    for chk in ("shuffled_labels", "features_shift_plus1", "features_shift_plus5", "features_shift_plus21", "features_shift_minus1_lookahead_control"):
         r = lc[lc.check == chk].set_index("period")
         print(f"leak check {chk:40s} 2010-2026 SR {r.loc['2010-2026','sharpe']:+.2f} t {r.loc['2010-2026','t']:+.2f} | "
               f"2016-2026 SR {r.loc['2016-2026','sharpe']:+.2f} | 2023-2026 SR {r.loc['2023-2026','sharpe']:+.2f}")

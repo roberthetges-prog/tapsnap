@@ -86,12 +86,12 @@ def _fit_model(model: str, X: pd.DataFrame, y: pd.Series):
     from sklearn.preprocessing import StandardScaler
     if model == "ridge":
         yc = y.clip(-3 * y.std(), 3 * y.std())
-        pipe = make_pipeline(SimpleImputer(strategy="median"), StandardScaler(),
+        pipe = make_pipeline(SimpleImputer(strategy="median", keep_empty_features=True), StandardScaler(),
                              RidgeCV(alphas=np.logspace(0, 5, 11), cv=TimeSeriesSplit(4)))
         pipe.fit(X, yc)
         return ("ridge", pipe, None)
     if model == "logit":
-        pipe = make_pipeline(SimpleImputer(strategy="median"), StandardScaler(), LogisticRegression(C=0.05, max_iter=1000))
+        pipe = make_pipeline(SimpleImputer(strategy="median", keep_empty_features=True), StandardScaler(), LogisticRegression(C=0.05, max_iter=1000))
         pipe.fit(X, (y > 0).astype(int))
         return ("logit", pipe, float(y.abs().mean()))
     raise ValueError(model)
