@@ -27,7 +27,7 @@ def _loc(df: pd.DataFrame, tz: str = "UTC", offset_h: float = 0.0):
     loc = df.index.tz_convert(tz)
     hrs = (loc.hour + loc.minute / 60.0).astype(float)
     naive = loc.tz_localize(None) - pd.Timedelta(hours=offset_h)
-    dayid = (naive.normalize().asi8 // (86400 * 10**9)).astype(np.int64)
+    dayid = ((naive.normalize() - pd.Timestamp("1970-01-01")) // pd.Timedelta(days=1)).values.astype(np.int64)
     hrs_off = (hrs - offset_h) % 24
     return np.asarray(hrs_off), dayid, loc
 
@@ -198,10 +198,11 @@ def range_breakout(df, tz="UTC", day_offset=0.0, rng_start=0.0, rng_end=7.0, ent
 
 
 def london_range_fade_second(df, tz="America/New_York", rng_start=3.0, rng_end=8.0, entry_until=16.0, exit_hour=17.0,
-                             buffer_pips=1.0, tp_val=1.0, **kw):
+                             buffer_pips=1.0, tp_val=1.0, sl_min_frac=0.25, **kw):
     """B01 variant: after the London range (03:00-08:00 ET) breaks on one side and then price breaks the
     OTHER side too, fade the second break (enter back toward the range: short after a second-break-up).
-    SL beyond the second-break extreme bar, TP = tp_val x range (toward the first break side)."""
+    SL beyond the second-break extreme by max(buffer, sl_min_frac x range), TP = tp_val x range from the entry bar's close back
+    toward the first-break side."""
     hrs, dayid, _ = _loc(df, tz)
     o, h, l, c = (df[k].values for k in ("open", "high", "low", "close"))
     hi, lo, cnt, inwin = _run_window(df, dayid, hrs, rng_start, rng_end)
@@ -229,13 +230,17 @@ def london_range_fade_second(df, tz="America/New_York", rng_start=3.0, rng_end=8
                     first = -1
                 continue
             if first == 1 and dn:      # second break is down -> fade: go long back toward the range
-                sl = min(l[j], lo[i]) - buf
-                tp = l[j] + tp_val * rng
+                sl = min(l[j], lo[i]) - max(buf, sl_min_frac * rng)
+                tp = c[j] + tp_val * rng
+                if sl >= c[j]:
+                    break
                 orders.append(Order(i=j, side=1, sl=sl, tp=tp, exit_i=int(last_exit[i]), tag="b01f"))
                 break
             if first == -1 and up:
-                sl = max(h[j], hi[i]) + buf
-                tp = h[j] - tp_val * rng
+                sl = max(h[j], hi[i]) + max(buf, sl_min_frac * rng)
+                tp = c[j] - tp_val * rng
+                if sl <= c[j]:
+                    break
                 orders.append(Order(i=j, side=-1, sl=sl, tp=tp, exit_i=int(last_exit[i]), tag="b01f"))
                 break
     return orders
@@ -508,7 +513,7 @@ def ny_open_reversal(df, min_london_move_pips=40.0, win_start=8.5, win_end=10.0,
             tp = (ext + ref_px[i]) / 2
         else:
             tp = ref_px[i]
-        if (tp - c[i]) * side <= 0 or (sl - c[i]) * side <= 0:
+        if (tp - c[i]) * side <= 0 or (sl - c[i]) * side >= 0:
             continue
         done = dayid[i]
         orders.append(Order(i=int(i), side=side, sl=sl, tp=tp, exit_i=int(last_exit[i]), tag="nyrev"))
@@ -672,12 +677,16 @@ def window_hold(df, tz="Europe/London", entry_hour=13.0, exit_hour=16.0, side=1,
     return orders
 
 
-def local_hours_pair(df, sl_adr=NAN, short_start=8.0, short_end=13.0, long_start=13.0, long_end=21.0, **kw):
+def local_hours_pair(df, sl_adr=NAN, short_start=8.0, short_end=13.0, long_start=13.0, long_end=21.0, legs="both", **kw):
     """S18 practitioner variant: short EUR/USD short_start-short_end London, long long_start-long_end London,
-    optional 0.5 x ADR stop on each leg."""
-    a = window_hold(df, "Europe/London", short_start, short_end, -1, sl_adr=sl_adr, tag="s18s")
-    b = window_hold(df, "Europe/London", long_start, long_end, 1, sl_adr=sl_adr, tag="s18l")
-    return a + b
+    optional 0.5 x ADR stop on each leg. legs: 'both' | 'short' | 'long' (the engine cannot open the long leg on the
+    bar that closes the short leg, so the legs are evaluated separately in the experiments)."""
+    out = []
+    if legs in ("both", "short"):
+        out += window_hold(df, "Europe/London", short_start, short_end, -1, sl_adr=sl_adr, tag="s18s")
+    if legs in ("both", "long"):
+        out += window_hold(df, "Europe/London", long_start, long_end, 1, sl_adr=sl_adr, tag="s18l")
+    return out
 
 
 def fix_pattern_pair(df, sl_adr=NAN, pre_start=13.0, post_end=20.0, legs="both", **kw):
@@ -860,7 +869,8 @@ def holiday_week(df_daily, which="both", trend_days=10, side_mode="continue", **
     """C06 on daily bars: over each holiday window (Thanksgiving week, Dec 24-Jan 2) hold a position in the
     direction of the prior trend_days return ('continue') or against it ('fade'); enter at the close before the
     window, exit at the close of the last day in the window."""
-    dates = df_daily.index.tz_convert("UTC").tz_localize(None).normalize()
+    # NY-close daily bars are labelled by their start (22:00 UTC the evening before): session date = start + 2h
+    dates = (df_daily.index.tz_convert("UTC").tz_localize(None) + pd.Timedelta(hours=2)).normalize()
     c = df_daily["close"].values
     n = len(df_daily)
     orders = []

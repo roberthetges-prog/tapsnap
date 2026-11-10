@@ -56,8 +56,9 @@ def _adr_by_bar(df: pd.DataFrame, n: int = 14, day_start_utc_hour: int = 22, min
     return adr.reindex(key, method="ffill").values
 
 
-def _first_exit_bar(day_last: np.ndarray, i: int) -> int:
-    return int(day_last[i])
+def _opt(mult) -> bool:
+    """True when an optional ATR multiple is active (NaN or <= 0 means 'none')."""
+    return not (mult is None or (isinstance(mult, float) and math.isnan(mult)) or mult <= 0)
 
 
 # ================================================================= M01 Connors RSI(2)
@@ -86,7 +87,7 @@ def connors_rsi2(df, n=2, thr=5, trend_ma=200, exit_ma=5, exit_on_trend_cross=Tr
         if (sides == "long" and side < 0) or (sides == "short" and side > 0):
             continue
         ex = long_exit[i + 1] if side > 0 else short_exit[i + 1]
-        sl = cv[i] - side * sl_atr * a[i] if not math.isnan(sl_atr) else NAN
+        sl = cv[i] - side * sl_atr * a[i] if _opt(sl_atr) else NAN
         orders.append(Order(i=i, side=side, sl=sl, tp=NAN, max_hold=max_hold, exit_i=int(min(ex, n_ - 1)), tag="crsi2"))
     return orders
 
@@ -396,19 +397,20 @@ def turtle_soup_d1(df, n=20, min_age=4, hold=3, sl_pips=2.0, tp_atr=NAN, atr_n=1
         age_lo = n - 1 - lo_pos[i]   # 0 = yesterday
         age_hi = n - 1 - hi_pos[i]
         if l[i] < lo_n[i] and c[i] > lo_n[i] and age_lo >= min_age - 1:
-            tp = c[i] + tp_atr * a[i] if not math.isnan(tp_atr) else NAN
+            tp = c[i] + tp_atr * a[i] if _opt(tp_atr) else NAN
             orders.append(Order(i=i, side=1, sl=l[i] - sl_pips * PIP, tp=tp, max_hold=hold, tag="tsoup"))
         elif h[i] > hi_n[i] and c[i] < hi_n[i] and age_hi >= min_age - 1:
-            tp = c[i] - tp_atr * a[i] if not math.isnan(tp_atr) else NAN
+            tp = c[i] - tp_atr * a[i] if _opt(tp_atr) else NAN
             orders.append(Order(i=i, side=-1, sl=h[i] + sl_pips * PIP, tp=tp, max_hold=hold, tag="tsoup"))
     return orders
 
 
 # ================================================================= M11 weekly-open mean reversion
-def weekly_open_mr(df, dist_adr=1.0, sl_adr=1.0, adr_n=14, days=(1, 2), exit_london_hour=15, **kw):
+def weekly_open_mr(df, dist_adr=1.0, sl_adr=1.0, adr_n=14, days="12", exit_london_hour=15, **kw):
     """M11. Weekly open = open of the first bar of the week (Sunday 21/22 UTC). On Tuesday/Wednesday (UTC
-    weekdays in `days`), when the close is >= dist_adr x ADR(14) away from the weekly open, fade toward it:
+    weekdays in `days`, a string of weekday digits, 0=Mon), when the close is >= dist_adr x ADR(14) away from the weekly open, fade toward it:
     stop sl_adr x ADR beyond entry, target the weekly open, time stop Friday exit_london_hour London."""
+    days = tuple(int(ch) for ch in days) if isinstance(days, str) else tuple(days)
     wk = (df.index.tz_convert(None) - pd.Timedelta(hours=21)).to_period("W-SAT")
     pos = np.arange(len(df))
     g = pd.Series(pos, index=df.index).groupby(wk.values)
@@ -493,7 +495,7 @@ def streak_fade(df, streak=3, min_cum_pct=1.0, hold=1, sl_atr=NAN, atr_n=14, dir
             side = -sgn
         else:
             continue
-        sl = c[i] - side * sl_atr * a[i] if not math.isnan(sl_atr) else NAN
+        sl = c[i] - side * sl_atr * a[i] if _opt(sl_atr) else NAN
         orders.append(Order(i=i, side=side, sl=sl, exit_i=i + hold, tag="streak"))
     return orders
 
@@ -520,7 +522,7 @@ def abnormal_day_contrarian(df, window=20, k=2.0, hold=1, sl_atr=NAN, atr_n=14, 
             side = -sgn
         else:
             continue
-        sl = c[i] - side * sl_atr * a[i] if not math.isnan(sl_atr) else NAN
+        sl = c[i] - side * sl_atr * a[i] if _opt(sl_atr) else NAN
         orders.append(Order(i=i, side=side, sl=sl, exit_i=i + hold, tag="abn_d"))
     return orders
 
@@ -559,7 +561,7 @@ def abnormal_day_momentum(df, window=20, k=2.0, last_entry_hour=18, sl_atr=NAN, 
         done = True
         if int(day_last[i]) <= i + 1:
             continue
-        sl = c[i] - side * sl_atr * a[i] if not math.isnan(sl_atr) else NAN
+        sl = c[i] - side * sl_atr * a[i] if _opt(sl_atr) else NAN
         orders.append(Order(i=i, side=side, sl=sl, exit_i=int(day_last[i]), tag="abn_h"))
     return orders
 
@@ -582,7 +584,7 @@ def lowest_close_mr(df, n=5, hold=1, sides="long", sl_atr=NAN, atr_n=14, **kw):
             side = -1
         else:
             continue
-        sl = c[i] - side * sl_atr * a[i] if not math.isnan(sl_atr) else NAN
+        sl = c[i] - side * sl_atr * a[i] if _opt(sl_atr) else NAN
         orders.append(Order(i=i, side=side, sl=sl, exit_i=i + hold, tag="lcmr"))
     return orders
 
@@ -653,7 +655,7 @@ def tsmom(df, lookback=120, sl_atr=NAN, atr_n=14, **kw):
             continue
         side = int(sig[i])
         ex = nxt[i + 1]
-        sl = c[i] - side * sl_atr * a[i] if not math.isnan(sl_atr) else NAN
+        sl = c[i] - side * sl_atr * a[i] if _opt(sl_atr) else NAN
         orders.append(Order(i=i, side=side, sl=sl, exit_i=int(min(ex, n_ - 1)), tag="tsmom"))
     return orders
 
