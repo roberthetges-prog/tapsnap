@@ -62,14 +62,14 @@ V06,NFP: P(price returns to pre-release level within 1h),holdout,23,0.2608695652
 V06,NFP: fade +5m jump over +5m -> +1h,train,149,-1.644451916783552,-0.8601367015930373,-1.4059318934913259,0.4966442953020134,
 V06,NFP: fade +5m jump over +5m -> +1h,validate,173,4.415215424634332,3.0895590064912937,2.3593822543083722,0.6011560693641619,
 V06,NFP: fade +5m jump over +5m -> +1h,holdout,28,-4.535455057718788,-1.6886142629086145,-2.077116023352841,0.32142857142857145,
-V05,"NFP: straddle +/-10 pips, SL 20, TP 40, 2h max (pips, 3+3 pip cost)",train,143,-4.981118881117307,-2.1399879716988863,-2.1399879716988863,0.3916083916083916,pips not bp; costs included
-V05,"NFP: straddle +/-10 pips, SL 20, TP 40, 2h max (pips, 3+3 pip cost)",validate,140,-5.492142857140924,-2.603026150506206,-2.603026150506206,0.37142857142857144,pips not bp; costs included
+V05,"NFP: straddle +/-10 pips, SL 20, TP 40, 2h max (pips, 3+3 pip cost)",train,138,-5.333333333331637,-2.2117061742436968,-2.2117061742436968,0.391304347826087,pips not bp; costs included
+V05,"NFP: straddle +/-10 pips, SL 20, TP 40, 2h max (pips, 3+3 pip cost)",validate,140,-5.99428571428377,-2.823519876441168,-2.823519876441168,0.36428571428571427,pips not bp; costs included
 V05,"NFP: straddle +/-10 pips, SL 20, TP 40, 2h max (pips, 3+3 pip cost)",holdout,20,-0.0949999999980701,-0.014625933348138574,-0.014625933348138574,0.45,pips not bp; costs included
-V05,"NFP: straddle +/-15 pips, SL 25, TP 50, 2h max (pips, 3+3 pip cost)",train,126,-5.405555555555055,-1.8054530642490874,-1.8054530642490874,0.42063492063492064,pips not bp; costs included
+V05,"NFP: straddle +/-15 pips, SL 25, TP 50, 2h max (pips, 3+3 pip cost)",train,124,-5.885483870967173,-1.9277502329490495,-1.9277502329490495,0.4112903225806452,pips not bp; costs included
 V05,"NFP: straddle +/-15 pips, SL 25, TP 50, 2h max (pips, 3+3 pip cost)",validate,109,-8.2009174311922,-2.9552462388111134,-2.9552462388111134,0.30275229357798167,pips not bp; costs included
 V05,"NFP: straddle +/-15 pips, SL 25, TP 50, 2h max (pips, 3+3 pip cost)",holdout,17,0.4235294117651284,0.05094506820067262,0.05094506820067262,0.4117647058823529,pips not bp; costs included
-V05,"NFP: straddle +/-8 pips, SL 15, TP 30, 2h max (pips, 3+3 pip cost)",train,146,-6.432191780820211,-3.4526675469163233,-3.4526675469163233,0.3493150684931507,pips not bp; costs included
-V05,"NFP: straddle +/-8 pips, SL 15, TP 30, 2h max (pips, 3+3 pip cost)",validate,153,-5.609150326795499,-3.3294905941815593,-3.3294905941815593,0.3464052287581699,pips not bp; costs included
+V05,"NFP: straddle +/-8 pips, SL 15, TP 30, 2h max (pips, 3+3 pip cost)",train,135,-4.8851851851833725,-2.6094678551708794,-2.6094678551708794,0.37777777777777777,pips not bp; costs included
+V05,"NFP: straddle +/-8 pips, SL 15, TP 30, 2h max (pips, 3+3 pip cost)",validate,153,-6.136601307187657,-3.6452193403597404,-3.6452193403597404,0.33986928104575165,pips not bp; costs included
 V05,"NFP: straddle +/-8 pips, SL 15, TP 30, 2h max (pips, 3+3 pip cost)",holdout,20,5.035000000001899,0.9644404738139637,0.9644404738139637,0.55,pips not bp; costs included
 H11/H12,CPI m/m: info |release -> +5m| bp,train,72,9.728306102957127,8.91691104076016,7.960464694739788,0.9861111111111112,n releases with actual+forecast=172
 H11/H12,CPI m/m: info |release -> +5m| bp,validate,84,17.432323225770205,7.314303442301723,6.876477884767177,1.0,n releases with actual+forecast=172
@@ -95,13 +95,13 @@ V06,CPI m/m: P(price returns to pre-release level within 1h),holdout,16,0.375,3.
 V06,CPI m/m: fade +5m jump over +5m -> +1h,train,72,-1.722764643077538,-0.7289898774078563,-1.1705389262147692,0.4722222222222222,
 V06,CPI m/m: fade +5m jump over +5m -> +1h,validate,84,-0.11651250888745654,-0.05000896567439819,-0.49788592779708707,0.5,
 V06,CPI m/m: fade +5m jump over +5m -> +1h,holdout,16,0.8465014389431269,0.1627481032706307,-0.03787070249618146,0.375,
-V05,"CPI m/m: straddle +/-10 pips, SL 20, TP 40, 2h max (pips, 3+3 pip cost)",train,65,-5.475384615382705,-1.70525346608199,-1.70525346608199,0.38461538461538464,pips not bp; costs included
+V05,"CPI m/m: straddle +/-10 pips, SL 20, TP 40, 2h max (pips, 3+3 pip cost)",train,65,-5.355384615382739,-1.656319149991963,-1.656319149991963,0.38461538461538464,pips not bp; costs included
 V05,"CPI m/m: straddle +/-10 pips, SL 20, TP 40, 2h max (pips, 3+3 pip cost)",validate,74,1.9986486486502941,0.6422628350390411,0.6422628350390411,0.4864864864864865,pips not bp; costs included
 V05,"CPI m/m: straddle +/-10 pips, SL 20, TP 40, 2h max (pips, 3+3 pip cost)",holdout,16,-6.906249999997922,-0.9822464367140712,-0.9822464367140712,0.3125,pips not bp; costs included
 V05,"CPI m/m: straddle +/-15 pips, SL 25, TP 50, 2h max (pips, 3+3 pip cost)",train,52,-9.871153846153224,-2.493589280919534,-2.493589280919534,0.34615384615384615,pips not bp; costs included
-V05,"CPI m/m: straddle +/-15 pips, SL 25, TP 50, 2h max (pips, 3+3 pip cost)",validate,63,0.9412698412701211,0.2450008566366745,0.2450008566366745,0.4444444444444444,pips not bp; costs included
+V05,"CPI m/m: straddle +/-15 pips, SL 25, TP 50, 2h max (pips, 3+3 pip cost)",validate,63,0.10317460317489009,0.026729970586699566,0.026729970586699566,0.42857142857142855,pips not bp; costs included
 V05,"CPI m/m: straddle +/-15 pips, SL 25, TP 50, 2h max (pips, 3+3 pip cost)",holdout,16,-10.443749999999447,-1.3198629686073275,-1.3198629686073275,0.3125,pips not bp; costs included
-V05,"CPI m/m: straddle +/-8 pips, SL 15, TP 30, 2h max (pips, 3+3 pip cost)",train,71,-5.702816901406624,-2.178507580940094,-2.178507580940094,0.352112676056338,pips not bp; costs included
+V05,"CPI m/m: straddle +/-8 pips, SL 15, TP 30, 2h max (pips, 3+3 pip cost)",train,70,-5.05999999999816,-1.8836024473435504,-1.8836024473435504,0.37142857142857144,pips not bp; costs included
 V05,"CPI m/m: straddle +/-8 pips, SL 15, TP 30, 2h max (pips, 3+3 pip cost)",validate,79,-0.9443037974666142,-0.38757170958054454,-0.38757170958054454,0.4177215189873418,pips not bp; costs included
 V05,"CPI m/m: straddle +/-8 pips, SL 15, TP 30, 2h max (pips, 3+3 pip cost)",holdout,16,-6.218749999997996,-1.1316155231613167,-1.1316155231613167,0.3125,pips not bp; costs included
 H11/H12,Core CPI: info |release -> +5m| bp,train,72,9.728306102957127,8.91691104076016,7.960464694739788,0.9861111111111112,n releases with actual+forecast=172
@@ -128,12 +128,12 @@ V06,Core CPI: P(price returns to pre-release level within 1h),holdout,16,0.375,3
 V06,Core CPI: fade +5m jump over +5m -> +1h,train,72,-1.722764643077538,-0.7289898774078563,-1.1705389262147692,0.4722222222222222,
 V06,Core CPI: fade +5m jump over +5m -> +1h,validate,84,-0.11651250888745654,-0.05000896567439819,-0.49788592779708707,0.5,
 V06,Core CPI: fade +5m jump over +5m -> +1h,holdout,16,0.8465014389431269,0.1627481032706307,-0.03787070249618146,0.375,
-V05,"Core CPI: straddle +/-10 pips, SL 20, TP 40, 2h max (pips, 3+3 pip cost)",train,65,-5.475384615382705,-1.70525346608199,-1.70525346608199,0.38461538461538464,pips not bp; costs included
+V05,"Core CPI: straddle +/-10 pips, SL 20, TP 40, 2h max (pips, 3+3 pip cost)",train,65,-5.355384615382739,-1.656319149991963,-1.656319149991963,0.38461538461538464,pips not bp; costs included
 V05,"Core CPI: straddle +/-10 pips, SL 20, TP 40, 2h max (pips, 3+3 pip cost)",validate,74,1.9986486486502941,0.6422628350390411,0.6422628350390411,0.4864864864864865,pips not bp; costs included
 V05,"Core CPI: straddle +/-10 pips, SL 20, TP 40, 2h max (pips, 3+3 pip cost)",holdout,16,-6.906249999997922,-0.9822464367140712,-0.9822464367140712,0.3125,pips not bp; costs included
 V05,"Core CPI: straddle +/-15 pips, SL 25, TP 50, 2h max (pips, 3+3 pip cost)",train,52,-9.871153846153224,-2.493589280919534,-2.493589280919534,0.34615384615384615,pips not bp; costs included
-V05,"Core CPI: straddle +/-15 pips, SL 25, TP 50, 2h max (pips, 3+3 pip cost)",validate,63,0.9412698412701211,0.2450008566366745,0.2450008566366745,0.4444444444444444,pips not bp; costs included
+V05,"Core CPI: straddle +/-15 pips, SL 25, TP 50, 2h max (pips, 3+3 pip cost)",validate,63,0.10317460317489009,0.026729970586699566,0.026729970586699566,0.42857142857142855,pips not bp; costs included
 V05,"Core CPI: straddle +/-15 pips, SL 25, TP 50, 2h max (pips, 3+3 pip cost)",holdout,16,-10.443749999999447,-1.3198629686073275,-1.3198629686073275,0.3125,pips not bp; costs included
-V05,"Core CPI: straddle +/-8 pips, SL 15, TP 30, 2h max (pips, 3+3 pip cost)",train,71,-5.702816901406624,-2.178507580940094,-2.178507580940094,0.352112676056338,pips not bp; costs included
+V05,"Core CPI: straddle +/-8 pips, SL 15, TP 30, 2h max (pips, 3+3 pip cost)",train,70,-5.05999999999816,-1.8836024473435504,-1.8836024473435504,0.37142857142857144,pips not bp; costs included
 V05,"Core CPI: straddle +/-8 pips, SL 15, TP 30, 2h max (pips, 3+3 pip cost)",validate,79,-0.9443037974666142,-0.38757170958054454,-0.38757170958054454,0.4177215189873418,pips not bp; costs included
 V05,"Core CPI: straddle +/-8 pips, SL 15, TP 30, 2h max (pips, 3+3 pip cost)",holdout,16,-6.218749999997996,-1.1316155231613167,-1.1316155231613167,0.3125,pips not bp; costs included

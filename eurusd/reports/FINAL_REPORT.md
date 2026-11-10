@@ -39,7 +39,10 @@ and t = 1.5 after costs - not enough.
 
 Two results that looked like survivors turned out to be engine artefacts and are documented as such: the
 Asian-range breakout (validation t 2.6 before the OCO fix, -0.4 after) and the Larry Williams M5 breakout
-(t +5.7 before, -1.0 after).
+(t +5.7 before, -1.0 after). The four breakout grids re-run on the corrected engine
+(`experiments/results/logs/breakouts_oco_engine.log`): Asian range M15 validation t -0.24 (PF 0.98), fixed-pip
+variant t -0.92, London opening range M5 t +0.28 (PF 1.02), New York opening range M5 t -0.98. News straddles
+re-run with correct OCO handling stay negative (NFP t -2.2 train / -2.8 validate).
 
 ### 2.2 Effects that keep their sign (weak, not individually significant on validation)
 
