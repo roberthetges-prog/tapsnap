@@ -20,8 +20,10 @@ for period in periods:
     df = df[df.index.dayofweek < 5]
     print(f"\n=== {period} ===")
     print("correlation of daily P&L:\n", df.corr().round(2).to_string())
-    combos = {"all six": names, "breakout only": ["asian_breakout"], "breakout+fomc+london": ["asian_breakout", "fomc_day_long", "london_short"],
-              "breakout+fomc+london+cot": ["asian_breakout", "fomc_day_long", "london_short", "cot_trend"]}
+    combos = {"all six": names, "breakout only": ["asian_breakout"],
+              "london+fomc+cot": ["london_short", "fomc_day_long", "cot_trend"],
+              "london+fomc+cot+monthend+gap": ["london_short", "fomc_day_long", "cot_trend", "month_end_fix", "weekend_gap_fade"],
+              "london+fomc": ["london_short", "fomc_day_long"]}
     rows = {}
     for k, cols in combos.items():
         p = df[cols].sum(axis=1)

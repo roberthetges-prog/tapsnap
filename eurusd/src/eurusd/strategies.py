@@ -234,8 +234,6 @@ def time_of_day(df, entry_hour=7, exit_hour=16, side=1, sl_pips=math.nan, tp_pip
         # decide at bar i so that entry is the open of bar i+1 == entry_hour
         if abs(hrs[i] + step_h - entry_hour) < 1e-9 and dow[i + 1] in dows:
             exit_i = i + 1 + int(round((exit_hour - entry_hour) / step_h)) - 1
-            if exit_i >= n:
-                continue
             c = df["close"].iat[i]
             sl = c - side * sl_pips * PIP if not math.isnan(sl_pips) else math.nan
             tp = c + side * tp_pips * PIP if not math.isnan(tp_pips) else math.nan

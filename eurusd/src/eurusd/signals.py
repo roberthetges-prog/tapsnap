@@ -23,6 +23,11 @@ import pandas as pd
 from .backtest import Order, PIP
 from .data import load_ohlc
 from .strategies import REGISTRY
+for _mod in ("strategies_candidates", "strategies_session", "strategies_trend_pa", "strategies_meanrev"):
+    try:  # extension modules register themselves into REGISTRY on import
+        __import__(f"eurusd.{_mod}")
+    except Exception:  # pragma: no cover - optional modules
+        pass
 
 CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "live_strategies.json"
 
@@ -69,9 +74,24 @@ def _bar_step(df: pd.DataFrame) -> pd.Timedelta:
 
 
 def orders_now(df: pd.DataFrame, cfg: StrategyConfig) -> list[Order]:
-    """Replay the strategy and return the orders that are live at the last bar."""
+    """Replay the strategy and return the orders that are live at the last bar.
+
+    Strategies decide at bar i and may look at the *timestamp* of bar i+1 (session/day
+    boundaries), so a synthetic next bar (timestamp only, prices = last close) is appended
+    before the replay. Orders decided at the last real bar are the actionable ones.
+    """
+    step = _bar_step(df)
+    nxt_time = df.index[-1] + step
+    if step >= pd.Timedelta(days=1):
+        # NY-close daily bars are labelled by their start; the bar after Thursday's start is Sunday's
+        while nxt_time.dayofweek in (4, 5):
+            nxt_time += pd.Timedelta(days=1)
+    nxt = pd.DataFrame({c: [df[c].iat[-1]] for c in df.columns}, index=pd.DatetimeIndex([nxt_time]))
+    for c in ("open", "high", "low"):
+        nxt[c] = df["close"].iat[-1]
+    df = pd.concat([df, nxt])
     orders = REGISTRY[cfg.name](df, **cfg.params)
-    last = len(df) - 1
+    last = len(df) - 2  # last REAL bar
     live = []
     for o in orders:
         if o.entry_type == "market" and o.i == last:
@@ -96,7 +116,15 @@ def generate_signals(asof: Optional[pd.Timestamp] = None, configs: Optional[list
     cache: dict[str, pd.DataFrame] = {}
     for cfg in configs:
         if cfg.timeframe not in cache:
-            cache[cfg.timeframe] = load_ohlc(cfg.timeframe)
+            if cfg.timeframe == "D1":
+                from .features import daily_ohlc
+                h1 = cache.get("H1") if "H1" in cache else load_ohlc("H1")
+                cache["H1"] = h1
+                d = daily_ohlc(h1, 22)
+                d = d[(d["n"] >= 10) & (d.index.dayofweek != 5)].drop(columns="n")
+                cache["D1"] = d
+            else:
+                cache[cfg.timeframe] = load_ohlc(cfg.timeframe)
         df = cache[cfg.timeframe]
         if asof is not None:
             df = df.loc[:asof]

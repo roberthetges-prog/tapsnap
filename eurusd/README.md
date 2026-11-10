@@ -35,12 +35,29 @@ repository is an unrelated Next.js app).
   >= 60 % of years positive, and the parameter neighbourhood is also positive on TRAIN.
 * Intra-bar stop/target ambiguity is resolved pessimistically (stop first) unless M1 data decides.
 
+## Results in one paragraph
+
+See `reports/FINAL_REPORT.md`. Short version: 102 practitioner strategies, 51 academic hypotheses and
+19 built-in indicator families were backtested on 26 years of 1-minute data with realistic costs and a
+fixed train / validate / holdout protocol. **No single rule survives.** Three weak, mutually uncorrelated
+effects (short EUR/USD during London hours, long EUR/USD on FOMC days, follow the CFTC positioning trend)
+kept their sign on 2003-2015 and 2016-2022 and are shipped as the live components, but the combination was
+flat on the untouched 2023-2026 holdout. Treat the signals as research output, not as a demonstrated edge.
+
 ## Running
 
 ```bash
 cd eurusd
 pip install -r requirements.txt
-python experiments/test_backtest.py          # engine sanity tests
-python experiments/01_behaviour_stats.py     # behaviour statistics -> reports/behaviour_stats.md
-python experiments/02_grid_builtin.py        # grid search of built-in families
+python experiments/test_backtest.py                   # engine sanity tests
+PYTHONPATH=src python -m eurusd.cli signals            # live entries with stop-loss / take-profit / size
+PYTHONPATH=src python -m eurusd.cli signals --asof 2026-11-05T06:59 --account 10000 --risk 0.005
+PYTHONPATH=src python -m eurusd.cli update             # fetch the newest HistData month(s), rebuild bars
+PYTHONPATH=src python -m eurusd.cli backtest london_short H1 '{"entry_min":420,"exit_min":780,"stop_adr":1.0}' --period validate
+python experiments/01_behaviour_stats.py              # behaviour statistics -> reports/behaviour_stats.md
+python experiments/02_grid_builtin.py                 # grid search of the built-in families
 ```
+
+Live components are listed in `config/live_strategies.json` (name, timeframe, parameters, validation record).
+Macro inputs (`data/macro/`) are refreshed with `PYTHONPATH=src python -m eurusd.macro_fetch`; the CFTC file
+and the FOMC calendar must be current for the positioning and FOMC components.

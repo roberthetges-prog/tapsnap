@@ -1,1 +1,56 @@
-[]
+[
+ {
+  "name": "london_short",
+  "timeframe": "H1",
+  "params": {
+   "entry_min": 420,
+   "exit_min": 780,
+   "stop_adr": 1.0
+  },
+  "label": "London-hours short (Breedon-Ranaldo)",
+  "weight": 1.0,
+  "lookback_bars": 800,
+  "notes": "Short EUR/USD at 07:00 London, flat 13:00 London, disaster stop 1 x ADR14. Validated 2016-2022 (t 1.4 R / 1.7 pips, 86% years), FLAT in holdout 2023-2026 (t -0.2).",
+  "validation": {
+   "train_t": 2.14,
+   "validate_t": 1.36,
+   "validate_pf": 1.09,
+   "holdout_t": -0.18
+  }
+ },
+ {
+  "name": "fomc_day_long",
+  "timeframe": "D1",
+  "params": {
+   "stop_atr": 1.5
+  },
+  "label": "FOMC-day long EUR/USD",
+  "weight": 1.0,
+  "lookback_bars": 400,
+  "notes": "Long from the NY close before a scheduled FOMC statement to the NY close of the statement day, stop 1.5 x ATR20. Validated 2016-2022 (t 1.6, PF 1.65), flat in holdout 2023-2026 (t 0.3, PF 1.14).",
+  "validation": {
+   "train_t": 1.72,
+   "validate_t": 1.62,
+   "validate_pf": 1.65,
+   "holdout_t": 0.31
+  }
+ },
+ {
+  "name": "cot_trend",
+  "timeframe": "D1",
+  "params": {
+   "hold_days": 5,
+   "stop_atr": 2.0
+  },
+  "label": "CFTC positioning trend",
+  "weight": 1.0,
+  "lookback_bars": 400,
+  "notes": "Weekly position in the direction of the 52-week z-score of non-commercial net EUR futures positioning, 5-day hold, stop 2 x ATR20. Validated 2016-2022 (t 1.3, PF 1.18), weakly positive in holdout (t 0.9, PF 1.20).",
+  "validation": {
+   "train_t": 1.94,
+   "validate_t": 1.27,
+   "validate_pf": 1.18,
+   "holdout_t": 0.93
+  }
+ }
+]

@@ -64,3 +64,23 @@ assert r.trades[0].reason == "tp" and r.trades[0].exit_i == 4, r.trades[0]
 r = run_backtest(df, [Order(i=0, side=1, sl=1.0980, tp=1.1025)], cost)
 assert r.trades[0].reason == "tp" and r.trades[0].exit_i == 1, r.trades[0]
 print("all backtest tests pass")
+
+# 7) OCO pair: buy stop 1.1035 / sell stop 1.1015 placed at bar1 (bar2 open 1.1020, high 1.1060, low 1.1015).
+#    Without M1 data: the sell stop (5 pips from open) is assumed touched before the buy stop (15 pips) -> short fills,
+#    its stop (1.1035) is hit on the same bar -> -1R; the buy stop is cancelled (OCO), so no long trade follows.
+pair = [Order(i=1, side=1, entry_type="stop", entry_price=1.1035, sl=1.1015, tp=1.1095, expiry_bars=3, tag="x"),
+        Order(i=1, side=-1, entry_type="stop", entry_price=1.1015, sl=1.1035, tp=1.0955, expiry_bars=3, tag="x")]
+r = run_backtest(df, pair, cost)
+assert len(r.trades) == 1 and r.trades[0].side == -1 and r.trades[0].reason == "sl" and r.trades[0].exit_i == 2, r.trades
+# 7b) with M1 data showing the rally first: the long fills first, the short is cancelled, long exits by time
+m1c = pd.DataFrame({"open":[1.1020,1.1040,1.1055,1.1030],"high":[1.1045,1.1060,1.1056,1.1050],"low":[1.1019,1.1038,1.1015,1.1028],"close":[1.1040,1.1055,1.1030,1.1050]},
+                   index=pd.to_datetime(["2024-01-01 02:00","2024-01-01 02:15","2024-01-01 02:30","2024-01-01 02:45"], utc=True))
+r = run_backtest(df, pair, cost, ltf=m1c)
+assert len(r.trades) == 1 and r.trades[0].side == 1 and r.trades[0].entry_i == 2, r.trades
+# 8) a pending order cannot fill while a trade is open; it fills afterwards if still valid
+ords = [Order(i=0, side=1, sl=1.0980, tp=1.1055),  # fills bar1, tp bar2
+        Order(i=0, side=-1, entry_type="limit", entry_price=1.1050, sl=1.1080, tp=1.1000, expiry_bars=4, tag="y")]
+r = run_backtest(df, ords, cost)
+# bar2 touches 1.1050 but the long is still open (exits on bar2) -> no fill on the exit bar; bar3 high 1.1055 -> fills at 1.1050; tp on bar4
+assert len(r.trades) == 2 and r.trades[1].entry_i == 3 and r.trades[1].side == -1 and r.trades[1].reason == "tp" and r.trades[1].exit_i == 4, r.trades
+print("oco / pending tests pass")

@@ -41,6 +41,7 @@ class Order:
     max_hold: int = 10**9       # max bars in trade (exit at close of the bar when reached)
     exit_i: int = -1            # hard exit: close the trade at the *close* of this bar index (if >=0)
     tag: str = ""
+    oco: int = -1               # one-cancels-other group id (orders with the same id cancel each other on fill)
 
 
 @dataclass
@@ -121,12 +122,32 @@ def _limit_entry_bar_ltf(ltf: pd.DataFrame, t0, t1, side: int, level: float, sl:
     return "sl" if i_sl < i_tp else "tp"
 
 
+def _first_touch_minute(ltf, t0, t1, side, entry_type, level, spread):
+    seg = ltf.loc[t0:t1 - pd.Timedelta(seconds=1)]
+    if seg.empty:
+        return None
+    hi = seg["high"].values
+    lo = seg["low"].values
+    if entry_type == "stop":
+        touched = (hi + spread >= level) if side > 0 else (lo <= level)
+    else:
+        touched = (lo + spread <= level) if side > 0 else (hi >= level)
+    return int(np.argmax(touched)) if touched.any() else None
+
+
 def run_backtest(df: pd.DataFrame, orders: Iterable[Order], cost: CostModel = CostModel(),
                  ltf: Optional[pd.DataFrame] = None, one_at_a_time: bool = True) -> "BacktestResult":
-    """Simulate orders on OHLC bars `df` (UTC index, bid prices).
+    """Chronological simulation of orders on OHLC bars `df` (UTC index, bid prices).
 
-    one_at_a_time: if True, an order placed while a trade is open is ignored
-    (keeps the statistics simple and realistic for a single-position system).
+    * An order decided at bar i becomes live at bar i+1: market orders fill at that open,
+      stop/limit orders wait for their level during `expiry_bars` bars.
+    * Only one position at a time (one_at_a_time): while a trade is open, nothing else fills;
+      a market order that arrives while a trade is open is dropped, pending orders keep waiting.
+    * Orders sharing an `oco` id cancel each other when one fills (one-cancels-other). Orders
+      placed at the same bar with the same tag are treated as an OCO pair automatically.
+    * When several pending orders are touched on the same bar, the one touched first is filled.
+      With lower-timeframe data (`ltf`) the order of touches is read from it; without it, the
+      level closest to the bar's open is assumed to be touched first.
     """
     o = df["open"].values
     h = df["high"].values
@@ -135,122 +156,158 @@ def run_backtest(df: pd.DataFrame, orders: Iterable[Order], cost: CostModel = Co
     idx = df.index
     n = len(df)
     orders = sorted(orders, key=lambda x: x.i)
-    trades: list[Trade] = []
-    busy_until = -1  # bar index until which we are in a trade
-
+    # automatic OCO grouping: same decision bar + same tag
+    auto = {}
     for od in orders:
-        if od.i + 1 >= n:
-            continue
-        if one_at_a_time and od.i < busy_until:
-            continue
-        spread = cost.spread(idx[od.i + 1]) * PIP
+        if od.oco < 0:
+            auto.setdefault((od.i, od.tag), []).append(od)
+    next_id = 10**6
+    for grp in auto.values():
+        if len(grp) > 1:
+            for od in grp:
+                od.oco = next_id
+            next_id += 1
+    trades: list[Trade] = []
+    pending: list[Order] = []
+    pos = None  # dict with order, entry_i, entry, sl, tp, risk, spread, slip, last_hold
+    k = 0       # pointer into orders
+    for j in range(n):
+        spread = cost.spread(idx[j]) * PIP
         slip = cost.slippage_pips * PIP
-        side = od.side
-        # ---- entry ----
-        entry_i = -1
-        entry = math.nan
-        if od.entry_type == "market":
-            entry_i = od.i + 1
-            entry = o[entry_i] + (spread + slip if side > 0 else -slip)
-        else:
-            last = min(n - 1, od.i + od.expiry_bars)
-            for j in range(od.i + 1, last + 1):
-                if od.entry_type == "stop":
-                    # buy stop above market: filled when ask >= price  (bid + spread >= price)
-                    if side > 0 and h[j] + spread >= od.entry_price:
-                        entry_i = j
-                        entry = max(od.entry_price, o[j] + spread) + slip
-                        break
-                    if side < 0 and l[j] <= od.entry_price:
-                        entry_i = j
-                        entry = min(od.entry_price, o[j]) - slip
-                        break
-                elif od.entry_type == "limit":
-                    if side > 0 and l[j] + spread <= od.entry_price:
-                        entry_i = j
-                        entry = min(od.entry_price, o[j] + spread)
-                        break
-                    if side < 0 and h[j] >= od.entry_price:
-                        entry_i = j
-                        entry = max(od.entry_price, o[j])
-                        break
-        if entry_i < 0:
-            continue
-        sl, tp = od.sl, od.tp
-        if side > 0 and not (math.isnan(sl)) and sl >= entry:
-            continue  # invalid order
-        if side < 0 and not (math.isnan(sl)) and sl <= entry:
-            continue
-        risk = abs(entry - sl) if not math.isnan(sl) else math.nan
-        # ---- exit ----
-        exit_i = -1
-        exit_px = math.nan
-        reason = ""
-        last_hold = min(n - 1, entry_i + od.max_hold)
-        if od.exit_i >= 0:
-            last_hold = min(last_hold, od.exit_i)
-        for j in range(entry_i, last_hold + 1):
-            # on the entry bar, only the part of the bar after entry counts; we approximate by
-            # using the full bar but never allowing an exit better than the entry on the same bar
-            # for market orders (conservative).
-            bid_hi, bid_lo = h[j], l[j]
-            if side > 0:
-                sl_hit = (not math.isnan(sl)) and bid_lo <= sl
-                tp_hit = (not math.isnan(tp)) and bid_hi >= tp
+        # ---- activate orders decided at bar j-1
+        while k < len(orders) and orders[k].i == j - 1:
+            od = orders[k]
+            k += 1
+            if od.entry_type == "market":
+                if pos is not None and one_at_a_time:
+                    continue
+                side = od.side
+                entry = o[j] + (spread + slip if side > 0 else -slip)
+                pos = _open(od, j, entry, spread, slip, n)
+                if pos is None:
+                    continue
+                if od.oco >= 0:
+                    pending = [p for p in pending if p.oco != od.oco]
             else:
-                sl_hit = (not math.isnan(sl)) and bid_hi + spread >= sl
-                tp_hit = (not math.isnan(tp)) and bid_lo + spread <= tp
-            if j == entry_i and od.entry_type == "limit" and tp_hit:
-                # A limit fills on a pull-back, so the bar's extreme beyond the target may have
-                # happened BEFORE the fill. Without minute data we do not allow a same-bar target.
-                # (Market orders fill at the open and stop orders fill on the way towards the
-                # target, so for them a same-bar target touch necessarily happens after the fill.)
-                if ltf is None:
-                    tp_hit = False
-                else:
-                    t1 = idx[j + 1] if j + 1 < n else idx[j] + (idx[j] - idx[j - 1])
-                    which = _limit_entry_bar_ltf(ltf, idx[j], t1, side, od.entry_price, sl, tp, spread)
-                    sl_hit, tp_hit = which == "sl", which == "tp"
-                    if which == "sl":
-                        exit_i = j
-                        exit_px = sl - (slip if side > 0 else -slip)
-                        reason = "sl"
-                        break
-            if sl_hit and tp_hit:
-                if ltf is not None:
-                    t1 = idx[j + 1] if j + 1 < n else idx[j] + (idx[j] - idx[j - 1])
-                    which = _resolve_with_ltf(ltf, idx[j], t1, side, sl, tp)
-                else:
-                    which = "sl"
-                sl_hit, tp_hit = which == "sl", which == "tp"
-            if sl_hit:
-                exit_i = j
-                exit_px = sl - (slip if side > 0 else -slip)
-                # gap through the stop: fill at open if open is beyond the stop
-                if side > 0 and o[j] < sl and j != entry_i:
-                    exit_px = o[j] - slip
-                if side < 0 and o[j] + spread > sl and j != entry_i:
-                    exit_px = o[j] + spread + slip
-                reason = "sl"
-                break
-            if tp_hit:
-                exit_i = j
-                exit_px = tp
-                reason = "tp"
-                break
-            if j == last_hold:
-                exit_i = j
-                exit_px = c[j] if side > 0 else c[j] + spread
-                reason = "time"
-                break
-        if exit_i < 0:
+                pending.append(od)
+        while k < len(orders) and orders[k].i < j - 1:
+            k += 1  # orders decided before the simulation start (should not happen)
+        # ---- manage open position on bar j
+        if pos is not None:
+            done = _check_exit(pos, j, o, h, l, c, idx, n, ltf, entry_bar=(pos["entry_i"] == j))
+            if done is not None:
+                trades.append(done)
+                pos = None
+                # nothing else may fill on the exit bar (conservative)
+                pending = [p for p in pending if j < p.i + p.expiry_bars]
+                continue
+        # ---- expire pending orders
+        pending = [p for p in pending if j <= p.i + p.expiry_bars]
+        if pos is not None or not pending:
             continue
-        pnl = (exit_px - entry) * side
-        pips = pnl / PIP
-        r = pnl / risk if (risk and not math.isnan(risk) and risk > 0) else math.nan
-        trades.append(Trade(od.i, entry_i, exit_i, side, entry, exit_px, sl, tp, reason, od.tag, pips, r))
-        busy_until = exit_i + 1
+        # ---- fills of pending orders on bar j
+        touched = []
+        for p in pending:
+            side = p.side
+            if p.entry_type == "stop":
+                hit = (h[j] + spread >= p.entry_price) if side > 0 else (l[j] <= p.entry_price)
+            else:
+                hit = (l[j] + spread <= p.entry_price) if side > 0 else (h[j] >= p.entry_price)
+            if hit:
+                touched.append(p)
+        if not touched:
+            continue
+        if len(touched) > 1:
+            if ltf is not None:
+                t1 = idx[j + 1] if j + 1 < n else idx[j] + (idx[j] - idx[j - 1])
+                key = {id(p): _first_touch_minute(ltf, idx[j], t1, p.side, p.entry_type, p.entry_price, spread) for p in touched}
+                touched.sort(key=lambda p: (key[id(p)] if key[id(p)] is not None else 10**9, abs(p.entry_price - o[j])))
+            else:
+                touched.sort(key=lambda p: abs(p.entry_price - o[j]))
+        p = touched[0]
+        side = p.side
+        if p.entry_type == "stop":
+            entry = (max(p.entry_price, o[j] + spread) + slip) if side > 0 else (min(p.entry_price, o[j]) - slip)
+        else:
+            entry = min(p.entry_price, o[j] + spread) if side > 0 else max(p.entry_price, o[j])
+        pending = [q for q in pending if q is not p and not (p.oco >= 0 and q.oco == p.oco)]
+        pos = _open(p, j, entry, spread, slip, n)
+        if pos is None:
+            continue
+        done = _check_exit(pos, j, o, h, l, c, idx, n, ltf, entry_bar=True)
+        if done is not None:
+            trades.append(done)
+            pos = None
+            pending = [q for q in pending if j < q.i + q.expiry_bars]
     return BacktestResult(trades, df)
+
+
+def _open(od: Order, j: int, entry: float, spread: float, slip: float, n: int):
+    sl, tp = od.sl, od.tp
+    side = od.side
+    if side > 0 and not math.isnan(sl) and sl >= entry:
+        return None
+    if side < 0 and not math.isnan(sl) and sl <= entry:
+        return None
+    if side > 0 and not math.isnan(tp) and tp <= entry:
+        return None
+    if side < 0 and not math.isnan(tp) and tp >= entry:
+        return None
+    risk = abs(entry - sl) if not math.isnan(sl) else math.nan
+    last_hold = min(n - 1, j + od.max_hold)
+    if od.exit_i >= 0:
+        last_hold = min(last_hold, max(od.exit_i, j))
+    return dict(order=od, entry_i=j, entry=entry, sl=sl, tp=tp, risk=risk, spread=spread, slip=slip, last_hold=last_hold)
+
+
+def _check_exit(pos, j, o, h, l, c, idx, n, ltf, entry_bar: bool):
+    od = pos["order"]
+    side = od.side
+    sl, tp, spread, slip = pos["sl"], pos["tp"], pos["spread"], pos["slip"]
+    if side > 0:
+        sl_hit = (not math.isnan(sl)) and l[j] <= sl
+        tp_hit = (not math.isnan(tp)) and h[j] >= tp
+    else:
+        sl_hit = (not math.isnan(sl)) and h[j] + spread >= sl
+        tp_hit = (not math.isnan(tp)) and l[j] + spread <= tp
+    exit_px = math.nan
+    reason = ""
+    if entry_bar and od.entry_type == "limit" and tp_hit:
+        # a limit fills on a pull-back: the bar's extreme beyond the target may precede the fill
+        if ltf is None:
+            tp_hit = False
+        else:
+            t1 = idx[j + 1] if j + 1 < n else idx[j] + (idx[j] - idx[j - 1])
+            which = _limit_entry_bar_ltf(ltf, idx[j], t1, side, od.entry_price, sl, tp, spread)
+            sl_hit, tp_hit = which == "sl", which == "tp"
+    if sl_hit and tp_hit:
+        if ltf is not None:
+            t1 = idx[j + 1] if j + 1 < n else idx[j] + (idx[j] - idx[j - 1])
+            which = _resolve_with_ltf(ltf, idx[j], t1, side, sl, tp)
+        else:
+            which = "sl"
+        sl_hit, tp_hit = which == "sl", which == "tp"
+    if sl_hit:
+        exit_px = sl - (slip if side > 0 else -slip)
+        if not entry_bar:  # gap through the stop
+            if side > 0 and o[j] < sl:
+                exit_px = o[j] - slip
+            if side < 0 and o[j] + spread > sl:
+                exit_px = o[j] + spread + slip
+        reason = "sl"
+    elif tp_hit:
+        exit_px = tp
+        reason = "tp"
+    elif j >= pos["last_hold"]:
+        exit_px = c[j] if side > 0 else c[j] + spread
+        reason = "time"
+    if not reason:
+        return None
+    entry = pos["entry"]
+    pnl = (exit_px - entry) * side
+    risk = pos["risk"]
+    r = pnl / risk if (risk and not math.isnan(risk) and risk > 0) else math.nan
+    return Trade(od.i, pos["entry_i"], j, side, entry, exit_px, sl, tp, reason, od.tag, pnl / PIP, r)
 
 
 class BacktestResult:

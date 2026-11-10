@@ -47,8 +47,8 @@ def london_short(df, entry_min=7 * 60, exit_min=13 * 60, stop_adr=1.0, tz="Europ
     for i in range(n - 1):
         # decide at bar i so that the fill is the open of bar i+1 at entry_min
         if mins[i] + step == entry_min and day[i + 1] == day[i] and df.index[i + 1].dayofweek < 5:
-            exit_i = i + 1 + (exit_min - entry_min) // step - 1
-            if exit_i >= n or np.isnan(adr[i]):
+            exit_i = i + 1 + (exit_min - entry_min) // step - 1  # may lie beyond the data in live mode; the engine clamps it
+            if np.isnan(adr[i]):
                 continue
             c = df["close"].iat[i]
             orders.append(Order(i=i, side=-1, sl=c + stop_adr * adr[i] * PIP, tp=math.nan, exit_i=exit_i, tag="london_short"))
@@ -90,8 +90,6 @@ def month_end_fix(df, start_min=15 * 60, entry_min=15 * 60 + 45, fix_min=16 * 60
                 continue
             side = 1 if move > 0 else -1
             exit_i = i + 1 + (fix_min - entry_min) // step - 1
-            if exit_i >= n:
-                continue
             orders.append(Order(i=i, side=side, sl=close[i] - side * stop_pips * PIP, tp=math.nan, exit_i=exit_i, tag="month_end_fix"))
     return orders
 
@@ -119,15 +117,18 @@ def weekend_gap_fade(df_daily, gap_atr=0.2, hold=1, stop_atr=1.0, **kw):
 # 5. FOMC-day: long EUR/USD from the T-1 NY close to the T NY close (scheduled meetings)
 def fomc_day_long(df_daily, stop_atr=1.5, **kw):
     f = pd.read_csv(MACRO / "fomc_decisions.csv", parse_dates=["statement_utc"])
-    f = f[(f.scheduled == True) & (f.status.isin(["held", "tentative"]))]
+    f = f[(f.scheduled == True) & (f.status.isin(["held", "scheduled", "tentative"]))]
     stmt = pd.to_datetime(f.statement_utc, utc=True)
     # NY-close day containing the statement = the daily bar whose start <= stmt < next start
     d = df_daily
     atr = F.atr(d, 20).shift(1).to_numpy()
     pos = d.index.searchsorted(stmt, side="right") - 1
     orders = []
-    for p in pos:
-        if 1 <= p < len(d) and not np.isnan(atr[p]):
+    for p, t in zip(pos, stmt):
+        # the bar p must actually contain the statement (guards against future meetings mapping to the last bar)
+        if not (1 <= p < len(d)) or np.isnan(atr[p]) or t >= d.index[p] + pd.Timedelta(days=1):
+            continue
+        if True:
             c = d["close"].iat[p - 1]
             orders.append(Order(i=p - 1, side=1, sl=c - stop_atr * atr[p], tp=math.nan, exit_i=p, tag="fomc_day_long"))
     return orders
@@ -143,16 +144,18 @@ def cot_trend(df_daily, z_win=52, hold_days=5, stop_atr=2.0, min_abs_z=0.0, **kw
     atr = F.atr(d, 20).shift(1).to_numpy()
     zz = z.reindex(d.index, method="ffill").to_numpy()
     orders = []
-    i = 1
     n = len(d)
-    while i < n - 1:
+    dow = d.index.dayofweek
+    for i in range(1, n - 1):
+        # calendar-anchored weekly cycle: decide at the last bar before the week's first NY-close day
+        # (that bar starts on Sunday, dayofweek 6) so the fill is the Monday session open
+        if dow[i + 1] != 6:
+            continue
         if np.isnan(zz[i]) or np.isnan(atr[i]) or abs(zz[i]) < min_abs_z:
-            i += 1
             continue
         side = 1 if zz[i] > 0 else -1
         c = d["close"].iat[i]
-        orders.append(Order(i=i, side=side, sl=c - side * stop_atr * atr[i], tp=math.nan, exit_i=min(n - 1, i + hold_days), tag="cot_trend"))
-        i += hold_days
+        orders.append(Order(i=i, side=side, sl=c - side * stop_atr * atr[i], tp=math.nan, exit_i=i + hold_days, tag="cot_trend"))
     return orders
 
 
