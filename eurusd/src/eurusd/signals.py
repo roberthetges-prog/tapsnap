@@ -73,6 +73,20 @@ def _bar_step(df: pd.DataFrame) -> pd.Timedelta:
     return (df.index[1:] - df.index[:-1]).min()
 
 
+def _bar_time(df: pd.DataFrame, k: int, step: pd.Timedelta) -> pd.Timestamp:
+    """Start time of bar index k, extrapolated beyond the frame in trading bars (daily frames skip
+    the Friday/Saturday-labelled days that do not exist as NY-close sessions)."""
+    if k < len(df):
+        return df.index[k]
+    t = df.index[-1]
+    for _ in range(k - len(df) + 1):
+        t = t + step
+        if step >= pd.Timedelta(days=1):
+            while t.dayofweek in (4, 5):
+                t += pd.Timedelta(days=1)
+    return t
+
+
 def orders_now(df: pd.DataFrame, cfg: StrategyConfig) -> list[Order]:
     """Replay the strategy and return the orders that are live at the last bar.
 
@@ -135,8 +149,8 @@ def generate_signals(asof: Optional[pd.Timestamp] = None, configs: Optional[list
             ref = o.entry_price if o.entry_type != "market" else df["close"].iat[-1]
             risk_pips = abs(ref - o.sl) / PIP if not math.isnan(o.sl) else math.nan
             reward_pips = abs(o.tp - ref) / PIP if not math.isnan(o.tp) else math.nan
-            valid_until = df.index[o.i] + step * (o.expiry_bars + 1) if o.entry_type != "market" else last_close_time + step
-            hard_exit = (df.index[o.i] + step * (o.exit_i - o.i + 1)) if o.exit_i >= 0 else None
+            valid_until = _bar_time(df, o.i + o.expiry_bars + 1, step) if o.entry_type != "market" else last_close_time + step
+            hard_exit = _bar_time(df, o.exit_i + 1, step) if o.exit_i >= 0 else None
             out.append(Signal(
                 strategy=cfg.label or cfg.name, timeframe=cfg.timeframe, decided_at=str(last_close_time),
                 side="long" if o.side > 0 else "short", entry_type=o.entry_type,
