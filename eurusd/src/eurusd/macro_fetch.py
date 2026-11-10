@@ -337,8 +337,9 @@ def fetch_mirrors(offline: bool = False) -> None:
             df.columns = [c.strip().lower().replace(" ", "_") for c in df.columns]
             if out == "datahub_fx_fed_h10_daily.csv":
                 # keep only the majors relevant to EUR/USD cross-checks; one column per currency
-                keep = {"Euro": "eur_per_usd_inverse", "United Kingdom": "gbp", "Japan": "jpy", "Switzerland": "chf",
-                        "Canada": "cad", "Australia": "aud"}
+                # datahub has already converted every rate to foreign-currency units per USD (EUR 0.628/USD on 2008-07-15)
+                keep = {"Euro": "eur_per_usd", "United Kingdom": "gbp_per_usd", "Japan": "jpy_per_usd",
+                        "Switzerland": "chf_per_usd", "Canada": "cad_per_usd", "Australia": "aud_per_usd"}
                 df = df[df["country"].isin(keep)].pivot(index="date", columns="country", values="exchange_rate")
                 df = df.rename(columns=keep).reset_index()
             _save(df, out)
@@ -639,8 +640,15 @@ def build_ecb() -> pd.DataFrame:
     mpd = pd.read_csv(cal / "yildirim_ecb_mpd.csv", header=None)[0].astype(str).str.strip()
     mpd = pd.DataFrame({"date": pd.to_datetime(mpd, format="%d %B %Y", errors="coerce").dt.strftime("%Y-%m-%d")}).dropna()
     mpd["in_ecb_decision_list_1999_2024"] = True
-    out = pd.DataFrame({"date": sorted(set(wide["date"]) | set(mpd["date"]))})
-    out = out.merge(wide, on="date", how="left").merge(mpd, on="date", how="left")
+    # 2026 meetings after the registry's last entry (2026-03-19).  Apr/Jun/Jul/Sep confirmed by the ForexFactory
+    # 2026 rows (EUR "Main Refinancing Rate"/"ECB Press Conference" in the fx-desk mirror); Oct/Dec from the ECB's
+    # published 2026 schedule as remembered by the author and NOT verified online (ecb.europa.eu is unreachable here).
+    extra = pd.DataFrame({"date": ["2026-04-30", "2026-06-11", "2026-07-23", "2026-09-10", "2026-10-29", "2026-12-17"],
+                          "time_quality": ["rule:14:15/14:45CET, date confirmed by ForexFactory 2026 mirror"] * 4 +
+                                          ["rule:14:15/14:45CET, date from ECB 2026 schedule (unverified)"] * 2})
+    extra = extra[~extra["date"].isin(wide["date"])]
+    out = pd.DataFrame({"date": sorted(set(wide["date"]) | set(mpd["date"]) | set(extra["date"]))})
+    out = out.merge(pd.concat([wide, extra]), on="date", how="left").merge(mpd, on="date", how="left")
 
     # rule-derived times for dates lacking a verified time: 13:45 CET decision / 14:30 CET press conference until
     # 2022-07-21; 14:15 / 14:45 CET from 2022-07-21 (ECB moved the release time at the July 2022 meeting).
@@ -663,6 +671,8 @@ def build_ecb() -> pd.DataFrame:
         out["_d"] = pd.to_datetime(out["date"]) + pd.Timedelta(days=7)   # level a week after the meeting = new rate
         out = pd.merge_asof(out, rates.rename(columns={"date": "_d"}).sort_values("_d"), on="_d", direction="backward").drop(columns="_d")
         out = out.rename(columns={"deposit_facility_rate": "dfr_after", "main_refinancing_rate": "mrr_after"})
+    first = ["date", "decision_utc", "press_conference_utc", "time_quality"]
+    out = out[first + [c for c in out.columns if c not in first]]
     return _finish(out.sort_values("date").reset_index(drop=True))
 
 
@@ -714,7 +724,7 @@ def _load_spoluan() -> pd.DataFrame:
         frames.append(pd.DataFrame({"datetime_utc": utc, "currency": df["currency"], "event": df["event"].str.strip(),
                                     "impact": df["impact"], "actual": df["actual"], "forecast": df["forecast"],
                                     "previous": df["previous"], "has_time": has_time,
-                                    "source": "forexfactory archive 2010-2023 (github spoluan/forex-factory-scraper), UTC+8 display zone"}))
+                                    "source": "ff_archive_2010_2023"}))
     _SPOLUAN_CACHE = pd.concat(frames).dropna(subset=["datetime_utc"]).reset_index(drop=True)
     return _SPOLUAN_CACHE
 
@@ -733,7 +743,7 @@ def _load_fxdesk() -> pd.DataFrame:
         frames.append(pd.DataFrame({"datetime_utc": utc, "currency": df["currency"], "event": df["event"].str.strip(),
                                     "impact": imp, "actual": df["actual"].replace("N/A", ""), "forecast": df["forecast"].replace("N/A", ""),
                                     "previous": df["previous"].replace("N/A", ""), "has_time": has_time,
-                                    "source": "forexfactory 2026 Jan-Sep (github datpro12345/fx-desk), UTC+7 assumed, TIMES UNRELIABLE"}))
+                                    "source": "ff_2026_fxdesk_lowq"}))
     return pd.concat(frames).dropna(subset=["datetime_utc"]).reset_index(drop=True)
 
 
@@ -754,7 +764,7 @@ def _load_cwt() -> pd.DataFrame:
             rows.append({"datetime_utc": utc, "currency": e.get("currency"), "event": e.get("title"),
                          "impact": str(e.get("impact", "")).capitalize(), "actual": e.get("actual") or "",
                          "forecast": e.get("forecast") or "", "previous": e.get("previous") or "", "has_time": has_time,
-                         "source": "forexfactory 2026 Apr-Oct (github Gourav232003/cwt-macro-pipeline raw), America/New_York display zone"})
+                         "source": "ff_2026_cwt"})
     return pd.DataFrame(rows).drop_duplicates(["datetime_utc", "currency", "event"])
 
 
@@ -771,7 +781,7 @@ def _load_cryptoprism() -> pd.DataFrame:
             utc, has_time = datetime.strptime(r["date"], "%Y-%m-%d"), False
         rows.append({"datetime_utc": utc, "currency": r["currency"], "event": r["event"], "impact": str(r["impact"]).capitalize(),
                      "actual": r.get("actual") or "", "forecast": r.get("forecast") or "", "previous": r.get("previous") or "",
-                     "has_time": has_time, "source": "forexfactory Oct-Dec 2025 snapshot (github CryptoPrism-io), IST display zone"})
+                     "has_time": has_time, "source": "ff_2025q4_snapshot"})
     return pd.DataFrame(rows).fillna("")
 
 
@@ -786,7 +796,7 @@ def _load_ff_feed() -> pd.DataFrame:
             dt = pd.Timestamp(e["date"]).tz_convert("UTC").tz_localize(None)
             rows.append({"datetime_utc": dt, "currency": e.get("country"), "event": e.get("title"), "impact": e.get("impact"),
                          "actual": e.get("actual", ""), "forecast": e.get("forecast", ""), "previous": e.get("previous", ""),
-                         "has_time": True, "source": f"forexfactory live feed nfs.faireconomy.media/{p.name}"})
+                         "has_time": True, "source": "ff_live_" + p.stem.replace("ff_calendar_", "")})
     return pd.DataFrame(rows)
 
 
@@ -797,16 +807,16 @@ def build_events(fomc: pd.DataFrame, ecb: pd.DataFrame, bls: pd.DataFrame) -> pd
     # structured, verified lists appended as events (currency tagged, no actual/forecast)
     f = pd.DataFrame({"datetime_utc": pd.to_datetime(fomc["statement_utc"]).dt.tz_localize(None), "currency": "USD",
                       "event": "FOMC Statement", "impact": "High", "actual": fomc["fed_funds_target"], "forecast": "", "previous": "",
-                      "has_time": True, "source": "fomc_decisions.csv (" + fomc["time_quality"] + ")"})
+                      "has_time": True, "source": "fomc_decisions:" + fomc["time_quality"]})
     e1 = pd.DataFrame({"datetime_utc": pd.to_datetime(ecb["decision_utc"]).dt.tz_localize(None), "currency": "EUR",
                        "event": "ECB Monetary Policy Decision", "impact": "High", "actual": ecb.get("dfr_after", ""), "forecast": "", "previous": "",
-                       "has_time": True, "source": "ecb_decisions.csv (" + ecb["time_quality"] + ")"})
+                       "has_time": True, "source": "ecb_decisions:" + ecb["time_quality"]})
     e2 = e1.copy()
     e2["datetime_utc"] = pd.to_datetime(ecb["press_conference_utc"]).dt.tz_localize(None)
     e2["event"] = "ECB Press Conference"
     b = pd.DataFrame({"datetime_utc": pd.to_datetime(bls["release_utc"]).dt.tz_localize(None), "currency": "USD",
                       "event": "BLS " + bls["release"], "impact": "High", "actual": "", "forecast": "", "previous": "",
-                      "has_time": True, "source": "us_bls_releases.csv (" + bls["time_quality"] + ")"})
+                      "has_time": True, "source": "us_bls_releases:" + bls["time_quality"]})
     allev = pd.concat([ff, f, e1, e2, b], ignore_index=True)
     allev["datetime_utc"] = pd.to_datetime(allev["datetime_utc"]).dt.strftime("%Y-%m-%dT%H:%M:%SZ")
     allev = allev.sort_values(["datetime_utc", "currency", "event"]).reset_index(drop=True)

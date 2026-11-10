@@ -1,4 +1,4 @@
-date,aud,cad,eur_per_usd_inverse,jpy,chf,gbp
+date,aud_per_usd,cad_per_usd,eur_per_usd,jpy_per_usd,chf_per_usd,gbp_per_usd
 1971-01-04,0.8987,1.0109,,357.73,4.318,0.4177
 1971-01-05,0.8983,1.0102,,357.81,4.3117,0.4176
 1971-01-06,0.8977,1.0106,,357.86,4.3113,0.4172
