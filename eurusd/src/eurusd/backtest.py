@@ -92,6 +92,35 @@ def _resolve_with_ltf(ltf: pd.DataFrame, t0: pd.Timestamp, t1: pd.Timestamp,
     return "sl" if i_sl < i_tp else "tp"
 
 
+def _limit_entry_bar_ltf(ltf: pd.DataFrame, t0, t1, side: int, level: float, sl: float, tp: float, spread: float) -> str:
+    """For a limit order filled inside bar [t0,t1): find the first minute that touches the limit
+    level, then return 'tp' / 'sl' / '' depending on what is touched first AFTER the fill minute."""
+    seg = ltf.loc[t0:t1 - pd.Timedelta(seconds=1)]
+    if seg.empty:
+        return ""
+    hi = seg["high"].values
+    lo = seg["low"].values
+    if side > 0:
+        filled = lo + spread <= level
+    else:
+        filled = hi >= level
+    if not filled.any():
+        return ""
+    k = int(np.argmax(filled))
+    hi, lo = hi[k:], lo[k:]
+    if side > 0:
+        hit_sl = lo <= sl if not math.isnan(sl) else np.zeros(len(lo), bool)
+        hit_tp = hi >= tp if not math.isnan(tp) else np.zeros(len(hi), bool)
+    else:
+        hit_sl = hi + spread >= sl if not math.isnan(sl) else np.zeros(len(hi), bool)
+        hit_tp = lo + spread <= tp if not math.isnan(tp) else np.zeros(len(lo), bool)
+    i_sl = int(np.argmax(hit_sl)) if hit_sl.any() else 10**9
+    i_tp = int(np.argmax(hit_tp)) if hit_tp.any() else 10**9
+    if i_sl == i_tp:
+        return "sl" if i_sl < 10**9 else ""
+    return "sl" if i_sl < i_tp else "tp"
+
+
 def run_backtest(df: pd.DataFrame, orders: Iterable[Order], cost: CostModel = CostModel(),
                  ltf: Optional[pd.DataFrame] = None, one_at_a_time: bool = True) -> "BacktestResult":
     """Simulate orders on OHLC bars `df` (UTC index, bid prices).
@@ -171,11 +200,22 @@ def run_backtest(df: pd.DataFrame, orders: Iterable[Order], cost: CostModel = Co
             else:
                 sl_hit = (not math.isnan(sl)) and bid_hi + spread >= sl
                 tp_hit = (not math.isnan(tp)) and bid_lo + spread <= tp
-            if j == entry_i and od.entry_type == "market":
-                # cannot know path within entry bar: treat TP hit on entry bar as not happening
-                # unless lower-TF data says otherwise; SL hit is allowed (conservative)
-                if tp_hit and not sl_hit and ltf is None:
+            if j == entry_i and od.entry_type == "limit" and tp_hit:
+                # A limit fills on a pull-back, so the bar's extreme beyond the target may have
+                # happened BEFORE the fill. Without minute data we do not allow a same-bar target.
+                # (Market orders fill at the open and stop orders fill on the way towards the
+                # target, so for them a same-bar target touch necessarily happens after the fill.)
+                if ltf is None:
                     tp_hit = False
+                else:
+                    t1 = idx[j + 1] if j + 1 < n else idx[j] + (idx[j] - idx[j - 1])
+                    which = _limit_entry_bar_ltf(ltf, idx[j], t1, side, od.entry_price, sl, tp, spread)
+                    sl_hit, tp_hit = which == "sl", which == "tp"
+                    if which == "sl":
+                        exit_i = j
+                        exit_px = sl - (slip if side > 0 else -slip)
+                        reason = "sl"
+                        break
             if sl_hit and tp_hit:
                 if ltf is not None:
                     t1 = idx[j + 1] if j + 1 < n else idx[j] + (idx[j] - idx[j - 1])

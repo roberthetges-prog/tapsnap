@@ -90,7 +90,10 @@ def neighbourhood_ok(train_df: pd.DataFrame, best: dict, param_grid: dict) -> tu
             if k not in p:
                 continue
             vals = sorted(param_grid.get(k, [v]), key=lambda x: (str(type(x)), x))
-            if isinstance(v, (int, float)) and not isinstance(v, bool) and len(vals) > 1 and k in param_grid:
+            if isinstance(v, float) and math.isnan(v):
+                if not (isinstance(p[k], float) and math.isnan(p[k])):
+                    close = False
+            elif isinstance(v, (int, float)) and not isinstance(v, bool) and len(vals) > 1 and k in param_grid:
                 try:
                     pos = vals.index(v)
                     pos2 = vals.index(p[k])
@@ -98,7 +101,7 @@ def neighbourhood_ok(train_df: pd.DataFrame, best: dict, param_grid: dict) -> tu
                         close = False
                 except ValueError:
                     close = False
-            elif p[k] != v:
+            elif p[k] != v and not (isinstance(v, float) and isinstance(p[k], float) and math.isnan(v) and math.isnan(p[k])):
                 close = False
         if close:
             rows.append(row["avg_r"])

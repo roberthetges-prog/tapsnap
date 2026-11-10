@@ -49,3 +49,18 @@ assert r.trades[0].reason == "tp", r.trades[0]
 r = run_backtest(df, [Order(i=4, side=1, entry_type="stop", entry_price=1.1005, expiry_bars=3, sl=1.0940, tp=1.1100, max_hold=2)], cost)
 t = r.trades[0]
 assert t.entry_i == 5 and abs(t.entry - 1.1005) < 1e-9 and t.reason == "sl" and t.exit_i == 6, t  # bar6 low 1.0940 hits the stop
+
+# 5) limit order: buy limit at 1.1000 placed bar3 (bar4 open 1.1030, low 1.0990 -> fills; bar4 high 1.1040 >= tp 1.1035 but
+#    without M1 data the same-bar TP is NOT allowed). Then bar5 low 1.0950 <= sl 1.0960 -> sl.
+r = run_backtest(df, [Order(i=3, side=1, entry_type="limit", entry_price=1.1000, expiry_bars=2, sl=1.0960, tp=1.1035)], cost)
+t = r.trades[0]
+assert t.entry_i == 4 and abs(t.entry - 1.1000) < 1e-9 and t.reason == "sl" and t.exit_i == 5, t
+# 5b) with M1 data showing the dip to 1.0999 first and then the rally to 1.1040: TP allowed on the entry bar
+m1b = pd.DataFrame({"open":[1.1030,1.1000,1.1010,1.1035],"high":[1.1030,1.1005,1.1041,1.1036],"low":[1.0999,1.0990,1.1008,1.1030],"close":[1.1000,1.1005,1.1040,1.1030]},
+                   index=pd.to_datetime(["2024-01-01 04:00","2024-01-01 04:15","2024-01-01 04:30","2024-01-01 04:45"], utc=True))
+r = run_backtest(df, [Order(i=3, side=1, entry_type="limit", entry_price=1.1000, expiry_bars=2, sl=1.0960, tp=1.1035)], cost, ltf=m1b)
+assert r.trades[0].reason == "tp" and r.trades[0].exit_i == 4, r.trades[0]
+# 6) market order can take profit on its entry bar when the stop is not touched: long at bar1 open (1.1006), tp 1.1025 (bar1 high 1.1030)
+r = run_backtest(df, [Order(i=0, side=1, sl=1.0980, tp=1.1025)], cost)
+assert r.trades[0].reason == "tp" and r.trades[0].exit_i == 1, r.trades[0]
+print("all backtest tests pass")

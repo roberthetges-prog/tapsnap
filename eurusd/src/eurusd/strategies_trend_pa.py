@@ -186,6 +186,86 @@ def _trail_exit(h, l, c, base_long, base_short, entry_i, side, max_bars=5000):
     return int(entry_i + 1 + w[0]) if len(w) else -1
 
 
+@lru_cache(maxsize=1)
+def _m1_hl():
+    from .data import load_ohlc
+    return load_ohlc("M1")[["high", "low"]]
+
+
+def _touch(h, l, side, px, kind, spread):
+    if kind == "stop":
+        hit = (h + spread >= px) if side > 0 else (l <= px)
+    else:
+        hit = (l + spread <= px) if side > 0 else (h >= px)
+    w = np.flatnonzero(hit)
+    return int(w[0]) if len(w) else -1
+
+
+def resolve_pending(df, orders, spread_pips=1.0):
+    """The engine evaluates pending orders one by one over their whole validity window instead of
+    chronologically, which (a) lets an order placed earlier but filled later pre-empt one filled earlier and
+    (b) for an OCO pair placed on the same bar always prefers the long side.  Here every stop/limit order is
+    re-anchored at the bar *before* its first touch with a 1-bar validity (identical fill price), so the engine
+    processes fills in time order; OCO pairs (same decision bar and tag, opposite sides) keep only the side
+    touched first, a same-bar tie is resolved with M1 data and dropped when still tied."""
+    h, l = df["high"].values, df["low"].values
+    n = len(df)
+    spread = spread_pips * PIP
+    idx = df.index
+    fills = []
+    for o in orders:
+        if o.entry_type == "market":
+            fills.append((o, o.i + 1))
+            continue
+        a, b = o.i + 1, min(n, o.i + o.expiry_bars + 1)
+        if a >= n:
+            continue
+        r = _touch(h[a:b], l[a:b], o.side, o.entry_price, o.entry_type, spread)
+        fills.append((o, a + r if r >= 0 else -1))
+    # OCO resolution
+    groups = {}
+    for k, (o, j) in enumerate(fills):
+        groups.setdefault((o.i, o.tag, o.entry_type != "market"), []).append(k)
+    drop = set()
+    for key, ks in groups.items():
+        if len(ks) != 2 or not key[2]:
+            continue
+        (o1, j1), (o2, j2) = fills[ks[0]], fills[ks[1]]
+        if o1.side == o2.side:
+            continue
+        if j1 < 0 or j2 < 0:
+            continue
+        if j1 < j2:
+            drop.add(ks[1])
+        elif j2 < j1:
+            drop.add(ks[0])
+        else:  # same bar: minute resolution
+            t0 = idx[j1]
+            t1 = idx[j1 + 1] if j1 + 1 < n else t0 + (idx[j1] - idx[j1 - 1])
+            seg = _m1_hl().loc[t0:t1 - pd.Timedelta(seconds=1)]
+            if seg.empty:
+                drop.update(ks)
+                continue
+            m1 = _touch(seg["high"].values, seg["low"].values, o1.side, o1.entry_price, o1.entry_type, spread)
+            m2 = _touch(seg["high"].values, seg["low"].values, o2.side, o2.entry_price, o2.entry_type, spread)
+            if m1 < 0 or m2 < 0 or m1 == m2:
+                drop.update(ks)
+            elif m1 < m2:
+                drop.add(ks[1])
+            else:
+                drop.add(ks[0])
+    out = []
+    for k, (o, j) in enumerate(fills):
+        if k in drop or j < 0:
+            continue
+        if o.entry_type == "market":
+            out.append(o)
+        else:
+            out.append(Order(i=int(j - 1), side=o.side, entry_type=o.entry_type, entry_price=o.entry_price, sl=o.sl,
+                             tp=o.tp, expiry_bars=1, max_hold=o.max_hold, exit_i=o.exit_i, tag=o.tag))
+    return out
+
+
 def _sl_tp(side, ref, sl_d, tp_d):
     if math.isnan(tp_d):
         return (ref - sl_d, math.nan) if side > 0 else (ref + sl_d, math.nan)
@@ -217,7 +297,7 @@ def turtle(df, entry_n=20, exit_n=10, atr_n=20, sl_atr=2.0, **kw):
                             expiry_bars=1, exit_i=int(xl) if xl < n else -1, tag="turtle"))
         orders.append(Order(i=i, side=-1, entry_type="stop", entry_price=ll[i], sl=ll[i] + sl_atr * a[i],
                             expiry_bars=1, exit_i=int(xs) if xs < n else -1, tag="turtle"))
-    return orders
+    return resolve_pending(df, orders)
 
 
 # ----------------------------------------------------------------------------- T03 golden cross
@@ -421,7 +501,7 @@ def inside_bar_breakout(df, buffer_pips=2.0, sl_mode="inside", rr=2.0, hold_bars
             tp = px + side * (rr * risk if tp_mode == "rr" else (mh - ml))
             orders.append(Order(i=int(i), side=side, entry_type="stop", entry_price=px, sl=sl, tp=tp,
                                 expiry_bars=expiry_bars, exit_i=int(i + hold_bars) if i + hold_bars < n else -1, tag="ib"))
-    return orders
+    return resolve_pending(df, orders)
 
 
 # ----------------------------------------------------------------------------- T10 NR7 / ID-NR4
@@ -449,7 +529,7 @@ def nr_breakout(df, pattern="nr7", buffer_pips=2.0, exit="day_close", adr_n=10, 
                 tp, ex = px + side * adr[i], i + hold_bars
             orders.append(Order(i=int(i), side=side, entry_type="stop", entry_price=px, sl=sl, tp=tp,
                                 expiry_bars=1, exit_i=int(ex) if ex < n else -1, tag=pattern))
-    return orders
+    return resolve_pending(df, orders)
 
 
 # ----------------------------------------------------------------------------- T11 Supertrend (flip exit)
@@ -608,7 +688,7 @@ def lw_vol_breakout(df, k=0.25, range_lookback=1, sl_mult=2.0, tp_mult=2.0, day_
                 sl, tp = px - side * sl_mult * band, px + side * tp_mult * band
                 orders.append(Order(i=i, side=side, entry_type="stop", entry_price=px, sl=sl, tp=tp,
                                     expiry_bars=1, exit_i=i + 1, tag="lw"))
-        return orders
+        return resolve_pending(df, orders)
     d = F.daily_ohlc(df, day_start)
     d["rng"] = (d["high"] - d["low"]).rolling(range_lookback).mean()
     key = (df.index - pd.Timedelta(hours=day_start)).floor("D") + pd.Timedelta(hours=day_start)
@@ -634,7 +714,7 @@ def lw_vol_breakout(df, k=0.25, range_lookback=1, sl_mult=2.0, tp_mult=2.0, day_
             sl, tp = px - side * sl_mult * band, px + side * tp_mult * band
             orders.append(Order(i=int(i), side=side, entry_type="stop", entry_price=px, sl=sl, tp=tp,
                                 expiry_bars=bars_valid, exit_i=int(ex), tag="lw"))
-    return orders
+    return resolve_pending(df, orders)
 
 
 # ----------------------------------------------------------------------------- T16 previous-day high/low breakout
@@ -679,7 +759,7 @@ def pdh_pdl_breakout(df, buffer_pips=2.0, sl_mode="pips", sl_pips=25, rr=1.5, st
             tp = px + side * rr * risk if not math.isnan(rr) else math.nan
             orders.append(Order(i=i, side=side, entry_type="stop", entry_price=px, sl=sl, tp=tp,
                                 expiry_bars=bars_valid, exit_i=int(ex), tag="pdhl"))
-    return orders
+    return resolve_pending(df, orders)
 
 
 # ----------------------------------------------------------------------------- T17 time-series momentum
@@ -787,7 +867,7 @@ def fractal_breakout(df, k=2, sl_mode="pips", sl_pips=30, tp_pips=50, start_hour
             tp = px + side * tp_pips * PIP if tp_pips else math.nan
             orders.append(Order(i=int(i), side=side, entry_type="stop", entry_price=px, sl=sl, tp=tp,
                                 expiry_bars=bars_valid, exit_i=int(ex), tag="frac"))
-    return orders
+    return resolve_pending(df, orders)
 
 
 # ----------------------------------------------------------------------------- V02/V03/V04/T06 filters
@@ -952,7 +1032,7 @@ def pin_bar(df, tail_ratio=0.667, sl_buffer_pips=5.0, rr=2.0, trend="ema", ema_n
             tp = ref + side * rr * risk
             orders.append(Order(i=int(i), side=side, entry_type="limit", entry_price=ref, sl=sl, tp=tp,
                                 expiry_bars=3, max_hold=max_hold, tag="pin50"))
-    return orders
+    return resolve_pending(df, orders)
 
 
 # ----------------------------------------------------------------------------- P02 engulfing
@@ -1235,7 +1315,7 @@ def harmonic(df, pattern="gartley", k=5, tol=0.05, tp_level=0.618, expiry_bars=6
         tp = D + side * tp_level * abs(A - D)
         orders.append(Order(i=int(conf), side=side, entry_type="limit", entry_price=D, sl=sl, tp=tp,
                             expiry_bars=expiry_bars, max_hold=expiry_bars * 2, tag=pattern))
-    return orders
+    return resolve_pending(df, orders)
 
 
 # ----------------------------------------------------------------------------- P08 Fibonacci pullback
@@ -1323,7 +1403,7 @@ def supply_demand(df, max_base=3, base_atr=0.6, departure_atr=2.0, depart_bars=3
             i = k_ + 1
         else:
             i = j + 1
-    return orders
+    return resolve_pending(df, orders)
 
 
 # ----------------------------------------------------------------------------- P10 order blocks
@@ -1368,7 +1448,7 @@ def order_block(df, displacement_atr=1.5, zone="open_low", rr=2.0, atr_n=14, str
                         i = j
                     break
         i += 1
-    return orders
+    return resolve_pending(df, orders)
 
 
 # ----------------------------------------------------------------------------- P11 fair value gaps
@@ -1404,7 +1484,7 @@ def fvg_retrace(df, entry_level="top", min_gap_atr=0.2, rr=2.0, atr_n=14, expiry
             risk = sl - px
             orders.append(Order(i=int(i), side=-1, entry_type="limit", entry_price=px, sl=sl, tp=px - rr * risk,
                                 expiry_bars=expiry_bars, max_hold=max_hold, tag="fvg"))
-    return orders
+    return resolve_pending(df, orders)
 
 
 # ----------------------------------------------------------------------------- P12 Wyckoff spring / upthrust
