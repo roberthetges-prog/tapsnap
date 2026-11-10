@@ -150,7 +150,12 @@ def generate_signals(asof: Optional[pd.Timestamp] = None, configs: Optional[list
             risk_pips = abs(ref - o.sl) / PIP if not math.isnan(o.sl) else math.nan
             reward_pips = abs(o.tp - ref) / PIP if not math.isnan(o.tp) else math.nan
             valid_until = _bar_time(df, o.i + o.expiry_bars + 1, step) if o.entry_type != "market" else last_close_time + step
-            hard_exit = _bar_time(df, o.exit_i + 1, step) if o.exit_i >= 0 else None
+            if o.exit_i < 0:
+                hard_exit = None
+            elif step >= pd.Timedelta(days=1):  # a NY-close session ends 24h after its start label
+                hard_exit = _bar_time(df, o.exit_i, step) + pd.Timedelta(days=1)
+            else:
+                hard_exit = _bar_time(df, o.exit_i + 1, step)
             out.append(Signal(
                 strategy=cfg.label or cfg.name, timeframe=cfg.timeframe, decided_at=str(last_close_time),
                 side="long" if o.side > 0 else "short", entry_type=o.entry_type,
