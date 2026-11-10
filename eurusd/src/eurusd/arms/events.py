@@ -383,6 +383,7 @@ VARIANTS = {
     "P10_post_ridge_24h": ("post", "ridge", F_POST_ALL, "fwd_24h", "label_end_24h", None, 24),
     "R1_pre_ridge_24h": ("pre", "ridge", F_PRE, "fwd_pre", "label_end_pre", None, 24),
     "R2_pre_ridge_24h_cb_only": ("pre", "ridge", F_PRE, "fwd_pre", "label_end_pre", "cb", 24),
+    "R3_pre_ridge_24h_cb_dummies_only": ("pre", "ridge", ["k_fomc", "k_ecb"], "fwd_pre", "label_end_pre", "cb", 24),
     "D1_div_ridge_10d": ("div", "ridge", F_DIV, "fwd_10d", "label_end_10d", None, 240),
     "D2_div_ridge_5d": ("div", "ridge", F_DIV, "fwd_5d", "label_end_5d", None, 120),
 }
@@ -444,6 +445,9 @@ def run_variant(name: str, frames: dict, shuffle: bool = False, shift: int = 0, 
 def _report(out: pd.DataFrame, name: str, cost_pips: float, n_arms: int) -> pd.DataFrame:
     pnl = event_pnl(out.pos, out.fwd_bp, out.close, cost_pips)
     tbl = report(pnl, periods_per_year=_ppy(out.index), name=ARM, n_arms=n_arms)
+    gross = report(pnl.assign(net_bp=pnl.gross_bp), periods_per_year=_ppy(out.index), name=ARM, n_arms=n_arms)
+    tbl["gross_sharpe"] = gross["sharpe"].values
+    tbl["gross_t"] = gross["t"].values
     tbl.insert(1, "variant", name)
     tbl.insert(2, "cost_pips", cost_pips)
     tbl.insert(3, "ppy", round(_ppy(out.index), 1))
@@ -488,16 +492,17 @@ def run(cost_pips: float = COST_HEADLINE, save: bool = True, verbose: bool = Tru
     sel = rep[(rep.cost_pips == cost_pips) & (rep.period == "2010-2015") & (rep.n >= 100)].sort_values("sharpe", ascending=False)
     final = str(sel.variant.iloc[0])
     rep["final"] = rep.variant == final
-    # --- leak checks on the final variant
-    base = outs[final] if final in VARIANTS else outs[COMBINED[final][0]]
-    chk_name = final if final in VARIANTS else COMBINED[final][0]
+    # --- leak checks on the final variant and on every variant that clears the HOWTO success bar (not selection)
+    bar = rep[(rep.cost_pips == cost_pips) & rep.variant.isin(VARIANTS)].pivot(index="variant", columns="period", values="sharpe")
+    notable = bar[(bar["2010-2026"] > 0.4) & (bar["2016-2026"] > 0.3) & (bar["2023-2026"] >= 0)].index.tolist()
     checks = {}
-    for lab, kw in (("shuffle_labels", {"shuffle": True}), ("features_shift_+1_stale", {"shift": 1}), ("features_shift_-1_future", {"shift": -1})):
-        o = run_variant(chk_name, frames, **kw)
-        t = _report(o, f"{chk_name}__{lab}", cost_pips, n_arms)
-        checks[lab] = {p: round(_agg_row(t, p), 2) for p in ("2010-2026", "2016-2026", "2023-2026")}
-        t["final"] = False
-        rep = pd.concat([rep, t], ignore_index=True)
+    for chk_name in dict.fromkeys([final if final in VARIANTS else COMBINED[final][0]] + notable):
+        for lab, kw in (("shuffle_labels", {"shuffle": True}), ("features_shift_+1_stale", {"shift": 1}), ("features_shift_-1_future", {"shift": -1})):
+            o = run_variant(chk_name, frames, **kw)
+            t = _report(o, f"{chk_name}__{lab}", cost_pips, n_arms)
+            checks[f"{chk_name}__{lab}"] = {p: (round(_agg_row(t, p), 2), round(_agg_row(t, p, "gross_sharpe"), 2)) for p in ("2010-2026", "2016-2026", "2023-2026")}
+            t["final"] = False
+            rep = pd.concat([rep, t], ignore_index=True)
     rep.attrs["final"] = final
     rep.attrs["leak_checks"] = checks
     pos = outs[final][["pos", "fwd_bp", "event", "horizon_h", "close", "label_end", "pred"]].copy()
@@ -515,5 +520,5 @@ def run(cost_pips: float = COST_HEADLINE, save: bool = True, verbose: bool = Tru
 
 if __name__ == "__main__":
     pos, rep = run()
-    cols = ["variant", "cost_pips", "period", "n", "ppy", "sharpe", "t", "mean_bp", "active_frac", "final"]
+    cols = ["variant", "cost_pips", "period", "n", "ppy", "sharpe", "t", "gross_sharpe", "mean_bp", "active_frac", "final"]
     print(rep[rep.period.isin(["2010-2015", "2010-2026", "2016-2026", "2023-2026"])][cols].to_string())

@@ -16,7 +16,8 @@ Building blocks (all causal features of the daily store, see `_add_features`):
 * Vol scaling: position *= clip(target / rv_21d_bp, 0, 1.5), target = training median of rv_21d_bp.
 * Moreira-Muir overlay ("mm"): position *= clip(c / rv_21d_bp^2, 0, 2), c = training median of rv_21d_bp^2.
 * Regime model: Gaussian HMM (hmmlearn, diagonal covariances) on standardized (log rv_21d_bp, |ret_21d|, adx14,
-  log vix), K = 3 or 4 states, fitted on the training window; state probabilities for every date are obtained by
+  log vix), K = 3 or 4 states, fitted on the training window (4 EM restarts; keep the best training likelihood among
+  restarts whose states are all persistent, self-transition >= 0.8); state probabilities for every date are obtained by
   CAUSAL forward filtering (never Viterbi / smoothing) with the training-window parameters.
   Mapping state -> action chosen on the training window only:
     "desc": the state with the highest mean stress score (mean z of log rv, log vix) is "stressed" -> flat;
@@ -108,14 +109,18 @@ class RegimeHMM:
         Z = train[self.cols].dropna()
         self.mu, self.sd = Z.mean(), Z.std().replace(0, 1.0)
         Zs = ((Z - self.mu) / self.sd).values
-        best, best_ll = None, -np.inf
-        for s in range(2):   # two restarts, keep the better likelihood (chosen on training data)
+        # restarts chosen on the training likelihood only; EM often returns a degenerate solution in which two
+        # states share a mean and flip every day (self-transition ~0), so among the restarts we keep the best
+        # likelihood subject to every state being persistent (self-transition >= 0.8), falling back to the best
+        # likelihood when no restart satisfies it.
+        fits = []
+        for s in range(4):
             m = GaussianHMM(n_components=self.K, covariance_type="diag", n_iter=100, tol=1e-3, random_state=self.seed + s)
             m.fit(Zs)
-            ll = m.score(Zs)
-            if ll > best_ll:
-                best, best_ll = m, ll
-        self.m = best
+            fits.append((m.score(Zs), float(np.diag(m.transmat_).min()), m))
+        good = [f for f in fits if f[1] >= 0.8]
+        self.m = max(good or fits, key=lambda f: f[0])[2]
+        self.degenerate = not good
         # order states by stress score so state ids are comparable across years
         self.means = pd.DataFrame(self.m.means_, columns=self.cols)
         return self
@@ -280,7 +285,7 @@ def build_fit_predict(X_all: pd.DataFrame, v: dict, cost_pips: float, log: dict 
             if log is not None:
                 log.setdefault("mappings", []).append({"year": train.index[-1].year + 1, "act": dict(act),
                                                        "state_means": hmm.means.round(2).to_dict("index"),
-                                                       "transmat_diag": np.round(np.diag(hmm.m.transmat_), 3).tolist()})
+                                                       "transmat_diag": np.round(np.diag(hmm.m.transmat_), 3).tolist(), "degenerate": hmm.degenerate})
         return model
 
     def predict(model, test: pd.DataFrame) -> pd.Series:

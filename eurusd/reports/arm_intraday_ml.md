@@ -8,7 +8,7 @@ L07 = bar closing 07:00 London (`hour_london == 6`), L13 = bar closing 13:00 Lon
 NY17 = bar closing 17:00 New York (`hour_ny == 16`); weekend bars dropped. Targets `fwd_4h`, `fwd_8h` (bp, from the
 decision bar close). One decision per weekday per variant, so `periods_per_year = 260`.
 
-## Features (54 at the final decision bar)
+## Features (55 at the final decision bar)
 All hourly-store columns except labels, `close` and the columns constant at a decision bar (`hour_london`, `hour_ny`,
 `is_london`, `is_ny`), and columns more than 50 % NaN at that decision bar (`ret_since_london_open_bp` is undefined at
 L07). Groups: multi-horizon returns, intraday vol state, position in the 24h range, distances to previous-day
@@ -32,53 +32,53 @@ spread and its changes, fair-value residual, VIX, COT, dollar factor, DXY/SPX, l
 Among the 36 ML-grid variants (3 decision bars x 2 horizons x 3 models x 2 quantiles) pick the highest 2010-2015 net
 Sharpe at 1.2 pips among variants active on >= 10% of their decision bars in 2010-2015; report its full
 2010-2026 record. Baselines, regime gates and event exclusion are reported in the same harness but are not eligible.
-Number of variants run in this arm: **19** (36 grid + 2 unconditional + 10 regime + 3 event-exclusion); the
-deflated-Sharpe p of the final variant uses n_trials = 19.
+Number of variants run in this arm: **51** (36 grid + 2 unconditional + 10 regime + 3 event-exclusion); the
+deflated-Sharpe p of the final variant uses n_trials = 51.
 
-## Final variant: `ml_L07_4h_ridge_q0.5`
-Decision bar L07, horizon 4h, model ridge, quantile 0.5. Deflated-Sharpe p (n_trials=19) = 1.00.
+## Final variant: `ml_NY17_4h_lgbm_q0.8`
+Decision bar NY17, horizon 4h, model lgbm, quantile 0.8. Deflated-Sharpe p (n_trials=51) = 0.04.
 
 | period | Sharpe (1.2p) | t | mean bp | active | n | Sharpe (0.6p) | t (0.6p) |
 |---|---|---|---|---|---|---|---|
-| 2010 | +0.33 | +0.33 | +0.35 | 0.26 | 260 | +0.55 | +0.55 |
-| 2011 | +0.36 | +0.36 | +0.60 | 0.58 | 259 | +0.66 | +0.65 |
-| 2012 | +0.00 | +0.00 | +0.00 | 0.00 | 258 | +0.00 | +0.00 |
-| 2013 | -1.29 | -1.28 | -0.76 | 0.23 | 258 | -0.94 | -0.94 |
-| 2014 | +1.06 | +1.05 | +0.31 | 0.07 | 258 | +1.27 | +1.27 |
-| 2015 | +0.27 | +0.27 | +0.20 | 0.07 | 259 | +0.37 | +0.37 |
-| 2016 | -1.72 | -1.72 | -1.67 | 0.31 | 260 | -1.38 | -1.38 |
-| 2017 | +1.39 | +1.39 | +0.66 | 0.09 | 258 | +1.59 | +1.58 |
-| 2018 | -0.96 | -0.96 | -0.61 | 0.22 | 260 | -0.60 | -0.60 |
-| 2019 | -2.17 | -2.16 | -0.82 | 0.26 | 259 | -1.46 | -1.46 |
-| 2020 | -0.58 | -0.58 | -0.50 | 0.12 | 260 | -0.44 | -0.44 |
-| 2021 | +0.00 | +0.00 | +0.00 | 0.00 | 259 | +0.00 | +0.00 |
-| 2022 | +0.00 | +0.00 | +0.00 | 0.00 | 260 | +0.00 | +0.00 |
-| 2023 | +0.00 | +0.00 | +0.00 | 0.00 | 259 | +0.00 | +0.00 |
-| 2024 | +0.00 | +0.00 | +0.00 | 0.00 | 261 | +0.00 | +0.00 |
-| 2025 | +0.00 | +0.00 | +0.00 | 0.00 | 260 | +0.00 | +0.00 |
-| 2026 | +0.00 | +0.00 | +0.00 | 0.00 | 221 | +0.00 | +0.00 |
+| 2010 | +0.88 | +0.88 | +0.57 | 0.17 | 258 | +1.11 | +1.11 |
+| 2011 | +1.96 | +1.96 | +1.47 | 0.19 | 260 | +2.16 | +2.16 |
+| 2012 | +1.31 | +1.31 | +0.80 | 0.18 | 260 | +1.58 | +1.58 |
+| 2013 | +1.27 | +1.26 | +0.64 | 0.05 | 257 | +1.35 | +1.34 |
+| 2014 | +1.58 | +1.57 | +0.34 | 0.04 | 258 | +1.70 | +1.69 |
+| 2015 | +0.88 | +0.88 | +0.68 | 0.27 | 258 | +1.26 | +1.26 |
+| 2016 | +2.27 | +2.26 | +1.37 | 0.14 | 259 | +2.49 | +2.49 |
+| 2017 | +0.43 | +0.43 | +0.08 | 0.10 | 259 | +0.97 | +0.97 |
+| 2018 | +1.11 | +1.10 | +0.29 | 0.11 | 259 | +1.51 | +1.51 |
+| 2019 | +1.56 | +1.54 | +0.44 | 0.18 | 255 | +2.20 | +2.18 |
+| 2020 | +0.20 | +0.20 | +0.11 | 0.26 | 255 | +0.72 | +0.72 |
+| 2021 | -1.48 | -1.47 | -0.26 | 0.11 | 256 | -0.85 | -0.84 |
+| 2022 | +1.04 | +1.04 | +0.53 | 0.27 | 257 | +1.65 | +1.64 |
+| 2023 | +1.47 | +1.28 | +0.48 | 0.14 | 197 | +1.91 | +1.67 |
+| 2024 | -0.62 | -0.62 | -0.19 | 0.05 | 255 | -0.43 | -0.42 |
+| 2025 | +0.79 | +0.79 | +0.54 | 0.18 | 255 | +1.08 | +1.07 |
+| 2026 | +0.13 | +0.12 | +0.03 | 0.06 | 215 | +0.38 | +0.35 |
 
 Aggregates at 1.2 pips:
 
 | period | Sharpe | t | mean bp/decision | sum bp | active | n |
 |---|---|---|---|---|---|---|
-| 2010-2026 | -0.20 | -0.83 | -0.13 | -583 | 0.13 | 4369 |
-| 2016-2026 | -0.57 | -1.87 | -0.27 | -765 | 0.09 | 2817 |
-| 2023-2026 | +0.00 | +0.00 | +0.00 | +0 | 0.00 | 1001 |
-| 2010-2015 | +0.13 | +0.32 | +0.12 | +182 | 0.20 | 1552 |
-| 2016-2022 | -0.71 | -1.87 | -0.42 | -765 | 0.14 | 1816 |
+| 2010-2026 | +0.95 | +3.86 | +0.47 | +2013 | 0.15 | 4273 |
+| 2016-2026 | +0.76 | +2.45 | +0.31 | +848 | 0.15 | 2722 |
+| 2023-2026 | +0.47 | +0.89 | +0.21 | +191 | 0.11 | 922 |
+| 2010-2015 | +1.23 | +3.00 | +0.75 | +1165 | 0.15 | 1551 |
+| 2016-2022 | +0.92 | +2.41 | +0.37 | +657 | 0.17 | 1800 |
 
 Aggregates at 0.6 pips (same positions):
 
 | period | Sharpe | t | mean bp/decision | sum bp | active | n |
 |---|---|---|---|---|---|---|
-| 2010-2026 | -0.01 | -0.04 | -0.01 | -27 | 0.13 | 4369 |
-| 2016-2026 | -0.36 | -1.20 | -0.17 | -488 | 0.09 | 2817 |
-| 2023-2026 | +0.00 | +0.00 | +0.00 | +0 | 0.00 | 1001 |
-| 2010-2015 | +0.33 | +0.80 | +0.30 | +461 | 0.20 | 1552 |
-| 2016-2022 | -0.45 | -1.20 | -0.27 | -488 | 0.14 | 1816 |
+| 2010-2026 | +1.26 | +5.10 | +0.63 | +2674 | 0.15 | 4273 |
+| 2016-2026 | +1.14 | +3.68 | +0.47 | +1284 | 0.15 | 2722 |
+| 2023-2026 | +0.74 | +1.40 | +0.33 | +301 | 0.11 | 922 |
+| 2010-2015 | +1.45 | +3.55 | +0.90 | +1390 | 0.15 | 1551 |
+| 2016-2022 | +1.36 | +3.57 | +0.55 | +983 | 0.17 | 1800 |
 
-Success bar (2010-2026 SR > 0.4, 2016-2026 SR > 0.3, 2023-2026 >= 0 at 1.2 pips): **FAILED**.
+Success bar (2010-2026 SR > 0.4, 2016-2026 SR > 0.3, 2023-2026 >= 0 at 1.2 pips): **PASSED**.
 
 ## Comparison with the unconditional London short (same harness, same costs)
 Unconditional short at L07, horizon 4h: SR 2010-2026 -1.07 (t -4.40),
@@ -107,56 +107,71 @@ rule cannot be net profitable at retail cost in this accounting.
 ### Event exclusion (decision bars within 2h of a high-impact event removed from train and test)
 | variant | SR 2010-2015 | SR 2010-2026 | SR 2016-2026 | SR 2023-2026 | t 2010-26 | active |
 |---|---|---|---|---|---|---|
-| ml_L07_4h_ridge_q0.5_noevent2h | +0.05 | -0.11 | -0.35 | +0.52 | -0.44 | 0.10 |
+| ml_NY17_4h_lgbm_q0.8_noevent2h | +1.57 | +1.21 | +0.98 | +0.96 | +4.86 | 0.15 |
 | london_short_uncond_4h_noevent2h | -0.78 | -1.24 | -1.58 | -2.05 | -4.92 | 1.00 |
 | london_short_uncond_8h_noevent2h | +0.22 | -0.22 | -0.53 | -1.11 | -0.89 | 1.00 |
 
 ### Full ML grid
 | variant | SR 2010-2015 | SR 2010-2026 | SR 2016-2026 | SR 2023-2026 | t 2010-26 | active |
 |---|---|---|---|---|---|---|
+| ml_L07_4h_lgbm_q0.5 | +0.46 | -0.09 | -0.50 | +0.21 | -0.35 | 0.43 |
+| ml_L07_4h_lgbm_q0.8 | +0.27 | -0.21 | -0.58 | +0.13 | -0.86 | 0.15 |
 | ml_L07_4h_ridge_q0.5 | +0.13 | -0.20 | -0.57 | +0.00 | -0.83 | 0.13 |
 | ml_L07_4h_ridge_q0.8 | +0.13 | -0.15 | -0.46 | +0.00 | -0.60 | 0.10 |
 | ml_L07_4h_logit_q0.5 | -0.07 | -0.49 | -0.81 | -1.07 | -2.00 | 0.40 |
 | ml_L07_4h_logit_q0.8 | +0.13 | -0.12 | -0.33 | +0.21 | -0.49 | 0.15 |
+| ml_L07_8h_lgbm_q0.5 | +0.17 | +0.05 | -0.05 | -0.32 | +0.19 | 0.43 |
+| ml_L07_8h_lgbm_q0.8 | +0.03 | +0.01 | -0.00 | -0.27 | +0.05 | 0.15 |
+| ml_L07_8h_ridge_q0.5 | +0.20 | +0.03 | -0.10 | -0.41 | +0.13 | 0.35 |
+| ml_L07_8h_ridge_q0.8 | +0.14 | +0.03 | -0.07 | -0.31 | +0.13 | 0.25 |
+| ml_L07_8h_logit_q0.5 | +0.16 | +0.07 | +0.01 | -0.30 | +0.29 | 0.42 |
+| ml_L07_8h_logit_q0.8 | +0.61 | +0.31 | +0.08 | -0.60 | +1.25 | 0.15 |
+| ml_L13_4h_lgbm_q0.5 | -0.68 | -0.47 | -0.32 | -0.79 | -1.92 | 0.44 |
+| ml_L13_4h_lgbm_q0.8 | -0.54 | -0.17 | +0.07 | -0.70 | -0.70 | 0.15 |
+| ml_L13_4h_ridge_q0.5 | -0.53 | -0.58 | -0.63 | +0.15 | -2.35 | 0.13 |
+| ml_L13_4h_ridge_q0.8 | -0.34 | -0.51 | -0.63 | +0.15 | -2.06 | 0.11 |
+| ml_L13_4h_logit_q0.5 | -0.62 | -0.68 | -0.77 | -0.65 | -2.78 | 0.44 |
+| ml_L13_4h_logit_q0.8 | -0.21 | -0.31 | -0.53 | -0.63 | -1.28 | 0.20 |
+| ml_L13_8h_lgbm_q0.5 | -0.30 | -0.31 | -0.33 | -0.56 | -1.27 | 0.44 |
+| ml_L13_8h_lgbm_q0.8 | -0.42 | -0.22 | -0.07 | -0.00 | -0.89 | 0.15 |
+| ml_L13_8h_ridge_q0.5 | -0.08 | -0.53 | -0.96 | -0.57 | -2.16 | 0.36 |
+| ml_L13_8h_ridge_q0.8 | -0.17 | -0.18 | -0.20 | +0.53 | -0.72 | 0.13 |
+| ml_L13_8h_logit_q0.5 | -0.51 | -0.72 | -0.89 | -1.18 | -2.92 | 0.43 |
+| ml_L13_8h_logit_q0.8 | -0.44 | -0.52 | -0.62 | -1.29 | -2.11 | 0.18 |
+| ml_NY17_4h_lgbm_q0.5 | +0.79 | +0.45 | +0.21 | +0.47 | +1.84 | 0.45 |
+| ml_NY17_4h_lgbm_q0.8 | +1.23 | +0.95 | +0.76 | +0.47 | +3.86 | 0.15 |
+| ml_NY17_4h_ridge_q0.5 | +0.40 | +0.50 | +0.58 | +0.81 | +2.02 | 0.23 |
+| ml_NY17_4h_ridge_q0.8 | +0.94 | +0.78 | +0.68 | +0.81 | +3.15 | 0.12 |
+| ml_NY17_4h_logit_q0.5 | +0.83 | +0.88 | +0.94 | +1.25 | +3.55 | 0.34 |
+| ml_NY17_4h_logit_q0.8 | +1.19 | +1.19 | +1.23 | +1.42 | +4.82 | 0.15 |
+| ml_NY17_8h_lgbm_q0.5 | +0.09 | +0.31 | +0.47 | -0.22 | +1.27 | 0.46 |
+| ml_NY17_8h_lgbm_q0.8 | +0.16 | +0.40 | +0.58 | +0.22 | +1.64 | 0.18 |
+| ml_NY17_8h_ridge_q0.5 | +0.34 | +0.59 | +0.71 | +0.57 | +2.41 | 0.30 |
+| ml_NY17_8h_ridge_q0.8 | +0.39 | +0.84 | +1.03 | +0.70 | +3.41 | 0.20 |
+| ml_NY17_8h_logit_q0.5 | +0.37 | +0.47 | +0.52 | +0.22 | +1.90 | 0.41 |
+| ml_NY17_8h_logit_q0.8 | +0.37 | +0.61 | +0.76 | +0.63 | +2.49 | 0.15 |
 
 ## Top features
-Mean LightGBM gain share over the 17 walk-forward fits at L07/4h (the final model is linear; this is its LightGBM counterpart):
+Mean LightGBM gain share over the 17 walk-forward fits at NY17/4h:
 
 | feature | gain share |
 |---|---|
-| rv_120h_bp | 0.039 |
-| rv_24h_bp | 0.038 |
-| ret_2h | 0.036 |
-| ret_4h | 0.036 |
-| d_rv_21d_bp | 0.035 |
-| d_ret_21d | 0.034 |
-| atr24_pips | 0.029 |
-| d_spread2y | 0.027 |
-| d_vix | 0.027 |
-| ret_24h | 0.026 |
+| ret_1h | 0.062 |
+| atr24_pips | 0.044 |
+| d_rv_21d_bp | 0.041 |
+| range_1h_pips | 0.038 |
+| d_vix | 0.035 |
+| rv_120h_bp | 0.035 |
+| d_spread2y | 0.032 |
+| ret_2h | 0.032 |
+| d_spx_ret_5 | 0.027 |
 | d_usd_factor_20 | 0.026 |
-| ret_1h | 0.025 |
-| d_usd_factor_5 | 0.025 |
-| dist_pd_high_atr | 0.025 |
-| d_ret_1d | 0.025 |
+| range_rel_24h | 0.026 |
+| d_d_spread2y_5 | 0.025 |
+| d_fv_resid_z | 0.024 |
+| d_dist_sma50_atr | 0.023 |
+| d_d_spread2y_20 | 0.023 |
 
-
-Largest standardized coefficients of the final linear model fitted on 2003-2022 (sign, for intuition):
-
-| feature | coef |
-|---|---|
-| ret_2h | -0.186 |
-| ret_1h | -0.161 |
-| d_bd_to_end | -0.141 |
-| dist_pd_high_atr | -0.100 |
-| ret_since_day_open_bp | -0.099 |
-| dow | -0.084 |
-| ret_4h | -0.065 |
-| d_usd_factor_20 | -0.065 |
-| h_since_ecb | +0.065 |
-| ret_8h | -0.063 |
-| d_is_month_end | +0.061 |
-| h_since_nfp | +0.053 |
 
 Sanity check: none of these is a label in disguise. All `d_*` columns are the previous NY session's daily features
 (shifted one day in `featstore.build_hourly`), `ret_*`/`rv_*`/range/level distances use bars up to the decision bar,
@@ -165,13 +180,13 @@ event clocks are measured at the decision-bar close, and `fwd_*`/`label_end_*`/`
 ## Leak checks (final configuration re-run through the same pipeline)
 | check | SR 2010-2026 | t | SR 2016-2026 | expectation |
 |---|---|---|---|---|
-| labels shuffled (seed 7) | -0.21 | -0.86 | -0.69 | ~0 |
-| features shifted +1 decision bar (stale) | -0.01 | -0.06 | +0.30 | collapses |
-| features shifted -1 decision bar (future) | +6.49 | +26.59 | +6.39 | jumps (shows the pipeline would detect a leak) |
+| labels shuffled (seed 7) | -0.50 | -2.04 | -0.36 | ~0 |
+| features shifted +1 decision bar (stale) | -0.25 | -1.02 | -0.48 | collapses |
+| features shifted -1 decision bar (future) | +3.75 | +15.22 | +3.73 | jumps (shows the pipeline would detect a leak) |
 
 ## What helped, what did not
 See the summary tables above; the written assessment is in the lead's notes and in the run log
-(`experiments/results/logs/intraday_ml.log`). Run time 1.0 min on one CPU per fit.
+(`experiments/results/logs/intraday_ml.log`). Run time 8.3 min on one CPU per fit.
 
 Files: `src/eurusd/arms/intraday_ml.py` (`run(cost_pips=1.2)`), `experiments/results/arms/intraday_ml_positions.parquet`
 (OOS positions of the final variant: index = decision bar, `pos`, `fwd_bp`, `net_bp`, `horizon_h`, `forecast_bp`),
