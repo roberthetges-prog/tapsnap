@@ -1,0 +1,220 @@
+{
+ "final": "ridge_1d_all",
+ "spec": {
+  "variant": "ridge_1d_all",
+  "model": "ridge",
+  "target": "fwd_1d",
+  "fset": "all",
+  "q": 0.7,
+  "rule": "sign",
+  "vol": true
+ },
+ "n_variants": 23,
+ "selection_rule": "max 2010-2015 net Sharpe at 1.2 pips",
+ "per_year": {
+  "2010": {
+   "thr": 1.1833659005244115,
+   "vol_target": 56.01769315226754,
+   "chosen": {
+    "ridge": {
+     "param": 10000.0,
+     "val_ic": -0.0483
+    }
+   },
+   "n_train": 1812,
+   "val_ic_ens": -0.0483
+  },
+  "2011": {
+   "thr": 1.3327166792836986,
+   "vol_target": 57.266162863026935,
+   "chosen": {
+    "ridge": {
+     "param": 10000.0,
+     "val_ic": 0.0587
+    }
+   },
+   "n_train": 2072,
+   "val_ic_ens": 0.0587
+  },
+  "2012": {
+   "thr": 1.352853424300639,
+   "vol_target": 58.34442307862464,
+   "chosen": {
+    "ridge": {
+     "param": 10000.0,
+     "val_ic": 0.0525
+    }
+   },
+   "n_train": 2333,
+   "val_ic_ens": 0.0525
+  },
+  "2013": {
+   "thr": 0.9610108265646018,
+   "vol_target": 57.62062865787374,
+   "chosen": {
+    "ridge": {
+     "param": 1000.0,
+     "val_ic": 0.0729
+    }
+   },
+   "n_train": 2592,
+   "val_ic_ens": 0.0729
+  },
+  "2014": {
+   "thr": 1.035790824608938,
+   "vol_target": 56.75826258908219,
+   "chosen": {
+    "ridge": {
+     "param": 10000.0,
+     "val_ic": 0.0449
+    }
+   },
+   "n_train": 2851,
+   "val_ic_ens": 0.0449
+  },
+  "2015": {
+   "thr": 1.0644852567216558,
+   "vol_target": 55.58031956830104,
+   "chosen": {
+    "ridge": {
+     "param": 1000.0,
+     "val_ic": 0.0079
+    }
+   },
+   "n_train": 3109,
+   "val_ic_ens": 0.0079
+  },
+  "2016": {
+   "thr": 1.2250775771061182,
+   "vol_target": 56.6263908916304,
+   "chosen": {
+    "ridge": {
+     "param": 10000.0,
+     "val_ic": 0.0293
+    }
+   },
+   "n_train": 3368,
+   "val_ic_ens": 0.0293
+  },
+  "2017": {
+   "thr": 0.9670356440276637,
+   "vol_target": 56.54031983887765,
+   "chosen": {
+    "ridge": {
+     "param": 10000.0,
+     "val_ic": 0.0652
+    }
+   },
+   "n_train": 3628,
+   "val_ic_ens": 0.0652
+  },
+  "2018": {
+   "thr": 0.9454644902521987,
+   "vol_target": 55.59984741960763,
+   "chosen": {
+    "ridge": {
+     "param": 10000.0,
+     "val_ic": 0.1146
+    }
+   },
+   "n_train": 3887,
+   "val_ic_ens": 0.1146
+  },
+  "2019": {
+   "thr": 1.0957918529573019,
+   "vol_target": 54.555135685423096,
+   "chosen": {
+    "ridge": {
+     "param": 10.0,
+     "val_ic": -0.0244
+    }
+   },
+   "n_train": 4146,
+   "val_ic_ens": -0.0244
+  },
+  "2020": {
+   "thr": 1.3688848768771653,
+   "vol_target": 53.38904780038975,
+   "chosen": {
+    "ridge": {
+     "param": 10.0,
+     "val_ic": -0.0728
+    }
+   },
+   "n_train": 4406,
+   "val_ic_ens": -0.0728
+  },
+  "2021": {
+   "thr": 1.183056083260011,
+   "vol_target": 52.73658041190449,
+   "chosen": {
+    "ridge": {
+     "param": 100.0,
+     "val_ic": 0.1478
+    }
+   },
+   "n_train": 4666,
+   "val_ic_ens": 0.1478
+  },
+  "2022": {
+   "thr": 0.95585611920142,
+   "vol_target": 51.63460246969824,
+   "chosen": {
+    "ridge": {
+     "param": 10000.0,
+     "val_ic": 0.1703
+    }
+   },
+   "n_train": 4925,
+   "val_ic_ens": 0.1703
+  },
+  "2023": {
+   "thr": 1.0635868417789782,
+   "vol_target": 52.39093295479972,
+   "chosen": {
+    "ridge": {
+     "param": 1000.0,
+     "val_ic": 0.0115
+    }
+   },
+   "n_train": 5186,
+   "val_ic_ens": 0.0115
+  },
+  "2024": {
+   "thr": 1.0347503740150041,
+   "vol_target": 51.804313281139194,
+   "chosen": {
+    "ridge": {
+     "param": 1000.0,
+     "val_ic": 0.0027
+    }
+   },
+   "n_train": 5444,
+   "val_ic_ens": 0.0027
+  },
+  "2025": {
+   "thr": 1.4015954919708764,
+   "vol_target": 50.989097670905466,
+   "chosen": {
+    "ridge": {
+     "param": 10.0,
+     "val_ic": 0.0649
+    }
+   },
+   "n_train": 5704,
+   "val_ic_ens": 0.0649
+  },
+  "2026": {
+   "thr": 0.9078721577698536,
+   "vol_target": 50.751249868852355,
+   "chosen": {
+    "ridge": {
+     "param": 1000.0,
+     "val_ic": 0.0166
+    }
+   },
+   "n_train": 5964,
+   "val_ic_ens": 0.0166
+  }
+ }
+}

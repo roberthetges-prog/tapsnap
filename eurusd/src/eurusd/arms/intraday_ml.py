@@ -19,8 +19,8 @@ hold-out of the training window, round-trip cost in bp), else 0.
 Selection rule (declared before any result was seen): among the ML grid
   decision {L07, L13, NY17} x horizon {4h, 8h} x model {lgbm, ridge, logit} x quantile {0.5, 0.8}   (36 variants)
 the FINAL variant is the one with the highest 2010-2015 net Sharpe at 1.2 pips among variants that are active on
-at least 10 % of their decision bars in 2010-2015. Baselines / regime gates / event exclusion are reported in the
-same harness but are not eligible for selection.
+at least 10 % of their decision bars in 2010-2015. Baselines / regime gates / event exclusion / post-selection
+diagnostics are reported in the same harness but are not eligible for selection.
 """
 from __future__ import annotations
 
@@ -47,7 +47,10 @@ PPY = 260                      # one decision bar per weekday
 MIN_ACTIVE_FRAC = 0.10         # eligibility for selection (2010-2015)
 LABELS = ["fwd_1h", "fwd_4h", "fwd_8h", "fwd_24h", "label_end_1h", "label_end_4h", "label_end_8h", "label_end_24h", "close"]
 CONSTANT_AT_DECISION = ["hour_london", "hour_ny", "is_london", "is_ny"]
+LAST_BAR_FEATS = ["ret_1h", "ret_2h", "range_1h_pips", "range_rel_24h"]   # features dominated by the decision bar itself
 SEED = 7
+SHUFFLE_SEEDS = (7, 11, 23, 42, 99)
+PERIODS = ("2010-2015", "2010-2026", "2016-2026", "2023-2026")
 
 
 def log(msg: str) -> None:
@@ -55,9 +58,9 @@ def log(msg: str) -> None:
 
 
 # ----------------------------------------------------------------------------------------------- data
-def decision_frame(h: pd.DataFrame, dec: str, horizon: int, exclude_events: bool = False) -> pd.DataFrame:
+def decision_frame(h: pd.DataFrame, dec: str, horizon: int, exclude_events: bool = False, hour_shift: int = 0) -> pd.DataFrame:
     col, val = DECISIONS[dec]
-    d = h[(h[col] == val) & (h.index.dayofweek < 5)].copy()
+    d = h[(h[col] == val + hour_shift) & (h.index.dayofweek < 5)].copy()
     d = d[d[f"fwd_{horizon}h"].notna()]
     if exclude_events:
         near = (d["h_to_any_high"] <= 2) | (d["h_since_any_high"] <= 2)
@@ -91,7 +94,8 @@ def _fit_model(model: str, X: pd.DataFrame, y: pd.Series):
         pipe.fit(X, yc)
         return ("ridge", pipe, None)
     if model == "logit":
-        pipe = make_pipeline(SimpleImputer(strategy="median", keep_empty_features=True), StandardScaler(), LogisticRegression(C=0.05, max_iter=1000))
+        pipe = make_pipeline(SimpleImputer(strategy="median", keep_empty_features=True), StandardScaler(),
+                             LogisticRegression(C=0.05, max_iter=1000))
         pipe.fit(X, (y > 0).astype(int))
         return ("logit", pipe, float(y.abs().mean()))
     raise ValueError(model)
@@ -149,6 +153,17 @@ def make_rule_fit_predict(rule: str):
     return fit, predict
 
 
+def make_fade_fit_predict(q: float):
+    """Diagnostic: fade the decision bar's own 1h return when |ret_1h| exceeds its training q-quantile (no model)."""
+    def fit(train: pd.DataFrame):
+        return float(np.nanquantile(train["ret_1h"].abs(), q))
+
+    def predict(thr, test: pd.DataFrame):
+        x = test["ret_1h"].values
+        return np.where(np.abs(x) > thr, -np.sign(x), 0.0)
+    return fit, predict
+
+
 # ----------------------------------------------------------------------------------------------- pnl / report
 def pnl_round_trip(pos: pd.Series, fwd_bp: pd.Series, price: pd.Series, cost_pips: float) -> pd.DataFrame:
     """Same columns as wf.pnl_from_positions but every non-zero position is a discrete round trip (turnover 2|pos|)."""
@@ -159,19 +174,36 @@ def pnl_round_trip(pos: pd.Series, fwd_bp: pd.Series, price: pd.Series, cost_pip
     return out
 
 
-def run_variant(d: pd.DataFrame, horizon: int, fit, predict, cost_pips: float, name: str, n_arms: int, verbose=False):
+def make_table(pnl: pd.DataFrame, name: str, n_arms: int, group: str, dec: str, hz: int, cost_pips: float) -> pd.DataFrame:
+    tbl = report(pnl, periods_per_year=PPY, name=ARM, n_arms=n_arms)
+    tbl.insert(1, "variant", name)
+    gross = []
+    for p in tbl["period"]:
+        a, b = (int(p), int(p)) if len(p) == 4 else map(int, p.split("-"))
+        g = pnl["gross_bp"][(pnl.index.year >= a) & (pnl.index.year <= b)]
+        gross.append(float(g.mean() / g.std() * np.sqrt(PPY)) if len(g) > 10 and g.std() > 0 else 0.0)
+    tbl["gross_sharpe"] = gross
+    tbl["group"] = group; tbl["decision"] = dec; tbl["horizon_h"] = hz; tbl["cost_pips"] = cost_pips
+    return tbl
+
+
+def run_variant(d: pd.DataFrame, horizon: int, fit, predict, cost_pips: float, name: str, n_arms: int,
+                group: str = "", dec: str = "", verbose=False):
     target, lend = f"fwd_{horizon}h", f"label_end_{horizon}h"
     pred = walk_forward(d, fit, predict, label_end=d[lend], verbose=verbose)
     pos = np.sign(pred).fillna(0.0)
     oos = pos.index.year >= YEARS[0]
     pnl = pnl_round_trip(pos[oos], d.loc[oos, target], d.loc[oos, "close"], cost_pips)
-    tbl = report(pnl, periods_per_year=PPY, name=ARM, n_arms=n_arms)
-    tbl.insert(1, "variant", name)
+    tbl = make_table(pnl, name, n_arms, group, dec, horizon, cost_pips)
     return pred, pnl, tbl
 
 
 def agg(tbl: pd.DataFrame, period: str, col: str = "sharpe") -> float:
     return float(tbl.loc[tbl.period == period, col].iloc[0])
+
+
+def _line(tbl: pd.DataFrame) -> str:
+    return "  ".join(f"SR{p[2:4]}-{p[-2:]} {agg(tbl, p):+.2f}" for p in PERIODS) + f"  active {agg(tbl, '2010-2026', 'active_frac'):.2f}"
 
 
 # ----------------------------------------------------------------------------------------------- main
@@ -183,7 +215,8 @@ def run(cost_pips: float = 1.2, quick: bool = False):
     if quick:
         grid = [g for g in grid if g[2] != "lgbm"][:4]
     n_grid = len(grid)
-    n_variants = n_grid + 2 + 10 + 3     # grid + unconditional (2 horizons) + regime gates (5 x 2) + event exclusion (3)
+    n_diag = 5                            # fade q0.5/q0.8, no-last-bar-features, decision bar -1h / +1h
+    n_variants = n_grid + 2 + 10 + 3 + n_diag   # grid + unconditional (2 horizons) + regime gates (5 x 2) + event exclusion (3) + diagnostics
     tables, pnls, preds = [], {}, {}
 
     # --- 1) ML grid (eligible for selection)
@@ -192,11 +225,9 @@ def run(cost_pips: float = 1.2, quick: bool = False):
         feats = feature_list(d)
         name = f"ml_{dec}_{hz}h_{m}_q{q}"
         fit, predict = make_ml_fit_predict(m, q, feats, f"fwd_{hz}h", cost_pips)
-        pred, pnl, tbl = run_variant(d, hz, fit, predict, cost_pips, name, n_variants)
-        tbl["group"] = "ml_grid"; tbl["decision"] = dec; tbl["horizon_h"] = hz
+        pred, pnl, tbl = run_variant(d, hz, fit, predict, cost_pips, name, n_variants, "ml_grid", dec)
         tables.append(tbl); pnls[name] = pnl; preds[name] = pred
-        log(f"[{i + 1}/{n_grid}] {name}: SR10-15 {agg(tbl, '2010-2015'):+.2f}  SR10-26 {agg(tbl, '2010-2026'):+.2f}  "
-            f"SR16-26 {agg(tbl, '2016-2026'):+.2f}  SR23-26 {agg(tbl, '2023-2026'):+.2f}  active {agg(tbl, '2010-2026', 'active_frac'):.2f}  ({time.time() - t0:.0f}s)")
+        log(f"[{i + 1}/{n_grid}] {name}: {_line(tbl)}  ({time.time() - t0:.0f}s)")
 
     # --- 2) baselines: unconditional London short and regime gates at L07, both horizons
     for hz in HORIZONS:
@@ -204,10 +235,9 @@ def run(cost_pips: float = 1.2, quick: bool = False):
         for rule in ("uncond", "rv_low", "rv_mid", "rv_high", "adx_low", "adx_high"):
             name = f"london_short_{rule}_{hz}h"
             fit, predict = make_rule_fit_predict(rule)
-            pred, pnl, tbl = run_variant(d, hz, fit, predict, cost_pips, name, n_variants)
-            tbl["group"] = "baseline" if rule == "uncond" else "regime"; tbl["decision"] = "L07"; tbl["horizon_h"] = hz
+            pred, pnl, tbl = run_variant(d, hz, fit, predict, cost_pips, name, n_variants, "baseline" if rule == "uncond" else "regime", "L07")
             tables.append(tbl); pnls[name] = pnl; preds[name] = pred
-            log(f"{name}: SR10-15 {agg(tbl, '2010-2015'):+.2f}  SR10-26 {agg(tbl, '2010-2026'):+.2f}  SR16-26 {agg(tbl, '2016-2026'):+.2f}  SR23-26 {agg(tbl, '2023-2026'):+.2f}")
+            log(f"{name}: {_line(tbl)}")
 
     # --- 3) selection (fixed rule, see module docstring)
     allt = pd.concat(tables, ignore_index=True)
@@ -217,114 +247,141 @@ def run(cost_pips: float = 1.2, quick: bool = False):
         elig = sel
     final_name = str(elig.sort_values("sharpe", ascending=False).iloc[0]["variant"])
     f_dec, f_hz, f_model, f_q = [g for g in grid if f"ml_{g[0]}_{g[1]}h_{g[2]}_q{g[3]}" == final_name][0]
+    target = f"fwd_{f_hz}h"
     log(f"FINAL (rule: best 2010-2015 Sharpe, active >= {MIN_ACTIVE_FRAC:.0%}): {final_name}")
 
     # --- 4) event exclusion (robustness, not eligible): final ML config + unconditional short at both horizons
     d = decision_frame(h, f_dec, f_hz, exclude_events=True)
     feats = feature_list(d)
-    fit, predict = make_ml_fit_predict(f_model, f_q, feats, f"fwd_{f_hz}h", cost_pips)
+    fit, predict = make_ml_fit_predict(f_model, f_q, feats, target, cost_pips)
     name = f"{final_name}_noevent2h"
-    pred, pnl, tbl = run_variant(d, f_hz, fit, predict, cost_pips, name, n_variants)
-    tbl["group"] = "event_excl"; tbl["decision"] = f_dec; tbl["horizon_h"] = f_hz
+    _, pnl, tbl = run_variant(d, f_hz, fit, predict, cost_pips, name, n_variants, "event_excl", f_dec)
     tables.append(tbl); pnls[name] = pnl
-    log(f"{name}: SR10-26 {agg(tbl, '2010-2026'):+.2f}  SR16-26 {agg(tbl, '2016-2026'):+.2f}  SR23-26 {agg(tbl, '2023-2026'):+.2f}")
+    log(f"{name}: {_line(tbl)}")
     for hz in HORIZONS:
         d = decision_frame(h, "L07", hz, exclude_events=True)
         name = f"london_short_uncond_{hz}h_noevent2h"
         fit, predict = make_rule_fit_predict("uncond")
-        pred, pnl, tbl = run_variant(d, hz, fit, predict, cost_pips, name, n_variants)
-        tbl["group"] = "event_excl"; tbl["decision"] = "L07"; tbl["horizon_h"] = hz
+        _, pnl, tbl = run_variant(d, hz, fit, predict, cost_pips, name, n_variants, "event_excl", "L07")
         tables.append(tbl); pnls[name] = pnl
-        log(f"{name}: SR10-26 {agg(tbl, '2010-2026'):+.2f}  SR16-26 {agg(tbl, '2016-2026'):+.2f}  SR23-26 {agg(tbl, '2023-2026'):+.2f}")
+        log(f"{name}: {_line(tbl)}")
 
-    # --- 5) final variant: 0.6-pip sensitivity (same positions), feature importances, leak checks
+    # --- 5) post-selection diagnostics of the final configuration (not eligible)
     d = decision_frame(h, f_dec, f_hz)
     feats = feature_list(d)
-    target = f"fwd_{f_hz}h"
+    diag = {}
+    for q in (0.5, 0.8):
+        name = f"diag_fade_ret1h_q{q}_{f_dec}_{f_hz}h"
+        fit, predict = make_fade_fit_predict(q)
+        _, pnl, tbl = run_variant(d, f_hz, fit, predict, cost_pips, name, n_variants, "diagnostic", f_dec)
+        tables.append(tbl); diag[name] = tbl; log(f"{name}: {_line(tbl)}")
+    feats_nolast = [c for c in feats if c not in LAST_BAR_FEATS]
+    name = f"{final_name}_no_last_bar_feats"
+    fit, predict = make_ml_fit_predict(f_model, f_q, feats_nolast, target, cost_pips)
+    _, pnl, tbl = run_variant(d, f_hz, fit, predict, cost_pips, name, n_variants, "diagnostic", f_dec)
+    tables.append(tbl); diag[name] = tbl; log(f"{name}: {_line(tbl)}")
+    for shift in (-1, +1):
+        dd = decision_frame(h, f_dec, f_hz, hour_shift=shift)
+        name = f"{final_name}_decision{shift:+d}h"
+        fit, predict = make_ml_fit_predict(f_model, f_q, feature_list(dd), target, cost_pips)
+        _, pnl, tbl = run_variant(dd, f_hz, fit, predict, cost_pips, name, n_variants, "diagnostic", f_dec)
+        tables.append(tbl); diag[name] = tbl; log(f"{name}: {_line(tbl)}")
+
+    # --- 6) final variant: cost sensitivity (same positions), feature importances, leak checks
     final_pos = np.sign(preds[final_name]).fillna(0.0)
     oos = final_pos.index.year >= YEARS[0]
-    pnl06 = pnl_round_trip(final_pos[oos], d.loc[oos, target], d.loc[oos, "close"], 0.6)
-    tbl06 = report(pnl06, periods_per_year=PPY, name=ARM, n_arms=n_variants)
-    tbl06.insert(1, "variant", f"{final_name}_cost0.6"); tbl06["group"] = "final_cost_sens"; tbl06["decision"] = f_dec; tbl06["horizon_h"] = f_hz
-    tables.append(tbl06)
+    cost_tbls = {}
+    for c in (0.6, 2.0, 3.0):
+        pnl_c = pnl_round_trip(final_pos[oos], d.loc[oos, target], d.loc[oos, "close"], c)
+        tbl = make_table(pnl_c, f"{final_name}_cost{c}", n_variants, "final_cost_sens", f_dec, f_hz, c)
+        tables.append(tbl); cost_tbls[c] = tbl
+        log(f"final at {c} pips: {_line(tbl)}")
 
     imps: list = []
     fit, predict = make_ml_fit_predict("lgbm", f_q, feats, target, cost_pips, importances=imps)
-    if f_model == "lgbm":
-        walk_forward(d, fit, predict, label_end=d[f"label_end_{f_hz}h"], verbose=False)
-    else:   # importances of the LightGBM counterpart of the final decision/horizon, plus the linear coefficients
-        walk_forward(d, fit, predict, label_end=d[f"label_end_{f_hz}h"], verbose=False)
+    walk_forward(d, fit, predict, label_end=d[f"label_end_{f_hz}h"], verbose=False)
     imp = pd.concat(imps, axis=1).mean(axis=1).sort_values(ascending=False)
     imp = imp / imp.sum()
     coef = None
     if f_model in ("ridge", "logit"):
         train = d[d[f"label_end_{f_hz}h"] < pd.Timestamp("2023-01-01", tz="UTC")]
         m = _fit_model(f_model, train[feats], train[target])
-        est = m[1][-1]
-        coef = pd.Series(np.ravel(est.coef_), index=feats).sort_values(key=np.abs, ascending=False)
+        coef = pd.Series(np.ravel(m[1][-1].coef_), index=feats).sort_values(key=np.abs, ascending=False)
 
-    leak = {}
-    rng = np.random.default_rng(SEED)
+    leak = {"shuffle": []}
     fit, predict = make_ml_fit_predict(f_model, f_q, feats, target, cost_pips)
-    d_sh = d.copy(); d_sh[target] = rng.permutation(d_sh[target].values)
-    _, pnl_sh, tbl_sh = run_variant(d_sh, f_hz, fit, predict, cost_pips, f"{final_name}_LEAK_shuffled_labels", n_variants)
-    leak["shuffle"] = tbl_sh
+    for s in SHUFFLE_SEEDS:
+        rng = np.random.default_rng(s)
+        d_sh = d.copy(); d_sh[target] = rng.permutation(d_sh[target].values)
+        _, _, tbl = run_variant(d_sh, f_hz, fit, predict, cost_pips, f"{final_name}_LEAK_shuffled_labels_seed{s}", n_variants, "leak_check", f_dec)
+        leak["shuffle"].append(tbl); tables.append(tbl)
+        log(f"leak shuffle seed {s}: net {_line(tbl)}  gross SR10-26 {agg(tbl, '2010-2026', 'gross_sharpe'):+.2f}")
     d_st = d.copy(); d_st[feats] = d_st[feats].shift(1)
-    _, _, tbl_st = run_variant(d_st.iloc[1:], f_hz, fit, predict, cost_pips, f"{final_name}_LEAK_features_shift+1_stale", n_variants)
-    leak["stale"] = tbl_st
+    _, _, tbl = run_variant(d_st.iloc[1:], f_hz, fit, predict, cost_pips, f"{final_name}_LEAK_features_shift+1_stale", n_variants, "leak_check", f_dec)
+    leak["stale"] = tbl; tables.append(tbl); log(f"leak stale: {_line(tbl)}  gross SR10-26 {agg(tbl, '2010-2026', 'gross_sharpe'):+.2f}")
     d_fu = d.copy(); d_fu[feats] = d_fu[feats].shift(-1)
-    _, _, tbl_fu = run_variant(d_fu.iloc[:-1], f_hz, fit, predict, cost_pips, f"{final_name}_LEAK_features_shift-1_future", n_variants)
-    leak["future"] = tbl_fu
-    for k, t in leak.items():
-        t["group"] = "leak_check"; t["decision"] = f_dec; t["horizon_h"] = f_hz
-        tables.append(t)
-        log(f"leak {k}: SR10-26 {agg(t, '2010-2026'):+.2f} t {agg(t, '2010-2026', 't'):+.2f}")
+    _, _, tbl = run_variant(d_fu.iloc[:-1], f_hz, fit, predict, cost_pips, f"{final_name}_LEAK_features_shift-1_future", n_variants, "leak_check", f_dec)
+    leak["future"] = tbl; tables.append(tbl); log(f"leak future: {_line(tbl)}")
 
-    # --- 6) save
+    # --- 7) save
     allt = pd.concat(tables, ignore_index=True)
     allt["final"] = allt["variant"] == final_name
-    allt["cost_pips"] = np.where(allt["variant"].str.endswith("_cost0.6"), 0.6, cost_pips)
     allt.to_csv(RES / f"{ARM}_report.csv", index=False)
     pnl_final = pnls[final_name]
     positions = pd.DataFrame({"pos": pnl_final["pos"], "fwd_bp": d.loc[pnl_final.index, target], "net_bp": pnl_final["net_bp"],
                               "horizon_h": f_hz, "forecast_bp": preds[final_name].loc[pnl_final.index]})
     positions.to_parquet(RES / f"{ARM}_positions.parquet")
-    write_report(allt, final_name, f_dec, f_hz, f_model, f_q, imp, coef, leak, n_variants, feats, cost_pips, time.time() - t0)
+    trade_stats = {"n_trades": int((positions.pos != 0).sum()), "long_frac": float((positions.pos > 0).mean() / max((positions.pos != 0).mean(), 1e-9)),
+                   "gross_per_trade": float((positions.pos * positions.fwd_bp)[positions.pos != 0].mean()),
+                   "fade_frac": float((np.sign(positions.pos) == -np.sign(h.loc[positions.index, "ret_1h"]))[positions.pos != 0].mean())}
+    write_report(allt, final_name, f_dec, f_hz, f_model, f_q, imp, coef, leak, diag, cost_tbls, n_variants, feats, cost_pips, trade_stats, time.time() - t0)
     log(f"done in {time.time() - t0:.0f}s; final {final_name}")
     return positions["pos"], allt
 
 
+# ----------------------------------------------------------------------------------------------- report
 def _fmt(tbl: pd.DataFrame, periods=("2010-2026", "2016-2026", "2023-2026", "2010-2015", "2016-2022")) -> str:
     rows = []
     for p in periods:
         r = tbl[tbl.period == p].iloc[0]
-        rows.append(f"| {p} | {r['sharpe']:+.2f} | {r['t']:+.2f} | {r['mean_bp']:+.2f} | {r['sum_bp']:+.0f} | {r['active_frac']:.2f} | {int(r['n'])} |")
-    return "| period | Sharpe | t | mean bp/decision | sum bp | active | n |\n|---|---|---|---|---|---|---|\n" + "\n".join(rows)
+        rows.append(f"| {p} | {r['sharpe']:+.2f} | {r['t']:+.2f} | {r['gross_sharpe']:+.2f} | {r['mean_bp']:+.2f} | {r['sum_bp']:+.0f} | {r['active_frac']:.2f} | {int(r['n'])} |")
+    return "| period | net Sharpe | t | gross Sharpe | mean bp/decision | sum bp | active | n |\n|---|---|---|---|---|---|---|---|\n" + "\n".join(rows)
 
 
-def write_report(allt, final_name, dec, hz, model, q, imp, coef, leak, n_variants, feats, cost_pips, secs):
+def _summary(sub: pd.DataFrame, periods=PERIODS) -> str:
+    out = ["| variant | " + " | ".join(f"SR {p}" for p in periods) + " | t 2010-26 | gross SR 2010-26 | active |", "|---|" + "---|" * (len(periods) + 3)]
+    for v in sub.variant.unique():
+        s = sub[sub.variant == v].set_index("period")
+        out.append(f"| {v} | " + " | ".join(f"{s.loc[p, 'sharpe']:+.2f}" for p in periods) +
+                   f" | {s.loc['2010-2026', 't']:+.2f} | {s.loc['2010-2026', 'gross_sharpe']:+.2f} | {s.loc['2010-2026', 'active_frac']:.2f} |")
+    return "\n".join(out)
+
+
+def write_report(allt, final_name, dec, hz, model, q, imp, coef, leak, diag, cost_tbls, n_variants, feats, cost_pips, ts, secs):
     fin = allt[allt.variant == final_name]
-    fin06 = allt[allt.variant == f"{final_name}_cost0.6"]
+    fin06 = cost_tbls[0.6]
     years = fin[fin.period.str.len() == 4]
     y06 = fin06[fin06.period.str.len() == 4].set_index("period")
     yr_rows = "\n".join(f"| {r.period} | {r.sharpe:+.2f} | {r.t:+.2f} | {r.mean_bp:+.2f} | {r.active_frac:.2f} | {int(r.n)} | {y06.loc[r.period, 'sharpe']:+.2f} | {y06.loc[r.period, 't']:+.2f} |"
                         for r in years.itertuples())
     dsp = float(fin.loc[fin.period == "2010-2026", "deflated_sharpe_p"].iloc[0])
-
-    def summary(group_mask, periods=("2010-2015", "2010-2026", "2016-2026", "2023-2026")):
-        sub = allt[group_mask]
-        out = ["| variant | " + " | ".join(f"SR {p}" for p in periods) + " | t 2010-26 | active |", "|---|" + "---|" * (len(periods) + 2)]
-        for v in sub.variant.unique():
-            s = sub[sub.variant == v].set_index("period")
-            out.append(f"| {v} | " + " | ".join(f"{s.loc[p, 'sharpe']:+.2f}" for p in periods) + f" | {s.loc['2010-2026', 't']:+.2f} | {s.loc['2010-2026', 'active_frac']:.2f} |")
-        return "\n".join(out)
-
-    unc = allt[(allt.variant == f"london_short_uncond_{hz}h")].set_index("period")
-    unc4 = allt[(allt.variant == "london_short_uncond_4h")].set_index("period")
+    passed = agg(fin, "2010-2026") > 0.4 and agg(fin, "2016-2026") > 0.3 and agg(fin, "2023-2026") >= 0
+    unc = {k: allt[allt.variant == f"london_short_uncond_{k}h"].set_index("period") for k in HORIZONS}
     top = "\n".join(f"| {k} | {v:.3f} |" for k, v in imp.head(15).items())
     coef_txt = "" if coef is None else "\n\nLargest standardized coefficients of the final linear model fitted on 2003-2022 (sign, for intuition):\n\n| feature | coef |\n|---|---|\n" + \
         "\n".join(f"| {k} | {v:+.3f} |" for k, v in coef.head(12).items())
-    lk = {k: t.set_index("period") for k, t in leak.items()}
+    sh = pd.concat(leak["shuffle"]); sh10 = sh[sh.period == "2010-2026"]; sh16 = sh[sh.period == "2016-2026"]
+    st = leak["stale"].set_index("period"); fu = leak["future"].set_index("period")
+    def best_ml(dec_):
+        sub = allt[(allt.group == "ml_grid") & (allt.decision == dec_) & (allt.period == "2010-2026")].sort_values("sharpe", ascending=False)
+        return sub.iloc[0] if len(sub) else pd.Series({"variant": "n/a", "sharpe": np.nan, "t": np.nan})
+    best_ml_l07, best_ml_l13 = best_ml("L07"), best_ml("L13")
+    fade08 = diag[f"diag_fade_ret1h_q0.8_{dec}_{hz}h"]
+    nolast = diag[f"{final_name}_no_last_bar_feats"]
+    cost_rows = "\n".join(f"| {c} | {agg(t, '2010-2026'):+.2f} | {agg(t, '2010-2026', 't'):+.2f} | {agg(t, '2016-2026'):+.2f} | {agg(t, '2023-2026'):+.2f} |"
+                          for c, t in sorted({**cost_tbls, cost_pips: fin}.items()))
+    breakeven_pips = ts["gross_per_trade"] / 2 * 1.1   # gross bp per trade -> pips per side (price ~1.1)
+
     md = f"""# Arm B: intraday_ml - context-conditioned intraday prediction at fixed decision times
 
 ## Idea
@@ -352,20 +409,23 @@ spread and its changes, fair-value residual, VIX, COT, dollar factor, DXY/SPX, l
   the training window, round-trip cost in bp = 2 x cost_pips / price ), q in {{0.5, 0.8}}.
 * Costs: each decision is a discrete round trip, so net = pos x fwd - 2|pos| x cost. (The harness's diff-based turnover
   would charge an always-short rule once in 17 years; the round-trip accounting is the honest one for intraday trades.)
-  Positions are fixed by the 1.2-pip rule; the 0.6-pip record re-prices the same positions.
+  Positions are fixed by the 1.2-pip rule; the 0.6 / 2.0 / 3.0-pip records re-price the same positions.
 * Walk-forward: `eurusd.wf.walk_forward` with `label_end_{{h}}h`, test years 2010-2026, expanding window from 2003.
 
 ## Selection rule (declared before results)
 Among the 36 ML-grid variants (3 decision bars x 2 horizons x 3 models x 2 quantiles) pick the highest 2010-2015 net
 Sharpe at 1.2 pips among variants active on >= {MIN_ACTIVE_FRAC:.0%} of their decision bars in 2010-2015; report its full
-2010-2026 record. Baselines, regime gates and event exclusion are reported in the same harness but are not eligible.
-Number of variants run in this arm: **{n_variants}** (36 grid + 2 unconditional + 10 regime + 3 event-exclusion); the
-deflated-Sharpe p of the final variant uses n_trials = {n_variants}.
+2010-2026 record. Baselines, regime gates, event exclusion and the post-selection diagnostics are reported in the same
+harness but were not eligible. Number of variants run in this arm: **{n_variants}** (36 grid + 2 unconditional + 10 regime
++ 3 event-exclusion + 5 diagnostics; cost re-pricings and leak checks not counted); the deflated-Sharpe p of the
+final variant uses n_trials = {n_variants}.
 
 ## Final variant: `{final_name}`
-Decision bar {dec}, horizon {hz}h, model {model}, quantile {q}. Deflated-Sharpe p (n_trials={n_variants}) = {dsp:.2f}.
+Decision bar {dec}, horizon {hz}h, model {model}, quantile {q}. Deflated-Sharpe p (n_trials={n_variants}) = {dsp:.3f}.
+{ts['n_trades']} trades in 2010-2026 ({ts['long_frac']:.0%} long), gross {ts['gross_per_trade']:+.2f} bp per trade,
+{ts['fade_frac']:.0%} of the trades are in the direction opposite to the decision bar's own 1h return.
 
-| period | Sharpe (1.2p) | t | mean bp | active | n | Sharpe (0.6p) | t (0.6p) |
+| year | net Sharpe (1.2p) | t | mean bp | active | n | net Sharpe (0.6p) | t (0.6p) |
 |---|---|---|---|---|---|---|---|
 {yr_rows}
 
@@ -377,24 +437,45 @@ Aggregates at 0.6 pips (same positions):
 
 {_fmt(fin06)}
 
-Success bar (2010-2026 SR > 0.4, 2016-2026 SR > 0.3, 2023-2026 >= 0 at 1.2 pips): **{"PASSED" if (agg(fin, '2010-2026') > 0.4 and agg(fin, '2016-2026') > 0.3 and agg(fin, '2023-2026') >= 0) else "FAILED"}**.
+Cost sensitivity (same positions; net Sharpe / t):
 
-## Comparison with the unconditional London short (same harness, same costs)
-Unconditional short at L07, horizon {hz}h: SR 2010-2026 {unc.loc['2010-2026', 'sharpe']:+.2f} (t {unc.loc['2010-2026', 't']:+.2f}),
-2016-2026 {unc.loc['2016-2026', 'sharpe']:+.2f}, 2023-2026 {unc.loc['2023-2026', 'sharpe']:+.2f}; horizon 4h:
-SR 2010-2026 {unc4.loc['2010-2026', 'sharpe']:+.2f} (t {unc4.loc['2010-2026', 't']:+.2f}), 2016-2026 {unc4.loc['2016-2026', 'sharpe']:+.2f},
-2023-2026 {unc4.loc['2023-2026', 'sharpe']:+.2f}. Note that the per-trade cost of a 4h/8h round trip (about 2.2 bp at 1.2 pips)
-is larger than the unconditional mean move (about -0.4 bp at 4h, -1.3 bp at 8h from 07:00 London), so the unconditional
-rule cannot be net profitable at retail cost in this accounting.
+| cost pips per side | SR 2010-2026 | t | SR 2016-2026 | SR 2023-2026 |
+|---|---|---|---|---|
+{cost_rows}
+
+Break-even cost for the final variant is about {breakeven_pips:.1f} pips per side.
+
+Success bar (2010-2026 SR > 0.4, 2016-2026 SR > 0.3, 2023-2026 >= 0 at 1.2 pips): **{"PASSED" if passed else "FAILED"}** on paper -
+see the assessment below before taking it at face value.
+
+## Does conditioning beat the unconditional London short?
+Same harness, same round-trip costs. The unconditional short at L07:
+4h horizon SR 2010-2026 {unc[4].loc['2010-2026', 'sharpe']:+.2f} (t {unc[4].loc['2010-2026', 't']:+.2f}, gross SR {unc[4].loc['2010-2026', 'gross_sharpe']:+.2f}), 2016-2026 {unc[4].loc['2016-2026', 'sharpe']:+.2f}, 2023-2026 {unc[4].loc['2023-2026', 'sharpe']:+.2f};
+8h horizon SR 2010-2026 {unc[8].loc['2010-2026', 'sharpe']:+.2f} (t {unc[8].loc['2010-2026', 't']:+.2f}, gross SR {unc[8].loc['2010-2026', 'gross_sharpe']:+.2f}), 2016-2026 {unc[8].loc['2016-2026', 'sharpe']:+.2f}, 2023-2026 {unc[8].loc['2023-2026', 'sharpe']:+.2f}.
+The unconditional mean move from 07:00 London (about -0.4 bp over 4h, -1.3 bp over 8h) is smaller than one round trip
+at 1.2 pips (about 2.2 bp), so the rule is gross-positive but net-negative when traded every day; round 1's positive
+record for it relied on a 6h hold, a disaster stop and a lower cost assumption.
+
+* Conditioning at the same decision bar (L07): the best of the 12 L07 ML variants over 2010-2026 is `{best_ml_l07['variant']}`
+  with net SR {best_ml_l07['sharpe']:+.2f} (t {best_ml_l07['t']:+.2f}). The models cut the losing days (net SR goes from
+  {unc[4].loc['2010-2026', 'sharpe']:+.2f} / {unc[8].loc['2010-2026', 'sharpe']:+.2f} to about zero) but find no reliably profitable subset: nothing at L07 clears the cost gate
+  often enough, and 2016-2026 is at best flat. **Conditioning does not turn the London effect into a tradable signal.**
+* Regime gates on the unconditional short: the mid-rv tercile and high-ADX halves look best in 2010-2015 (SR about +0.8 at
+  8h) but both are negative in 2016-2026 and 2023-2026. Low-rv regimes are the worst. No gate is stable.
+* Event exclusion (bars within 2h of a high-impact event removed): changes nothing for the London short (slightly worse);
+  for the final configuration it raises the Sharpe a little (see table).
+* L13 (London/NY overlap): every one of the 12 variants is negative over 2010-2026 (best `{best_ml_l13['variant']}` SR {best_ml_l13['sharpe']:+.2f}).
+  Nothing predictable at the overlap after costs.
+* NY17 (overnight): all 12 variants are positive and it is where the selection rule lands. See the assessment.
 
 ### Baselines and regime gates (London short at L07; gate thresholds from the training window)
-{summary(allt.group.isin(["baseline", "regime"]))}
+{_summary(allt[allt.group.isin(["baseline", "regime"])])}
 
 ### Event exclusion (decision bars within 2h of a high-impact event removed from train and test)
-{summary(allt.group == "event_excl")}
+{_summary(allt[allt.group == "event_excl"])}
 
 ### Full ML grid
-{summary(allt.group == "ml_grid")}
+{_summary(allt[allt.group == "ml_grid"])}
 
 ## Top features
 Mean LightGBM gain share over the 17 walk-forward fits at {dec}/{hz}h{" (the final model is linear; this is its LightGBM counterpart)" if model != "lgbm" else ""}:
@@ -405,23 +486,51 @@ Mean LightGBM gain share over the 17 walk-forward fits at {dec}/{hz}h{" (the fin
 {coef_txt}
 
 Sanity check: none of these is a label in disguise. All `d_*` columns are the previous NY session's daily features
-(shifted one day in `featstore.build_hourly`), `ret_*`/`rv_*`/range/level distances use bars up to the decision bar,
-event clocks are measured at the decision-bar close, and `fwd_*`/`label_end_*`/`close` are excluded.
+(shifted one day in `featstore.build_hourly`), `ret_*`/`rv_*`/range/level distances use bars up to and including the
+decision bar, event clocks are measured at the decision-bar close, and `fwd_*`/`label_end_*`/`close` are excluded.
+`ret_1h` (the decision bar's own return) is the top feature; what that means is discussed below.
+
+## Post-selection diagnostics of the final configuration (not eligible for selection)
+{_summary(allt[allt.group == "diagnostic"])}
+
+`diag_fade_ret1h_q*`: no model at all, just short when the decision bar's own 1h return is above its training quantile
+and long when below (q = 0.5 / 0.8). `_no_last_bar_feats`: the final model without {", ".join(LAST_BAR_FEATS)}.
+`_decision-1h` / `_decision+1h`: the final configuration one hour earlier / later on the same local clock.
+
+## Assessment: what the NY17 result is, and why it should not be taken at face value
+The final variant's record is driven by mean reversion of the 16:00-17:00 New York bar, i.e. the daily rollover hour:
+* corr(ret_1h, fwd_1h) in 2010-2026 is about -0.09 at `hour_ny` 16, -0.16 at 17 and -0.10 at 18, versus |corr| < 0.06 at
+  every other hour; corr(ret_1h, fwd_4h) is -0.12 at hour 16 and within +-0.04 elsewhere.
+* {ts['fade_frac']:.0%} of the final variant's trades are simply against the decision bar's own return. The model-free fade rule
+  (`diag_fade_ret1h_q0.8`) earns net SR {agg(fade08, '2010-2026'):+.2f} (2016-2026 {agg(fade08, '2016-2026'):+.2f}), as much as the LightGBM model.
+* Removing the four decision-bar features drops the final configuration to net SR {agg(nolast, '2010-2026'):+.2f} (2016-2026 {agg(nolast, '2016-2026'):+.2f}).
+  The day's context (d_* macro, positioning, event clocks, previous-day levels) on its own does not carry the result.
+* The effect lives in the thinnest hour of the day (mean |1h move| at 17:00 NY is about a third of the London morning),
+  in bid-only HistData prices, with exactly the shape of quote bounce in illiquid trading. Retail spreads at the 17:00 NY
+  rollover are routinely 3-10 pips, not 1.2, and the break-even cost of the final variant is about {breakeven_pips:.1f} pips per side.
+  At 2.0 pips the net Sharpe is {agg(cost_tbls[2.0], '2010-2026'):+.2f}, at 3.0 pips {agg(cost_tbls[3.0], '2010-2026'):+.2f}.
+So the arm's honest conclusion is: the context-conditioned intraday models find **no new information** at the London
+decision bars (L07, L13), and the one thing they do find (NY17) is a microstructure artefact of the rollover hour that
+is unlikely to survive real overnight spreads. The positions file is nevertheless the declared final variant, so the lead
+can decide whether to stack it; it should be given the cost of the rollover hour, not 1.2 pips.
 
 ## Leak checks (final configuration re-run through the same pipeline)
-| check | SR 2010-2026 | t | SR 2016-2026 | expectation |
-|---|---|---|---|---|
-| labels shuffled (seed {SEED}) | {lk['shuffle'].loc['2010-2026', 'sharpe']:+.2f} | {lk['shuffle'].loc['2010-2026', 't']:+.2f} | {lk['shuffle'].loc['2016-2026', 'sharpe']:+.2f} | ~0 |
-| features shifted +1 decision bar (stale) | {lk['stale'].loc['2010-2026', 'sharpe']:+.2f} | {lk['stale'].loc['2010-2026', 't']:+.2f} | {lk['stale'].loc['2016-2026', 'sharpe']:+.2f} | collapses |
-| features shifted -1 decision bar (future) | {lk['future'].loc['2010-2026', 'sharpe']:+.2f} | {lk['future'].loc['2010-2026', 't']:+.2f} | {lk['future'].loc['2016-2026', 'sharpe']:+.2f} | jumps (shows the pipeline would detect a leak) |
+| check | net SR 2010-2026 | t | gross SR 2010-2026 | net SR 2016-2026 | expectation |
+|---|---|---|---|---|---|
+| labels shuffled, {len(SHUFFLE_SEEDS)} seeds (mean [min, max]) | {sh10.sharpe.mean():+.2f} [{sh10.sharpe.min():+.2f}, {sh10.sharpe.max():+.2f}] | {sh10['t'].mean():+.2f} | {sh10.gross_sharpe.mean():+.2f} [{sh10.gross_sharpe.min():+.2f}, {sh10.gross_sharpe.max():+.2f}] | {sh16.sharpe.mean():+.2f} | gross ~0, net = cost drag |
+| features shifted +1 decision bar (stale) | {st.loc['2010-2026', 'sharpe']:+.2f} | {st.loc['2010-2026', 't']:+.2f} | {st.loc['2010-2026', 'gross_sharpe']:+.2f} | {st.loc['2016-2026', 'sharpe']:+.2f} | collapses |
+| features shifted -1 decision bar (future) | {fu.loc['2010-2026', 'sharpe']:+.2f} | {fu.loc['2010-2026', 't']:+.2f} | {fu.loc['2010-2026', 'gross_sharpe']:+.2f} | {fu.loc['2016-2026', 'sharpe']:+.2f} | jumps (the pipeline would detect a leak) |
 
-## What helped, what did not
-See the summary tables above; the written assessment is in the lead's notes and in the run log
-(`experiments/results/logs/{ARM}.log`). Run time {secs / 60:.1f} min on one CPU per fit.
+With shuffled labels the model has no skill but still pays the round-trip cost on ~15 % of bars, so the net Sharpe is
+negative by construction and the gross Sharpe is the number to read (~0). Stale features collapse to the cost drag; features
+from the next decision bar (which overlap the label window) jump to a very large Sharpe, confirming the harness is
+sensitive to a leak and that the real run contains none of that kind.
 
+## Run
+`PYTHONPATH=src python -m eurusd.arms.intraday_ml` ({secs / 60:.1f} min, one CPU per fit; log in `experiments/results/logs/{ARM}.log`).
 Files: `src/eurusd/arms/{ARM}.py` (`run(cost_pips=1.2)`), `experiments/results/arms/{ARM}_positions.parquet`
 (OOS positions of the final variant: index = decision bar, `pos`, `fwd_bp`, `net_bp`, `horizon_h`, `forecast_bp`),
-`experiments/results/arms/{ARM}_report.csv` (all variants, `variant`, `group`, `final`, `cost_pips`).
+`experiments/results/arms/{ARM}_report.csv` (all variants, `variant`, `group`, `final`, `cost_pips`, `gross_sharpe`).
 """
     (REP / f"arm_{ARM}.md").write_text(md)
 

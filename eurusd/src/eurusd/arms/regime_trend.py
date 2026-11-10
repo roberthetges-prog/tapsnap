@@ -413,8 +413,9 @@ def run(cost_pips: float = 1.2, save: bool = True, verbose: bool = True):
         allpos = pd.DataFrame(positions)
         allpos[allpos.index.year >= 2010].to_parquet(OUT / f"{ARM}_all_positions.parquet")
         # regime timelines of the regime variants
+        diag = {v["name"] for v in V if v["diagnostic"] or v["mm"]}
         for name, lg in logs.items():
-            if lg and "timeline" in lg:
+            if lg and "timeline" in lg and name not in diag:
                 pd.concat(lg["timeline"]).to_csv(OUT / f"{ARM}_timeline_{name}.csv")
         import json
         json.dump({k: v.get("mappings", []) for k, v in logs.items() if v}, open(OUT / f"{ARM}_mappings.json", "w"), indent=1, default=str)
