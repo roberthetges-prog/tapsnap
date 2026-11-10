@@ -1,6 +1,7 @@
 """Command line interface.
 
   python -m eurusd.cli signals [--asof 2026-11-06T21:00] [--no-refresh] [--json]   # entries, sized by the risk engine
+  python -m eurusd.cli exposure [--no-refresh] [--json]   # today's target daily exposure (round-2 survivor) with lots and stop
   python -m eurusd.cli risk [--asof ...] [--no-refresh] [--out reports/risk_latest.md]  # full risk report
   python -m eurusd.cli book add --strategy S --side long|short --entry P --stop P --lots L --opened ISO [--exit ISO]
   python -m eurusd.cli book close --id N --exit-price P --closed ISO
@@ -61,6 +62,34 @@ def _cfg_name(label: str) -> str:
     return label
 
 
+def cmd_exposure(a):
+    from .exposure import compute, plan
+    from .risk import RiskEngine, Book
+    exp, _ = compute(refresh=not a.no_refresh)
+    eng = RiskEngine(__import__("eurusd.live_data", fromlist=["load_h1_live"]).load_h1_live(refresh=False))
+    cur = sum(p.lots * p.side for p in eng.book.positions if p.strategy == "macro_exposure")
+    vol = eng.vol_forecast()["har_daily_vol"]
+    unit_lots = eng.cfg.target_annual_vol / (252 ** 0.5) * (eng.book.equity + eng.mtm()) / vol / 100_000
+    cur_units = cur / unit_lots if unit_lots > 0 else 0.0
+    pl = plan(exp, eng.book.equity + eng.mtm(), eng.cfg.target_annual_vol, vol, current_units=cur_units)
+    st = eng.limits_status()
+    if st["trading_halted"]:
+        pl["action"] = "halted"; pl["reason"] = [k for k, v in st["checks"].items() if v["breached"]]
+    out = {"exposure": exp.__dict__, "plan": pl, "risk_engine": {"har_daily_vol": round(vol, 5), "equity": eng.book.equity, "halted": st["trading_halted"]}}
+    if a.json:
+        print(json.dumps(out, indent=1, default=str)); return
+    e = exp
+    print(f"As of session close {e.asof_session_close} | price {e.price:.5f} | ATR20 {e.atr20_pips} pips")
+    print(f"Target exposure: {pl['side'].upper()} {abs(e.target_units):.2f} units = {pl['target_lots']} lots (1 unit = {pl['lots_per_unit']} lots at {eng.cfg.target_annual_vol:.0%} vol target)")
+    print(f"  C weak-signal combo: {e.c_units:+.2f}  (score {e.c_score:+.3f} vs threshold {e.c_threshold:.3f}, vol scale {e.c_vol_scale}); top contributions: " + ", ".join(f"{k} {v:+.3f}" for k, v in e.top_contributions.items()))
+    print(f"  D positioning trend: {e.d_units:+.2f}  (cot_z52 {e.d_cot_z52:+.2f}, vol scale {e.d_vol_scale})")
+    print(f"Disaster stop: {pl['stop']} ({e.stop_distance_pips} pips = {STOP_ATR_TXT}); risk at stop {pl['risk_at_stop_usd']} USD")
+    print(f"Action: {pl['action'].upper()} (current {pl['current_units']:+.2f} units; rebalance when sign flips or |change| >= {e.rebalance_band})")
+
+
+STOP_ATR_TXT = "2 x ATR20"
+
+
 def cmd_risk(a):
     eng, _ = _engine(a)
     txt = eng.report()
@@ -112,6 +141,7 @@ def main(argv=None):
     sub = p.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("signals"); s.add_argument("--asof"); s.add_argument("--no-refresh", action="store_true")
     s.add_argument("--json", action="store_true"); s.set_defaults(f=cmd_signals)
+    x = sub.add_parser("exposure"); x.add_argument("--no-refresh", action="store_true"); x.add_argument("--json", action="store_true"); x.set_defaults(f=cmd_exposure)
     r = sub.add_parser("risk"); r.add_argument("--asof"); r.add_argument("--no-refresh", action="store_true"); r.add_argument("--out"); r.set_defaults(f=cmd_risk)
     k = sub.add_parser("book"); k.add_argument("action", choices=["show", "add", "close", "equity"]); k.add_argument("--strategy"); k.add_argument("--side", choices=["long", "short"])
     k.add_argument("--entry", type=float); k.add_argument("--stop", type=float); k.add_argument("--lots", type=float); k.add_argument("--opened"); k.add_argument("--exit")

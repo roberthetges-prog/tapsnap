@@ -97,10 +97,34 @@ of nine historical shock episodes and synthetic gaps; and a health check compari
 its validation distribution. `python -m eurusd.cli risk` produces the report; `reports/risk_latest.md` is the latest.
 It limits damage and sizes correctly. It does not create edge, and the holdout verdict above is unchanged.
 
+## 3c. Research round 2: new information, new structure (walk-forward 2010-2026)
+
+Protocol: leak-free feature store (141 daily, 68 hourly features: price, calendar, event clocks and macro
+surprises, yield curves and spreads, fair-value residual, VIX, dollar factor and cross pairs, equities and
+commodities, CFTC positioning), yearly expanding-window walk-forward with test years 2010-2026, all selection
+inside the training window, one pre-declared selection rule per arm, shuffled-label and lag leak checks, and
+deflated Sharpe for the number of variants. Five arms ran in parallel (reports `reports/arm_*.md`).
+
+| Arm | Idea | Variants | Final net Sharpe 2010-26 / 2016-26 / 2023-26 (1.2 pips) | Verdict |
+|---|---|---|---|---|
+| A daily ML | ridge / LightGBM on all 131 features, 1-5 day targets | 23 | 0.26 / 0.09 / 0.23 | negative; technicals alone negative after cost, events add nothing, macro+positioning the only block that lifts to ~0 |
+| B intraday ML | London / NY / overnight sessions from hourly context | 56 | 0.95 / 0.76 / 0.47 but a rollover-hour artefact (fading the thin 17:00 NY bar; break-even 2.9 pips/side) | excluded as untradeable; the London short is negative at 4h/8h after cost |
+| C weak signals | 14 economic signals, t-stat weights, sign position, vol-scaled | 8 (+14 leave-one-out) | 0.68 / 0.43 / 0.27 | passes the arm bar; carried by negative 12-month momentum, positioning, seasonality, equity-relative flow and spread trend; profits front-loaded in 2010-2012 |
+| D regimes and trend | HMM regimes, vol-scaled multi-horizon TSMOM, regime-conditioned components | 34 | 0.74 / 0.60 / 0.31 | regimes add nothing beyond vol-scaled trend; trend itself ~0; the record is the positioning trend held as continuous exposure |
+| E events | post-release and pre-release models from surprises, jumps, positioning, vol | 16 | -0.10 / -0.49 / -0.60 | clean negative; surprises are absorbed in the release bar |
+
+Walk-forward combination of the legitimate streams (C + D, equal weight, weights fitted on prior years' out-of-sample
+P&L only): **Sharpe 0.56 (2010-2026, t 2.3), 0.64 (2016-2026, t 2.1), 0.36 (2023-2026, t 0.7); deflated-Sharpe
+p = 0.28 for 15 variants.** Adding arm A lowers it. This is the best honest record the project has produced and it
+is not statistically distinguishable from a selection artefact. What it says about EUR/USD: the only persistent
+predictability is slow macro drift and speculative positioning; nothing intraday, event-driven, technical or
+non-linear survived. The live system was reduced to this one exposure (`src/eurusd/exposure.py`), and every
+failed component was moved out of the runtime into `research/archive/`.
+
 ## 4. Recommendation
 
-Do not trade the signals as a stand-alone source of edge: the untouched holdout says the edge is not there in
-2023-2026. The system is a sound research platform (clean data, correct engine, pre-registered protocol) and the
+Do not trade the signals as a stand-alone source of edge: the untouched holdout of round 1 and the walk-forward
+of round 2 both say the post-2022 edge is small (Sharpe 0.3-0.4) and statistically unproven. The system is a sound research platform (clean data, correct engine, pre-registered protocol) and the
 three components are the only effects that did not fail. Reasonable next steps if the project continues:
 rolling re-validation each year with the same protocol, execution-cost reduction (the London component's gross
 2.3 bp/day survives only with sub-pip spreads), and adding genuinely new information (order flow, options

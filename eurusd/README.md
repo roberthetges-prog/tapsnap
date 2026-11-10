@@ -35,6 +35,18 @@ repository is an unrelated Next.js app).
   >= 60 % of years positive, and the parameter neighbourhood is also positive on TRAIN.
 * Intra-bar stop/target ambiguity is resolved pessimistically (stop first) unless M1 data decides.
 
+## What is live now (after research round 2)
+
+One component: a **daily macro/positioning exposure** (`src/eurusd/exposure.py`, `python -m eurusd.cli exposure`),
+the equal-weight combination of the two streams that survived a yearly walk-forward 2010-2026 on a leak-free
+feature store (`src/eurusd/featstore.py`, 141 daily / 68 hourly features; protocol in `src/eurusd/wf.py`):
+a t-stat-weighted combination of 14 economic signals (`src/eurusd/arms/weak_signals.py`) and the CFTC
+positioning trend (`src/eurusd/arms/regime_trend.py`). Net of 1.2 pips per unit turnover: Sharpe 0.56
+(2010-2026, t 2.3), 0.64 (2016-2026, t 2.1), 0.36 (2023-2026, t 0.7); deflated for the 15 variants tried,
+p = 0.28, i.e. not significant. The position is rebalanced only on a sign flip or a move of 0.5 units, with a
+disaster stop at 2 x ATR20; the risk engine sizes one unit to the configured volatility target.
+Everything that failed was moved to `research/archive/` (see its README) and `config/live_strategies.json` is empty.
+
 ## Results in one paragraph
 
 See `reports/FINAL_REPORT.md`. Short version: 102 practitioner strategies, 51 academic hypotheses and

@@ -1,0 +1,22 @@
+{
+ "macro_exposure": {
+  "components": [
+   "weak_signals tstat/sign",
+   "positioning trend sign(cot_z52) vol-scaled"
+  ],
+  "combination": "equal weight",
+  "walk_forward_net_sharpe": {
+   "2010-2026": 0.56,
+   "2016-2026": 0.64,
+   "2023-2026": 0.36
+  },
+  "t_stat": {
+   "2010-2026": 2.35,
+   "2016-2026": 2.13,
+   "2023-2026": 0.71
+  },
+  "deflated_sharpe_p_15_variants": 0.28,
+  "cost_pips": 1.2,
+  "note": "Not significant after multiple-testing correction; best honest record found. Rebalance on sign flip or >=0.5 unit change; disaster stop 2 x ATR20."
+ }
+}

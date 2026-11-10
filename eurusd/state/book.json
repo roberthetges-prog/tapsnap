@@ -1,18 +1,20 @@
 {
- "equity": 10000.0,
+ "equity": 9993.04,
  "peak_equity": 10000.0,
- "positions": [
+ "positions": [],
+ "closed_trades": [
   {
    "id": 1,
    "strategy": "cot_trend",
    "side": -1,
    "entry": 1.11508,
-   "stop": 1.12638,
+   "exit": 1.11682,
    "lots": 0.04,
    "opened": "2026-11-08T22:00:00+00:00",
-   "take_profit": NaN,
-   "hard_exit": "2026-11-13T22:00:00+00:00"
+   "closed": "2026-11-10T21:00:00+00:00",
+   "pnl": -6.959999999999411,
+   "pips": -17.399999999998528,
+   "r": -0.15398230088494455
   }
- ],
- "closed_trades": []
+ ]
 }

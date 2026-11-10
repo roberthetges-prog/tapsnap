@@ -11,6 +11,7 @@ Hourly frame (index = bar start): features use bars <= t; macro/daily features a
 from __future__ import annotations
 
 import json
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -96,8 +97,12 @@ def _surprises() -> pd.DataFrame:
 
 
 # ------------------------------------------------------------------ daily
-def build_daily(save: bool = True) -> pd.DataFrame:
-    h1 = load_ohlc("H1").loc["2003":]
+def build_daily(save: bool = True, h1: pd.DataFrame | None = None) -> pd.DataFrame:
+    """h1: optional hourly frame (e.g. live_data.load_h1_live()) to build from instead of the stored history."""
+    warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    h1 = (load_ohlc("H1") if h1 is None else h1[["open", "high", "low", "close"]].copy()).loc["2003":]
+    h1 = h1[~h1.index.duplicated(keep="last")]
     d = F.daily_ohlc(h1, 22)
     d = d[(d["n"] >= 10) & (d.index.dayofweek != 5)]
     start = d.index                       # session start (UTC 21/22:00 of previous calendar day)

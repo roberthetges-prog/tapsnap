@@ -33,7 +33,8 @@ def fetch_recent_yahoo(days: int = 5) -> pd.DataFrame:
             q = d["indicators"]["quote"][0]
             df = pd.DataFrame({"open": q["open"], "high": q["high"], "low": q["low"], "close": q["close"]},
                               index=pd.to_datetime(d["timestamp"], unit="s", utc=True)).dropna()
-            df = df[df.index.minute == 0]          # drop the partial, in-progress bar
+            df = df[df.index.minute == 0]
+            df = df[df.index + pd.Timedelta(hours=1) <= pd.Timestamp.now(tz="UTC")]   # drop the in-progress bar
             df["volume"] = 0
             df.index.name = "time"
             RECENT.parent.mkdir(parents=True, exist_ok=True)
