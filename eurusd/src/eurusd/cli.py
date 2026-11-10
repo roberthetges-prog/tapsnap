@@ -1,6 +1,10 @@
 """Command line interface.
 
-  python -m eurusd.cli signals [--asof 2026-11-06T21:00] [--account 10000] [--risk 0.01] [--json]
+  python -m eurusd.cli signals [--asof 2026-11-06T21:00] [--no-refresh] [--json]   # entries, sized by the risk engine
+  python -m eurusd.cli risk [--asof ...] [--no-refresh] [--out reports/risk_latest.md]  # full risk report
+  python -m eurusd.cli book add --strategy S --side long|short --entry P --stop P --lots L --opened ISO [--exit ISO]
+  python -m eurusd.cli book close --id N --exit-price P --closed ISO
+  python -m eurusd.cli book equity --set 10000 | book show
   python -m eurusd.cli update            # download the latest HistData month(s) and rebuild bars
   python -m eurusd.cli backtest NAME TF '{"param": value}' [--period train|validate|holdout]
 """
@@ -13,18 +17,73 @@ import sys
 import pandas as pd
 
 
+def _engine(a):
+    from .live_data import load_h1_live
+    from .risk import RiskEngine
+    h1 = load_h1_live(refresh=not getattr(a, "no_refresh", False))
+    asof = pd.Timestamp(a.asof, tz="UTC") if getattr(a, "asof", None) else None
+    if asof is not None:
+        h1 = h1.loc[:asof]
+    return RiskEngine(h1), h1
+
+
 def cmd_signals(a):
+    import eurusd.signals as S
     from .signals import generate_signals, signals_to_frame
+    eng, h1 = _engine(a)
+    S.load_ohlc = lambda tf, _h1=h1, _orig=S.load_ohlc: _h1.drop(columns="source") if tf == "H1" else _orig(tf)
     asof = pd.Timestamp(a.asof, tz="UTC") if a.asof else None
-    sig = generate_signals(asof, account=a.account, risk_per_trade=a.risk)
+    sig = generate_signals(asof, account=eng.book.equity, risk_per_trade=eng.cfg.max_risk_per_trade)
+    rows = []
+    for s in sig:
+        ref = s.entry_price if s.entry_type != "market" else eng.price
+        dec = eng.size(s.strategy_name if hasattr(s, "strategy_name") else _cfg_name(s.strategy), 1 if s.side == "long" else -1, ref, s.stop_loss, pd.Timestamp(s.decided_at))
+        d = s.__dict__ | {"approved": dec.approved, "lots": dec.lots, "risk_usd": round(dec.risk_amount, 2), "risk_pct": round(dec.risk_fraction, 4),
+                          "binding_cap": dec.binding_cap, "caps": dec.caps, "reasons": "; ".join(dec.reasons)}
+        d.pop("size_lots", None)
+        rows.append(d)
     if a.json:
-        print(json.dumps([s.__dict__ for s in sig], indent=2, default=str))
+        print(json.dumps(rows, indent=2, default=str))
         return
-    if not sig:
-        print("No actionable signal at", asof or "latest bar")
+    if not rows:
+        print("No actionable signal at", asof or h1.index[-1] + pd.Timedelta(hours=1))
         return
-    pd.set_option("display.width", 200)
-    print(signals_to_frame(sig).to_string(index=False))
+    pd.set_option("display.width", 250); pd.set_option("display.max_colwidth", 60)
+    cols = ["strategy", "side", "entry_type", "entry_price", "stop_loss", "take_profit", "risk_pips", "hard_exit", "approved", "lots", "risk_usd", "binding_cap", "reasons"]
+    print(pd.DataFrame(rows)[cols].to_string(index=False))
+
+
+def _cfg_name(label: str) -> str:
+    from .signals import _load_configs
+    for c in _load_configs():
+        if (c.label or c.name) == label:
+            return c.name
+    return label
+
+
+def cmd_risk(a):
+    eng, _ = _engine(a)
+    txt = eng.report()
+    print(txt)
+    if a.out:
+        from pathlib import Path
+        Path(a.out).write_text(txt)
+
+
+def cmd_book(a):
+    from .risk import Book, RiskConfig
+    b = Book()
+    cfg = RiskConfig.load()
+    if a.action == "show":
+        print(json.dumps({"equity": b.equity, "peak_equity": b.peak_equity, "positions": [p.__dict__ for p in b.positions], "closed": b.closed[-10:]}, indent=1, default=str))
+        return
+    if a.action == "equity":
+        b.equity = float(a.set); b.peak_equity = max(b.peak_equity, b.equity); b.save(); print("equity set to", b.equity); return
+    if a.action == "add":
+        p = b.add(strategy=a.strategy, side=1 if a.side == "long" else -1, entry=a.entry, stop=a.stop, lots=a.lots, opened=a.opened, hard_exit=a.exit or "")
+        b.save(); print("added position", p); return
+    if a.action == "close":
+        rec = b.close(a.id, a.exit_price, a.closed, cfg.pip_value_per_lot); b.save(); print("closed", rec); return
 
 
 def cmd_update(a):
@@ -51,8 +110,12 @@ def cmd_backtest(a):
 def main(argv=None):
     p = argparse.ArgumentParser(prog="eurusd")
     sub = p.add_subparsers(dest="cmd", required=True)
-    s = sub.add_parser("signals"); s.add_argument("--asof"); s.add_argument("--account", type=float, default=10_000)
-    s.add_argument("--risk", type=float, default=0.01); s.add_argument("--json", action="store_true"); s.set_defaults(f=cmd_signals)
+    s = sub.add_parser("signals"); s.add_argument("--asof"); s.add_argument("--no-refresh", action="store_true")
+    s.add_argument("--json", action="store_true"); s.set_defaults(f=cmd_signals)
+    r = sub.add_parser("risk"); r.add_argument("--asof"); r.add_argument("--no-refresh", action="store_true"); r.add_argument("--out"); r.set_defaults(f=cmd_risk)
+    k = sub.add_parser("book"); k.add_argument("action", choices=["show", "add", "close", "equity"]); k.add_argument("--strategy"); k.add_argument("--side", choices=["long", "short"])
+    k.add_argument("--entry", type=float); k.add_argument("--stop", type=float); k.add_argument("--lots", type=float); k.add_argument("--opened"); k.add_argument("--exit")
+    k.add_argument("--id", type=int); k.add_argument("--exit-price", type=float, dest="exit_price"); k.add_argument("--closed"); k.add_argument("--set"); k.set_defaults(f=cmd_book)
     u = sub.add_parser("update"); u.add_argument("--no-external", action="store_true"); u.set_defaults(f=cmd_update)
     b = sub.add_parser("backtest"); b.add_argument("name"); b.add_argument("timeframe"); b.add_argument("params")
     b.add_argument("--period", default="validate"); b.set_defaults(f=cmd_backtest)

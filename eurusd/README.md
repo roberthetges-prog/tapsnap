@@ -58,6 +58,33 @@ python experiments/01_behaviour_stats.py              # behaviour statistics -> 
 python experiments/02_grid_builtin.py                 # grid search of the built-in families
 ```
 
+### Risk engine
+
+Every signal is routed through `src/eurusd/risk.py` before it becomes an order:
+
+* **Sizing**: the smallest of a hard cap (`max_risk_per_trade`), a fractional-Kelly cap from the component's
+  validation + holdout trades, a volatility target (HAR one-day forecast) and the remaining open-risk budget;
+  halved inside `event_size_cut_hours_before` a high-impact release and blocked inside the release window.
+* **Kill switches**: daily loss, monthly loss, drawdown from peak, consecutive losses, stale data, wide spread.
+* **Value at risk**: parametric (HAR vol), historical simulation over all NY-close days since 2000 with stops
+  honoured, and a Monte Carlo of the strategy mix (1 month / 1 year P&L and drawdown distribution).
+* **Stress tests**: the open book replayed through SNB 2015, FOMC/ECB shock days, Brexit, the 2016 election,
+  COVID, Ukraine, the 2022 dollar surge and the 2025 tariff gap, plus synthetic 1-3 ADR gaps.
+* **Event radar** (next 72 h) and **component health** (live trade R-multiples versus the validation record).
+
+```bash
+PYTHONPATH=src python -m eurusd.cli risk --out reports/risk_latest.md     # full report (refreshes recent bars)
+PYTHONPATH=src python -m eurusd.cli signals                                # entries with approved size and reasons
+PYTHONPATH=src python -m eurusd.cli book add --strategy cot_trend --side short --entry 1.11508 --stop 1.12638 --lots 0.04 --opened 2026-11-08T22:00:00+00:00
+PYTHONPATH=src python -m eurusd.cli book close --id 1 --exit-price 1.1180 --closed 2026-11-13T22:00:00+00:00
+PYTHONPATH=src python -m eurusd.cli book equity --set 10000
+```
+
+Limits live in `config/risk_limits.json`; the position book in `state/book.json` (the user records fills and
+closes; the engine never assumes a fill). Recent bars come from Yahoo (`live_data.py`) until HistData publishes
+the month; they are flagged in the `source` column. `experiments/test_risk.py` covers sizing caps, event gating,
+open-risk budget, stop-aware VaR, stress replay and the kill switches.
+
 Live components are listed in `config/live_strategies.json` (name, timeframe, parameters, validation record).
 Macro inputs (`data/macro/`) are refreshed with `PYTHONPATH=src python -m eurusd.macro_fetch`; the CFTC file
 and the FOMC calendar must be current for the positioning and FOMC components.

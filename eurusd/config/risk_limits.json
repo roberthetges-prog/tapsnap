@@ -1,0 +1,22 @@
+{
+  "account_currency": "USD",
+  "pip_value_per_lot": 10.0,
+  "max_risk_per_trade": 0.005,
+  "target_annual_vol": 0.08,
+  "kelly_fraction": 0.25,
+  "max_open_risk": 0.015,
+  "max_daily_loss": 0.02,
+  "max_monthly_loss": 0.05,
+  "max_drawdown": 0.10,
+  "max_consecutive_losses": 8,
+  "event_block_minutes_before": 30,
+  "event_block_minutes_after": 15,
+  "event_size_cut_hours_before": 4,
+  "event_size_cut_factor": 0.5,
+  "max_spread_pips": 2.5,
+  "max_data_age_hours": 30,
+  "var_confidence": 0.99,
+  "stress_gap_adr_multiples": [1.0, 2.0, 3.0],
+  "health_window_trades": 40,
+  "health_z_alert": -2.0
+}

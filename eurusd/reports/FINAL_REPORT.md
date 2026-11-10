@@ -87,6 +87,16 @@ documented on 1997-2012 data; post-2015 decay reported by the FCA and by Krohn-M
 * `python -m eurusd.cli backtest NAME TF PARAMS --period validate` backtests any registered strategy (built-in plus the
   ~65 strategies the testing agents wrote in `strategies_session.py`, `strategies_trend_pa.py`, `strategies_meanrev.py`).
 
+## 3b. Risk engine (added after the research phase)
+
+`src/eurusd/risk.py` sits between every signal and the order: sizing by the minimum of a hard cap, a quarter-Kelly
+cap from the component's own trade record, a HAR volatility target and the open-risk budget; event gating around
+FOMC/ECB/NFP/CPI; kill switches on daily, monthly and peak-to-trough losses, consecutive losses, stale data and
+spreads; parametric, historical (stop-aware, 6,800 days) and Monte Carlo value-at-risk; minute-level stress replays
+of nine historical shock episodes and synthetic gaps; and a health check comparing each component's live trades to
+its validation distribution. `python -m eurusd.cli risk` produces the report; `reports/risk_latest.md` is the latest.
+It limits damage and sizes correctly. It does not create edge, and the holdout verdict above is unchanged.
+
 ## 4. Recommendation
 
 Do not trade the signals as a stand-alone source of edge: the untouched holdout says the edge is not there in
