@@ -1,0 +1,17 @@
+lookback,carry,period,days,ann_ret,sharpe,t,years_pos
+1,True,train,4043,0.0189,0.18,0.72,0.69
+1,True,validate,2185,-0.0103,-0.1,-0.29,0.43
+1,False,train,4000,0.0152,0.14,0.57,0.69
+1,False,validate,2183,-0.0262,-0.25,-0.73,0.43
+3,True,train,4043,0.0205,0.2,0.78,0.62
+3,True,validate,2185,0.0231,0.22,0.65,0.57
+3,False,train,4000,0.0272,0.26,1.03,0.62
+3,False,validate,2183,-0.0002,-0.0,-0.01,0.57
+12,True,train,4043,0.0428,0.41,1.63,0.54
+12,True,validate,2185,0.0209,0.2,0.59,0.71
+12,False,train,4000,0.0423,0.4,1.6,0.54
+12,False,validate,2183,0.0136,0.13,0.38,0.71
+combo,True,train,4043,0.0039,0.04,0.15,0.46
+combo,True,validate,2185,0.0154,0.15,0.43,0.43
+combo,False,train,4000,0.0064,0.06,0.24,0.54
+combo,False,validate,2183,0.0026,0.02,0.07,0.43

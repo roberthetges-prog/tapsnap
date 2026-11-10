@@ -1,0 +1,3 @@
+has_r,profit_factor_pips,t_stat_pips,trades,trades_per_year,win_rate,avg_r,avg_pips,total_pips,profit_factor,sharpe,cagr_1pct_risk,max_dd_1pct_risk,t_stat,years,sl_rate,tp_rate,strategy,period,params,years_positive,p_boot
+False,1.8377698595682315,1.188504298773601,26,2.052853437094682,0.6153846153846154,0.0,122.98461538461608,3197.600000000018,inf,0.0,0.0,0.0,0.0,12.6652977412731,0.0,0.0,month_seasonal,train,"{""long_months"": [12], ""short_months"": [5]}",0.6153846153846154,1.0
+False,1.6979383704353594,0.6737592991179033,13,1.0762126019945604,0.6153846153846154,0.0,97.91538461538504,1272.9000000000055,inf,0.0,0.0,0.0,0.0,12.07939767282683,0.0,0.0,month_seasonal,train,"{""long_months"": [12], ""short_months"": []}",0.6153846153846154,1.0
