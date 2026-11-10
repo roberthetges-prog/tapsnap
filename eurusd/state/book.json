@@ -1,7 +1,19 @@
 {
  "equity": 9993.04,
  "peak_equity": 10000.0,
- "positions": [],
+ "positions": [
+  {
+   "id": 2,
+   "strategy": "macro_exposure",
+   "side": -1,
+   "entry": 1.11657,
+   "stop": 1.12909,
+   "lots": 0.09,
+   "opened": "2026-11-10T22:00:00+00:00",
+   "take_profit": NaN,
+   "hard_exit": "rebalance on signal"
+  }
+ ],
  "closed_trades": [
   {
    "id": 1,

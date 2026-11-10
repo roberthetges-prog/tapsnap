@@ -210,6 +210,16 @@ class RiskEngine:
             return "cut", f"{soon.iloc[0].event} in {(soon.iloc[0].time - at).total_seconds() / 3600:.1f}h"
         return "ok", None
 
+    # ------------------------------------------------------------------ exposure stream (round-2 survivor)
+    def exposure_stream(self) -> pd.Series:
+        """Walk-forward OOS daily net bp per unit of the live exposure (EW of the surviving arms)."""
+        try:
+            from .arms.meta import combine
+            pnl, _ = combine(["weak_signals", "regime_trend"], "EW")
+            return pnl["net_bp"]
+        except Exception:
+            return pd.Series(dtype=float)
+
     # ------------------------------------------------------------------ component statistics
     def component_trades(self, strategy: str) -> pd.DataFrame:
         parts = []
@@ -370,7 +380,7 @@ class RiskEngine:
             pools.append(r)
             rates.append(st["trades_per_year"])
         if not pools:
-            return {}
+            return self._monte_carlo_exposure(n_paths, seed)
         rng = np.random.default_rng(seed)
         f = cfg.max_risk_per_trade
         res = {}
@@ -393,6 +403,34 @@ class RiskEngine:
                           "p_breach_max_drawdown": float((maxdd <= -cfg.max_drawdown).mean())}
         res["risk_per_trade"] = f
         res["trades_per_year_total"] = float(sum(rates))
+        return res
+
+    def _monte_carlo_exposure(self, n_paths: int = 4000, seed: int = 7) -> dict:
+        """Block bootstrap (20-day blocks) of the exposure's OOS daily net bp, scaled to one unit at the vol target."""
+        st = self.exposure_stream().dropna()
+        if len(st) < 500:
+            return {}
+        vol = self.vol_forecast()["har_daily_vol"]
+        unit_frac = self.cfg.target_annual_vol / math.sqrt(252) / max(vol, 1e-6)   # unit notional as fraction of equity
+        daily = st.values / 1e4 * unit_frac
+        rng = np.random.default_rng(seed)
+        res = {}
+        for label, n in (("1_month", 21), ("1_year", 252)):
+            finals, maxdd = np.empty(n_paths), np.empty(n_paths)
+            nb = int(math.ceil(n / 20))
+            for k in range(n_paths):
+                starts = rng.integers(0, len(daily) - 20, nb)
+                seq = np.concatenate([daily[s0:s0 + 20] for s0 in starts])[:n]
+                eq = np.cumprod(1 + seq)
+                finals[k] = eq[-1] - 1
+                maxdd[k] = (eq / np.maximum.accumulate(eq) - 1).min()
+            res[label] = {"median_return": float(np.median(finals)), "p5_return": float(np.quantile(finals, 0.05)),
+                          "p95_return": float(np.quantile(finals, 0.95)), "var_99": float(-np.quantile(finals, 0.01)),
+                          "p_loss": float((finals < 0).mean()), "median_max_dd": float(np.median(maxdd)),
+                          "p_breach_max_drawdown": float((maxdd <= -self.cfg.max_drawdown).mean())}
+        res["basis"] = f"exposure OOS stream {st.index.min():%Y-%m-%d}..{st.index.max():%Y-%m-%d}, 1 unit, block bootstrap"
+        res["risk_per_trade"] = float("nan")
+        res["trades_per_year_total"] = float("nan")
         return res
 
     # ------------------------------------------------------------------ stress
@@ -443,6 +481,13 @@ class RiskEngine:
     def component_health(self) -> dict:
         out = {}
         strategies = [c["name"] for c in json.loads((ROOT / "config" / "live_strategies.json").read_text())]
+        st_exp = self.exposure_stream().dropna()
+        if len(st_exp):
+            live = [t for t in self.book.closed if t["strategy"] == "macro_exposure"]
+            rec = {"validation_mean_r": float(st_exp.mean()), "validation_sd_r": float(st_exp.std()), "live_trades": len(live),
+                   "live_mean_r": None, "z": None, "alert": False, "consecutive_losses": self.consecutive_losses("macro_exposure"),
+                   "unit": "bp per session per unit (OOS 2010-2026)"}
+            out["macro_exposure"] = rec
         for s in strategies:
             st = self.component_stats(s)
             live = [t for t in self.book.closed if t["strategy"] == s and t.get("r") == t.get("r")]
@@ -492,7 +537,8 @@ class RiskEngine:
         if mc:
             for hzn in ("1_month", "1_year"):
                 m = mc[hzn]
-                P(f"- Monte Carlo strategy mix {hzn.replace('_', ' ')} at {mc['risk_per_trade']:.2%} risk/trade: median {m['median_return']:+.2%}, 5th pct {m['p5_return']:+.2%}, 95th pct {m['p95_return']:+.2%}, P(loss) {m['p_loss']:.0%}, median max DD {m['median_max_dd']:.2%}, P(breach {self.cfg.max_drawdown:.0%} DD) {m['p_breach_max_drawdown']:.1%}")
+                basis = f"at {mc['risk_per_trade']:.2%} risk/trade" if mc.get("risk_per_trade") == mc.get("risk_per_trade") else "per exposure unit"
+                P(f"- Monte Carlo {hzn.replace('_', ' ')} {basis}: median {m['median_return']:+.2%}, 5th pct {m['p5_return']:+.2%}, 95th pct {m['p95_return']:+.2%}, P(loss) {m['p_loss']:.0%}, median max DD {m['median_max_dd']:.2%}, P(breach {self.cfg.max_drawdown:.0%} DD) {m['p_breach_max_drawdown']:.1%}")
         P("")
         stx = self.stress()
         P("## Stress tests (open book replayed through the episode's path, stops honoured, gaps fill at the gap)")
