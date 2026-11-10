@@ -28,11 +28,14 @@ Selection rule (declared before any result was seen): the FINAL variant is the o
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 import warnings
 from pathlib import Path
 
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):   # single-threaded: 4 CPUs shared by 5 arms
+    os.environ.setdefault(_v, "1")
 import numpy as np
 import pandas as pd
 
@@ -309,7 +312,7 @@ def run(cost_pips: float = 1.2, variants=None, log=print):
     return pos, rep
 
 
-def leak_checks(cost_pips: float = 1.2, log=print):
+def leak_checks(cost_pips: float = 1.2, log=print, n_shuffles: int = 10):
     """(1) shuffled labels, (2a) features lagged one extra session, (2b) features from t+1 (positive control),
     (3) top features. Runs on the final variant recorded in the meta file."""
     df = load_store()
@@ -317,16 +320,22 @@ def leak_checks(cost_pips: float = 1.2, log=print):
     spec = meta["spec"]
     feats = feats_of(spec["fset"])
     res = {}
-    for name, kw in (("baseline", {}), ("shuffled_labels", {"shuffle_labels": True}), ("features_lagged_+1", {"feature_shift": 1}),
-                     ("features_from_t+1_(positive_control)", {"feature_shift": -1})):
-        t1 = time.time()
+    def one(name, **kw):
         pos, pnl, info, pred = run_variant(df, spec, cost_pips=cost_pips, **kw)
-        tab = _tables(pos, df, name, cost_list=(cost_pips,))
-        r = tab[tab.period == "2010-2026"].iloc[0]
-        res[name] = {"sharpe": round(float(r.sharpe), 2), "t": round(float(r.t), 2), "active_frac": round(float(r.active_frac), 2)}
+        r = _tables(pos, df, name, cost_list=(cost_pips,)).query("period == '2010-2026'").iloc[0]
+        return {"sharpe": round(float(r.sharpe), 2), "t": round(float(r.t), 2), "active_frac": round(float(r.active_frac), 2)}, info
+    for name, kw in (("baseline", {}), ("features_lagged_+1", {"feature_shift": 1}), ("features_from_t+1_(positive_control)", {"feature_shift": -1})):
+        t1 = time.time()
+        res[name], info = one(name, **kw)
         if name == "baseline":
             res["top_features"] = _top_features(info, feats)
-        log(f"leak check {name:40s} 2010-2026 SR={r.sharpe:+.2f} t={r.t:+.2f} ({time.time() - t1:.0f}s)")
+        log(f"leak check {name:40s} 2010-2026 SR={res[name]['sharpe']:+.2f} t={res[name]['t']:+.2f} ({time.time() - t1:.0f}s)")
+    t1 = time.time()
+    sh = [one("shuffled", shuffle_labels=True, seed=s)[0]["sharpe"] for s in range(n_shuffles)]
+    res["shuffled_labels_mean_of_%d_seeds" % n_shuffles] = {"sharpe": round(float(np.mean(sh)), 2), "t": round(float(np.mean(sh) / (np.std(sh) / np.sqrt(len(sh)) + 1e-9)), 2),
+                                                             "active_frac": res["baseline"]["active_frac"], "sd_across_seeds": round(float(np.std(sh)), 2),
+                                                             "min": round(float(min(sh)), 2), "max": round(float(max(sh)), 2)}
+    log(f"leak check shuffled labels ({n_shuffles} seeds): mean SR={np.mean(sh):+.2f} sd={np.std(sh):.2f} min={min(sh):+.2f} max={max(sh):+.2f} ({time.time() - t1:.0f}s)")
     tf = res.pop("top_features")
     tf.to_csv(RES / f"{ARM}_top_features.csv")
     pd.DataFrame(res).T.to_csv(RES / f"{ARM}_leak_checks.csv")
