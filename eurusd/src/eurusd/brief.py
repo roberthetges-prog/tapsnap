@@ -154,6 +154,58 @@ def daily_brief(refresh: bool = True, paper: bool = False) -> str:
     return "\n".join(L)
 
 
+def macro_state() -> list[str]:
+    """Economic backdrop, US vs euro area: policy-rate cycle, 2-year yields, inflation, unemployment, energy."""
+    from .refresh import ROOT
+    M = ROOT / "data" / "macro"
+    out = []
+    rd = lambda f, c: pd.read_csv(M / f, parse_dates=[0]).set_index(pd.read_csv(M / f, nrows=0).columns[0])[c].astype(float).dropna()
+
+    def cycle(s: pd.Series, name: str) -> str:
+        ch = s[s.diff().fillna(0) != 0]
+        if ch.empty:
+            return f"{name} {s.iloc[-1]:.2f}%"
+        last_dt = ch.index[-1]; step = s.diff().loc[last_dt]
+        moves = s.diff().loc[s.index >= s.index[-1] - pd.Timedelta(days=365)]
+        net = moves.sum()
+        months_since = (pd.Timestamp.now().normalize() - last_dt).days / 30.4
+        # the phase is the direction of the most recent move while it is fresh (< 9 months), otherwise on hold
+        phase = ("HIKING" if step > 0 else "CUTTING") if months_since < 9 else "ON HOLD"
+        prev = ch.index[-2] if len(ch) > 1 else None
+        turned = prev is not None and (s.diff().loc[prev] * step < 0)
+        stale = (pd.Timestamp.now().normalize() - s.index[-1]).days
+        return (f"{name} {s.iloc[-1]:.2f}% {phase} (last move: {'hike' if step > 0 else 'cut'} {last_dt:%b %Y}"
+                f"{', a turn from the previous ' + ('cuts' if step > 0 else 'hikes') if turned else ''}; net {net:+.2f} pts over 12m"
+                f"{'; data only to ' + format(s.index[-1], '%d %b %Y') if stale > 21 else ''})")
+    try:
+        fed = rd("fred_DFEDTARU.csv", "value"); ecb = rd("ecb_policy_rates.csv", "deposit_facility_rate")
+        out.append("Policy: " + cycle(fed, "Fed") + " | " + cycle(ecb, "ECB") + f" | gap ECB-Fed {ecb.iloc[-1] - fed.iloc[-1]:+.2f}")
+    except Exception as e:
+        out.append(f"Policy: unavailable ({e})")
+    try:
+        us2 = rd("fred_DGS2.csv", "value"); ea = pd.read_csv(M / "ea_aaa_yield_curve.csv", parse_dates=["date"]).set_index("date")["aaa_spot_2y"].dropna()
+        d = lambda x, k: x.iloc[-1] - x.iloc[-k]
+        sp = (ea.reindex(us2.index.union(ea.index)).ffill() - us2.reindex(us2.index.union(ea.index)).ffill()).dropna()
+        out.append(f"2y yields: US {us2.iloc[-1]:.2f}% ({d(us2, 63):+.2f} in 3m) | euro area {ea.iloc[-1]:.2f}% ({d(ea, 63):+.2f}) | gap {sp.iloc[-1]:+.2f} "
+                   f"({'narrowing, EUR-supportive' if d(sp, 21) > 0 else 'widening, USD-supportive'}: {d(sp, 21):+.2f} in 1m, {d(sp, 63):+.2f} in 3m)")
+    except Exception as e:
+        out.append(f"2y yields: unavailable ({e})")
+    try:
+        cpi = rd("fred_CPIAUCSL.csv", "value"); hicp = rd("fred_CP0000EZ19M086NEST.csv", "value")
+        yoy = lambda x: (x.iloc[-1] / x.iloc[-13] - 1) * 100; yoy3 = lambda x: (x.iloc[-4] / x.iloc[-16] - 1) * 100
+        un_us = rd("fred_UNRATE.csv", "value"); un_ea = pd.read_csv(M / "ea_unemployment.csv").iloc[:, -1].astype(float).dropna()
+        out.append(f"Inflation y/y: US {yoy(cpi):.1f}% ({yoy(cpi) - yoy3(cpi):+.1f} vs 3m ago, {cpi.index[-1]:%b %Y}) | euro area {yoy(hicp):.1f}% ({yoy(hicp) - yoy3(hicp):+.1f}, {hicp.index[-1]:%b %Y}) || "
+                   f"Unemployment: US {un_us.iloc[-1]:.1f}% ({un_us.iloc[-1] - un_us.iloc[-7]:+.1f} in 6m) | euro area {un_ea.iloc[-1]:.1f}% ({un_ea.iloc[-1] - un_ea.iloc[-7]:+.1f})")
+    except Exception as e:
+        out.append(f"Inflation / jobs: unavailable ({e})")
+    try:
+        br = rd("datahub_brent_daily.csv", "price")
+        out.append(f"Energy: Brent {br.iloc[-1]:.0f} USD ({(br.iloc[-1] / br.iloc[-63] - 1) * 100:+.0f}% in 3m, {(br.iloc[-1] / br.iloc[-126] - 1) * 100:+.0f}% in 6m; the euro area imports its energy)")
+    except Exception:
+        pass
+    return out
+
+
 def weekly_outlook(refresh: bool = True) -> str:
     from .refresh import refresh_macro
     if refresh:
@@ -188,6 +240,7 @@ def weekly_outlook(refresh: bool = True) -> str:
     L.append(f"Trend: {trend} ({strength}, ADX {adx:.0f}) | 1m {r1:+.0f} bp, 3m {r3:+.0f} bp, 12m {r12:+.0f} bp | vs SMA50 {sma50:+.1f} ATR, SMA200 {sma200:+.1f} ATR")
     L.append(f"Regime: 21d vol {last['rv_21d_bp']:.0f} bp/day ({rv_pct:.0%} pct of history) | HAR week vol {wk_vol_bp:.0f} bp | ATR20 {atr / PIP:.0f} pips")
     L.append(f"Macro: EA-US 2y spread {last['spread2y']:+.2f} ({last['d_spread2y_20']:+.2f} over 20d) | fair-value residual z {last['fv_resid_z']:+.2f} | USD factor 20d {last['usd_factor_20']:+.0f} bp | VIX {last['vix']:.0f}")
+    L.extend(macro_state())
     L.append(f"Positioning: CFTC non-commercial z {last['cot_z52']:+.2f} (4w change {last['cot_d4']:+.3f} of OI)")
     L.append(f"Forecast (tilt + cone): {'DOWN' if exp.target_units < 0 else ('UP' if exp.target_units > 0 else 'FLAT')} tilt {tilt_bp:+.0f} bp, P(up week) {p_up:.0%} | 1-sigma week range {px - cone1:.4f} - {px + cone1:.4f} | 2-sigma {px - 2 * cone1:.4f} - {px + 2 * cone1:.4f}")
     L.append(f"Levels: last week H {prev_wk_hi:.4f} / L {prev_wk_lo:.4f} | weekly pivot {piv:.4f} | stop for the live exposure {exp.price + (exp.stop_distance_pips * PIP if exp.target_units < 0 else -exp.stop_distance_pips * PIP):.4f}")
