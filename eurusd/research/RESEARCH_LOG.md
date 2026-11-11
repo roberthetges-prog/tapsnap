@@ -16,7 +16,7 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 
 | 5 | liquidity & stress (12): FAILS; real economy (12): FAILS; regime dependence (4): no rule adopted, one lead (policy-gap direction); policy cycle / reaction functions (10, strict 15): FAILS | 43 | none so far |
 
-| 6 | policy-divergence replication across G10 (6 frozen streams + 1 robustness): FAILS ... (analogs, data scoping pending) | 7+ | none |
+| 6 | policy-divergence replication across G10 (7): FAILS; analog / nearest-neighbour 'history rhymes' forecasting (12, strict 36): FAILS; data scoping (36 sources, no backtest) | 43 | none |
 
 ## What is established
 * Predictable: slow macro drift and speculative positioning (direction, weakly); volatility and range (strongly).
@@ -74,6 +74,11 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
   almost no turning point. EUR/USD after cycle turns: textbook sign right ~half the time (n 10-17 per cell, 1975-2026);
   the move comes BEFORE the event (EUR/USD fell in 14 of 17 three-month windows before a first Fed hike). 'Economy-implied
   path minus priced path' scores 50 % and is better when stale (regime artefact). Policy state is context only.
+* **'History rhymes' analog forecasting (reports/arm_analogs.md): fails.** Nearest-neighbour forecasts from policy, macro,
+  market and combined state vectors: 41-56 % at 21-63 sessions; analog probabilities are anti-calibrated ('70-80 % of
+  analogs one way' came true 45-49 %); the FARTHEST dates forecast as well as the nearest (no stable state-to-outcome
+  mapping); 20 neighbours rest on 4-12 independent episodes. Only positioning and agreement-input states beat chance, and
+  less than the plain signs. `explain()` kept as a 'what followed last time' context panel, never as a probability.
 * Positioning: the level is the signal; no trader group is specially informed; robust to z-window and to delays.
 * A six-month record cannot separate skill from luck (see reports/scenario_replay.md).
 * **Positioning does not replicate (reports/arm_g10_positioning.md).** The identical rule on GBP, JPY, CHF, AUD, CAD, NZD,

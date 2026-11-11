@@ -134,3 +134,18 @@ agreement rule, the +63 / +126 session timing placebo, the daily incremental tes
 * REPLICATION beats backtest: two EUR/USD-only findings (positioning trend, residual order flow) failed on other
   currencies. Where an idea can be tested on other pairs or other eras with the identical rule, do that and report it.
 * A slow signal that scores the same when 3-6 months stale is a regime bet, not information. Always run the placebo.
+
+---
+# Round 7 addendum (2026-11-11): information the project has never had
+
+Read the Round 3-6 addenda first; all apply (Round 5: multi-week judging, extra-vote tests against the agreement rule,
++63 / +126 session placebo, daily incremental test; Round 6: replication and the stale-signal lesson).
+`research/RESEARCH_LOG.md` lists ~520 trials. `research/DATA_SCOPING.md` and `research/data_sources.json` describe 36
+data sources with verified download URLs, date ranges, lags and pitfalls: your sources are named in your brief; read their
+entries there before fetching. Third-party copies of vendor data are research-only: record the URL and the date you
+fetched it, cross-check a sample against any independent source you can reach, and report gaps. Cache everything under
+`data/macro/` or `data/processed/cross/` with your arm's prefix.
+Because these sources are new, also report for each signal: its correlation with the three agreement-rule inputs
+(cot_z52, d_spread2y_20, house score) and with EUR/USD's own trailing 1- and 3-month return (a signal that merely
+restates the recent price move is not new information: show accuracy after regressing that out, as arm K's control did).
+FRED: use `curl --http1.1` with NO browser user-agent.
