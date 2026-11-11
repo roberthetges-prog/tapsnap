@@ -30,14 +30,14 @@ PPIACO,US PPI all commodities,monthly,https://raw.githubusercontent.com/mfenickf
 SAHMREALTIME,"Sahm rule recession indicator, pp",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/SAHMREALTIME.csv,801,1959-12-01,2026-09-01
 CP0000EZ19M086NEST,"Euro area HICP all items, index 2015=100 (FRED copy)",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/CP0000EZ19M086NEST.csv,358,1996-12-01,2026-09-01
 LRHUTTTTDEM156S,"Germany harmonised unemployment rate, %",monthly,https://raw.githubusercontent.com/mfenickfau/econ-dashboards/main/data/LRHUTTTTDEM156S.csv,428,1991-01-01,2026-08-01
-EFFR,"Effective fed funds rate, daily %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/EFFR.csv,1216,2022-01-03,2026-11-06
-SOFR,"SOFR, daily %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/SOFR.csv,1210,2022-01-03,2026-11-06
-IORB,"Interest on reserve balances, %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/IORB.csv,1775,2022-01-01,2026-11-10
-T10YIE,"10y breakeven inflation, %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/T10YIE.csv,1213,2022-01-03,2026-11-09
-DFII10,"10y TIPS real yield, %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/DFII10.csv,1212,2022-01-03,2026-11-06
-BAMLH0A0HYM2,"ICE BofA US HY OAS, %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/BAMLH0A0HYM2.csv,784,2023-11-10,2026-11-06
+EFFR,"Effective fed funds rate, daily %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/EFFR.csv,1217,2022-01-03,2026-11-09
+SOFR,"SOFR, daily %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/SOFR.csv,1211,2022-01-03,2026-11-09
+IORB,"Interest on reserve balances, %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/IORB.csv,1777,2022-01-01,2026-11-12
+T10YIE,"10y breakeven inflation, %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/T10YIE.csv,1214,2022-01-03,2026-11-10
+DFII10,"10y TIPS real yield, %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/DFII10.csv,1213,2022-01-03,2026-11-09
+BAMLH0A0HYM2,"ICE BofA US HY OAS, %",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/BAMLH0A0HYM2.csv,784,2023-11-13,2026-11-09
 WALCL,"Fed total assets, $mn",weekly,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/WALCL.csv,253,2022-01-05,2026-11-04
-RRPONTSYD,"Fed overnight reverse repo usage, $bn",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/RRPONTSYD.csv,1211,2022-01-03,2026-11-09
+RRPONTSYD,"Fed overnight reverse repo usage, $bn",daily,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/RRPONTSYD.csv,1212,2022-01-03,2026-11-10
 WRESBAL,"Reserve balances with Fed banks, $mn",weekly,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/WRESBAL.csv,253,2022-01-05,2026-11-04
 STLFSI4,St Louis Fed financial stress index,weekly,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/STLFSI4.csv,252,2022-01-07,2026-10-30
 ANFCI,Chicago Fed adjusted NFCI,weekly,https://raw.githubusercontent.com/cool1990/invest-dashboard_v1/main/data/series/ANFCI.csv,252,2022-01-07,2026-10-30

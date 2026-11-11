@@ -47,6 +47,13 @@ p = 0.28, i.e. not significant. The position is rebalanced only on a sign flip o
 disaster stop at 2 x ATR20; the risk engine sizes one unit to the configured volatility target.
 Everything that failed was moved to `research/archive/` (see its README) and `config/live_strategies.json` is empty.
 
+## Operating it
+
+`reports/GO_LIVE_RUNBOOK.md` is the operating plan: forward test first, small real money only if the forward
+record is not negative, automation last. `python -m eurusd.cli brief` (daily) and `weekly` refresh their inputs
+and append to `state/signal_log.csv`; two cloud scheduled tasks run them, but the forward log only persists when
+the commands run on a machine that keeps the folder.
+
 ## Results in one paragraph
 
 See `reports/FINAL_REPORT.md`. Short version: 102 practitioner strategies, 51 academic hypotheses and

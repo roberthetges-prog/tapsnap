@@ -1,0 +1,2 @@
+asof_session_close,price,target_units,c_units,d_units,c_score,d_cot_z52,atr20_pips,stop,action,target_lots,risk_var99,risk_equity,risk_halted
+2026-11-10 22:00:00+00:00,1.1095085144042969,-0.672,0.0,-1.344,0.0486,-2.05,62.6,1.12203,hold,0.08,84.15,10056.59,False

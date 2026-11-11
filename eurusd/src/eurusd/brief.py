@@ -26,6 +26,8 @@ def _engine(refresh: bool):
 
 
 def daily_brief(refresh: bool = True) -> str:
+    from .refresh import refresh_macro, log_signal
+    status = refresh_macro() if refresh else ["macro refresh skipped"]
     exp, D = compute(refresh=refresh)
     eng, h1 = _engine(False)
     vol = eng.vol_forecast()
@@ -53,10 +55,19 @@ def daily_brief(refresh: bool = True) -> str:
         L.append("Events 48h: " + "; ".join(f"{r.event} in {r.hours_ahead:.0f}h" for r in nxt.itertuples()))
     else:
         L.append("Events 48h: none high-impact")
+    bad = [m for m in status if "FAILED" in m or "skipped" in m]
+    L.append("Data: " + (status[0] if status and status[0].startswith("COT") else "COT not refreshed") + (" | WARN " + "; ".join(bad) if bad else ""))
+    try:
+        log_signal(exp, pl, {"var99": round(ve["parametric"]["var"], 2), "equity": round(st["equity_with_mtm"], 2), "halted": st["trading_halted"]})
+    except Exception as e:
+        L.append(f"(signal log not written: {e})")
     return "\n".join(L)
 
 
 def weekly_outlook(refresh: bool = True) -> str:
+    from .refresh import refresh_macro
+    if refresh:
+        refresh_macro()
     exp, D = compute(refresh=refresh)
     eng, h1 = _engine(False)
     vol = eng.vol_forecast()
