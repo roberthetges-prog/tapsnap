@@ -66,6 +66,8 @@ Round 4 (launched 2026-11-11; plus arm N selective calibrated probabilities and 
 month-end / fix / calendar flows. Lead: prediction scoreboard (direction, range, cone calibration).
 Round 5 (2026-11-11): slow fundamentals not yet used (liquidity and balance sheets, financial stress and credit, energy
 terms of trade, growth leading indicators, real yields), judged natively at the 1-3 month horizon as an extra vote;
-policy-regime dependence of the surviving signals and the post-2023 fade.
+policy-regime dependence of the surviving signals and the post-2023 fade; central-bank reaction functions (owner's idea):
+predict Fed / ECB moves from inflation and unemployment, event-study EUR/USD around every cycle turn, trade the gap
+between the economy-implied relative policy path and what 2y yields price (arm T).
 Later: weekly-horizon ensembles of survivors; implied volatility and options positioning (needs a data host);
 news / central-bank text tone (needs a data host); cross-currency portfolio if G10 positioning validates.
