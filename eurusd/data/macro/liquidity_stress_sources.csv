@@ -1,0 +1,8 @@
+file,source,first,last,rows,publication,lag_used,fetched
+data/macro/liquidity_stress_ecb_ilm_weekly.csv,"ECB Data Portal ILM.W.U2.C.{T000000.Z5.Z01, L020100.U2.EUR, L020200.U2.EUR, A050500.U2.EUR}",1999-01-01,2026-11-06,1454,"Friday statement, published next Tuesday",7 calendar days,2026-11-11
+data/macro/liquidity_stress_fed_h41_weekly.csv,"FRED WALCL, WRESBAL, RRPONTSYD (curl --http1.1)",2002-12-18,2026-11-04,1247,"Wednesday, released Thursday 16:30 ET",7 calendar days,2026-11-11
+data/macro/liquidity_stress_us_m2.csv,FRED M2SL,1959-01-31,2026-09-30,813,month m released 4th Tuesday of m+1,35 calendar days after month-end,2026-11-11
+data/macro/liquidity_stress_ea_m3.csv,"ECB Data Portal BSI.M.U2.Y.V.M30.X.{I,1}.U2.2300.Z01.{A,E}",1980-01-31,2026-09-30,561,month m released ~19th working day of m+1,35 calendar days after month-end,2026-11-11
+data/macro/liquidity_stress_ciss_daily.csv,"ECB Data Portal CISS.D.{U2,US}.Z0Z.4F.EC.SS_CIN.IDX",1980-01-02,2026-11-10,12233,day D on the portal on D+1,2 calendar days,2026-11-11
+data/macro/liquidity_stress_hy_oas.csv,https://raw.githubusercontent.com/mhidper/talvi/HEAD/data/indicadores/BAMLH0A0HYM2.csv (to 2023-11) + FRED BAMLH0A0HYM2,1996-12-31,2026-11-09,7797,day D published D+1,2 calendar days,2026-11-11
+data/macro/liquidity_stress_us_fci_weekly.csv,"FRED NFCI, STLFSI4 (CURRENT VINTAGE, not real-time)",1971-01-08,2026-10-30,2913,"week ending Friday, released next Wed / Thu",7 calendar days,2026-11-11

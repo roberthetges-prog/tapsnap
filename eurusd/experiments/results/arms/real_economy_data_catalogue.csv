@@ -1,0 +1,17 @@
+file,source,rows,first,last
+data/macro/real_economy_fred_DFII10.csv,FRED DFII10,5968,2003-01-02,2026-11-09
+data/macro/real_economy_fred_T5YIFR.csv,FRED T5YIFR,5969,2003-01-02,2026-11-10
+data/macro/real_economy_fred_DHHNGSP.csv,FRED DHHNGSP,5722,1997-01-07,2026-11-03
+data/macro/real_economy_fred_PNGASEUUSDM.csv,FRED PNGASEUUSDM,417,1992-01-01,2026-09-01
+data/macro/real_economy_fred_UMCSENT.csv,FRED UMCSENT,677,1952-11-01,2026-09-01
+data/macro/real_economy_fred_USALOLITONOSTSAM.csv,FRED USALOLITONOSTSAM,829,1955-01-01,2024-01-01
+data/macro/real_economy_fred_EA19LOLITONOSTSAM.csv,FRED EA19LOLITONOSTSAM,684,1965-12-01,2022-11-01
+data/macro/real_economy_fred_DEULOLITONOSTSAM.csv,FRED DEULOLITONOSTSAM,757,1961-01-01,2024-01-01
+data/macro/real_economy_fred_FRALOLITONOSTSAM.csv,FRED FRALOLITONOSTSAM,687,1966-11-01,2024-01-01
+data/macro/real_economy_fred_ITALOLITONOSTSAM.csv,FRED ITALOLITONOSTSAM,746,1961-12-01,2024-01-01
+data/processed/cross/real_economy_ttf_D1.parquet,Yahoo TTF=F,2278,2017-10-23,2026-11-11
+data/processed/cross/real_economy_ng_D1.parquet,Yahoo NG=F,6581,2000-08-30,2026-11-11
+data/macro/real_economy_ecb_esi.csv,ECB RTD/M.S0.S.Y_ESIND.F,560,1980-01,2026-08
+data/macro/real_economy_ecb_trade_x.csv,ECB TRD/M.I10.Y.X.TTT.J10.4.VAL,296,2002-01,2026-08
+data/macro/real_economy_ecb_trade_m.csv,ECB TRD/M.I10.Y.M.TTT.J10.4.VAL,296,2002-01,2026-08
+data/macro/datahub_brent_daily.csv,"datahub oil-prices (EIA Brent spot), repo file",9122,1987-05-20,2026-11-03
