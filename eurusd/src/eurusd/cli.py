@@ -94,7 +94,7 @@ STOP_ATR_TXT = "2 x ATR20"
 
 def cmd_brief(a):
     from .brief import daily_brief
-    print(daily_brief(refresh=not a.no_refresh))
+    print(daily_brief(refresh=not a.no_refresh, paper=a.paper))
 
 
 def cmd_weekly(a):
@@ -154,7 +154,7 @@ def main(argv=None):
     s = sub.add_parser("signals"); s.add_argument("--asof"); s.add_argument("--no-refresh", action="store_true")
     s.add_argument("--json", action="store_true"); s.set_defaults(f=cmd_signals)
     x = sub.add_parser("exposure"); x.add_argument("--no-refresh", action="store_true"); x.add_argument("--json", action="store_true"); x.set_defaults(f=cmd_exposure)
-    bb = sub.add_parser("brief"); bb.add_argument("--no-refresh", action="store_true"); bb.set_defaults(f=cmd_brief)
+    bb = sub.add_parser("brief"); bb.add_argument("--no-refresh", action="store_true"); bb.add_argument("--paper", action="store_true", help="apply the plan to the book as modelled fills (forward test)"); bb.set_defaults(f=cmd_brief)
     ww = sub.add_parser("weekly"); ww.add_argument("--no-refresh", action="store_true"); ww.set_defaults(f=cmd_weekly)
     r = sub.add_parser("risk"); r.add_argument("--asof"); r.add_argument("--no-refresh", action="store_true"); r.add_argument("--out"); r.set_defaults(f=cmd_risk)
     k = sub.add_parser("book"); k.add_argument("action", choices=["show", "add", "close", "equity"]); k.add_argument("--strategy"); k.add_argument("--side", choices=["long", "short"])

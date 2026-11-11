@@ -25,7 +25,41 @@ def _engine(refresh: bool):
     return RiskEngine(h1), h1
 
 
-def daily_brief(refresh: bool = True) -> str:
+SPREAD = 1.0 * PIP   # modelled fill cost for paper trades (bid data: longs pay the spread)
+
+
+def paper_execute(exp, pl: dict, eng: RiskEngine, h1: pd.DataFrame) -> list[str]:
+    """Apply the plan to the book as modelled fills: stop checks against the completed session's range,
+    then rebalance at the session close (+ spread for longs). Returns the actions taken."""
+    notes = []
+    book = eng.book
+    pv = eng.cfg.pip_value_per_lot
+    close_t = pd.Timestamp(exp.asof_session_close)
+    sess = h1.loc[close_t - pd.Timedelta(hours=24):close_t - pd.Timedelta(seconds=1)]
+    for p in list(book.positions):
+        if p.strategy != "macro_exposure" or sess.empty:
+            continue
+        hit = (p.side > 0 and sess["low"].min() <= p.stop) or (p.side < 0 and sess["high"].max() + SPREAD >= p.stop)
+        if hit:
+            rec = book.close(p.id, p.stop, str(close_t), pv)
+            notes.append(f"STOP hit: closed {('long' if p.side > 0 else 'short')} {p.lots} lots at {p.stop:.5f} ({rec['pips']:+.0f} pips, {rec['pnl']:+.0f} USD)")
+    if pl["action"] == "halted":
+        return notes
+    if pl["action"] == "rebalance":
+        for p in [q for q in book.positions if q.strategy == "macro_exposure"]:
+            px = exp.price if p.side > 0 else exp.price + SPREAD
+            rec = book.close(p.id, px, str(close_t), pv)
+            notes.append(f"closed {('long' if p.side > 0 else 'short')} {p.lots} lots at {px:.5f} ({rec['pips']:+.0f} pips, {rec['pnl']:+.0f} USD)")
+        if pl["target_lots"] >= 0.01 and pl["side"] != "flat":
+            side = 1 if pl["side"] == "long" else -1
+            px = exp.price + SPREAD if side > 0 else exp.price
+            book.add(strategy="macro_exposure", side=side, entry=px, stop=pl["stop"], lots=pl["target_lots"], opened=str(close_t), hard_exit="rebalance on signal")
+            notes.append(f"opened {pl['side']} {pl['target_lots']} lots at {px:.5f}, stop {pl['stop']}")
+    book.save()
+    return notes
+
+
+def daily_brief(refresh: bool = True, paper: bool = False) -> str:
     from .refresh import refresh_macro, log_signal
     status = refresh_macro() if refresh else ["macro refresh skipped"]
     exp, D = compute(refresh=refresh)
@@ -35,6 +69,12 @@ def daily_brief(refresh: bool = True) -> str:
     unit_lots = eng.cfg.target_annual_vol / math.sqrt(252) * (eng.book.equity + eng.mtm()) / vol["har_daily_vol"] / 100_000
     pl = plan(exp, eng.book.equity + eng.mtm(), eng.cfg.target_annual_vol, vol["har_daily_vol"], current_units=cur / unit_lots if unit_lots else 0.0)
     st = eng.limits_status()
+    if st["trading_halted"]:
+        pl["action"] = "halted"
+    paper_notes = paper_execute(exp, pl, eng, h1) if paper else []
+    if paper_notes:  # the book changed: recompute the risk view
+        eng = RiskEngine(h1, eng.cfg, eng.book)
+        st = eng.limits_status()
     ve = eng.var_es()
     ev = eng.events_ahead(48)
     src = h1["source"].iloc[-1] if "source" in h1 else "histdata"
@@ -55,6 +95,8 @@ def daily_brief(refresh: bool = True) -> str:
         L.append("Events 48h: " + "; ".join(f"{r.event} in {r.hours_ahead:.0f}h" for r in nxt.itertuples()))
     else:
         L.append("Events 48h: none high-impact")
+    if paper:
+        L.append("Paper: " + ("; ".join(paper_notes) if paper_notes else "no fills (hold)"))
     bad = [m for m in status if "FAILED" in m or "skipped" in m]
     L.append("Data: " + (status[0] if status and status[0].startswith("COT") else "COT not refreshed") + (" | WARN " + "; ".join(bad) if bad else ""))
     try:
