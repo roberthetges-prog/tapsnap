@@ -255,6 +255,10 @@ def weekly_outlook(refresh: bool = True) -> str:
         tot = sum(votes.values())
         vtxt = ", ".join(f"{k} {'+' if v > 0 else ('-' if v < 0 else '0')}" for k, v in votes.items())
         a14 = float(last["atr14_pips"]) * PIP
+        g = D["policy_diff"].abs()
+        gdir = "WIDER" if g.iloc[-1] > g.iloc[-127] + 1e-9 else ("NARROWER" if g.iloc[-1] < g.iloc[-127] - 1e-9 else "UNCHANGED")
+        gtxt = (f"Policy gap vs six months ago: {gdir} ({g.iloc[-127]:.2f} -> {g.iloc[-1]:.2f} pts). Historically the call was right 64 % at 1 month when WIDER "
+                f"and 51 % otherwise (2006-26, a lead under paper test, not established)")
         if abs(tot) == 3:
             side = 1 if tot > 0 else -1
             acc, nt = pc["accuracy_non_overlapping"], pc["no_touch"]
@@ -264,6 +268,7 @@ def weekly_outlook(refresh: bool = True) -> str:
                      f"2 ATR = {px - side * 2 * a14:.4f} ({nt['21']['2atr']:.0%} / {nt['10']['2atr']:.0%})")
         else:
             L.append(f"POSITION CALL: none (signals disagree: {vtxt}); the multi-week rule only speaks when all three agree")
+        L.append("  " + gtxt)
     except Exception as e:
         L.append(f"(position call unavailable: {e})")
     L.append("Events this week: " + ("; ".join(f"{r.event} {r.time:%a %H:%M}Z" for r in key.itertuples()) if not key.empty else "none high-impact"))

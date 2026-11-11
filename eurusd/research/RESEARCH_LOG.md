@@ -14,7 +14,7 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 
 | 4 | vol-conditioned intraday tactics (12), FX relative value (12, strict count 24), flows & calendar (12), intraday path from M1 (22), selective probabilities (12), OFI replication (1: FAILS), swing / position trading from 1999 (12 + 14 sensitivities: FAILS) | 109 | none. Agreement rule adopted as the PRODUCT FORM of the existing information (not a new edge) | vol tactics: none; range forecast kept for stop/target placement (78 % above/below-median accuracy; oracle ceiling for intraday tactics ~0.8-1.1 Sharpe) |
 
-| 5 | liquidity & stress (12): FAILS; real economy (12): FAILS ... (regime dependence, policy cycle pending) | 24+ | none so far |
+| 5 | liquidity & stress (12): FAILS; real economy (12): FAILS; regime dependence (4): no rule adopted, one lead (policy-gap direction); policy cycle / reaction functions (10, strict 15): FAILS | 43 | none so far |
 
 ## What is established
 * Predictable: slow macro drift and speculative positioning (direction, weakly); volatility and range (strongly).
@@ -55,6 +55,19 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
   (regime bet); TTF/Henry Hub gas ratio a weekly-grid lead since 2018 only (one shock, not confirmed non-overlapping);
   OECD CLI, sentiment, trade balance, US real-yield and breakeven changes: 44-53 %. No extra vote passes.
   Blocked sources: OECD SDMX, Eurostat, DBnomics, EIA; FRED's OECD CLI frozen at 2024-01.
+* **Why the fade after 2023 (reports/arm_regime_dependence.md): mostly noise.** No component's Sharpe drop is
+  distinguishable from a 0.5-Sharpe process (p 0.18-0.48); the 2023-26 sample has 17-50 % power; an 80 %-power test of
+  59 % vs 50 % needs ~190 non-overlapping calls (two decades). Positioning's 2010-22 stretch was its best ever (Sharpe
+  0.15-0.38 before 2010, 0.73-0.83 in 2010-22, 0.32-0.36 since): plan positioning-driven calls at Sharpe 0.3-0.5.
+  Equity momentum shows the mining signature (step down after 2015). One pre-declared regime passes in both halves:
+  the agreement rule is right 64 % / 70 % (21 / 42 sessions, 2006-26, n=74/47) when the ECB-Fed policy gap is WIDER
+  than six months earlier and 51 % / 49 % otherwise; family-wise p 0.11, so a lead, not a result. 2023-26 was 58 %
+  NARROWER sessions. Registered as paper scenario `agreement_wider`.
+* **Central-bank reaction functions (reports/arm_policy_cycle.md): no edge.** Predicting cut / hold / hike from inflation
+  and unemployment does not beat persistence (Fed 71 vs 77 %, ECB 80 vs 76 % next meeting; 3-6 months worse) and calls
+  almost no turning point. EUR/USD after cycle turns: textbook sign right ~half the time (n 10-17 per cell, 1975-2026);
+  the move comes BEFORE the event (EUR/USD fell in 14 of 17 three-month windows before a first Fed hike). 'Economy-implied
+  path minus priced path' scores 50 % and is better when stale (regime artefact). Policy state is context only.
 * Positioning: the level is the signal; no trader group is specially informed; robust to z-window and to delays.
 * A six-month record cannot separate skill from luck (see reports/scenario_replay.md).
 * **Positioning does not replicate (reports/arm_g10_positioning.md).** The identical rule on GBP, JPY, CHF, AUD, CAD, NZD,
@@ -78,5 +91,8 @@ terms of trade, growth leading indicators, real yields), judged natively at the 
 policy-regime dependence of the surviving signals and the post-2023 fade; central-bank reaction functions (owner's idea):
 predict Fed / ECB moves from inflation and unemployment, event-study EUR/USD around every cycle turn, trade the gap
 between the economy-implied relative policy path and what 2y yields price (arm T).
+Round 6 (2026-11-11): 'history rhymes' analog / nearest-neighbour forecasting on the macro state (owner's intuition);
+replication of the policy-divergence lead across G10 pairs (does rate-differential trend following work when the policy
+gap is widening?); scoping of data we cannot reach yet (options positioning, OIS, flow, news text).
 Later: weekly-horizon ensembles of survivors; implied volatility and options positioning (needs a data host);
 news / central-bank text tone (needs a data host); cross-currency portfolio if G10 positioning validates.

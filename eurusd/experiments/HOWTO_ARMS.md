@@ -123,3 +123,14 @@ Data notes: FRED is reachable only with `curl --http1.1` from some shells and no
 (see `macro_fetch.py` MIRRORS) and the ECB API (https://data-api.ecb.europa.eu/service/data/<FLOW>/<KEY>?format=csvdata)
 work; Yahoo chart API needs a browser User-Agent and rate-limits (retry with backoff, cache everything you fetch).
 State the publication lag you assume for every monthly or weekly series and lag conservatively.
+
+---
+# Round 6 addendum (2026-11-11)
+
+Read the Round 3, 4 and 5 addenda first; all still apply (Round 5 defines the multi-week judging: accuracy at 21 / 42 / 63
+sessions on weekly and non-overlapping decisions with intervals and decisions per year, the extra-vote tests against the
+agreement rule, the +63 / +126 session timing placebo, the daily incremental test). `research/RESEARCH_LOG.md` now lists
+~480 trials; do not re-test what failed. Two standing lessons to respect:
+* REPLICATION beats backtest: two EUR/USD-only findings (positioning trend, residual order flow) failed on other
+  currencies. Where an idea can be tested on other pairs or other eras with the identical rule, do that and report it.
+* A slow signal that scores the same when 3-6 months stale is a regime bet, not information. Always run the placebo.

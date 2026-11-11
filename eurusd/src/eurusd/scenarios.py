@@ -49,6 +49,17 @@ def _signals_asof(Dt: pd.DataFrame) -> dict:
     out["positioning"] = sgn(row["cot_z52"]) * scale
     out["round1"] = (float(row["h_to_fomc"] < 30) + sgn(row["cot_z52"]) + sgn(row["d_spread2y_20"])) / 3.0 * scale
     out["trend"] = sgn(row["ret_63d"]) * scale
+    # agreement rule (arm N): positioning, 2y-spread trend and house-score signs all agree
+    fit_s, _ = WS.make_fit_predict("tstat", "sign", names)
+    m = fit_s(hist)
+    score = float((WS._scaler_apply(last[names], m["st"]).values @ m["w"])[0])
+    votes = [sgn(row["cot_z52"]), sgn(row["d_spread2y_20"]), sgn(score)]
+    agree = votes[0] if (votes[0] != 0 and votes[0] == votes[1] == votes[2]) else 0.0
+    out["agree"] = agree * scale
+    # policy-gap direction (arm S lead): |ECB deposit - fed funds| wider than 126 sessions earlier
+    gap = Dt["policy_diff"].abs()
+    wider = len(gap) > 127 and gap.iloc[-1] == gap.iloc[-1] and gap.iloc[-127] == gap.iloc[-127] and gap.iloc[-1] > gap.iloc[-127] + 1e-9
+    out["agree_wider"] = out["agree"] if wider else 0.0
     return out
 
 
