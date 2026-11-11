@@ -475,7 +475,7 @@ def _quick(D: pd.DataFrame, name: str, cost_pips: float, label: str) -> pd.DataF
     return evaluate(D, P[name], label, "leak_check", cost_pips)[1].assign(check=label)
 
 
-def leak_checks(final: str, cost_pips: float = 1.2, seed: int = 0, n_null: int = 200) -> pd.DataFrame:
+def leak_checks(final: str, cost_pips: float = 1.2, seed: int = 0, n_null: int = 200, n_shuffle: int = 40) -> pd.DataFrame:
     """(1) shuffled labels (5 permutations of fwd_1d; fwd_5d rebuilt from the shuffled series); (2) features shifted
     forward by 1, 5, 21 sessions and look-ahead controls (shift -1, -5: the harness must light up, the path features of
     the NEXT session contain its return); (2b) circular-shift null of the final; (3) full-sample correlation of every
@@ -484,12 +484,19 @@ def leak_checks(final: str, cost_pips: float = 1.2, seed: int = 0, n_null: int =
     fcols = [c for c in D.columns if c[:3] in ("d1_", "w5_")]
     out = []
     rng = np.random.default_rng(seed)
-    for k in range(5):
+    shuf = []
+    for k in range(n_shuffle):
         Ds = D.copy()
         f1 = pd.Series(rng.permutation(D["fwd_1d"].values), index=D.index)
         Ds["fwd_1d"] = f1
         Ds["fwd_5d"] = f1[::-1].rolling(5, min_periods=5).sum()[::-1]
-        out.append(_quick(Ds, final, cost_pips, f"shuffled_labels_{k}"))
+        if k < 5:
+            out.append(_quick(Ds, final, cost_pips, f"shuffled_labels_{k}"))
+        pk = all_positions(Ds, only=[final])[final]
+        shuf.append([evaluate(Ds, pk, "s", "leak_check", cst)[1].set_index("period").loc["2010-2026", "sharpe"] for cst in (cost_pips, 0.0)])
+    shuf = np.array(shuf)
+    out.append(pd.DataFrame([{"period": "2010-2026", "n_perm": n_shuffle, "net_mean": shuf[:, 0].mean(), "net_sd": shuf[:, 0].std(),
+                              "gross_mean": shuf[:, 1].mean(), "gross_sd": shuf[:, 1].std(), "check": "shuffled_labels_summary"}]))
     for lag in (1, 5, 21, -1, -5):
         Dl = D.copy()
         Dl[fcols] = D[fcols].shift(lag)
@@ -544,10 +551,28 @@ def controls(final: str, cost_pips: float = 1.2) -> pd.DataFrame:
     legs = ["combo_d1", "combo_w5"] if final == "combo_both" else [final]
     rows = []
     pa = sum(positions(D, V[n][1], residualise=True) for n in legs) / len(legs)
-    rows.append(evaluate(D, pa, f"{final}_residualised_on_ret1d_body_cir", "control", cost_pips)[1])
+    pnl_a, ta = evaluate(D, pa, f"{final}_residualised_on_ret1d_body_cir", "control", cost_pips)
+    rows.append(ta)
+    rows.append(evaluate(D, pa, f"{final}_residualised_on_ret1d_body_cir", "control_cost_sensitivity", 0.6)[1])
+    o = pd.DataFrame({"pos": pa, "fwd_bp": D["fwd_1d"], "net_bp": pnl_a["net_bp"].reindex(D.index)})
+    o[o.index.year >= 2010].to_parquet(RES / f"{ARM}_control_resid_stream.parquet")      # NOT an arm file (name avoids *_positions.parquet)
     pb = sum(positions(D, [f"{V[n][1][0][:2]}_{k}" for k in CONTROL_COLS]) for n in legs) / len(legs)
     rows.append(evaluate(D, pb, f"{final}_pipeline_on_ret1d_body_cir_only", "control", cost_pips)[1])
     return pd.concat(rows, ignore_index=True)
+
+
+def residual_corr() -> pd.DataFrame:
+    """Descriptive (features only, no label): correlation matrix of the eight daily path signals AFTER removing the
+    existing price features [ret_1d/rv, body_rel, close_in_range] by full-sample OLS."""
+    D = load_frame()
+    C = np.column_stack([D[f"d1_{k}"].values for k in CONTROL_COLS] + [np.ones(len(D))])
+    R = pd.DataFrame(index=D.index)
+    for k in SIG:
+        x = D[f"d1_{k}"].values
+        ok = ~np.isnan(x) & ~np.isnan(C).any(axis=1)
+        b = np.linalg.lstsq(C[ok], x[ok], rcond=None)[0]
+        R[k] = np.where(ok, x - np.nan_to_num(C) @ b, np.nan)
+    return R.corr()
 
 
 def feature_correlations() -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -600,6 +625,144 @@ def incremental(write: bool = True) -> tuple[pd.DataFrame, pd.DataFrame]:
         cor.to_csv(RES / f"{ARM}_correlations.csv", index=False)
     return inc, cor
 
+# ================================================================================================ post-hoc: is `late` a bid-price artefact?
+def late_artefact_check(cost_pips: float = 1.2, write: bool = True) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """POST-HOC (written after the 19 results were seen; not a candidate). The only single signal with a positive
+    record is d1_late, and its training-window sign is NEGATIVE (fade the last hour). The M1 file holds BID prices and
+    the session closes inside the 17:00 New York rollover, when spreads widen and the bid is marked down: a depressed
+    closing bid makes `late` negative and the next close-to-close return positive without anything tradable.
+    Checks: (1) where the 'predicted' return is realised: fwd_1d = [close -> m minutes into the next session] + rest;
+    (2) which part of `late` predicts: 16:00 -> 16:45 New York vs 16:45 New York -> close;
+    (3) the d1_late positions executed 60 minutes after each close (entry and exit prices 60 minutes into the next
+    session) - one extra backtest."""
+    df = pd.read_parquet(FEATURES)
+    P = load_features().reindex(df.index)
+    m1 = pd.read_parquet(M1, columns=["close"]).loc["2002-12-31":]
+    ts = m1.index.as_unit("ns").asi8
+    lc = np.log(m1["close"].values)
+    S = df.index.as_unit("ns").asi8
+    MIN = 60_000_000_000
+    def px(tau, lo):                                    # last 1-minute close stamped in [lo, tau)
+        pos = np.searchsorted(ts, tau) - 1
+        return np.where((pos >= 0) & (ts[np.maximum(pos, 0)] >= lo), lc[np.maximum(pos, 0)], np.nan)
+    lclose = np.log(df["close"].values)
+    out = pd.DataFrame(index=df.index)
+    for m in (5, 15, 30, 60, 120, 240):
+        pm = px(S + m * MIN, S)                         # price m minutes into each session
+        out[f"early_{m}"] = (np.r_[pm[1:], np.nan] - lclose) * 1e4
+        out[f"rest_{m}"] = df["fwd_1d"].values - out[f"early_{m}"].values
+        out[f"p_{m}"] = pm
+    dates = pd.DatetimeIndex(pd.to_datetime(S + 2 * 60 * MIN)).normalize()
+    t1600 = _local_utc_ns(dates, 16, "America/New_York")
+    p1600 = px(t1600, S); p1645 = px(t1600 + 45 * MIN, S)
+    rv = (P["rv5_bp"].values / 1e4)
+    out["late"] = P["late"].values
+    rv = np.where(rv > 0, rv, np.nan)
+    out["late_a_1600_1645"] = (p1645 - p1600) / rv
+    out["late_b_1645_close"] = (lclose - p1645) / rv
+    out.loc[P["ok"].values == 0, ["late_a_1600_1645", "late_b_1645_close"]] = np.nan
+    out["fwd_1d"] = df["fwd_1d"].values
+    summer = pd.Series((df["close_time"].dt.tz_convert("America/New_York").dt.hour == 18).values, index=df.index)   # close = 18:00 NY
+    rows = []
+    for lab, msk in (("all", pd.Series(True, index=df.index)), ("close=17:00 NY (US winter)", ~summer), ("close=18:00 NY (US summer)", summer),
+                     ("2010-2026", pd.Series(df.index.year >= 2010, index=df.index)), ("2016-2026", pd.Series(df.index.year >= 2016, index=df.index))):
+        o = out[msk.values]
+        r = {"sample": lab, "n": int(o["late"].notna().sum()), "corr(late,fwd_1d)": o["late"].corr(o["fwd_1d"])}
+        for m in (5, 15, 30, 60, 120, 240):
+            r[f"corr(late,first_{m}min)"] = o["late"].corr(o[f"early_{m}"])
+            r[f"corr(late,rest_after_{m}min)"] = o["late"].corr(o[f"rest_{m}"])
+        r["corr(late_a,fwd_1d)"] = o["late_a_1600_1645"].corr(o["fwd_1d"])
+        r["corr(late_b,fwd_1d)"] = o["late_b_1645_close"].corr(o["fwd_1d"])
+        r["corr(late_a,rest_after_60min)"] = o["late_a_1600_1645"].corr(o["rest_60"])
+        r["corr(late_b,rest_after_60min)"] = o["late_b_1645_close"].corr(o["rest_60"])
+        r["mean_late_bp"] = float(P.loc[msk.values, "late_bp"].mean())
+        r["mean_first_60min_bp"] = float(o["early_60"].mean())
+        rows.append(r)
+    tab = pd.DataFrame(rows)
+    # (3) same positions, executed 60 minutes after the close
+    D = load_frame()
+    pos = positions(D, ["d1_late"])
+    p60 = out["p_60"].values
+    fwd60 = pd.Series((np.r_[p60[2:], np.nan, np.nan] - np.r_[p60[1:], np.nan]) * 1e4, index=df.index)   # 60 min after close(t) -> 60 min after close(t+1)
+    D2 = D.copy(); D2["fwd_1d"] = fwd60
+    t_lag = evaluate(D2, pos, "d1_late_executed_60min_after_close", "post_hoc", cost_pips)[1]
+    t_g = evaluate(D2, pos, "d1_late_executed_60min_after_close", "post_hoc", 0.0)[1]
+    bt = pd.concat([t_lag, t_g], ignore_index=True)
+    if write:
+        tab.to_csv(RES / f"{ARM}_late_artefact.csv", index=False)
+        bt.to_csv(RES / f"{ARM}_late_lagged_execution.csv", index=False)
+    return tab, bt
+
+
+def tranche_hit_rate(final: str) -> pd.DataFrame:
+    """Hit rate of the final's daily targets against the label of its own horizon (overlapping for w5)."""
+    D = load_frame()
+    V = variant_cols()
+    legs = ["combo_d1", "combo_w5"] if final == "combo_both" else [final]
+    rows = []
+    for n in legs:
+        s = targets(D, V[n][1])
+        y = D["fwd_1d"] if V[n][1][0].startswith("d1") else D["fwd_5d"]
+        for lab, a, b in PERIODS:
+            m = (s.index.year >= a) & (s.index.year <= b) & (s != 0) & y.notna() & (y != 0)
+            rows.append({"leg": n, "period": lab, "n_targets": int(m.sum()), "hit_sign_own_horizon": float((np.sign(s[m]) == np.sign(y[m])).mean())})
+    return pd.DataFrame(rows)
+
+def control_followup(final: str, cost_pips: float = 1.2, n_null: int = 200, seed: int = 1, write: bool = True) -> pd.DataFrame:
+    """POST-HOC robustness of control (a) (the final's signals residualised on the existing price features), run only
+    because that pre-declared control came out positive. No new variant: the same stream is (i) lagged by 1/5/21
+    sessions, (ii) compared with a circular-shift null, (iii) correlated with the live streams and (iv) put through the
+    three-way EW combination in a temporary directory (nothing is written next to the arms' position files)."""
+    import shutil
+    import tempfile
+    from eurusd.arms import meta
+    D = load_frame()
+    V = variant_cols()
+    legs = ["combo_d1", "combo_w5"] if final == "combo_both" else [final]
+    fcols = [c for c in D.columns if c[:3] in ("d1_", "w5_")]
+    def stream(Dx):
+        pos = sum(positions(Dx, V[n][1], residualise=True) for n in legs) / len(legs)
+        return pos, evaluate(Dx, pos, "ctrl", "post_hoc", cost_pips)
+    pos0, (pnl0, t0) = stream(D)
+    per = [p for p, _, _ in PERIODS]
+    rows = [{"check": "control_a_actual", **{f"SR_{p}": t0.set_index("period").loc[p, "sharpe"] for p in per + ["2010-2015"]}}]
+    for lag in (1, 5, 21, -1):
+        Dl = D.copy(); Dl[fcols] = D[fcols].shift(lag)
+        tl = stream(Dl)[1][1].set_index("period")
+        rows.append({"check": f"control_a_features_shift_{lag:+d}", **{f"SR_{p}": tl.loc[p, "sharpe"] for p in per + ["2010-2015"]}})
+    rng = np.random.default_rng(seed)
+    idx = np.where(D.index.year >= 2010)[0]
+    null = []
+    for _ in range(n_null):
+        Dl = D.copy(); v = D[fcols].values.copy(); v[idx] = np.roll(v[idx], int(rng.integers(252, len(idx) - 252)), axis=0); Dl[fcols] = v
+        null.append(stream(Dl)[1][1].set_index("period").loc[per, "sharpe"].values)
+    null = np.array(null); act = t0.set_index("period").loc[per, "sharpe"].values
+    rows.append({"check": "control_a_circular_null_mean", **{f"SR_{p}": null[:, j].mean() for j, p in enumerate(per)}})
+    rows.append({"check": "control_a_circular_null_q95", **{f"SR_{p}": np.quantile(null[:, j], 0.95) for j, p in enumerate(per)}})
+    rows.append({"check": "control_a_p_null_ge_actual", **{f"SR_{p}": (null[:, j] >= act[j]).mean() for j, p in enumerate(per)}})
+    old = meta.RES
+    with tempfile.TemporaryDirectory() as td:
+        td = Path(td)
+        for a in ("weak_signals", "regime_trend"):
+            shutil.copy(old / f"{a}_positions.parquet", td / f"{a}_positions.parquet")
+        o = pd.DataFrame({"pos": pos0, "fwd_bp": D["fwd_1d"], "net_bp": pnl0["net_bp"].reindex(D.index)})
+        o[o.index.year >= 2010].to_parquet(td / "ctrl_positions.parquet")
+        meta.RES = td
+        try:
+            for nm, arms in (("two_way", ["weak_signals", "regime_trend"]), ("three_way_with_control_a", ["weak_signals", "regime_trend", "ctrl"])):
+                t = meta.report_combo(meta.combine(arms, "EW")[0], nm, len(arms)).set_index("period")
+                rows.append({"check": f"EW_{nm}", **{f"SR_{p}": t.loc[p, "sharpe"] for p in per}})
+            mine = meta.load_arm_daily("ctrl")
+            for a in ("weak_signals", "regime_trend"):
+                J = pd.concat([mine.rename("a"), meta.load_arm_daily(a).rename("b")], axis=1).dropna()
+                rows.append({"check": f"control_a_corr_daily_pnl_{a}", **{f"SR_{p}": J[(J.index.year >= x) & (J.index.year <= y)].corr().iloc[0, 1] for p, x, y in PERIODS}})
+        finally:
+            meta.RES = old
+    out = pd.DataFrame(rows)
+    if write:
+        out.to_csv(RES / f"{ARM}_control_followup.csv", index=False)
+    return out
+
 
 if __name__ == "__main__":
     cost = float(sys.argv[1]) if len(sys.argv) > 1 else 1.2
@@ -610,14 +773,18 @@ if __name__ == "__main__":
     cm.to_csv(RES / f"{ARM}_signal_corr.csv")
     print(fc.round(3).to_string(index=False))
     print(cm.round(2).to_string())
+    rc = residual_corr()
+    rc.to_csv(RES / f"{ARM}_residual_signal_corr.csv")
+    print("residual correlations (after removing ret_1d/rv, body_rel, close_in_range)"); print(rc.round(2).to_string())
     ct = controls(final, cost)
     ct.to_csv(RES / f"{ARM}_controls.csv", index=False)
     for v in ct.variant.unique():
-        r = ct[ct.variant == v].set_index("period")
+        r = ct[(ct.variant == v) & (ct.cost_pips == cost)].set_index("period")
         print(f"control {v:48s} 2010-26 SR {r.loc['2010-2026','sharpe']:+.2f} t {r.loc['2010-2026','t']:+.2f} | 2016-26 SR {r.loc['2016-2026','sharpe']:+.2f} | 2023-26 SR {r.loc['2023-2026','sharpe']:+.2f}")
     lc = leak_checks(final, cost_pips=cost)
     lc.to_csv(RES / f"{ARM}_leakchecks.csv", index=False)
-    skip = ("signal_label_corr", "circular_shift_null", "feature_truncation")
+    skip = ("signal_label_corr", "circular_shift_null", "feature_truncation", "shuffled_labels_summary")
+    print(lc[lc.check == "shuffled_labels_summary"][["period", "n_perm", "net_mean", "net_sd", "gross_mean", "gross_sd"]].round(3).to_string(index=False))
     for chk in [c for c in lc.check.unique() if c not in skip]:
         r = lc[lc.check == chk].set_index("period")
         print(f"leak check {chk:42s} 2010-26 SR {r.loc['2010-2026','sharpe']:+.2f} t {r.loc['2010-2026','t']:+.2f} | "
@@ -628,3 +795,13 @@ if __name__ == "__main__":
     inc, cor = incremental()
     print(inc[inc.period.isin(["2010-2026", "2016-2026", "2023-2026"])].round(3).to_string(index=False))
     print(cor.round(3).to_string(index=False))
+    th = tranche_hit_rate(final)
+    th.to_csv(RES / f"{ARM}_tranche_hit.csv", index=False)
+    print(th.round(3).to_string(index=False))
+    print(control_followup(final, cost).round(3).to_string(index=False))
+    tab, bt = late_artefact_check(cost)
+    print(tab.round(3).T.to_string())
+    for cst in bt.cost_pips.unique():
+        r = bt[bt.cost_pips == cst].set_index("period")
+        print(f"post-hoc d1_late executed 60 min after the close, cost {cst}: 2010-26 SR {r.loc['2010-2026','sharpe']:+.2f} t {r.loc['2010-2026','t']:+.2f} | "
+              f"2016-26 SR {r.loc['2016-2026','sharpe']:+.2f} | 2023-26 SR {r.loc['2023-2026','sharpe']:+.2f} | hit_sign {r.loc['2010-2026','hit_sign']:.3f}")

@@ -1,0 +1,9 @@
+combo,period,n,sharpe,t,mean_bp,sum_bp,deflated_sharpe_p,weights_last_year
+"EW[weak_signals,regime_trend]",2010-2026,4373,0.5634362775597489,2.3471144891799067,0.5825049060227941,2547.2939540376788,0.03413945022790765,"{'weak_signals': 0.5, 'regime_trend': 0.5}"
+"EW[weak_signals,regime_trend]",2016-2026,2817,0.6363263590806036,2.127517136380736,0.7377706014283496,2078.299784223661,,"{'weak_signals': 0.5, 'regime_trend': 0.5}"
+"EW[weak_signals,regime_trend]",2023-2026,1000,0.35565194136717515,0.7084756254789434,0.4202829904834732,420.28299048347316,,"{'weak_signals': 0.5, 'regime_trend': 0.5}"
+"EW[weak_signals,regime_trend]",2013-2026,3593,0.6216623429911203,2.3473772926452603,0.7089601875974613,2547.2939540376783,,"{'weak_signals': 0.5, 'regime_trend': 0.5}"
+"EW[weak_signals,regime_trend,vol_tactics]",2010-2026,4373,0.5669079866674597,2.361576637027782,0.574687234721947,2513.1072774390746,0.06563807603186089,"{'weak_signals': 0.5, 'regime_trend': 0.5, 'vol_tactics': 0.0}"
+"EW[weak_signals,regime_trend,vol_tactics]",2016-2026,2817,0.6363263590806036,2.127517136380736,0.7377706014283496,2078.299784223661,,"{'weak_signals': 0.5, 'regime_trend': 0.5, 'vol_tactics': 0.0}"
+"EW[weak_signals,regime_trend,vol_tactics]",2023-2026,1000,0.35565194136717515,0.7084756254789434,0.4202829904834732,420.28299048347316,,"{'weak_signals': 0.5, 'regime_trend': 0.5, 'vol_tactics': 0.0}"
+"EW[weak_signals,regime_trend,vol_tactics]",2013-2026,3593,0.6254938797690606,2.361845054011016,0.699445387542186,2513.107277439074,,"{'weak_signals': 0.5, 'regime_trend': 0.5, 'vol_tactics': 0.0}"

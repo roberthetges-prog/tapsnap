@@ -77,6 +77,10 @@ Incremental test: meta.combine(["weak_signals","regime_trend","relative_value"],
 combination, and the daily-P&L correlation with both. Hit rates of the final variant for the three periods.
 Leak checks: shuffled labels; features one period late (H10 lagged one calendar day, the feature-store convention);
 look-ahead probe (next H10 date); correlation of every signal with the label.
+
+Added AFTER the results were seen (diagnostics only, no candidate, nothing selected on them): `noon_diagnostic`
+(zero-staleness IC of each signal against the next noon-to-noon EUR/USD return), `yahoo_probe` (look-ahead probe on
+the Yahoo closes), `decomposition_summary`. RESULT: clean negative, see reports/arm_relative_value.md.
 """
 from __future__ import annotations
 
@@ -472,7 +476,7 @@ def leak_checks(final: str, cost_pips: float = 1.2, seed: int = 0) -> pd.DataFra
             _, t = table(pos, Dx, cost_pips, n, check)
             a = t.set_index("period")
             rows.append({"check": check, "variant": n, **{f"sr_{p.replace('-', '_')}": float(a.loc[p, "sharpe"]) for p in ("2010-2026", "2016-2026", "2023-2026")},
-                         "t_2010_2026": float(a.loc["2010-2026", "t"])})
+                         "t_2010_2026": float(a.loc["2010-2026", "t"]), "gross_sr_2010_2026": _sr(table(pos, Dx, 0.0, n, check)[1], "2010-2026")})
     add(D, "baseline", names)
     rng = np.random.default_rng(seed)
     Ds = D.copy()
@@ -504,6 +508,67 @@ def incremental() -> tuple[pd.DataFrame, pd.DataFrame]:
     s = s[s.index.year >= 2010]
     corr = pd.concat({"2010-2026": s.corr()[ARM], "2016-2026": s[s.index.year >= 2016].corr()[ARM]}, axis=1)
     return inc.reset_index(), corr
+
+
+def noon_diagnostic() -> pd.DataFrame:
+    """Zero-staleness diagnostic (NOT a candidate, no positions): does each signal, known at noon of H10 date g,
+    predict EUR/USD from noon g to noon g+1 / g+5? The target is our OWN 12:00 New York bar open (an independent
+    sample of the same instant, so H10 rounding / fixing noise cannot create a mechanical reversal). 2010-2026."""
+    S, diag = build_noon_panel(save=False)
+    own = np.log(eur_noon_from_h1()).reindex(S.index)
+    rows = []
+    for a, b in (("2010", "2026"), ("2016", "2026")):
+        m = (S.index >= a) & (S.index < str(int(b) + 1))
+        for k in SIGNALS:
+            c1, t1, n = _nw_t(S.loc[m, k], ((own.shift(-1) - own) * 1e4)[m], 0)
+            c5, t5, _ = _nw_t(S.loc[m, k], ((own.shift(-5) - own) * 1e4)[m], 4)
+            rows.append({"period": f"{a}-{b}", "signal": k, "ic_noon_1d": c1, "t_noon_1d": t1, "ic_noon_5d": c5, "nw_t_noon_5d": t5, "n": n})
+    return pd.DataFrame(rows)
+
+
+def decomposition_summary() -> pd.DataFrame:
+    _, d = build_noon_panel(save=False)
+    rows = []
+    for a, b in (("2004", "2009"), ("2010", "2015"), ("2016", "2022"), ("2023", "2026")):
+        x = d.loc[a:b]
+        rows.append({"period": f"{a}-{b}", "sd_eur_bp": x["r_eur"].std(), "sd_basket_bp": x["basket"].std(), "sd_resid_bp": x["resid"].std(),
+                     "r2_regression_oos": 1 - x["resid"].var() / x["r_eur"].var(), "r2_pca_oos": 1 - x["resid_pca"].var() / x["r_eur"].var(),
+                     "resid_autocorr_1": x["resid"].autocorr(1), "resid_autocorr_5d_sum": x["resid"].rolling(5).sum().autocorr(5),
+                     "basket_autocorr_1": x["basket"].autocorr(1), **{c: x[c].mean() for c in x.columns if c.startswith("beta_")}})
+    return pd.DataFrame(rows)
+
+
+def yahoo_probe(cost_pips: float = 1.2) -> pd.DataFrame:
+    """Look-ahead probe on the Yahoo daily closes (NOT a candidate). Signal: 1-day return of the equal-weight basket
+    of 7 Yahoo dollar pairs (USDNOK=X dropped: bad after 2016), prior '+' as lead_usd1, evaluated on 2011-2026 where
+    the stamp convention is constant (bar stamped London date D = price at 00:00 London of D).
+      honest      : last bar stamped <= D  (known 21-22 h before our close of D)
+      plus_1_bar  : bar stamped D+1 = price at 00:00 London of D+1, only 2-3 h AFTER our 17:00 NY close. This is what
+                    a naive 'same date' join delivers under the pre-2010 convention, and under UTC-normalised stamps
+                    in summer (the bar is stamped 23:00 UTC of the previous day)
+      plus_2_bars : 26-27 h after the close"""
+    df = pd.read_parquet(FEATURES, columns=["fwd_1d", "fwd_5d", "rv_21d_bp", "close", "close_time", "label_end_1d"])
+    cols = {}
+    for name, (sym, ccy, sg) in YAHOO.items():
+        if ccy is None or ccy == "nok" or not (CROSS / f"{name}_D1.parquet").exists():
+            continue
+        y = pd.read_parquet(CROSS / f"{name}_D1.parquet")
+        x = pd.Series(-sg * np.log(y["close"].values), index=y.index.tz_convert("Europe/London").tz_localize(None).normalize())
+        cols[ccy] = x[~x.index.duplicated(keep="last")]
+    Ly = pd.DataFrame(cols).sort_index().loc["2006-06":].dropna()
+    S = pd.DataFrame({"lead_usd1": _winsor(Ly.diff() * 1e4).mean(axis=1)})
+    rows = []
+    for label, k in (("honest_last_bar_le_D", 0), ("LOOKAHEAD_plus_1_bar_(2-3h_after_close)", 1), ("LOOKAHEAD_plus_2_bars", 2)):
+        Dx = pd.concat([align_to_sessions(S, df, shift_obs=k), df], axis=1)
+        fit, predict = make_single("lead_usd1")
+        pos = walk_forward(Dx, fit, predict, label_end=Dx["label_end_1d"], years=range(2011, 2027), verbose=False).fillna(0.0)
+        for c in (cost_pips, 0.0):
+            pnl = pnl_from_positions(pos, Dx["fwd_1d"], Dx["close"], cost_pips=c)
+            a = report(pnl[pnl.index.year >= 2011], 252, ARM, 1).set_index("period")
+            rows.append({"alignment": label, "cost_pips": c, "sr_2011_2026": float(np.sqrt(252) * pnl.loc["2011":, "net_bp"].mean() / pnl.loc["2011":, "net_bp"].std()),
+                         "sr_2016_2026": float(a.loc["2016-2026", "sharpe"]), "sr_2023_2026": float(a.loc["2023-2026", "sharpe"]),
+                         "corr_signal_fwd_1d": float(Dx.loc["2011":, "lead_usd1"].corr(Dx.loc["2011":, "fwd_1d"]))})
+    return pd.DataFrame(rows)
 
 
 def data_checks() -> dict[str, pd.DataFrame]:
@@ -584,6 +649,15 @@ if __name__ == "__main__":
     corr.to_csv(RES / f"{ARM}_pnl_corr.csv")
     print(inc.round(3).to_string())
     print(corr.round(3).to_string())
+    nd = noon_diagnostic()
+    nd.to_csv(RES / f"{ARM}_noon_diagnostic.csv", index=False)
+    print(nd.round(3).to_string())
+    ds = decomposition_summary()
+    ds.to_csv(RES / f"{ARM}_decomposition.csv", index=False)
+    print(ds.round(3).to_string())
+    yp = yahoo_probe(cost)
+    yp.to_csv(RES / f"{ARM}_yahoo_probe.csv", index=False)
+    print(yp.round(3).to_string())
     dc = data_checks()
     pd.concat([v.assign(table=k) for k, v in dc.items()], ignore_index=True).to_csv(RES / f"{ARM}_data_checks.csv", index=False)
     for k, v in dc.items():

@@ -485,7 +485,10 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True, ctx: d
     if write:
         RES.mkdir(parents=True, exist_ok=True)
         pos.to_parquet(RES / f"{ARM}_positions.parquet")
-        rep.to_csv(RES / f"{ARM}_report.csv", index=False)
+        rp = RES / f"{ARM}_report.csv"                       # keep the other cost levels already on file
+        prev = pd.read_csv(rp) if rp.exists() else pd.DataFrame()
+        prev = prev[(prev.cost_pips - cost_pips).abs() > 1e-9] if "cost_pips" in prev else pd.DataFrame()
+        pd.concat([rep, prev], ignore_index=True).to_csv(rp, index=False)
         allv = pd.concat({v: s[["pos", "gross_bp", "net_bp"]] for v, s in V.items()}, axis=1)
         allv.to_parquet(RES / f"{ARM}_all_variants.parquet")
     ctx.update(sims=sims, V=V, reports=reports, final=final)
@@ -626,7 +629,7 @@ def incremental() -> tuple[pd.DataFrame, pd.DataFrame]:
     cor = []
     for a in base:
         o = load_arm_daily(a)
-        j = pd.concat([mine, o], axis=1, keys=["mine", a]).fillna(0.0)
+        j = pd.concat([mine, o], axis=1, keys=["mine", a], sort=True).fillna(0.0)
         j = j[j.index.year >= 2010]
         act = j[j["mine"] != 0]
         cor.append({"arm": a, "corr_daily_all": j["mine"].corr(j[a]), "corr_on_my_trade_days": act["mine"].corr(act[a]) if len(act) > 10 else np.nan,
