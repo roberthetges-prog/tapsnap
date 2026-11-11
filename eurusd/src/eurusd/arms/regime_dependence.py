@@ -651,7 +651,7 @@ def step_z(sr_in, y_in, sr_out, y_out) -> float:
 
 
 # ---------------------------------------------------------------- (3) regimes
-def regime_tables(P: Panel, R: pd.DataFrame, comps=COMPONENTS) -> pd.DataFrame:
+def regime_tables(P: Panel, R: pd.DataFrame, comps=COMPONENTS, periods=PERIODS3, table: str = "regime") -> pd.DataFrame:
     rows = []
     for comp in comps:
         CA = class_arrays(P, R, comp)
@@ -662,11 +662,11 @@ def regime_tables(P: Panel, R: pd.DataFrame, comps=COMPONENTS) -> pd.DataFrame:
                     defined |= m2
             rest = defined & ~m
             dn = {(h, md, w): decisions(P, comp, h, md, 2006, mask=(m if w == "in" else rest)) for h in HS for md in ("N", "W") for w in ("in", "out")}
-            for lab, a, b in PERIODS3:
+            for lab, a, b in periods:
                 per = (P.year >= a) & (P.year <= b)
                 sr_in, t_in, n_in = sharpe(P.net[comp][per & m & P.exists[comp]])
                 sr_out, _, n_out = sharpe(P.net[comp][per & rest & P.exists[comp]])
-                r = {"table": "regime", "component": comp, "regime": v, "class": c, "period": lab, "sessions": int((per & m).sum()),
+                r = {"table": table, "component": comp, "regime": v, "class": c, "period": lab, "sessions": int((per & m).sum()),
                      "share_of_defined": float((per & m).sum() / max(1, (per & defined).sum())), "sharpe_in": sr_in, "t_in": t_in, "sharpe_out": sr_out}
                 for (h, md, w), idx in dn.items():
                     x = cell(P, comp, h, idx, a, b)
@@ -1002,6 +1002,8 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True, fast: 
     T = regime_tables(P, R)
     S = screen(T)
     res["regime"], res["screen"] = T, S
+    # added after the first run: the second half split at the fade, to see whether a regime effect is the fade restated
+    res["regime_sub"] = regime_tables(P, R, comps=("cot", "spread", "house", "eqrel", "agree3"), periods=(("2016-22", 2016, 2022), ("2023-26", 2023, 2026)), table="regime_sub")
     SA = S[S.component == "agree3"]
     pc, npass, (mx, mxs) = screen_placebo(P, R, reps=200 if fast else 1000)
     obs_max = float(np.nanmax(SA["consistent_gap"].values))
@@ -1153,7 +1155,7 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True, fast: 
         RES.mkdir(parents=True, exist_ok=True)
         out.to_parquet(RES / f"{ARM}_positions.parquet")
         rep.to_csv(RES / f"{ARM}_report.csv", index=False)
-        tabs = [PW, res["power_joint"], ROLL, res["step"], T, S, res["screen_placebo"], res["mix"], C, res["bar"] if "bar" in res else pd.DataFrame(),
+        tabs = [PW, res["power_joint"], ROLL, res["step"], T, res["regime_sub"], S, res["screen_placebo"], res["mix"], C, res["bar"] if "bar" in res else pd.DataFrame(),
                 res["mute_log"], LK, PP.assign(table="pipeline_placebo"),
                 rec.assign(table="reconcile"), regime_timeline(P, R).assign(table="regime_timeline")]
         if "strict_positions" in res:
