@@ -741,6 +741,21 @@ def diagnostics(X: pd.DataFrame, cc: dict, positions: dict, cost_pips: float) ->
                      "eur_rel_mean_bp_when_differ": float((rel * f)[~same].mean()), "t_eur_rel_when_differ": float(_agg((rel * f)[~same], 252)["t"]),
                      "n_differ": int((~same).sum())})
     out["final_vs_eur_own"] = pd.DataFrame(rows)
+    # (g) round-4 reporting: out-of-sample hit rates of every EUR/USD variant (daily decisions; a decision = one session
+    #     with a non-zero position), plus the always-long baseline
+    rows = []
+    for v in EUR_VARIANTS + ["always_long"]:
+        pos = positions[v] if v in positions else pd.Series(1.0, index=X.index)
+        p = _eur_pnl(X, pos, cost_pips)
+        for lab, a, b in (("2010-2026", 2010, 2026), ("2016-2026", 2016, 2026), ("2023-2026", 2023, 2026)):
+            mm = (p.index.year >= a) & (p.index.year <= b) & (p["pos"] != 0) & X["fwd_1d"].reindex(p.index).notna()
+            f = X["fwd_1d"].reindex(p.index)[mm]
+            q = p[mm]
+            nz = f != 0
+            rows.append({"variant": v, "period": lab, "n_decisions": int(mm.sum()), "hit_net_pnl_positive": float((q["net_bp"] > 0).mean()),
+                         "hit_sign_before_costs": float((np.sign(q["pos"][nz]) == np.sign(f[nz])).mean()),
+                         "n_position_flips": int((np.sign(q["pos"]).diff().abs() > 0).sum())})
+    out["hit_rates"] = pd.DataFrame(rows)
     return out
 
 
