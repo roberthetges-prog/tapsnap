@@ -14,7 +14,7 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 
 | 4 | vol-conditioned intraday tactics (12), FX relative value (12, strict count 24), flows & calendar (12), intraday path from M1 (22), selective probabilities (12), OFI replication (1: FAILS), swing / position trading from 1999 (12 + 14 sensitivities: FAILS) | 109 | none. Agreement rule adopted as the PRODUCT FORM of the existing information (not a new edge) | vol tactics: none; range forecast kept for stop/target placement (78 % above/below-median accuracy; oracle ceiling for intraday tactics ~0.8-1.1 Sharpe) |
 
-| 5 | liquidity & stress (12): FAILS as an extra vote ... (real economy, regime dependence, policy cycle pending) | 12+ | none so far |
+| 5 | liquidity & stress (12): FAILS; real economy (12): FAILS ... (regime dependence, policy cycle pending) | 24+ | none so far |
 
 ## What is established
 * Predictable: slow macro drift and speculative positioning (direction, weakly); volatility and range (strongly).
@@ -51,6 +51,10 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 * Liquidity and stress as a 1-3 month vote (relative ECB/Fed balance sheets, M3-M2, excess liquidity, CISS euro-US, HY
   spreads, NFCI): 44-57 %, nothing; as an extra vote it lowers the agreement rule (59 -> 55 % at 21 sessions); the stale
   placebo beats the live signal. 'USD safe haven when stress is high and rising' was right only 41 % of the time.
+* Real economy as a 1-3 month vote: Brent 6-month change 55 / 57 / 68 % but its 63-session-stale version does as well
+  (regime bet); TTF/Henry Hub gas ratio a weekly-grid lead since 2018 only (one shock, not confirmed non-overlapping);
+  OECD CLI, sentiment, trade balance, US real-yield and breakeven changes: 44-53 %. No extra vote passes.
+  Blocked sources: OECD SDMX, Eurostat, DBnomics, EIA; FRED's OECD CLI frozen at 2024-01.
 * Positioning: the level is the signal; no trader group is specially informed; robust to z-window and to delays.
 * A six-month record cannot separate skill from luck (see reports/scenario_replay.md).
 * **Positioning does not replicate (reports/arm_g10_positioning.md).** The identical rule on GBP, JPY, CHF, AUD, CAD, NZD,

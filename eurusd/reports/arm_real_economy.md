@@ -1,4 +1,63 @@
-TODO
+# Arm R: real economy (`real_economy`) - energy terms of trade, growth leading indicators and US real yields as an extra vote
+
+Code `src/eurusd/arms/real_economy.py` (`run(cost_pips=1.2)`; `python -I src/eurusd/arms/real_economy.py` fetches (cached), runs
+everything in about 20 seconds once the data are cached and rebuilds this file; `... real_economy.py report` rebuilds the file only). Results in
+`experiments/results/arms/`: `real_economy_positions.parquet` (daily stream of the final extra-vote rule: `pos`, `fwd_bp`, `net_bp`),
+`real_economy_report.csv` (protocol table of the 12 candidates, `variant`, `final`, plus the agreement rule as reference and the 0.6-pip
+run), `real_economy_votes.csv` (every signal x rule x horizon x decision mode x period: n, decisions per year, accuracy, Wilson
+interval, net bp), `real_economy_paired.csv`, `real_economy_bar.csv`, `real_economy_candidates.csv`, `real_economy_leakchecks.csv`,
+`real_economy_incremental.csv`, `real_economy_signals.parquet`, `real_economy_data_catalogue.csv`, log `logs/real_economy.log`.
+The docstring of the module (signals, signs, lags, evaluation, selection rule) was written before the first accuracy number.
+
+## Verdict
+1. **The round-5 success bar is NOT met - not by the rule the declared selection picks, and not by any of the other 11.**
+   The pick is `cli_d6m_diff` (agreement rule AND the euro-area-minus-US 6-month change of the OECD leading indicator agrees).
+   Non-overlapping decisions, against the agreement rule alone:
+   * 21 sessions: 60 % [49-69] n=87 vs 59 % n=156 in 2010-26 (**+0.8 points**), 60 % n=45 vs 57 % n=96 in 2016-26 (**+2.7**),
+     50 % n=10 vs 60 % n=35 in 2023-26 (**-10**). 5.2 / 4.2 decisions a year (bar: 6).
+   * 42 sessions: 65 % n=51 vs 61 % n=89 (+4.0), 63 % n=27 vs 59 % n=56 (+4.0), 50 % n=6 vs 45 % n=20; 3.1 / 2.5 decisions a year.
+   * 63 sessions: 68 % n=40 vs 72 % n=61 (-4.6), 62 % n=21 vs 71 % n=38 (-9.1).
+   Bar components: gain of 3 points at 21 AND 42 sessions in both periods - no (21 sessions fails twice); 6 decisions a year - no;
+   not worse in 2023-26 - no (21 sessions); placebo loses half the gain - yes, but there is no gain to lose. In its own selection
+   period (2010-15) the AND rule is at 59.5 % (n=42) and the agreement rule alone at 61.7 % (n=60): the pick "wins" a contest in which
+   every entrant is below the benchmark. The runner-up (`gasratio_d3m`, lower bound 44.4 % against 44.5 %) is at -1.4 / -0.8 points.
+   The pick also rests on revised (not real-time) OECD data and has no value after May 2024 (FRED froze the series, the OECD API is
+   blocked here).
+2. **A fourth vote from these three families does not sharpen the agreement rule.** Across the 12 candidates the non-overlapping gain
+   over the agreement rule is negative for 11 of 12 at 21 sessions in 2010-26 (median -3.8 points, range -10.1 .. +0.8), about zero at
+   42 sessions (median +1.5, range -5.1 .. +8.2 on 37-76 decisions) and negative for all 12 at 63 sessions (-1.9 .. -13.0). No candidate
+   reaches +3 at 21 sessions in 2010-26, and none has +3 at both 21 and 42 sessions in both periods. The AND rules make 3.5-7.1
+   non-overlapping decisions a year at 21 sessions and 2.2-4.6 at 42. On the weekly grid, paired with the agreement rule on the same
+   sessions, no difference at 21 sessions excludes zero in 2010-26 or 2016-26 for any candidate. Calls that the new vote CONTRADICTS are
+   right about as often as calls it confirms (46-61 % against 49-60 % at 21 sessions, non-overlapping, 2010-26): the vote does not sort.
+3. **Standalone, at 1-3 months, only 6-month Brent carries anything, and it is arm O's finding, not timely information.**
+   `brent_usd_d126` (sign adopted from arm O, not re-fitted): 55 % [48-61] n=208 / 57 % [47-66] n=104 / 68 % [56-78] n=69 at
+   21 / 42 / 63 sessions non-overlapping in 2010-26 (weekly 56 / 56 / 58, n=869); 2016-26 55 / 61 / 73 (n=133 / 66 / 44), weekly
+   58 / 59 / 60; 2023-26 47 / 61 / 80 (n=47 / 23 / 15), weekly 53 / 50 / 52. That reproduces arm O's 55-58 %. But the same signal made
+   63 sessions STALER scores 59 % at 21 sessions (fresh 56 %) and 59 % at 63 (fresh 58 %): it is a slow regime bet (the 2014-16 and
+   2020-22 oil cycles), not information that has to be fresh. In EUR terms it is weaker (53 / 53 / 64; weekly 53 / 53 / 55).
+   Everything else is at chance:
+   * Europe-vs-US gas, monthly (`gasratio_d3m`): 52 / 53 / 49 (n=208 / 104 / 69). Daily TTF / Henry Hub (`ttf_hh_d63`, 2018-26 only):
+     57 % [48-66] n=108 / 59 % [46-71] n=54 / 47 % [32-63] n=36, weekly 55 / 60 / 59 (n=452) - one gas shock, intervals contain 50.
+   * Euro-area trade balance momentum: 56 / 53 / 59 non-overlapping, 52 / 51 / 51 weekly.
+   * Growth: CLI differential 52 / 48 / 48; sentiment level differential 44 / 42 / 46; sentiment 3-month change 45 / 50 / 51.
+   * US real yields as CHANGES: `tips_d21` 50 / 47 / 48, `tips_d63` 46 / 53 / 52 (weekly 46-49: if anything wrongly signed, as arm O
+     found for levels); 5y5y breakeven 51 / 41 / 48.
+4. **Coverage extension (calls when the three old signals do not agree): no.** 42-58 % at 21 sessions in 2010-26 and 2016-26; only `brent_usd_d126` is
+   above 53 % with any consistency (55 % [47-62] n=170 / 56 % n=93 / 56 % n=64; weekly 55 / 56 / 56, n=482), and its 63-session-stale
+   version does 58 / 59 / 57.
+5. **Daily stream and incremental test: fails.** The final rule as a weekly-tranche book: net Sharpe 0.47 / 0.35 / -0.19
+   (2010-26 / 2016-26 / 2023-26) at 1.2 pips against 0.52 / 0.51 / 0.43 for the agreement rule itself; three-way EW 0.62 against
+   two-way 0.64 on 2016-26 (0.26 against 0.36 on 2023-26). Daily P&L correlation 0.98 with the agreement-rule book on active days,
+   0.78 with `regime_trend`. It is a thinned copy of the existing stream.
+6. **Two leads, neither a result.** (i) Daily TTF / Henry Hub as a confirmation: on WEEKLY decisions the AND rule is 63 / 74 / 75 %
+   (n=123 / 119 / 119) against 56 / 62 / 65 % for the agreement rule on the same 2018-26 sessions, paired difference
+   +7 [-1,+14] / +12 [+3,+21] / +10 [+3,+17] points, and it fades when the signal is made stale (55 / 57 at 21 sessions). The
+   non-overlapping stream does NOT confirm it (53 / 62 / 67 % on 59 / 37 / 27 decisions against 58 / 61 / 69 %), the history is 8.8
+   years with one gas shock, it has no 2010-15 record so the declared rule could not pick it, and 12 of the 108 paired intervals
+   exclude zero where about 5 would by chance (8 positive, 4 negative, heavily overlapping cells). Worth a forward look, nothing more.
+   (ii) US real-yield changes are wrongly signed as a vote: when `tips_d21` contradicts the agreement rule the rule is right more
+   often (2016-26, 42 sessions: confirmed minus contradicted -20 points [-34,-5]). I did not flip the sign: that would be fitting it.
 
 ## 1. Data: sources, spans, publication lags
 | file                                               | source                                         |   rows | first      | last       | lag used                       |
@@ -20,7 +79,34 @@ TODO
 | data/macro/real_economy_ecb_trade_m.csv            | ECB TRD/M.I10.Y.M.TTT.J10.4.VAL                |    296 | 2002-01    | 2026-08    | month-end + 50 d               |
 | data/macro/datahub_brent_daily.csv                 | datahub oil-prices (EIA Brent spot), repo file |   9122 | 1987-05-20 | 2026-11-03 | 1 calendar day                 |
 
-TODO
+* **Lags.** Daily market series: stamp d is used from the session whose NY-close date is >= d + 1 calendar day
+  (`featstore._align_lagged(..., 1)`, the convention of every earlier arm). Monthly series: reference month m is used from
+  month-end(m) + LAG days, plus the same one day. LAG = 45 d for the OECD leading indicators (published about six weeks after
+  the month) and for the IMF European gas price (IMF publishes in the first half of m+1, FRED later); 50 d for euro-area trade
+  (Eurostat releases around day 15-18 of m+2); 10 d for the Commission's Economic Sentiment Indicator (released on the
+  next-to-last working day of m, a few times in the first week of m+1) and for the final Michigan sentiment (last or
+  next-to-last Friday of m). A monthly signal gives no vote once its newest usable observation is more than 75 days old; a daily
+  one once its newest stamp is more than 10 days old.
+* **TTF history is short.** Yahoo `TTF=F` starts 2017-10-23; with a 63-session change the signal exists from 2018-01-22, i.e. for
+  52 % of 2010-26 and not at all in the 2010-15 selection window. The long-history stand-in is the IMF monthly European gas price
+  (FRED `PNGASEUUSDM`, USD/MMBtu: TTF in recent years, border prices before) against the monthly mean of the Henry Hub spot
+  (FRED `DHHNGSP`, months with at least 15 quotes; FRED's file is thin before 2007, so the ratio signal starts 2007-09).
+* **Conversions.** Brent in EUR = Brent (USD) / previous-session EUR/USD close; TTF in USD/MMBtu = EUR/MWh x previous-session
+  EUR/USD / 3.412. The gas ratios are in a common currency. Signals built this way contain the lagged EUR/USD return by
+  construction; `brent_usd_d126` is the currency-free control (correlations in section 9).
+* **Vintage.** Every monthly series is the CURRENT vintage. The OECD CLI is revised materially (the trend is re-estimated every
+  month), the trade balance moderately, sentiment hardly. ALFRED (real-time vintages) is refused by the proxy, so this look-ahead
+  could not be removed or measured. It favours the CLI signal, which is the one the selection rule picked; it failed anyway.
+* **OECD CLI stops.** FRED froze the OECD series at 2024-01 (`EA19LOLITONOSTSAM` at 2022-11; after that the 6-month change of the
+  DEU/FRA/ITA mean is used). `sdmx.oecd.org` answers 403 through the proxy, so `cli_d6m_diff` has no value after 2024-05-30.
+* **Euro-area real yields: not built.** An AAA yield minus TRAILING HICP is not an expectation; its 1-3 month change is the nominal
+  change plus base effects, and arm O found the trailing-inflation real differential wrongly signed (43-48 %). Family C is US-only.
+* **Not reachable (proxy 403):** `sdmx.oecd.org`, `ec.europa.eu` (Eurostat, DG ECFIN), `api.db.nomics.world`, `alfred.stlouisfed.org`,
+  `www.eia.gov`. Reachable: `fred.stlouisfed.org` with `curl --http1.1`, the Yahoo chart API with a browser User-Agent, the ECB data
+  API. The ESI comes from the ECB flow `RTD` (the ECB `SUR` flow only has quarterly items); it ends 2026-08 there. US ISM: not free, skipped.
+* **A bug caught before any result:** Yahoo daily bars are stamped at midnight exchange time (04:00 or 05:00 UTC). Converting with
+  the current `gmtoffset` put every summer bar one day EARLY (a one-day look-ahead on TTF and NG). The fetch converts with the
+  exchange time zone; the cached parquet files carry the trading date.
 
 ## 2. The 12 candidate signals and their priors (fixed before any result)
 | signal         | fam   | prior (sign on the raw quantity)                                                    | first value   | last value   | defined 2010-26   | long share   |   sign flips / yr |
@@ -38,10 +124,18 @@ TODO
 | tips_d63       | C     | - same over 3 months                                                                | 2003-04-01    | 2026-11-05   | 100 %             | 50 %         |              17.7 |
 | bei_d63        | C     | + US 5y5y breakeven up over 3 months = dollar down (weak prior)                     | 2003-04-01    | 2026-11-05   | 100 %             | 50 %         |              27.4 |
 
-TODO
+* Positive value = vote for long EUR/USD. No fitting, no thresholds, no sign learned from the data; the vote is the sign.
+* Oil: arm O's table has `oil_d126` = -(126-session log change of Brent) with the prior "dearer oil worsens euro-area terms of
+  trade" and 55-58 %. That sign is adopted for all three Brent signals and for the gas signals; it was not re-fitted.
+* `bei_d63` has a weak prior (the opposite story is as respectable); `sent_lvl_diff` is long 81 % of the time because Michigan
+  sentiment has sat below its own history since 2008 far more than the ESI has: by construction a regime bet.
 
 ## 3. Reconciliation of the agreement rule
-TODO
+Rebuilt with `selective.load_data`, `make_ctx`, `build_targets` and `house_score_wf` (walk-forward house score), agreement =
+sign(cot_z52) = sign(d_spread2y_20) = sign(house score), evaluated with `selective.weekly_idx` / `seq_idx` / `cell_stats`. Every
+accuracy and every n equals arm N's report; the weekly-tranche book of the 21-session rule has net Sharpe 0.52 / 0.51 / 0.43, also
+identical. The agreement rule itself makes 9.3 non-overlapping decisions a year at 21 sessions and 5.3 at 42, so "at least 6 a year"
+cannot hold at 42 sessions for ANY rule that only removes calls; the count is judged at 21 sessions and printed everywhere.
 
 | decisions   | period   | arm N report (10 / 21 / 42 / 63 s)        | rebuilt here                              | identical   | decisions / yr            |
 |:------------|:---------|:------------------------------------------|:------------------------------------------|:------------|:--------------------------|
@@ -53,7 +147,10 @@ TODO
 | weekly      | 2023-26  | 57 n=80 / 55 n=77 / 47 n=73 / 53 n=73     | 57 n=80 / 55 n=77 / 47 n=73 / 53 n=73     | True        | 21.1 / 20.6 / 19.9 / 20.4 |
 
 ## 4. Standalone accuracy of each signal (direction = sign of the oriented signal)
-TODO
+One decision whenever the signal is non-zero: weekly grid (every 5th session, overlapping holds; no interval shown because the
+overlap makes a plain one meaningless) and the greedy non-overlapping stream (plain Wilson 95 %). The up-base rate is 48-52 % in every
+period, so 50 % is the mark to beat. `ttf_hh_d63` exists from 2018 only (its 2010-26 and 2016-26 rows are the same 8.8 years);
+`cli_d6m_diff` ends in May 2024.
 
 *2010-26* (accuracy % [Wilson 95 %] n)
 
@@ -107,7 +204,11 @@ TODO
 | bei_d63        | 50 [36-64] n=46        | 39 [22-59] n=23        | 47 [25-70] n=15        | 44 n=188      | 48 n=184      | 50 n=181      |
 
 ## 5. As an extra vote
-TODO
+(a) AND rule = the agreement rule speaks and the sign of the new signal equals its direction. (b) OUTSIDE = direction of the new
+signal on sessions where the three old signals do not agree. (c) paired differences on the weekly grid with a circular block
+bootstrap (block 2h/5 weeks, 2000 draws, the same blocks for both rules); the baseline in (c) is the agreement rule restricted to
+the sessions where the signal exists, so a signal with a short history is compared like for like. The gains printed in (a) are
+against the agreement rule on the WHOLE period, which is what the bar asks for.
 
 **(a) AND rule, non-overlapping decisions, 2010-26** (accuracy % [Wilson] n (decisions / year), then the gain in points over the agreement rule)
 
@@ -285,7 +386,9 @@ TODO
 Of the 108 paired intervals in (c), 12 exclude zero (8 positive, 4 negative); about 5 would by chance.
 
 ## 6. Selection by the declared rule and the record of the pick
-TODO
+Declared rule: highest LOWER Wilson bound of the 2010-2015 non-overlapping 21-session accuracy of the AND rule, among candidates with
+at least 6 such decisions a year in 2010-2015. For reference the agreement rule alone in 2010-15: 61.7 % [49.0-72.9], n=60, 10.0 a
+year - higher than every AND rule in the table.
 
 | signal         |   n_2010-15 |   dec_per_year_2010-15 |   accuracy_2010-15 |   lo_2010-15 |   hi_2010-15 | eligible   | final   |
 |:---------------|------------:|-----------------------:|-------------------:|-------------:|-------------:|:-----------|:--------|
@@ -367,7 +470,13 @@ The same bar applied to every candidate (none was selected from this table; it s
 | bei_d63        | False     | False        | False        | False            | False        | False | False                 |
 
 ## 7. Timing placebo (signal made 63 / 126 sessions staler)
-TODO
+The signal is shifted by +63 and +126 sessions (staler) and the rule re-evaluated. A vote that helps as much when it is three or six
+months old is a regime bet. Reading: the pick (`cli_d6m_diff`) loses everything when stale, but its fresh gain is +0.8 / +2.7 points
+at 21 sessions, i.e. nothing. The Brent signals do NOT pass: their AND-rule and standalone numbers are as good or better 63 sessions
+stale (`brent_usd_d126` AND rule, weekly 21 sessions: 65 % fresh, 65 % at +63; standalone 56 % fresh, 59 % at +63). `ea_tb_mom`'s +8
+points at 42 sessions falls to +0.4 / -0.3 when stale, but it is -3.9 at 21 sessions and -13.0 at 63 on 44-98 decisions: noise around zero.
+The look-ahead column (-21: the signal as it will be 21 sessions later) shows the test has power where information exists:
+`tips_d21` goes from 49 % to 60 %, because real yields and EUR/USD move together within the month and not afterwards.
 
 AND rule, gain in points over the agreement rule, non-overlapping decisions:
 
@@ -404,7 +513,11 @@ Weekly decisions, 2010-26, accuracy % as the signal is shifted in time:
 | bei_d63        | 50 / 48 / 46 / 47 / 49 / 49 / 49                                         | 52 / 51 / 49 / 52 / 50 / 51 / 48                                         | 56 / 57 / 63                   | 49 / 49 / 47                       |
 
 ## 8. Daily stream and incremental test
-TODO
+Each AND rule as a book of weekly tranches held 21 sessions (`selective.book_time_exit`: weight 1/5 per tranche, turnover netted,
+1.2 pips per unit turnover), net Sharpe by period; `agree3_reference` is the agreement rule through the same code (arm N: 0.52 / 0.51 /
+0.43). Deflated-Sharpe p for 12 candidates. The final stream misses the round-3 bar as well (2023-26 negative, three-way below two-way).
+Some AND books have a higher Sharpe than the reference in 2016-26 (`brent_eur_d63` 0.76, `brent_usd_d126` 0.68); with twelve thinned
+copies of a 0.51 stream that is expected, none was selected, and their 2010-15 and placebo records (above) do not support them.
 
 | variant                  |   2010-2015 |   2010-2026 |   2016-2026 |   2023-2026 |   t 2010-26 |   deflated p |   active | final   |
 |:-------------------------|------------:|------------:|------------:|------------:|------------:|-------------:|---------:|:--------|
@@ -446,7 +559,19 @@ Daily net P&L correlation of the final stream:
 | selective_daily |            0.81 |               0.98 |           0.67 |
 
 ## 9. Leak checks
-TODO
+* (1) Permuted labels: every rule falls to 50-51 % (5-95 % band 45-57 %).
+* (2) Shifted features. One period staler (+1) changes nothing for 3-6-month signals (table in section 7: within a point), so
+  "collapses when shifted by one" cannot apply to slow votes; the round-5 placebo (+63 / +126) is the meaningful version and is in
+  section 7. The look-ahead control (-21) raises `tips_d21` from 49 to 60 %, the CLI from 54 to 56 %, `gasratio_d3m` from 53 to 55 % and
+  `brent_eur_d63` from 51 to 55 % (its EUR conversion then contains the future EUR/USD return), and does not help `brent_usd_d126`
+  (56 -> 53): the test sees look-ahead where there is some, and the honest signals do not have it.
+* (2b) Truncation: raw data cut at five dates under the declared lags reproduce the stored signal row exactly (12 of 12 each time),
+  so no value uses an observation that would not yet have been published (revisions aside, see section 1).
+* (3) No signal is a label in disguise: correlation with the forward 21-session return is between -0.07 and +0.13, with the forward
+  63-session return between -0.13 and +0.14. Several are correlated with PAST EUR/USD returns (with the
+  126-session return: `cli_d6m_diff` +0.27, `ea_tb_mom` +0.24, `brent_usd_d126` -0.21; with the 63-session return: `gasratio_d3m`
+  +0.22, `tips_d63` +0.21; with the 21-session return: `tips_d21` +0.22): part of what they vote is price momentum, which rounds
+  1-4 found to be worthless here. Their signs agree with each old vote 40-61 % of the time.
 
 (1) labels permuted (300 draws, weekly decisions, 2010-26):
 
@@ -492,4 +617,19 @@ TODO
 | tips_d63       |          0.068 |          0.205 |           0.131 |            0.515 |            0.585 |              0.546 |       -0.063 |       -0.078 |
 | bei_d63        |          0.019 |          0.159 |           0.211 |            0.535 |            0.431 |              0.457 |       -0.059 |       -0.025 |
 
-TODO
+## 10. Variants, caveats, what is worth keeping
+* **Variant count: 12** candidate signals = 12 AND rules, one selection rule, one final. Not selected from: the standalone, outside,
+  contradicted and shifted versions of the same 12 signals. The module was run in full five times: the first run, then re-runs that
+  added diagnostics only (the outside-agreement placebo rows, the per-year table, this report); signals, candidates, the selection and
+  every number of the first run are unchanged.
+* Non-overlapping and weekly numbers disagree for several AND rules (`ttf_hh_d63` against its same-span baseline: weekly
+  +7 / +12 / +10 points, non-overlapping -5 / +1 / -2; `brent_usd_d126` at 21 sessions: weekly +5, non-overlapping -3.7). The weekly
+  grid counts one directional episode five to thirteen times; the non-overlapping stream is the one the bar is written on, and it
+  says no.
+* The 2023-26 cells have 5-30 non-overlapping decisions each; nothing can be read from them in either direction.
+* What I would keep: (1) the cached data set (TTF, Henry Hub, TIPS and breakevens from 2003, ESI from 1980, euro-area trade from 2002)
+  for later arms; (2) the negative result that real-yield and breakeven CHANGES, the CLI and sentiment differentials, trade-balance
+  momentum and the monthly gas ratio do not predict 1-3 month EUR/USD direction (45-54 % on weekly decisions), which closes families
+  B and C and most of A;
+  (3) 6-month Brent as a known 55-58 % slow regime variable that adds nothing to the agreement rule; (4) TTF / Henry Hub as a
+  forward-test note only.
