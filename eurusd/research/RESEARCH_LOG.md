@@ -24,8 +24,14 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 * Direction accuracy today: 52 % next session, 55 % next week, 58 % next month (2010-26), fading after 2023.
   Range / volatility accuracy: 75 % above/below median, 93 % on volatile-day calls (reports/prediction_scoreboard.md).
 
+## Product definition (owner, 2026-11-11)
+Directional POSITION trading: hold for weeks up to a month or more, a few decisions a month, each with a calibrated
+probability; act when P >= 60 % (target band 60-80 %). Not day trading. Backtesting on history is the research engine;
+the paper forward test runs in the background as a free cross-check. Intraday findings matter only for stop and
+target placement.
+
 ## Avenue queue
-Round 4 (launched 2026-11-11): volatility-conditioned intraday tactics; intraday-path signals from 1-minute data
+Round 4 (launched 2026-11-11; plus arm N selective calibrated probabilities and arm O multi-week position trading with 1999+ history, carry cost and weekly-ATR stops): volatility-conditioned intraday tactics; intraday-path signals from 1-minute data
 (signed jumps, semivariance, skew); FX relative value (EUR/USD vs a basket of dollar pairs); equity-conditioned
 month-end / fix / calendar flows. Lead: prediction scoreboard (direction, range, cone calibration).
 Later: weekly-horizon ensembles of survivors; implied volatility and options positioning (needs a data host);
