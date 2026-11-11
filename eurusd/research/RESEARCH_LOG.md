@@ -12,7 +12,7 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 | 2 | daily ML, intraday ML, weak-signal combination, regimes/trend, events (walk-forward 2010-2026) | 137 | weak-signal combination + positioning trend -> live exposure (Sharpe 0.56 / 0.64 / 0.36) |
 | 3 | rate expectations & stress (12), deep positioning (12), macro surprises (12), G10 positioning (10) | 46 | none added. Rates/stress: spread trend re-expressed, +0.03 Sharpe = noise. Deep positioning: crude rule not improved (placebo matched). Macro surprises: not timing-dependent, cannot run live. G10: effect does NOT replicate outside EUR |
 
-| 4 | vol-conditioned intraday tactics (12), FX relative value (12, strict count 24), flows & calendar (12), intraday path from M1 (22), selective probabilities (12), OFI replication (1: FAILS, basket Sharpe 0.06, 3 of 6 pairs), swing pending | 83+ | vol tactics: none; range forecast kept for stop/target placement (78 % above/below-median accuracy; oracle ceiling for intraday tactics ~0.8-1.1 Sharpe) |
+| 4 | vol-conditioned intraday tactics (12), FX relative value (12, strict count 24), flows & calendar (12), intraday path from M1 (22), selective probabilities (12), OFI replication (1: FAILS), swing / position trading from 1999 (12 + 14 sensitivities: FAILS) | 109 | none. Agreement rule adopted as the PRODUCT FORM of the existing information (not a new edge) | vol tactics: none; range forecast kept for stop/target placement (78 % above/below-median accuracy; oracle ceiling for intraday tactics ~0.8-1.1 Sharpe) |
 
 ## What is established
 * Predictable: slow macro drift and speculative positioning (direction, weakly); volatility and range (strongly).
@@ -37,6 +37,15 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
   Sharpe ~1.05, 80 % ~1.7.
 * Path / level probabilities are real and calibrated to 1-3 points in every era: level 2 ATR away untouched in 10 sessions
   69 %, 3 ATR 87 %; in 21 sessions 52 % / 71 %. No expectancy alone; use for stops and targets.
+* **Position trading designed for the horizon (reports/arm_swing.md): fails.** Scorecard / t-stat / logistic models on slow
+  predictors (rates, real rates, PPP, trend, positioning, equities, oil, seasonality, carry) with 1999+ history, carry cost
+  and weekly-ATR stops: 54 % at month-ends (2006-26), 50 % in 2023-26; probabilities do not sort outcomes (Brier = coin).
+  Only positioning (57-60 %), relative equity momentum (57-60 %, fading) and 6-month oil (55-58 %) carry anything; rate
+  levels, real rates, PPP, curve, carry, contrarian extremes are at or below 50 %. Stops make no measurable difference;
+  carry is worth ~13 pips per month-long trade. The existing exposure read monthly gives 59 % / +58 pips (2010-26),
+  49 % in 2023-26.
+* HONEST CEILING SO FAR (direction, EUR/USD): ~59 % at one month, 61-65 % at two, 67-72 % at a quarter when the three
+  slow signals agree (2010-26); unconfirmed since 2023. Path / level events: 69-87 %, calibrated, stable.
 * Positioning: the level is the signal; no trader group is specially informed; robust to z-window and to delays.
 * A six-month record cannot separate skill from luck (see reports/scenario_replay.md).
 * **Positioning does not replicate (reports/arm_g10_positioning.md).** The identical rule on GBP, JPY, CHF, AUD, CAD, NZD,
@@ -55,5 +64,8 @@ target placement.
 Round 4 (launched 2026-11-11; plus arm N selective calibrated probabilities and arm O multi-week position trading with 1999+ history, carry cost and weekly-ATR stops): volatility-conditioned intraday tactics; intraday-path signals from 1-minute data
 (signed jumps, semivariance, skew); FX relative value (EUR/USD vs a basket of dollar pairs); equity-conditioned
 month-end / fix / calendar flows. Lead: prediction scoreboard (direction, range, cone calibration).
+Round 5 (2026-11-11): slow fundamentals not yet used (liquidity and balance sheets, financial stress and credit, energy
+terms of trade, growth leading indicators, real yields), judged natively at the 1-3 month horizon as an extra vote;
+policy-regime dependence of the surviving signals and the post-2023 fade.
 Later: weekly-horizon ensembles of survivors; implied volatility and options positioning (needs a data host);
 news / central-bank text tone (needs a data host); cross-currency portfolio if G10 positioning validates.

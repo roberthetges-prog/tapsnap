@@ -1,0 +1,40 @@
+{
+ "source": "reports/arm_selective.md (walk-forward 2010-2026, net of costs)",
+ "rule": "call only when positioning sign, 2y-spread 20-day trend sign and house-score sign agree (about 44 % of sessions)",
+ "accuracy_non_overlapping": {
+  "10": 0.56,
+  "21": 0.59,
+  "42": 0.61,
+  "63": 0.72
+ },
+ "accuracy_weekly": {
+  "10": 0.57,
+  "21": 0.59,
+  "42": 0.65,
+  "63": 0.67
+ },
+ "net_bp_per_decision": {
+  "10": 29,
+  "21": 46,
+  "42": 108,
+  "63": 153
+ },
+ "since_2016": {
+  "10": 0.55,
+  "21": 0.57,
+  "42": 0.63,
+  "63": 0.67
+ },
+ "since_2023": "not confirmed: 57 / 55 / 47 / 53 % on 14-63 decisions, intervals 25-60 points wide",
+ "no_touch": {
+  "10": {
+   "2atr": 0.69,
+   "3atr": 0.87
+  },
+  "21": {
+   "2atr": 0.52,
+   "3atr": 0.71
+  }
+ },
+ "caveat": "same information as the live exposure, expressed as a position trade; EUR-specific positioning effect did not replicate on other currencies"
+}

@@ -83,8 +83,7 @@ THRESHOLDS = (0.55, 0.60, 0.65, 0.70)
 ATR_WEEKS = 13
 MIN_ROWS_PRED = 156          # weekly rows a predictor needs in the training window before T / L may use it
 C_GRID = (0.003, 0.03, 0.3)
-FRED_EXTRA = ("EXGEUS", "EXDNUS", "DEXDNUS", "IR3TIB01DEM156N", "IRLTLT01DEM156N", "IRLTLT01EZM156N",
-              "DEUCPIALLMINMEI", "INTDSRDEM193N")
+FRED_EXTRA = ("EXGEUS", "EXDNUS", "DEXDNUS", "IR3TIB01DEM156N", "IRLTLT01DEM156N", "DEUCPIALLMINMEI")
 
 # name: (family, kind, prior, definition, data span)     kind 'cont' = scaled by training std, 'bin' = already in [-1, 1]
 PRED = {
@@ -111,13 +110,13 @@ PRED = {
     "brk126":     ("TR", "bin", "+ breakout of the 6-month range", "+1 after a 126-session closing high, -1 after a low (state)", "1975+"),
     "cot_z52":    ("POS", "cont", "+ follow speculators (HOUSE finding; EUR-specific, fragile)", "non-commercial net/OI, 52-week z", "2000+"),
     "cot_z156":   ("POS", "cont", "+ same on a 3-year window (HOUSE)", "156-week z", "2002+"),
-    "cot_ext":    ("POSX", "bin", "- crowded positioning reverses (textbook contrarian)", "-sign(z156) when |z156| > 1.5", "2002+"),
+    "cot_ext":    ("POSX", "bin", "- crowded positioning reverses (textbook contrarian)", "-sign(z156) when abs(z156) > 1.5", "2002+"),
     "eqrel63":    ("EQ", "cont", "+ euro-area equity outperformance draws flows (HOUSE sign F04)", "63-session return DAX - S&P 500 (local)", "2003-04+"),
     "vix_lvl":    ("EQ", "cont", "- high VIX = risk-off, dollar bid (textbook; expected weak)", "-(VIX - its 252-session median)", "1991+"),
     "slope2_diff":  ("CURVE", "cont", "- the steeper relative curve underperforms (Ang-Chen 2010)", "-((EA10-EA2) - (US10-US2))", "2004-09+"),
     "slope3m_diff": ("CURVE", "cont", "- same with the 3-month rate", "-((EA10-EA3m) - (US10-US3m))", "1975+"),
     "seas":       ("SEAS", "bin", "+ December long / May short (HOUSE C03, no economic story)", "share of the horizon in December - share in May", "all"),
-    "seas_month": ("SEAS", "bin", "none: sign learned on the expanding training history (|t| >= 1)", "month-of-year mean of the target, prior years only", "5y after start"),
+    "seas_month": ("SEAS", "bin", "none: sign learned on the expanding training history (abs(t) >= 1)", "month-of-year mean of the target, prior years only", "5y after start"),
     "oil_d63":    ("OIL", "cont", "- dearer oil worsens euro-area terms of trade", "-(63-session log change of Brent)", "1987-09+"),
     "oil_d126":   ("OIL", "cont", "- same", "-(126-session log change of Brent)", "1987-12+"),
     "carry":      ("CARRY", "cont", "+ short-rate carry (expected weak)", "EUR overnight - Fed target (pre-1999: 3m interbank)", "1975+"),

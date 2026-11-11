@@ -192,6 +192,27 @@ def weekly_outlook(refresh: bool = True) -> str:
     L.append(f"Forecast (tilt + cone): {'DOWN' if exp.target_units < 0 else ('UP' if exp.target_units > 0 else 'FLAT')} tilt {tilt_bp:+.0f} bp, P(up week) {p_up:.0%} | 1-sigma week range {px - cone1:.4f} - {px + cone1:.4f} | 2-sigma {px - 2 * cone1:.4f} - {px + 2 * cone1:.4f}")
     L.append(f"Levels: last week H {prev_wk_hi:.4f} / L {prev_wk_lo:.4f} | weekly pivot {piv:.4f} | stop for the live exposure {exp.price + (exp.stop_distance_pips * PIP if exp.target_units < 0 else -exp.stop_distance_pips * PIP):.4f}")
     L.append(f"Exposure: {'SHORT' if exp.target_units < 0 else ('LONG' if exp.target_units > 0 else 'FLAT')} {abs(exp.target_units):.2f} units (positioning {exp.d_units:+.2f}, weak-signal {exp.c_units:+.2f})")
+    # ---- position call (multi-week): the three slow signals must agree
+    try:
+        import json as _json
+        from .refresh import ROOT as _ROOT
+        pc = _json.loads((_ROOT / "config" / "position_call.json").read_text())
+        sg = lambda x: 0 if (x != x or x == 0) else (1 if x > 0 else -1)
+        votes = {"positioning": sg(last["cot_z52"]), "2y-spread trend": sg(last["d_spread2y_20"]), "macro score": sg(exp.c_score)}
+        tot = sum(votes.values())
+        vtxt = ", ".join(f"{k} {'+' if v > 0 else ('-' if v < 0 else '0')}" for k, v in votes.items())
+        a14 = float(last["atr14_pips"]) * PIP
+        if abs(tot) == 3:
+            side = 1 if tot > 0 else -1
+            acc, nt = pc["accuracy_non_overlapping"], pc["no_touch"]
+            L.append(f"POSITION CALL: {'LONG' if side > 0 else 'SHORT'} EUR/USD (3 of 3 agree: {vtxt}) | historically right {acc['21']:.0%} at 1 month, "
+                     f"{acc['42']:.0%} at 2 months, {acc['63']:.0%} at a quarter (2010-26; not confirmed since 2023)")
+            L.append(f"  Stops at known odds: 3 ATR = {px - side * 3 * a14:.4f} (untouched {nt['21']['3atr']:.0%} of the time over 21 sessions, {nt['10']['3atr']:.0%} over 10) | "
+                     f"2 ATR = {px - side * 2 * a14:.4f} ({nt['21']['2atr']:.0%} / {nt['10']['2atr']:.0%})")
+        else:
+            L.append(f"POSITION CALL: none (signals disagree: {vtxt}); the multi-week rule only speaks when all three agree")
+    except Exception as e:
+        L.append(f"(position call unavailable: {e})")
     L.append("Events this week: " + ("; ".join(f"{r.event} {r.time:%a %H:%M}Z" for r in key.itertuples()) if not key.empty else "none high-impact"))
     L.append("Honesty note: the tilt's historical weekly hit rate is ~52-55 %; the cone is where most movement lies.")
     try:

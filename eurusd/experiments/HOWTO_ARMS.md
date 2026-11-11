@@ -93,3 +93,33 @@ probability of touching a level), report classification accuracy or Brier score 
 CPU: four arms share 4 cores; one process per arm, set OMP_NUM_THREADS=1; when working with M1/M5 data load only the
 columns and years you need (M1 parquet is 106 MB, 9 M rows) and cache intermediate daily aggregates to
 `data/processed/` under a name starting with your arm.
+
+---
+# Round 5 addendum (2026-11-11): the product is multi-week direction
+
+Read the Round 3 and Round 4 addenda first; they still apply (max 12 candidates, honest lags, leak checks, no touching
+live files or other arms). Read `research/RESEARCH_LOG.md` in full: ~440 trials so far; what failed must not be re-tested.
+
+Product (owner): DIRECTIONAL POSITION TRADING in EUR/USD, holds of weeks to a quarter, a call only when the odds are good.
+State of the art to beat (reports/arm_selective.md): the AGREEMENT RULE - call only when positioning sign (cot_z52), the
+20-day 2y-spread trend sign (d_spread2y_20) and the house macro-score sign agree (about 44 % of sessions): right
+56 / 59 / 61 / 72 % at 10 / 21 / 42 / 63 sessions non-overlapping (2010-26), 57 % at 21 sessions since 2016, unconfirmed
+since 2023. Rebuild it with `eurusd.arms.selective` helpers (read that module) so your numbers reconcile with it first.
+
+How a round-5 arm is judged (native to the horizon):
+1. Standalone: for each new signal, directional accuracy at 21 / 42 / 63 sessions on weekly decisions AND on
+   non-overlapping decisions, with Wilson intervals on the non-overlapping count; 2010-26, 2016-26, 2023-26.
+2. As an EXTRA VOTE: (a) accuracy and decisions/year of "agreement rule AND new signal agrees" vs the agreement rule alone;
+   (b) accuracy of calls the new signal makes when the three old signals do NOT agree (does it extend coverage?);
+   (c) the paired difference with a bootstrap interval. An extra vote that raises accuracy by cutting the sample to a
+   handful of trades proves nothing: report decisions per year next to every accuracy.
+3. Daily-stream incremental test from the Round 3 addendum, as before.
+4. Timing placebo: shift the new signal by +63 and +126 sessions; a slow level that scores the same when stale is a
+   regime bet, not information (this killed the macro surprise index).
+Success bar: the extra-vote rule beats the agreement rule by >= 3 accuracy points at 21 and 42 sessions on non-overlapping
+decisions in BOTH 2010-26 and 2016-26 with at least 6 decisions a year, is not worse in 2023-26, and the timing placebo
+loses at least half of the gain. Say plainly if you fail.
+Data notes: FRED is reachable only with `curl --http1.1` from some shells and not at all from others; GitHub mirrors
+(see `macro_fetch.py` MIRRORS) and the ECB API (https://data-api.ecb.europa.eu/service/data/<FLOW>/<KEY>?format=csvdata)
+work; Yahoo chart API needs a browser User-Agent and rate-limits (retry with backoff, cache everything you fetch).
+State the publication lag you assume for every monthly or weekly series and lag conservatively.
