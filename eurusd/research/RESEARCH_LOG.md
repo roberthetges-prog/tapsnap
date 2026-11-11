@@ -12,7 +12,7 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 | 2 | daily ML, intraday ML, weak-signal combination, regimes/trend, events (walk-forward 2010-2026) | 137 | weak-signal combination + positioning trend -> live exposure (Sharpe 0.56 / 0.64 / 0.36) |
 | 3 | rate expectations & stress (12), deep positioning (12), macro surprises (12), G10 positioning (10) | 46 | none added. Rates/stress: spread trend re-expressed, +0.03 Sharpe = noise. Deep positioning: crude rule not improved (placebo matched). Macro surprises: not timing-dependent, cannot run live. G10: effect does NOT replicate outside EUR |
 
-| 4 | vol-conditioned intraday tactics (12), FX relative value (12, strict count 24), flows & calendar (12) ... (others pending) | 48+ | vol tactics: none; range forecast kept for stop/target placement (78 % above/below-median accuracy; oracle ceiling for intraday tactics ~0.8-1.1 Sharpe) |
+| 4 | vol-conditioned intraday tactics (12), FX relative value (12, strict count 24), flows & calendar (12), intraday path from M1 (22), selective + swing + OFI replication pending | 70+ | vol tactics: none; range forecast kept for stop/target placement (78 % above/below-median accuracy; oracle ceiling for intraday tactics ~0.8-1.1 Sharpe) |
 
 ## What is established
 * Predictable: slow macro drift and speculative positioning (direction, weakly); volatility and range (strongly).
@@ -25,6 +25,10 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
   t 3.4, all eras positive, hit 54-59 %, ~12 a year, break-even ~3.4 pips. A 15-minute side tactic, not the product.
 * Seasonality: December long is supported in every era; May short was 2010-15 luck. The live `season` input's honest
   record is ~0.3 Sharpe since 2016. Candidate scenario for later: December-only season.
+* Intraday path features from 1-minute data (signed jumps, realised skew, session shares, efficiency, late-day move,
+  order-flow proxy): none robust; most are ret_1d in disguise and flip sign across eras. One post-hoc lead: the 5-day
+  order-flow proxy orthogonalised to the day's return (+0.53 / +0.41 / +0.68, 13 of 17 years). Being tested as a single
+  pre-registered replication on six other pairs (arm P). The 'fade the last hour' effect is a closing-bid artefact.
 * Positioning: the level is the signal; no trader group is specially informed; robust to z-window and to delays.
 * A six-month record cannot separate skill from luck (see reports/scenario_replay.md).
 * **Positioning does not replicate (reports/arm_g10_positioning.md).** The identical rule on GBP, JPY, CHF, AUD, CAD, NZD,

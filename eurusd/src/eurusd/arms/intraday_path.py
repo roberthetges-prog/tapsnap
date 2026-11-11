@@ -64,6 +64,11 @@ Sharpe at 1.2 pips. Its full 2010-2026 record is reported; 2016+ and 2023-2026 a
 CONTROLS declared in advance (not candidates): (a) the final's pipeline with every signal replaced by its residual
 from a training-window OLS on the existing price features [ret_1d / rv_1d_bp, body_rel, close_in_range - 0.5] (their
 5-day means for w5), (b) the final's pipeline run on those three existing features alone ("ret_1d in disguise").
+
+ADDED AFTER THE RESULTS (everything above was written before the first run and is unchanged): the final by the rule is
+w5_ofi and it fails (reports/arm_intraday_path.md). Post-hoc functions, none of them a candidate: late_artefact_check()
+(one extra backtest: d1_late executed 60 minutes after the close; total backtests looked at = 19 + 2 controls + 1 = 22),
+control_followup() (lags / null / combination of control (a), no new variant), residual_corr(), tranche_hit_rate().
 """
 from __future__ import annotations
 
