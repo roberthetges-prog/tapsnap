@@ -1,0 +1,11 @@
+cut_year,state,decisions,analogs_identical,max_abs_diff_p
+2012,A,260,True,0.0
+2012,B,260,True,0.0
+2012,C,260,True,0.0
+2012,D,260,True,0.0
+2012,E,260,True,0.0
+2019,A,260,True,0.0
+2019,B,260,True,0.0
+2019,C,260,True,0.0
+2019,D,260,True,0.0
+2019,E,260,True,0.0

@@ -882,8 +882,50 @@ def compute(cost_pips: float = 1.2, verbose: bool = True) -> dict:
         for h in HORIZONS:
             bench += eval_call(E, s, h, {"reference": nm})
     bench = pd.DataFrame(bench)
-    return {"E": E, "reconcile": rec, "passes": passes, "FC": FC, "acc": acc, "cal": cal, "una": una, "epi": epi, "votes": votes, "placebo": plc,
+    trunc = truncation_test(E)
+    log(trunc.to_string())
+    return {"E": E, "trunc": trunc, "reconcile": rec, "passes": passes, "FC": FC, "acc": acc, "cal": cal, "una": una, "epi": epi, "votes": votes, "placebo": plc,
             "boot": boots, "controls": ctl, "labelcorr": lab, "bench": bench}
+
+
+def truncation_test(E: Env, cut_years=(2012, 2019), states=("A", "B", "C", "D", "E")) -> pd.DataFrame:
+    """Engine look-ahead test: every state row after the last session of the cut year and every outcome not yet known
+    on that session are replaced by noise; the analogs and probabilities of the cut year's decisions must not change."""
+    rows = []
+    X0, F0 = E.X, {h: E.fwd[h] for h in HORIZONS}
+    rng = np.random.default_rng(3)
+    for Y in cut_years:
+        i1 = int(np.where(E.year == Y)[0][-1])
+        dec = np.where(E.year == Y)[0]
+        base = {st: knn_pass(E, st, years=[Y]) for st in states}
+        try:
+            X2 = X0.copy()
+            X2.iloc[i1 + 1:, :] = rng.normal(size=(E.n - i1 - 1, X2.shape[1])) * 10.0
+            E.X = X2
+            for h in HORIZONS:
+                f = F0[h].copy()
+                f[i1 + 1 - h:] = rng.normal(size=E.n - (i1 + 1 - h)) * 300.0
+                E.fwd[h] = f
+            E._Z = {}
+            for st in states:
+                new = knn_pass(E, st, years=[Y])
+                same_nn = bool((new["nn"][dec] == base[st]["nn"][dec]).all())
+                dp = 0.0
+                for k in KS:
+                    for h in HORIZONS:
+                        a = forecast(E, new["nn"], k, h)["p"][dec]
+                        E.fwd[h], keep = F0[h], E.fwd[h]
+                        b = forecast(E, base[st]["nn"], k, h)["p"][dec]
+                        E.fwd[h] = keep
+                        dp = max(dp, float(np.nanmax(np.abs(a - b))) if np.isfinite(a).any() else 0.0)
+                rows.append({"cut_year": Y, "state": st, "decisions": int((base[st]["nn"][dec, KMAX - 1] >= 0).sum()), "analogs_identical": same_nn,
+                             "max_abs_diff_p": dp})
+        finally:
+            E.X = X0
+            for h in HORIZONS:
+                E.fwd[h] = F0[h]
+            E._Z = {}
+    return pd.DataFrame(rows)
 
 
 def _get(T: pd.DataFrame, col: str = "accuracy", **kw) -> float:
@@ -1012,6 +1054,7 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True):
         R["labelcorr"].to_csv(RES / f"{ARM}_label_corr.csv", index=False)
         R["reconcile"].to_csv(RES / f"{ARM}_reconciliation.csv", index=False)
         R["bench"].to_csv(RES / f"{ARM}_reference_sign_rules.csv", index=False)
+        R["trunc"].to_csv(RES / f"{ARM}_truncation_test.csv", index=False)
         R["incremental"] = incremental()
         ex = explain(env=E, final=stream_name)
         (RES / f"{ARM}_latest.json").write_text(json.dumps(ex, indent=1))
@@ -1199,7 +1242,7 @@ def write_report(path: Path | None = None) -> str:
       "mode x period), `analogs_calibration.csv` (reliability tables and the near-unanimous calls), `analogs_votes.csv` (extra-vote tests and the timing "
       "placebo), `analogs_bar.csv`, `analogs_paired_bootstrap.csv`, `analogs_controls.csv` (farthest / random / shuffled / look-ahead), "
       "`analogs_episodes.csv`, `analogs_candidates.csv`, `analogs_reference_sign_rules.csv`, `analogs_label_corr.csv`, `analogs_incremental.csv`, "
-      "`analogs_reconciliation.csv`, `analogs_latest.json` (output of `explain()` for the latest session). The module docstring (states, analog rule, "
+      "`analogs_reconciliation.csv`, `analogs_truncation_test.csv`, `analogs_latest.json` (output of `explain()` for the latest session). The module docstring (states, analog rule, "
       "12 candidates, selection rule) was written before the first result.\n")
     A("## Verdict\n")
     A(VERDICT_MD.strip() + "\n")
@@ -1346,6 +1389,10 @@ def write_report(path: Path | None = None) -> str:
             A(_md(t) + "\n")
     rs = ctl[(ctl["mode"] == "weekly") & (ctl.period == "2006-26") & (ctl.ctl == "random") & (ctl.k == 20)].groupby(["state", "h"]).accuracy.agg(["min", "max"])
     A("Range of the five random draws (weekly, k = 20): " + "; ".join(f"{st} h{h} {_pc(r['min'])}-{_pc(r['max'])}" for (st, h), r in rs.iterrows()) + ".\n")
+    A("### Engine truncation test\n")
+    A("Every state row after the last session of the cut year and every outcome not yet known on that session replaced by noise; the chosen analogs and "
+      "the probabilities of that year's decisions must be unchanged (F excluded: its inputs come from the feature store).\n")
+    A(_md(R["trunc"]) + "\n")
     A("### Label in disguise? Correlation of every state dimension with the forward returns (all sessions 1999+)\n")
     A(_md(lab.round(3)) + "\n")
     # ---------------------------------------------------------------- 7 votes
@@ -1515,20 +1562,133 @@ def write_report(path: Path | None = None) -> str:
     return txt
 
 
-VERDICT_MD = """
-(verdict pending)
+VERDICT_MD = r"""
+**The owner's intuition was tested as a proper analog (nearest-neighbour / kernel) forecast and it does not work for EUR/USD. Analog forecasting
+does not reach the 60-80 % band at any horizon or decision frequency, its probabilities are not calibrated, and the Round 5 bar is not met by any
+of the 12 candidates.** What it does deliver is a transparent piece of context for the weekly outlook (`explain()`), to be shown WITH its record.
+
+1. **"When the economy / rates / markets looked like today" does not predict the next 1-3 months.** Out-of-sample 2010-26, non-overlapping decisions,
+   accuracy at 21 / 42 / 63 sessions with k = 20 (n = about 205 / 103 / 69, i.e. 12 / 6 / 4 decisions a year):
+   policy / rates state **A 46 / 48 / 57 %**, macro state (inflation, unemployment) **B 51 / 46 / 49 %**, market state **C 48 / 45 / 44 %**, union of
+   everything in 4 principal components **E 43 / 46 / 48 %**. With k = 40: A 42 / 54 / 44, B 55 / 56 / 55, C 47 / 47 / 42, E 46 / 46 / 55. On the
+   weekly and monthly clocks the same states sit between 41 and 56 %; over 2006-26 between 42 and 58 %. Every 2010-26 Wilson interval of A, B, C, E
+   at 21 sessions contains 50 % except A_k40, which lies BELOW it (35-49; E_k20 at 37-50 touches it). Nothing here is distinguishable from a coin.
+2. **The only analog states above chance are the two that contain the information we already trade, and the analogs do it worse than the plain sign.**
+   Positioning state **D 55 / 56 / 56 %** (k = 40: 53 / 55 / 54); the plain rule sign(cot_z52) on the same evaluator: 58 / 68 / 68 %.
+   The three agreement-rule inputs as a state, **F 58 / 59 / 64 %** with k = 20 (52 / 55 / 57 with k = 40); the sign of the house score alone:
+   55 / 61 / 64 %, the agreement rule: 59 / 61 / 72 %. Weekly grid: F 55 / 58 / 60 against 59 / 65 / 67 for the agreement rule. So to the question
+   "do analogs add anything to plain sign agreement?" the answer is no: nearest neighbours on (positioning, spread trend, house score) recover part of
+   the same drift, with more noise and a strong dependence on k.
+3. **The analog probability is not calibrated; "70 % of the analogs rose" came true about half the time.** Weekly forecasts 2006-26, k = 20, states
+   A, B, C, E pooled: when 70-80 % of the analogs pointed one way that way was right **45 / 47 / 49 %** of the time at 21 / 42 / 63 sessions
+   (448 / 656 / 804 forecasts); at >= 80 %: **34 / 55 / 46 %** (29 / 137 / 204). Brier scores 0.252-0.281 against 0.250 for "always 50 %": worse than
+   saying 50 % in all 24 A/B/C/E cells. The slope of outcome on stated probability is negative for A (-0.5 to -0.1) and for C in five of six cells; for B
+   and E it is about zero with k = 20 (-0.4 to +0.1) and positive with k = 40 (B +0.2 to +0.6, E 0.0 to +0.7), still with Brier scores of 0.252-0.258.
+   D and F have a positive slope throughout (D +0.3 to +0.9, F +0.3 to +0.6; calibrated would be 1) and Brier scores of 0.247-0.258, i.e. equal to the coin.
+   The kernel-weighted and the episode-level probabilities are no better (section 4).
+4. **Near-unanimous analogs are not better calls, and they are rare.** At least 70 % one way happens on 9-20 % of weeks at 21 sessions (16-40 % at 63
+   sessions); non-overlapping 2010-26 that is 1.5-6 decisions a year for A-E, right **A 34 / 41 / 41 %, B 49 / 46 / 56 %, C 45 / 37 / 60 %, D 46 / 52 / 51 %,
+   E 42 / 45 / 41 %** (n = 25-107 per cell). F: 54 / 60 / 56 % on 8 / 5 / 4 decisions a year. At least 80 % one way: 0-3 % of weeks at 21 sessions,
+   under 1.3 decisions a year for A-E with 0-75 % right on 1-20 decisions (nothing can be said); F 53 / 67 / 60 % on about 3 a year.
+5. **Why: twenty neighbours are four or five observations, and the neighbourhood carries no stable drift.**
+   * Independent episodes behind a k = 20 forecast (analogs within 63 sessions of each other = one episode): macro state B **4.2**, policy state A **4.8**,
+     union E 6.1, market C 9.4, positioning D 12.0, F 11.0 (k = 40: 6.3 / 6.1 / 7.6 / 13.0 / 15.9 / 13.5). In 10 % of weeks the macro forecast rests on two
+     episodes or fewer. A slow state has visited each neighbourhood only a handful of times since 1999, and the nearest analogs are very often the months just before
+     the embargo (today's ten nearest macro analogs: four dates from spring-summer 2026, five from 2007-12..2008-07, one from 2024).
+   * Distance does not matter for the new states. Weekly 2006-26, k = 20, 21 / 42 / 63 sessions: A nearest 47 / 49 / 48 %, random dates 50 / 49 / 50,
+     FARTHEST dates 51 / 52 / 54; B 51 / 51 / 50 vs 50 / 50 / 52 vs 53 / 50 / 54; C 50 / 47 / 48 vs 50 / 49 / 48 vs 51 / 49 / 47; E 49 / 50 / 55 vs
+     50 / 50 / 52 vs 49 / 46 / 43. The method is at best the unconditional coin for these states. It does matter for D (55 / 55 / 57 vs 50 / 50 / 51 random)
+     and F (54 / 57 / 60 vs 49 / 48 / 48 random vs 45 / 42 / 39 farthest), which is the known positioning / house-score information.
+   * Even hindsight does not help: allowing analogs from the FUTURE (with the 63-session embargo) leaves A, B, C, E at 45-50 % at 21 sessions. The same
+     state has been followed by opposite moves in different episodes; there is no stable mapping to find.
+6. **Extra vote on the agreement rule: fails for all 12.** Final `F_k20`: gain -2.4 / +6.8 points at 21 / 42 sessions in 2010-26, +0.2 / +9.6 in 2016-26,
+   -8.4 / +7.6 in 2023-26 (non-overlapping; weekly paired difference +1.5 [-2.9, +6.1] and -0.1 [-2.3, +2.1]). The candidate closest to the bar is
+   `B_k40` (macro state): +4.2 / +8.0 points in 2010-26 and +9.4 / +10.8 in 2016-26, not worse in 2023-26, but on 5.2 / 3.1 decisions a year (under the 6
+   required) and with a placebo that keeps +3.3 / +4.4 (2010-26) and +6.7 / +2.6 (2016-26) of the 42-session gain when the call is 63 / 126 sessions stale.
+   On the weekly grid its paired difference is +7.2 [+0.6, +14.0] at 21 sessions and -2.9 [-12.2, +4.9] at 42: one of the 24 candidate intervals excludes
+   zero upwards and one (`E_k40`, -9.4 [-19.4, -0.1]) downwards, which is what chance produces. Its sibling `B_k20` on the same state loses 2.2 / 0.3 points,
+   and B_k40 is long in 71-84 % of its calls. Not a lead. Coverage extension (analog calls when the three old signals disagree): 44-55 % at 21 sessions
+   (n = 156-168).
+7. **Final by the declared rule: `F_k20`** (highest lower Wilson bound in 2006-15: 61.8 % on 76 decisions, bound 50.6 %; F can only forecast from 2009-11).
+   Full record, non-overlapping: 2010-26 **57.8 % [51-64] at 21 sessions (n = 206, 12 a year), 59.2 % [50-68] at 42 (n = 103), 63.8 % [52-74] at 63
+   (n = 69)**; 2016-26 53.0 / 53.0 / 65.9 %; 2023-26 50.0 / 47.8 / 73.3 % (n = 46 / 23 / 15). Weekly-tranche book net Sharpe **0.51 / 0.42 / -0.01**
+   (2010-26 / 2016-26 / 2023-26), deflated-Sharpe p 0.32, hit rate of active sessions 50.6 %; three-way combination 0.58 / 0.63 / 0.26 against 0.56 / 0.64 / 0.36
+   for the two live streams; correlation 0.57 with `regime_trend`. It is the agreement-rule information through a noisier estimator (its sibling with k = 40:
+   51.7 % at 21 sessions, Sharpe 0.13), its library scores are in-sample fitted, and it is below the plain rules it was built from. **Round 5 bar: not met
+   (0 of 12). Round 3 bar: not met (2023-26 negative, three-way below two-way on 2016-26).** No stream is recommended.
+8. Robustness: Mahalanobis distance, the kernel-weighted vote, the library frozen at each year start (strict protocol), the long library with nine extra
+   DEM years (A 46 / 47 / 49, B 50 / 52 / 51, C 51 / 51 / 53 % in 2010-26) and the other-era replication on 1997-2005 (A 44 / 56 / 62 on 108 / 55 / 37
+   decisions, B 52 / 51 / 51, C 45 / 51 / 41) all give the same picture. Leak checks are clean: shuffled outcomes 48-53 %; removing the embargo lifts every
+   state to 56-60 % at 21 sessions and 60-69 % at 63 (as it must); replacing everything after a cut date by noise leaves that year's analogs and
+   probabilities unchanged; the agreement rule rebuilt here matches arm N to the decision.
+
+**Answer to the owner.** History does rhyme often enough to be worth LOOKING at, but for EUR/USD the rhyme is not a forecast: with 27 years of euro
+history a macro / policy state has four or five independent precedents, the precedents disagree with each other about as often as a coin would, and
+"most analogs rose" was right 45-49 % of the time when 70-80 % of them agreed. The honest ceiling stays where the log has it: about 59 % at one month,
+61-65 % at two and 67-72 % at a quarter when positioning, the spread trend and the house score agree. Use `explain()` as a "what happened the last times
+it looked like this" panel, never as a probability.
 """
 
-NOTES_MD = """
-(notes pending) {first_aaa} {offset_pp:.3f} {proxy_rmse_first250_pp:.3f} {off_u:.2f}
+NOTES_MD = r"""
+* **Count of trials.** 12 candidates (state x k at 21 sessions) as declared. Strictly counted, 36 state x k x horizon cells of the main method were tabulated,
+  plus diagnostics that were never selected from: Mahalanobis (36), kernel (18), long library (18, and 18 on 1997-2005), near-unanimity cells (72). The
+  controls (farthest, random, shuffled, look-ahead, frozen, stale) are checks, not variants.
+* **Deviation from the yearly protocol, as specified in the brief:** the analog library grows daily (analogs at least 63 sessions before the decision,
+  so every 21 / 42 / 63-session outcome is known); only the standardisation, the PCA and the covariance are frozen at 1 January of the decision year.
+  The strict version (library frozen at year start minus 63 sessions) is in section 6 and gives the same picture.
+* **Proxy.** The euro-area AAA 2y yield starts {first_aaa}; before that state A uses 3m interbank + 0.18 x (German 10y - 3m) from monthly averages with a
+  45-day lag, shifted by {offset_pp:+.3f} pp (mean gap over the first 250 AAA sessions, RMSE {proxy_rmse_first250_pp:.2f} pp there). The 63-session change of
+  the spread before 2004-09 is therefore coarse. It affects the library of A and E only, not the test dates.
+* **Policy gap** = ECB deposit rate minus the Fed target of `policy_state.csv` (midpoint of the range after 2008); the feature store's `policy_diff` uses the
+  upper bound, a constant 0.125 pp difference that standardisation removes.
+* **State F** uses, for a decision in year Y, house-score weights fitted before Y applied to every session, so the library scores are in-sample fitted
+  to next-day returns. This can only flatter F; F still does not beat the plain sign of the house score.
+* **Long-library variants** (1990+): Bundesbank / German proxies before the euro (policy phases and key-rate index of arm T, German CPI y/y before HICP
+  y/y exists, German unemployment + {off_u:.2f} pp before 2000), synthetic DEM euro for the price and the outcomes. Diagnostic only.
+* **Added after the first run** (none changes the selection): the table of plain sign rules on the same evaluator (section 3), the by-year record of the
+  final, the out-of-sample record inside `explain()`, and the label-correlation table computed on all sessions instead of the weekly grid (on the weekly
+  grid one dimension, the 6-month Brent change, showed a +0.10 correlation with the NEXT-session return; on all sessions it is +0.007 and on the other four
+  weekly phases -0.06 to +0.02: a sampling accident of that phase before 2010, not a leak).
+* **Suspicious / worth knowing.** (a) Non-overlapping cells of 40-70 decisions move by +-10 points with the starting day: e.g. A_k20 at 63 sessions shows 57 %
+  non-overlapping and 45 % on the weekly grid in 2010-26. Read the weekly column next to every non-overlapping one. (b) The random control is identical for B
+  and E because both have the same eligible sessions and the same seeds. (c) B_k40 looks positive (55-56 %, book Sharpe 0.28 / 0.46 / 0.62) but is long in
+  71-84 % of its calls; on the weekly grid 2006-26 it scores 54 / 55 / 54 % against 50 / 50 / 52 for random dates and 54 / 50 / 49 for the farthest
+  dates, and its k = 20 sibling is at 46-51 % (2010-26, non-overlapping).
+  (d) Macro inputs are latest-vintage (revision risk as in arm T); with a clean negative this cannot matter.
+* **Replication (Round 6 lesson).** Other eras: done (1997-2005 with the long library, section 9): chance. Other currency pairs: not done, the repo has no
+  policy-state or macro history for other pairs; nothing in the EUR/USD result suggests it would be worth building.
 """
 
-STATES_MD = """
-(states pending)
+STATES_MD = r"""
+Frame: arm O's continuous daily closes (synthetic DEM euro 1975-98, Fed H.10 1999-2002, feature-store sessions 2003-2026-11-06; 13,248 sessions). Main
+analog library from 1999-01-04. Every input is what was public the calendar day before the session's closing date.
+
+| state | dimensions | sources and lags | complete from |
+|:--|:--|:--|:--|
+| A policy / rates (7) | Fed phase, ECB phase (-1 cutting / 0 hold / +1 hiking); ECB deposit - Fed target and its 126-session change; US 2y - Fed target; EA - US 2y spread and its 63-session change | `data/macro/policy_state.csv` (arm T, causal phases; row of closing date - 1); `fred_DGS2`, `ea_aaa_yield_curve.csv` lagged one calendar day; 2y proxy before 2004-09 | 1999-06-29 |
+| B macro (8) | US CPI y/y, its 6-month change; euro-area HICP y/y, its 6-month change; US unemployment, 6-month change; euro-area unemployment, 6-month change | `fred_CPIAUCSL`, `fred_UNRATE`, `fred_CP0000EZ19M086NEST`: reference-month end + 21 days (US shutdown months not before 2026-01-31); `ea_unemployment.csv`: + 35 days; older than 150 days = missing | 2000-09-05 |
+| C market (7) | EUR/USD 63- and 252-session return; log distance from the 200-session average; percentile of 21-session realised volatility in the trailing 1260 sessions; log VIX; DAX - S&P 500 63-session return; Brent 126-session change | frame closes; `fred_VIXCLS`, `gdaxi_D1`, `spx_D1` + new `analogs_spx_pre2003_D1`, `datahub_brent_daily`: one calendar day | 1999-01-04 |
+| D positioning (2) | cot_z52 and its 65-session change | `cot_eurofx_legacy.csv`, report date + 6 days, then one day (identical to the store's `cot_z52`) | 2000-04-04 |
+| E union (24 -> 4) | first 4 principal components of A-D, loadings from the training window | as above | 2000-09-05 |
+| F agreement inputs (3) | cot_z52, d_spread2y_20, house score | feature store; house weights fitted before the decision year | 2004-10-05 |
+
+New raw data: `data/processed/cross/analogs_spx_pre2003_D1.parquet` - S&P 500 daily closes 1989-01-03 .. 2002-12-31 from the Yahoo chart API (`^GSPC`,
+one request with a browser User-Agent, 3,532 rows, same format as `spx_D1.parquet`, whose first close 2003-01-02 it meets exactly); used with a one-calendar-day
+lag for the relative equity return of state C before 2003-04.
 """
 
-TAIL_MD = """
-(tail pending)
+TAIL_MD = r"""
+How to use it in the weekly outlook: call `eurusd.arms.analogs.explain()` (about a second after the imports; it needs the current feature store and
+`data/macro/policy_state.csv`, which arm T's `run()` rebuilds) or `PYTHONPATH=src python -m eurusd.arms.analogs latest` to rewrite `analogs_latest.json`.
+Show the analog dates and what followed as a narrative panel ("the last times the macro picture looked like this were spring 2008 and mid-2024"), always
+with `n_episodes` and the out-of-sample record that the function returns next to each state. Do not print the analog share as a probability of direction:
+section 4 shows it is not one.
+
+## What helped, what did not
+* Helped: nothing new. Positioning and the house score reappear when they are the state (D, F), weaker than their plain signs.
+* Did not help: the policy phase of both central banks, the policy gap and its change, the 2y spread and its change, inflation and unemployment levels and
+  changes on both sides, the market state (trend, volatility, VIX, relative equities, oil), their union in principal components; a larger k; Mahalanobis
+  distance; kernel weighting; nine more years of library; demanding unanimity; counting episodes instead of analogs.
 """
 
 
@@ -1538,6 +1698,8 @@ if __name__ == "__main__":
         print(json.dumps(explain(sys.argv[2] if len(sys.argv) > 2 else None), indent=1))
     elif arg == "report":
         write_report()
+    elif arg == "latest":
+        (RES / f"{ARM}_latest.json").write_text(json.dumps(explain(), indent=1))
     else:
         pos, rep = run()
         R = run.last

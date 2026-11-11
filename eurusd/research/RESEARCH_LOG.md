@@ -100,5 +100,9 @@ between the economy-implied relative policy path and what 2y yields price (arm T
 Round 6 (2026-11-11): 'history rhymes' analog / nearest-neighbour forecasting on the macro state (owner's intuition);
 replication of the policy-divergence lead across G10 pairs (does rate-differential trend following work when the policy
 gap is widening?); scoping of data we cannot reach yet (options positioning, OIS, flow, news text).
+Round 7 (2026-11-11): NEW INFORMATION found reachable by the scoping pass (research/DATA_SCOPING.md, 36 sources):
+options (25-delta risk reversals 2003-2026, implied vol, CFTC options-only positioning); official flows (Fed custody
+holdings, foreign repo pool, swap lines; ECB portfolio flows); text and uncertainty (news sentiment, policy uncertainty,
+geopolitical risk, central-bank speeches and statements, policy / information shocks).
 Later: weekly-horizon ensembles of survivors; implied volatility and options positioning (needs a data host);
 news / central-bank text tone (needs a data host); cross-currency portfolio if G10 positioning validates.

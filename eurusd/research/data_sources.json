@@ -1,0 +1,1460 @@
+{
+  "generated": "2026-11-11",
+  "scoring": "expected_value = independence x history x plausibility / effort; each on a 1-5 scale. history: 5 = 20+ years, 4 = 15-20, 3 = 10-15, 2 = 5-10, 1 = under 5 or forward-only. history_basis says whether the length was verified by download or only claimed by the provider / third parties.",
+  "top8": [
+    "rr25_eurusd_github",
+    "fred_h41_foreign_custody",
+    "epu_fred",
+    "cftc_options_delta",
+    "gpr_github",
+    "jk_policy_shocks",
+    "ecb_bps_portfolio_flows",
+    "sf_fed_news_sentiment"
+  ],
+  "hosts_reachable_today": [
+    {
+      "host": "raw.githubusercontent.com",
+      "use": "GitHub copies: risk reversal, ATM vols, policy shocks, GPR, FOMC text, SF Fed copy"
+    },
+    {
+      "host": "media.githubusercontent.com",
+      "use": "GitHub large files (ECB speeches copy, 52 MB)"
+    },
+    {
+      "host": "fred.stlouisfed.org",
+      "use": "EVZ, EPU family, H.4.1 custody, term premia (curl --http1.1, default user-agent only)"
+    },
+    {
+      "host": "api.stlouisfed.org",
+      "use": "ALFRED vintages once a free API key exists"
+    },
+    {
+      "host": "data-api.ecb.europa.eu",
+      "use": "BPS portfolio flows, SPF, OIS money-market statistics, TARGET balances"
+    },
+    {
+      "host": "www.cftc.gov",
+      "use": "futures-and-options-combined history"
+    },
+    {
+      "host": "www.bis.org",
+      "use": "central bankers' speeches bulk files and RSS"
+    },
+    {
+      "host": "storage.googleapis.com",
+      "use": "GDELT raw files (bucket data.gdeltproject.org)"
+    },
+    {
+      "host": "query1.finance.yahoo.com",
+      "use": "6E volume, live fed funds contracts, FXE"
+    }
+  ],
+  "hosts_to_allow_in_priority_order": [
+    {
+      "host": "www.frbsf.org",
+      "unlocks": "live SF Fed news sentiment (top-8 item; the GitHub copy stops 2025-05-18)"
+    },
+    {
+      "host": "www.cmegroup.com",
+      "unlocks": "CVOL EUVL and skew = only free live continuation of the risk reversal / implied vol; daily bulletin (6E option open interest)"
+    },
+    {
+      "host": "cdn.cboe.com",
+      "unlocks": "FXE option chain for an own implied-vol and skew series going forward"
+    },
+    {
+      "host": "www.ecb.europa.eu",
+      "unlocks": "official all_ECB_speeches.csv (weekly), EA-MPD event database, policy statements"
+    },
+    {
+      "host": "www.federalreserve.gov",
+      "unlocks": "official FOMC statements, minutes, speeches, H.4.1 detail"
+    },
+    {
+      "host": "ticdata.treasury.gov",
+      "unlocks": "TIC monthly flows"
+    },
+    {
+      "host": "www.sentix.de",
+      "unlocks": "EUR-USD investor sentiment (needs a registered login as well)"
+    },
+    {
+      "host": "api.gdeltproject.org",
+      "unlocks": "GDELT timelines without the 170 GB raw route"
+    },
+    {
+      "host": "www.atlantafed.org",
+      "unlocks": "GDPNow history, Market Probability Tracker"
+    },
+    {
+      "host": "www.mof.go.jp",
+      "unlocks": "Japan weekly securities flows"
+    },
+    {
+      "host": "download.zew.de",
+      "unlocks": "ZEW monthly tables with dollar/euro expectations"
+    },
+    {
+      "host": "www.newyorkfed.org",
+      "unlocks": "NY Fed nowcast, market surveys"
+    },
+    {
+      "host": "pddata.dtcc.com",
+      "unlocks": "OTC FX option trades (one year of history only)"
+    },
+    {
+      "host": "trends.google.com",
+      "unlocks": "Google Trends"
+    },
+    {
+      "host": "content.guardianapis.com",
+      "unlocks": "Guardian article API"
+    },
+    {
+      "host": "api.fiscaldata.treasury.gov",
+      "unlocks": "Treasury auction results"
+    },
+    {
+      "host": "data.snb.ch",
+      "unlocks": "SNB sight deposits"
+    },
+    {
+      "host": "data.imf.org",
+      "unlocks": "COFER"
+    }
+  ],
+  "hosts_confirmed_blocked_today": [
+    "www.frbsf.org",
+    "www.cmegroup.com",
+    "cdn.cboe.com",
+    "www.ecb.europa.eu",
+    "www.federalreserve.gov",
+    "ticdata.treasury.gov",
+    "home.treasury.gov",
+    "www.sentix.de",
+    "api.gdeltproject.org",
+    "www.atlantafed.org",
+    "www.newyorkfed.org",
+    "markets.newyorkfed.org",
+    "www.mof.go.jp",
+    "www.zew.de",
+    "download.zew.de",
+    "www.ifo.de",
+    "pddata.dtcc.com",
+    "trends.google.com",
+    "content.guardianapis.com",
+    "api.nytimes.com",
+    "wikimedia.org",
+    "api.fiscaldata.treasury.gov",
+    "www.treasurydirect.gov",
+    "data.snb.ch",
+    "www.snb.ch",
+    "data.imf.org",
+    "www.imf.org",
+    "alfred.stlouisfed.org",
+    "www.policyuncertainty.com",
+    "www.matteoiacoviello.com",
+    "www.philadelphiafed.org",
+    "www.clevelandfed.org",
+    "www.kansascityfed.org",
+    "data.bis.org",
+    "stats.bis.org",
+    "www.dukascopy.com",
+    "freeserv.dukascopy.com",
+    "www.myfxbook.com",
+    "www.oanda.com",
+    "api.ig.com",
+    "www.investing.com",
+    "data.nasdaq.com",
+    "www.quandl.com",
+    "www.dolthub.com",
+    "huggingface.co",
+    "zenodo.org",
+    "dataverse.harvard.edu",
+    "www.kaggle.com",
+    "web.archive.org",
+    "ec.europa.eu",
+    "sdmx.oecd.org",
+    "api.db.nomics.world",
+    "www.ici.org",
+    "www.bundesbank.de",
+    "api.statistiken.bundesbank.de",
+    "www.ishares.com",
+    "www.invesco.com",
+    "www.barchart.com",
+    "www.theice.com"
+  ],
+  "notes": [
+    "stooq.com answers but serves a JavaScript proof-of-work page: unusable from curl.",
+    "datafeed.dukascopy.com: connection reset (not a proxy refusal); status unclear.",
+    "fred.stlouisfed.org refuses a browser user-agent from this sandbox; plain curl --http1.1 works.",
+    "fredgraph.csv ignores vintage_date; vintages need api.stlouisfed.org with a key.",
+    "bq / gcloud have no credentials, so GDELT on BigQuery is not available."
+  ],
+  "sources": [
+    {
+      "id": "rr25_eurusd_github",
+      "category": "1 FX options",
+      "name": "EUR/USD 1-month 25-delta risk reversal (Bloomberg BGN), GitHub copy",
+      "measures": "Implied vol of 25-delta EUR calls minus EUR puts, 1 month; also USD/JPY and EUR/JPY.",
+      "economic_rationale": "Price of crash insurance = where option buyers pay up for protection. Level/extremes proxy hedging demand and skew risk premium; changes show whether real-money hedgers lean with or against spot.",
+      "frequency": "daily",
+      "publication_lag": "same day (market quote)",
+      "history_verified": "2003-10-02 .. 2026-07-29, 5,874 EUR/USD rows, 150-262 rows a year, longest gap 13 days",
+      "verification_method": "Downloaded the file (302 kB) and parsed it; values plausible (-2.86 on 2008-10-24, -2.26 on 2015-01-16).",
+      "history_claimed_unverified": "",
+      "cost": "free copy of paid data (Bloomberg)",
+      "url_pattern": "https://raw.githubusercontent.com/GerardWu100/geographic-equity-rotation/main/data/RiskReversalData_Clean.csv",
+      "hosts_required": [
+        "raw.githubusercontent.com"
+      ],
+      "reachable_today": true,
+      "format_and_size": "CSV, 0.3 MB",
+      "github_mirror": {
+        "url": "https://raw.githubusercontent.com/GerardWu100/geographic-equity-rotation/main/data/RiskReversalData_Clean.csv",
+        "range_seen": "2003-10-02 .. 2026-07-29"
+      },
+      "pitfalls": "Third-party redistribution of Bloomberg data: research use only, licence is not ours; one tenor only (1M), no butterfly; quote time unknown (assume NY close, lag one day); copy ends 2026-07-29 and may never update. A sibling study on JPY carry (AleMazza04-NoScroll/carry-unwind-signals) found risk reversals REACT to returns rather than lead them: expect a contemporaneous, not predictive, relation.",
+      "independence_note": "Moderate: correlated with recent spot return and with speculative positioning, but it is an options-market price the project has never seen.",
+      "already_in_project": false,
+      "live_continuation": "No free live feed. Options: CME CVOL skew (www.cmegroup.com), or own skew from the FXE chain (cdn.cboe.com).",
+      "hosts_for_live_use": [
+        "www.cmegroup.com",
+        "cdn.cboe.com"
+      ],
+      "scores": {
+        "independence": 3,
+        "history": 5,
+        "history_basis": "verified",
+        "plausibility": 3,
+        "effort": 1,
+        "expected_value": 45.0
+      },
+      "rank_by_expected_value": 1
+    },
+    {
+      "id": "fred_h41_foreign_custody",
+      "category": "3 Flows and positioning",
+      "name": "Fed H.4.1 memo items: securities held in custody for foreign official accounts; foreign repo pool; swap lines",
+      "measures": "Treasuries and agencies held at the NY Fed for foreign central banks (WMTSECL1, WSEFINTL1), foreign official reverse repos (WLRRAFOIAL), central-bank liquidity swaps (SWPT).",
+      "economic_rationale": "Weekly footprint of reserve managers: dollar accumulation and liquidation by foreign central banks (intervention, reserve recycling into euros). Not in the project's H.4.1 file (walcl, wresbal, rrp only).",
+      "frequency": "weekly (Wednesday level)",
+      "publication_lag": "1 day (Thursday 16:30 ET)",
+      "history_verified": "2002-12-18 .. 2026-11-04, 1,247 weeks each",
+      "verification_method": "Downloaded four series from FRED.",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=WMTSECL1 (also WSEFINTL1, WLRRAFOIAL, SWPT, WFCDA)",
+      "hosts_required": [
+        "fred.stlouisfed.org"
+      ],
+      "reachable_today": true,
+      "format_and_size": "CSV, 30 kB each",
+      "github_mirror": null,
+      "pitfalls": "Covers only reserves custodied at the Fed (share has changed over time); face value; mixes all currencies' reserve managers. FRED answers curl only with the default user-agent and --http1.1 (a browser user-agent is refused).",
+      "independence_note": "High: official-sector flow, unrelated to speculative futures positioning.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 4,
+        "history": 5,
+        "history_basis": "verified",
+        "plausibility": 2,
+        "effort": 1,
+        "expected_value": 40.0
+      },
+      "rank_by_expected_value": 2
+    },
+    {
+      "id": "epu_fred",
+      "category": "4 News and text",
+      "name": "Economic Policy Uncertainty and news-based trackers (FRED copies)",
+      "measures": "Newspaper-count indices: US daily EPU; Europe, Germany, Italy, UK monthly; US monetary-policy and trade-policy uncertainty; equity-market-volatility trackers by topic (incl. exchange rates).",
+      "economic_rationale": "Relative policy uncertainty US vs Europe is a risk-premium driver independent of rates and positioning.",
+      "frequency": "daily (US), monthly (others)",
+      "publication_lag": "1 day (US daily); about 1 month (monthly)",
+      "history_verified": "USEPUINDXD 1985-01-01 .. 2026-11-10; EUEPUINDXM 1987-01 .. 2026-10; DEEPUINDXM 1993-01 .. 2026-10; EPUMONETARY and EPUTRADE 1985-01 .. 2026-09; EMVEXRATES 1985-01 .. 2026-10; WLEMUINDXD 1985 .. 2026-11-10",
+      "verification_method": "Downloaded each from FRED.",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=USEPUINDXD (EUEPUINDXM, DEEPUINDXM, ITEPUINDXM, UKEPUINDXM, EPUMONETARY, EPUTRADE, EMVEXRATES, EMVMONETARYPOL, WLEMUINDXD)",
+      "hosts_required": [
+        "fred.stlouisfed.org"
+      ],
+      "reachable_today": true,
+      "format_and_size": "CSV, <0.3 MB each",
+      "github_mirror": null,
+      "pitfalls": "Monthly indices are revised and rescaled; no daily European index exists; France series absent on FRED.",
+      "independence_note": "High: built from newspaper text.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 4,
+        "history": 5,
+        "history_basis": "verified",
+        "plausibility": 2,
+        "effort": 1,
+        "expected_value": 40.0
+      },
+      "rank_by_expected_value": 3
+    },
+    {
+      "id": "cftc_options_delta",
+      "category": "1 FX options",
+      "name": "CFTC options-only positioning in Euro FX (combined report minus futures-only)",
+      "measures": "Delta-equivalent option positions by trader group = futures-and-options-combined minus futures-only.",
+      "economic_rationale": "Splits speculative positioning into outright futures and option exposure; option exposure of leveraged funds and asset managers is a positioning view the project has not used (only futures-only columns are in cot_eurofx_deep.csv).",
+      "frequency": "weekly (Tuesday)",
+      "publication_lag": "3 days (Friday 15:30 ET)",
+      "history_verified": "Legacy combined: Euro FX 1999-01-05 .. 2016-12-27 (939 weeks) in deahistfo_1995_2016.zip, then yearly files to deahistfo2026.zip; by-trader-type (TFF) combined: 551 Euro FX weeks in fin_com_txt_2006_2016.zip, then yearly com_fin_txt_{YYYY}.zip; current week FinComWk.txt dated 2026-11-03",
+      "verification_method": "Downloaded and parsed both multi-year archives (19.3 MB, 3.2 MB); HTTP 200 on the 2026 files; compared FinComWk.txt with FinFutWk.txt for 2026-11-03: open interest 1,031,931 vs 876,122, leveraged-fund longs 90,652 vs 119,238.",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "https://www.cftc.gov/files/dea/history/deahistfo_1995_2016.zip ; .../deahistfo{YYYY}.zip ; .../fin_com_txt_2006_2016.zip ; .../com_fin_txt_{YYYY}.zip ; https://www.cftc.gov/dea/newcot/FinComWk.txt",
+      "hosts_required": [
+        "www.cftc.gov"
+      ],
+      "reachable_today": true,
+      "format_and_size": "zipped CSV, ~45 MB in total",
+      "github_mirror": null,
+      "pitfalls": "Delta-weighted aggregate only: no strikes, expiries or put/call split. Same Tuesday snapshot and Friday release as the positioning already used. The project README says curl sometimes gets a Cloudflare challenge from cftc.gov; a browser user-agent worked today.",
+      "independence_note": "Low-moderate: same reporting population as the live positioning stream.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 2.5,
+        "history": 5,
+        "history_basis": "verified",
+        "plausibility": 3,
+        "effort": 1,
+        "expected_value": 37.5
+      },
+      "rank_by_expected_value": 4
+    },
+    {
+      "id": "gpr_github",
+      "category": "4 News and text",
+      "name": "Geopolitical Risk index, daily (Caldara-Iacoviello), authors' GitHub",
+      "measures": "Share of newspaper articles about geopolitical threats and acts.",
+      "economic_rationale": "Safe-haven demand for dollars; Europe-centred shocks (Ukraine, energy) hit the euro.",
+      "frequency": "daily",
+      "publication_lag": "about 1 week",
+      "history_verified": "1985-01-01 .. 2026-11-02 (15,281 rows)",
+      "verification_method": "Downloaded the xls and read first/last rows.",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "https://raw.githubusercontent.com/iacoviel/iacoviel.github.io/master/gpr_files/data_gpr_daily_recent.xls",
+      "hosts_required": [
+        "raw.githubusercontent.com"
+      ],
+      "reachable_today": true,
+      "format_and_size": "XLS, 3.3 MB (needs xlrd)",
+      "github_mirror": {
+        "url": "https://raw.githubusercontent.com/iacoviel/iacoviel.github.io/master/gpr_files/data_gpr_daily_recent.xls",
+        "range_seen": "1985-01-01 .. 2026-11-02"
+      },
+      "pitfalls": "The log's own test of 'dollar as safe haven when stress is high and rising' was right 41 % of the time.",
+      "independence_note": "High.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 4.5,
+        "history": 5,
+        "history_basis": "verified",
+        "plausibility": 1.5,
+        "effort": 1,
+        "expected_value": 33.8
+      },
+      "rank_by_expected_value": 5
+    },
+    {
+      "id": "jk_policy_shocks",
+      "category": "2 Policy paths",
+      "name": "Jarocinski-Karadi high-frequency policy and information shocks (Fed, ECB)",
+      "measures": "Surprise in OIS / fed funds futures in the minutes around each FOMC and ECB announcement, split into 'policy' and 'central-bank information' shocks.",
+      "economic_rationale": "Measures what the market did NOT expect, which the calendar actual-vs-forecast data cannot. Relative cumulated surprises are a candidate for post-announcement drift over weeks.",
+      "frequency": "per meeting (8 a year each) and monthly",
+      "publication_lag": "same day in principle; these files are updated a few times a year",
+      "history_verified": "Fed 1990-02-08 .. 2026-09-16; ECB 1999-01-07 .. 2025-10-30",
+      "verification_method": "Downloaded and read first/last rows.",
+      "history_claimed_unverified": "",
+      "cost": "free (authors' repository)",
+      "url_pattern": "https://raw.githubusercontent.com/marekjarocinski/jkshocks_update_fed/main/shocks_fed_jk_t.csv ; https://raw.githubusercontent.com/marekjarocinski/jkshocks_update_ecb/main/shocks_ecb_mpd_me_d.csv",
+      "hosts_required": [
+        "raw.githubusercontent.com"
+      ],
+      "reachable_today": true,
+      "format_and_size": "CSV, 25 kB each",
+      "github_mirror": {
+        "url": "https://raw.githubusercontent.com/marekjarocinski/jkshocks_update_ecb/main/shocks_ecb_mpd_me_d.csv",
+        "range_seen": "1999-01-07 .. 2025-10-30 (ECB); 1990-02-08 .. 2026-09-16 (Fed)"
+      },
+      "pitfalls": "Only ~16 events a year: small samples. Scaling of pc1 uses the full sample (mild look-ahead in units, not in sign). ECB file lags by months. The log already found event reactions and policy-cycle turns unprofitable.",
+      "independence_note": "Moderate: related to the 2y-spread trend, which absorbs the same surprises within days.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 3,
+        "history": 5,
+        "history_basis": "verified",
+        "plausibility": 2,
+        "effort": 1,
+        "expected_value": 30.0
+      },
+      "rank_by_expected_value": 6
+    },
+    {
+      "id": "ecb_bps_portfolio_flows",
+      "category": "3 Flows and positioning",
+      "name": "Euro area balance of payments: monthly portfolio and direct investment flows (ECB flow BPS)",
+      "measures": "Net purchases of euro-area equities and debt by non-residents and of foreign securities by residents.",
+      "economic_rationale": "Cross-border portfolio flows are the textbook medium-term driver of EUR/USD (equity inflows 2017, bond outflows under QE).",
+      "frequency": "monthly",
+      "publication_lag": "about 7 weeks (August 2026 was the latest month on 2026-11-11)",
+      "history_verified": "BPS.M.N.I10.W1.S1.S1.T.N.FA.P.F._Z.EUR._T.M.N.ALL: 1999-04 .. 2026-08 (329 months); equity/debt, asset/liability splits verified for area I9 2013-01 .. 2025-12",
+      "verification_method": "Queried the API.",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "https://data-api.ecb.europa.eu/service/data/BPS/M.N.I10.W1.S1.S1.T.N.FA.P.F._Z.EUR._T.M.N.ALL?format=csvdata",
+      "hosts_required": [
+        "data-api.ecb.europa.eu"
+      ],
+      "reachable_today": true,
+      "format_and_size": "CSV, small",
+      "github_mirror": null,
+      "pitfalls": "Heavily revised and no vintages in this flow; area code changed (I8 to 2022-12 in flow BP6, I9 to 2025-12, I10 current); the 7-week lag must be applied; splits by instrument are shorter than the net series.",
+      "independence_note": "High.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 4,
+        "history": 5,
+        "history_basis": "verified",
+        "plausibility": 1.5,
+        "effort": 1,
+        "expected_value": 30.0
+      },
+      "rank_by_expected_value": 7
+    },
+    {
+      "id": "sf_fed_news_sentiment",
+      "category": "4 News and text",
+      "name": "San Francisco Fed Daily News Sentiment Index",
+      "measures": "Sentiment of economics-related US newspaper articles.",
+      "economic_rationale": "High-frequency read of US growth sentiment ahead of the data.",
+      "frequency": "daily, published weekly",
+      "publication_lag": "up to 1 week",
+      "history_verified": "1980-01-01 .. 2025-05-18 in a GitHub copy",
+      "verification_method": "Downloaded the copy (289 kB).",
+      "history_claimed_unverified": "Official file is current (page showed an update of 2026-07-20 in search results).",
+      "cost": "free",
+      "url_pattern": "https://raw.githubusercontent.com/wattyven/VIX-study/main/sentiment/news_sentiment_data.csv (copy) ; official: https://www.frbsf.org/wp-content/uploads/news_sentiment_data.xlsx (not fetched)",
+      "hosts_required": [
+        "raw.githubusercontent.com"
+      ],
+      "reachable_today": true,
+      "format_and_size": "XLSX/CSV, 0.4 MB",
+      "github_mirror": {
+        "url": "https://raw.githubusercontent.com/wattyven/VIX-study/main/sentiment/news_sentiment_data.csv",
+        "range_seen": "1980-01-01 .. 2025-05-18"
+      },
+      "pitfalls": "US only, no euro counterpart; the index is re-estimated so history changes between vintages; the copy is 18 months stale.",
+      "independence_note": "High.",
+      "already_in_project": false,
+      "live_continuation": "Live values need www.frbsf.org.",
+      "hosts_for_live_use": [
+        "www.frbsf.org"
+      ],
+      "scores": {
+        "independence": 4,
+        "history": 5,
+        "history_basis": "verified",
+        "plausibility": 2,
+        "effort": 1.5,
+        "expected_value": 26.7
+      },
+      "rank_by_expected_value": 8
+    },
+    {
+      "id": "atm_iv_eurusd",
+      "category": "1 FX options",
+      "name": "EUR/USD implied volatility: Bloomberg ATM 1M/3M/1Y copy + CBOE EVZ on FRED",
+      "measures": "At-the-money implied vol 1M/3M/1Y (GitHub copy) and EVZ, the 30-day implied vol of FXE options.",
+      "economic_rationale": "Implied minus realised variance (variance risk premium) is a documented predictor of dollar returns at 1-4 months (Londono & Zhou 2017); term-structure slope marks stress regimes.",
+      "frequency": "daily",
+      "publication_lag": "same day; FRED copy next day",
+      "history_verified": "ATM vols 2000-01-25 .. 2022-02-22 (5,761 rows); EVZCLS 2007-11-01 .. 2025-03-11",
+      "verification_method": "Downloaded both; level correlation V1M vs EVZ 0.991 on 3,596 common days.",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "https://raw.githubusercontent.com/frederikbachdk/FXVolTrading/master/data/EURUSD.csv ; https://fred.stlouisfed.org/graph/fredgraph.csv?id=EVZCLS",
+      "hosts_required": [
+        "raw.githubusercontent.com",
+        "fred.stlouisfed.org"
+      ],
+      "reachable_today": true,
+      "format_and_size": "CSV, 0.29 MB + 0.07 MB",
+      "github_mirror": {
+        "url": "https://raw.githubusercontent.com/frederikbachdk/FXVolTrading/master/data/EURUSD.csv",
+        "range_seen": "2000-01-25 .. 2022-02-22"
+      },
+      "pitfalls": "EVZ was decommissioned: last value 2025-03-11 on FRED (and, per NavyBlueCheese/fx-vrp, on CBOE). Splice of two sources ends 2025-03; nothing free after that. GitHub copy is redistributed Bloomberg data.",
+      "independence_note": "Low-moderate for direction: the project already forecasts range/volatility well; the new part is the implied-minus-realised gap.",
+      "already_in_project": false,
+      "live_continuation": "Needs CME CVOL (www.cmegroup.com) or own model-free vol from FXE chain (cdn.cboe.com).",
+      "hosts_for_live_use": [
+        "www.cmegroup.com",
+        "cdn.cboe.com"
+      ],
+      "scores": {
+        "independence": 3,
+        "history": 5,
+        "history_basis": "verified",
+        "plausibility": 2.5,
+        "effort": 1.5,
+        "expected_value": 25.0
+      },
+      "rank_by_expected_value": 9
+    },
+    {
+      "id": "ecb_spf_fx_assumption",
+      "category": "2 Policy paths",
+      "name": "ECB Survey of Professional Forecasters: expected USD per EUR, policy rate, oil",
+      "measures": "Mean (and dispersion) of forecasters' assumed EUR/USD 3 to 12 months ahead, plus MRO-rate assumptions.",
+      "economic_rationale": "Direct survey expectation of the exchange rate; expected change and disagreement are information of a kind the project has never used.",
+      "frequency": "quarterly",
+      "publication_lag": "about 3-4 weeks after the survey",
+      "history_verified": "SPF.Q.U2.ASSU.USD.P3M.Q.AVG: target periods 2002-Q1 .. 2026-Q4 (100 rows); P12M 2002-Q4 .. 2027-Q3",
+      "verification_method": "Queried the API.",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "https://data-api.ecb.europa.eu/service/data/SPF/Q.U2.ASSU.USD.P3M+P12M.Q.AVG?format=csvdata",
+      "hosts_required": [
+        "data-api.ecb.europa.eu"
+      ],
+      "reachable_today": true,
+      "format_and_size": "CSV, small",
+      "github_mirror": null,
+      "pitfalls": "Quarterly: ~96 observations, low power. TIME_PERIOD is the target quarter, not the survey date: map each row back to its survey round and publication date before use. Survey FX forecasts are known to follow spot.",
+      "independence_note": "High in kind, low in frequency.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 4,
+        "history": 3,
+        "history_basis": "verified",
+        "plausibility": 2,
+        "effort": 1,
+        "expected_value": 24.0
+      },
+      "rank_by_expected_value": 10
+    },
+    {
+      "id": "us_tic",
+      "category": "3 Flows and positioning",
+      "name": "US Treasury International Capital (TIC) monthly",
+      "measures": "Foreign net purchases of US long-term securities by country and holder type; major foreign holders.",
+      "economic_rationale": "Dollar-side counterpart of the ECB flows; official vs private demand for dollar assets.",
+      "frequency": "monthly",
+      "publication_lag": "about 6 weeks",
+      "history_verified": "none (host blocked)",
+      "verification_method": "File names confirmed by search (slt_table3.txt, slt_table5, mfhhis01.txt).",
+      "history_claimed_unverified": "Decades of history per Treasury archives.",
+      "cost": "free",
+      "url_pattern": "https://ticdata.treasury.gov/resource-center/data-chart-center/tic/Documents/slt_table3.txt (also slt_table1, slt_table5.html, snetus.csv)",
+      "hosts_required": [
+        "ticdata.treasury.gov"
+      ],
+      "reachable_today": false,
+      "format_and_size": "TXT/CSV, <5 MB",
+      "github_mirror": null,
+      "pitfalls": "Format changed in 2023 (S and SLT forms merged); custodial bias by country; revisions.",
+      "independence_note": "High.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 4,
+        "history": 5,
+        "history_basis": "claimed",
+        "plausibility": 2,
+        "effort": 2,
+        "expected_value": 20.0
+      },
+      "rank_by_expected_value": 11
+    },
+    {
+      "id": "central_bank_text",
+      "category": "4 News and text",
+      "name": "Central-bank text: BIS speeches archive, FOMC statements and minutes, ECB speeches",
+      "measures": "Full text of central bankers' speeches (all central banks), FOMC statements and minutes, ECB speeches.",
+      "economic_rationale": "A hawkish-minus-dovish tone gap between Fed and ECB speakers is a direct, forward-looking version of the 'policy gap is widening' regime that is the log's one surviving lead.",
+      "frequency": "per speech (several a week)",
+      "publication_lag": "0-3 days",
+      "history_verified": "BIS: yearly zips 1996 .. 2026 plus speeches.zip (129.5 MB, last modified 2026-08-23); the 2026 file holds 360 speeches dated 2026-01-08 .. 2026-06-22; RSS feed lists items dated 2026-11-10. FOMC: statements 2000-02-02 .. 2026-10-28 (227), minutes to 2026-09-16 (244). ECB copy: 1997-02-07 .. 2023-02-27 (2,661).",
+      "verification_method": "Downloaded the BIS 2026 zip (2 MB) and read the CSV; HEAD requests returned 200 for 1996 (66 kB), 2005, 2015, 2025 and the full zip, whose contents were not opened; downloaded the FOMC CSV (12 MB) and the ECB copy (52 MB).",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "https://www.bis.org/pages/download-central-bankers-speeches/speeches-{YYYY}.zip ; https://www.bis.org/doclist/cbspeeches.rss ; https://raw.githubusercontent.com/vtasca/fed-statement-scraping/master/communications.csv ; https://media.githubusercontent.com/media/Moritz-Pfeifer/CentralBankRoBERTa/main/Data/ECB/all_ECB_speeches.csv ; official ECB file https://www.ecb.europa.eu/press/key/shared/data/all_ECB_speeches.csv (blocked)",
+      "hosts_required": [
+        "www.bis.org",
+        "raw.githubusercontent.com",
+        "media.githubusercontent.com"
+      ],
+      "reachable_today": true,
+      "format_and_size": "CSV in zip: 130 MB (BIS), 12 MB (FOMC), 52 MB (ECB copy)",
+      "github_mirror": {
+        "url": "https://raw.githubusercontent.com/vtasca/fed-statement-scraping/master/communications.csv",
+        "range_seen": "2000-02-02 .. 2026-10-28 (FOMC); ECB copy 1997-02-07 .. 2023-02-27"
+      },
+      "pitfalls": "Needs a tone-scoring step (dictionary or language model) that must be fixed before looking at returns. BIS bulk file is rebuilt only every few months (use the RSS feed between builds) and carries the speech date, not the posting time. BIS covers a selection of speeches. One public test (Mingju-Zhang-CBS/financial-text-validation) found FOMC statement text added nothing to 20-day EUR/USD direction.",
+      "independence_note": "Highest of all candidates.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 5,
+        "history": 5,
+        "history_basis": "verified",
+        "plausibility": 2,
+        "effort": 2.5,
+        "expected_value": 20.0
+      },
+      "rank_by_expected_value": 12
+    },
+    {
+      "id": "sentix_fx_sentiment",
+      "category": "7 Other",
+      "name": "sentix investor survey: EUR-USD sentiment (1 month) and strategic bias (6 months)",
+      "measures": "Weekly survey of several thousand investors on the expected direction of EUR/USD.",
+      "economic_rationale": "The only long-running sentiment survey aimed at EUR/USD itself; short-term sentiment is contrarian, the 6-month 'strategic bias' is said by the provider to lead.",
+      "frequency": "weekly (Friday-Saturday poll)",
+      "publication_lag": "Sunday/Monday",
+      "history_verified": "none (host blocked)",
+      "verification_method": "sentix pages found by search name the EUR-USD series (code SNTXEUN6) and weekly polling since 2001.",
+      "history_claimed_unverified": "Weekly since 2001.",
+      "cost": "free delayed data with registration; licence for timely data",
+      "url_pattern": "https://www.sentix.de/index.php/en/ (data section after login)",
+      "hosts_required": [
+        "www.sentix.de"
+      ],
+      "reachable_today": false,
+      "format_and_size": "CSV/XLS, small",
+      "github_mirror": null,
+      "pitfalls": "Login and manual export; licence terms for systematic use must be read; free series may be delayed.",
+      "independence_note": "High: neither futures positioning nor rates.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 5,
+        "history": 5,
+        "history_basis": "claimed",
+        "plausibility": 3,
+        "effort": 4,
+        "expected_value": 18.8
+      },
+      "rank_by_expected_value": 13
+    },
+    {
+      "id": "ecb_ea_mpd",
+      "category": "2 Policy paths",
+      "name": "ECB Euro Area Monetary Policy event-study Database (EA-MPD)",
+      "measures": "Intraday changes in OIS, yields, equities and exchange rates in the press-release and press-conference windows.",
+      "economic_rationale": "Raw input of the ECB shock series above, including the EUR/USD move itself and the OIS curve by maturity.",
+      "frequency": "per ECB meeting",
+      "publication_lag": "updated after meetings",
+      "history_verified": "none (host blocked)",
+      "verification_method": "URL is quoted in the README of marekjarocinski/jkshocks_update_ecb; no GitHub copy of the xlsx found.",
+      "history_claimed_unverified": "From 1999 per the authors.",
+      "cost": "free",
+      "url_pattern": "https://www.ecb.europa.eu/pub/pdf/annex/Dataset_EA-MPD.xlsx",
+      "hosts_required": [
+        "www.ecb.europa.eu"
+      ],
+      "reachable_today": false,
+      "format_and_size": "XLSX, ~1 MB",
+      "github_mirror": null,
+      "pitfalls": "Events only; same caveats as the shock series.",
+      "independence_note": "Moderate.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 3,
+        "history": 5,
+        "history_basis": "claimed",
+        "plausibility": 2,
+        "effort": 2,
+        "expected_value": 15.0
+      },
+      "rank_by_expected_value": 14
+    },
+    {
+      "id": "japan_mof_weekly",
+      "category": "3 Flows and positioning",
+      "name": "Japan MoF weekly international transactions in securities",
+      "measures": "Japanese residents' net purchases of foreign bonds and equities; foreigners' purchases of Japanese assets.",
+      "economic_rationale": "Japanese life insurers and pension funds are large buyers of euro-area and US bonds.",
+      "frequency": "weekly",
+      "publication_lag": "about 1 week",
+      "history_verified": "none (host blocked)",
+      "verification_method": "CEIC lists the weekly series from 2005 (third party).",
+      "history_claimed_unverified": "Weekly from 2005.",
+      "cost": "free",
+      "url_pattern": "https://www.mof.go.jp/english/policy/international_policy/reference/itn_transactions_in_securities/week.csv (not confirmed)",
+      "hosts_required": [
+        "www.mof.go.jp"
+      ],
+      "reachable_today": false,
+      "format_and_size": "CSV, small",
+      "github_mirror": null,
+      "pitfalls": "No currency split: euro share unknown; affects JPY crosses first.",
+      "independence_note": "High, but indirect.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 4,
+        "history": 5,
+        "history_basis": "claimed",
+        "plausibility": 1.5,
+        "effort": 2,
+        "expected_value": 15.0
+      },
+      "rank_by_expected_value": 15
+    },
+    {
+      "id": "yahoo_6e_volume_fxe",
+      "category": "3 Flows and positioning",
+      "name": "CME 6E front-contract volume and FXE ETF price/volume (Yahoo)",
+      "measures": "Daily futures volume (no open interest) and ETF dollar volume.",
+      "economic_rationale": "Activity/attention proxy.",
+      "frequency": "daily",
+      "publication_lag": "same day",
+      "history_verified": "6E=F 2000-09-12 .. 2026-11-11 (5,825 days with volume); FXE 2005-12-12 .. 2026-11-11",
+      "verification_method": "Chart API.",
+      "history_claimed_unverified": "FXE shares-outstanding history: no source located.",
+      "cost": "free",
+      "url_pattern": "https://query1.finance.yahoo.com/v8/finance/chart/6E=F?period1=0&period2=1900000000&interval=1d",
+      "hosts_required": [
+        "query1.finance.yahoo.com"
+      ],
+      "reachable_today": true,
+      "format_and_size": "JSON",
+      "github_mirror": null,
+      "pitfalls": "Front contract only (roll artefacts); no daily open interest; FXE is a small fund.",
+      "independence_note": "Low: volume mostly tracks volatility.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 2,
+        "history": 5,
+        "history_basis": "verified",
+        "plausibility": 1.5,
+        "effort": 1,
+        "expected_value": 15.0
+      },
+      "rank_by_expected_value": 16
+    },
+    {
+      "id": "alfred_vintages_api",
+      "category": "5 Vintages and nowcasts",
+      "name": "ALFRED real-time vintages through the FRED API",
+      "measures": "Every published vintage of US (and some euro-area) macro series, including the GDPNow series.",
+      "economic_rationale": "Removes revision look-ahead from the macro score; gives the day-by-day GDPNow path.",
+      "frequency": "as released",
+      "publication_lag": "none",
+      "history_verified": "Host answers: HTTP 400 'api_key is not set' (so it is reachable); no data pulled",
+      "verification_method": "curl to api.stlouisfed.org; separately confirmed that fredgraph.csv ignores vintage_date.",
+      "history_claimed_unverified": "Vintages back to the 1990s for major series.",
+      "cost": "free (registration for an API key)",
+      "url_pattern": "https://api.stlouisfed.org/fred/series/observations?series_id=PAYEMS&realtime_start=YYYY-MM-DD&realtime_end=YYYY-MM-DD&file_type=json&api_key=KEY",
+      "hosts_required": [
+        "api.stlouisfed.org"
+      ],
+      "reachable_today": true,
+      "format_and_size": "JSON",
+      "github_mirror": null,
+      "pitfalls": "Needs the owner to register a free key (a secret, not a host change). alfred.stlouisfed.org itself is blocked.",
+      "independence_note": "Low: a hygiene fix for existing inputs rather than new information.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 2,
+        "history": 5,
+        "history_basis": "claimed",
+        "plausibility": 2,
+        "effort": 1.5,
+        "expected_value": 13.3
+      },
+      "rank_by_expected_value": 17
+    },
+    {
+      "id": "fred_term_premia",
+      "category": "2 Policy paths",
+      "name": "Kim-Wright term premia (FRED THREEFYTP2 / THREEFYTP10)",
+      "measures": "Model split of US yields into expected short rates and term premium.",
+      "economic_rationale": "Separates the 'expected policy path' part of the 2y/10y yield from the premium part.",
+      "frequency": "daily",
+      "publication_lag": "about one week",
+      "history_verified": "1990-01-02 .. 2026-11-06 (9,614 rows each)",
+      "verification_method": "Downloaded from FRED.",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=THREEFYTP2",
+      "hosts_required": [
+        "fred.stlouisfed.org"
+      ],
+      "reachable_today": true,
+      "format_and_size": "CSV, 0.2 MB",
+      "github_mirror": null,
+      "pitfalls": "US only; model re-estimated, so history is revised; rate-based signals already exhausted.",
+      "independence_note": "Low.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 1.5,
+        "history": 5,
+        "history_basis": "verified",
+        "plausibility": 1.5,
+        "effort": 1,
+        "expected_value": 11.2
+      },
+      "rank_by_expected_value": 18
+    },
+    {
+      "id": "citi_surprise_copy",
+      "category": "5 Vintages and nowcasts",
+      "name": "Citi Economic Surprise Index, US (GitHub copy)",
+      "measures": "Daily surprise index.",
+      "economic_rationale": "Benchmark for the project's own surprise index.",
+      "frequency": "daily",
+      "publication_lag": "same day",
+      "history_verified": "2005-01-03 .. 2025-05-09",
+      "verification_method": "Downloaded (134 kB).",
+      "history_claimed_unverified": "",
+      "cost": "free copy of paid data",
+      "url_pattern": "https://raw.githubusercontent.com/Pj-354/Python-Notebooks--Mine-/main/Dispersion/GARCH%20MIDAS/Citi%20Suprise%20Economic%20Index%202005-2025.csv",
+      "hosts_required": [
+        "raw.githubusercontent.com"
+      ],
+      "reachable_today": true,
+      "format_and_size": "CSV, 0.13 MB",
+      "github_mirror": {
+        "url": "https://raw.githubusercontent.com/Pj-354/Python-Notebooks--Mine-/main/Dispersion/GARCH%20MIDAS/Citi%20Suprise%20Economic%20Index%202005-2025.csv",
+        "range_seen": "2005-01-03 .. 2025-05-09"
+      },
+      "pitfalls": "US only, no euro series; stale; macro surprises already failed (round 3).",
+      "independence_note": "Low.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 1.5,
+        "history": 5,
+        "history_basis": "verified",
+        "plausibility": 1.5,
+        "effort": 1,
+        "expected_value": 11.2
+      },
+      "rank_by_expected_value": 19
+    },
+    {
+      "id": "cls_fx_flow",
+      "category": "3 Flows and positioning",
+      "name": "CLS FX spot flow by participant type",
+      "measures": "Hourly buy/sell volume of banks, funds, corporates, non-bank financials.",
+      "economic_rationale": "The best-documented flow predictor in the literature (Ranaldo & Somogyi).",
+      "frequency": "hourly",
+      "publication_lag": "next business day",
+      "history_verified": "none",
+      "verification_method": "Search only.",
+      "history_claimed_unverified": "Hourly data from about 2012; intraday from 2017-09.",
+      "cost": "paid (CLS Market Data; no public price list)",
+      "url_pattern": "vendor delivery",
+      "hosts_required": [
+        "(vendor)"
+      ],
+      "reachable_today": false,
+      "format_and_size": "CSV",
+      "github_mirror": null,
+      "pitfalls": "Commercial licence.",
+      "independence_note": "High.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 5,
+        "history": 3,
+        "history_basis": "claimed",
+        "plausibility": 3.5,
+        "effort": 5,
+        "expected_value": 10.5
+      },
+      "rank_by_expected_value": 20
+    },
+    {
+      "id": "news_apis_trends",
+      "category": "4 News and text",
+      "name": "Google Trends, Guardian / New York Times article APIs, Wikipedia page views",
+      "measures": "Search interest and article counts/text for chosen terms.",
+      "economic_rationale": "Attention to 'euro crisis', 'ECB', 'Fed' as a crowding or risk signal; own text index back to 1999.",
+      "frequency": "daily to weekly",
+      "publication_lag": "1-3 days",
+      "history_verified": "none (hosts blocked)",
+      "verification_method": "Not verified.",
+      "history_claimed_unverified": "Google Trends from 2004; Guardian archive from 1999; Wikipedia page views from 2015-07.",
+      "cost": "free (API keys for Guardian and NYT)",
+      "url_pattern": "https://trends.google.com/trends/api/widgetdata/multiline (unofficial) ; https://content.guardianapis.com/search?q=...&from-date=...&api-key=KEY ; https://api.nytimes.com/svc/search/v2/articlesearch.json ; https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/...",
+      "hosts_required": [
+        "trends.google.com",
+        "content.guardianapis.com",
+        "api.nytimes.com",
+        "wikimedia.org"
+      ],
+      "reachable_today": false,
+      "format_and_size": "JSON",
+      "github_mirror": null,
+      "pitfalls": "Google Trends is sampled and re-normalised on every pull (history is not stable) and the unofficial API is rate-limited; article APIs need keys and have daily quotas.",
+      "independence_note": "High.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 4,
+        "history": 5,
+        "history_basis": "claimed",
+        "plausibility": 1.5,
+        "effort": 3,
+        "expected_value": 10.0
+      },
+      "rank_by_expected_value": 21
+    },
+    {
+      "id": "us_treasury_auctions_ici",
+      "category": "7 Other",
+      "name": "US Treasury auction results (indirect bidders) and ICI weekly fund flows",
+      "measures": "Share of auctions taken by indirect (largely foreign) bidders; US fund flows into world equity and bond funds.",
+      "economic_rationale": "Foreign demand for dollar assets at higher frequency than TIC.",
+      "frequency": "per auction / weekly",
+      "publication_lag": "same day / 1 week",
+      "history_verified": "none (hosts blocked)",
+      "verification_method": "Not verified.",
+      "history_claimed_unverified": "Bidder data from about 2008; ICI weekly from 2007.",
+      "cost": "free",
+      "url_pattern": "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/od/auctions_query ; https://www.ici.org/research/stats/flows",
+      "hosts_required": [
+        "api.fiscaldata.treasury.gov",
+        "www.ici.org"
+      ],
+      "reachable_today": false,
+      "format_and_size": "JSON/XLS",
+      "github_mirror": null,
+      "pitfalls": "Indirect link to EUR/USD.",
+      "independence_note": "High.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 4,
+        "history": 3,
+        "history_basis": "claimed",
+        "plausibility": 1.5,
+        "effort": 2,
+        "expected_value": 9.0
+      },
+      "rank_by_expected_value": 22
+    },
+    {
+      "id": "gdelt_doc_api",
+      "category": "4 News and text",
+      "name": "GDELT DOC 2.0 API (ready-made tone and volume timelines)",
+      "measures": "Daily tone / article-count series for any query.",
+      "economic_rationale": "Same as above without the 170 GB.",
+      "frequency": "daily",
+      "publication_lag": "same day",
+      "history_verified": "none (host blocked)",
+      "verification_method": "Search only.",
+      "history_claimed_unverified": "Start of the searchable window not confirmed (sources disagree: 3 months, 1 year, or from 2017).",
+      "cost": "free",
+      "url_pattern": "https://api.gdeltproject.org/api/v2/doc/doc?query=%22european%20central%20bank%22&mode=timelinetone&format=csv&startdatetime=YYYYMMDDHHMMSS&enddatetime=YYYYMMDDHHMMSS",
+      "hosts_required": [
+        "api.gdeltproject.org"
+      ],
+      "reachable_today": false,
+      "format_and_size": "CSV, small",
+      "github_mirror": null,
+      "pitfalls": "One request per 5 seconds; history at best 2017 onward.",
+      "independence_note": "High.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 5,
+        "history": 2,
+        "history_basis": "claimed",
+        "plausibility": 1.5,
+        "effort": 2,
+        "expected_value": 7.5
+      },
+      "rank_by_expected_value": 23
+    },
+    {
+      "id": "ecb_ois_money_market",
+      "category": "2 Policy paths",
+      "name": "ECB money-market statistics: euro OIS rates (flows EMMS, MMSR)",
+      "measures": "Traded OIS rates by maturity bucket; '1-year OIS in 2 years' monthly.",
+      "economic_rationale": "Euro-side priced policy path without sovereign-credit noise.",
+      "frequency": "daily buckets; monthly forwards",
+      "publication_lag": "weeks to months",
+      "history_verified": "EMMS daily buckets 2017-01-03 .. 2025-12-31 (2,302 rows); monthly 1y-in-2y OIS 2010-01 .. 2025-12; MMSR per maintenance period 2017-03-14 .. 2026-09-15 (77 rows)",
+      "verification_method": "Queried the API, read first/last periods.",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "https://data-api.ecb.europa.eu/service/data/EMMS/B.U2._X._Z.S122.S1ZV._Z.O._X.WR._X.GB._Z._Z.EUR._Z._Z.OIS._Z?format=csvdata",
+      "hosts_required": [
+        "data-api.ecb.europa.eu"
+      ],
+      "reachable_today": true,
+      "format_and_size": "CSV, small",
+      "github_mirror": null,
+      "pitfalls": "Under 10 years daily; daily series stops at 2025-12-31; published with a long delay: unusable live.",
+      "independence_note": "Low.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 1.5,
+        "history": 2,
+        "history_basis": "verified",
+        "plausibility": 2,
+        "effort": 1,
+        "expected_value": 6.0
+      },
+      "rank_by_expected_value": 24
+    },
+    {
+      "id": "imf_cofer_snb",
+      "category": "3 Flows and positioning",
+      "name": "Reserve data: IMF COFER, SNB sight deposits, ECB TARGET balances and FX interventions",
+      "measures": "Currency composition of world reserves (quarterly); SNB sight deposits (weekly intervention proxy); TARGET balances (monthly); ECB interventions (daily).",
+      "economic_rationale": "Reserve diversification and intra-euro capital flight.",
+      "frequency": "weekly to quarterly",
+      "publication_lag": "1 week to 3 months",
+      "history_verified": "ECB TARGET (TGB) 2008-05 .. 2026-09; ECB interventions (FXI) 2000-09-01 .. 2026-06-30 with five non-zero days (four in 2000, one in 2011)",
+      "verification_method": "ECB API queried; IMF and SNB hosts blocked.",
+      "history_claimed_unverified": "COFER quarterly from 1999; SNB weekly.",
+      "cost": "free",
+      "url_pattern": "https://data-api.ecb.europa.eu/service/data/TGB/M.DE.N.A094T.U2.EUR.E?format=csvdata ; https://data.snb.ch/ ; https://data.imf.org/",
+      "hosts_required": [
+        "data-api.ecb.europa.eu",
+        "data.snb.ch",
+        "data.imf.org"
+      ],
+      "reachable_today": false,
+      "format_and_size": "CSV",
+      "github_mirror": null,
+      "pitfalls": "COFER is quarterly with a 3-month lag; SNB data speak to EUR/CHF; ECB interventions are five days in 26 years.",
+      "independence_note": "Moderate, low relevance at a multi-week horizon.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 3,
+        "history": 4,
+        "history_basis": "verified",
+        "plausibility": 1,
+        "effort": 2,
+        "expected_value": 6.0
+      },
+      "rank_by_expected_value": 25
+    },
+    {
+      "id": "calendar_surveys_in_hand",
+      "category": "5 Vintages and nowcasts",
+      "name": "Flash PMI, ZEW, Ifo, Sentix headline releases with forecasts (already held)",
+      "measures": "Actual, forecast and previous for each release, time-stamped.",
+      "economic_rationale": "First-release values without revision.",
+      "frequency": "monthly",
+      "publication_lag": "none",
+      "history_verified": "In data/macro/events.csv: flash manufacturing PMI 2010-01-21 .. 2026-09-23 (984 rows), ZEW from 2010-01-19, Ifo from 2010-01-26, Sentix from 2010-01-04",
+      "verification_method": "Counted rows in the project file.",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "(local) data/macro/events.csv",
+      "hosts_required": [],
+      "reachable_today": true,
+      "format_and_size": "CSV",
+      "github_mirror": null,
+      "pitfalls": "Nothing to acquire: the paid S&P Global archive would add sub-indices only.",
+      "independence_note": "None (already used).",
+      "already_in_project": true,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 1,
+        "history": 4,
+        "history_basis": "verified",
+        "plausibility": 1.5,
+        "effort": 1,
+        "expected_value": 6.0
+      },
+      "rank_by_expected_value": 26
+    },
+    {
+      "id": "gdelt_gcs",
+      "category": "4 News and text",
+      "name": "GDELT raw files through Google Cloud Storage",
+      "measures": "Events (who did what to whom, with tone) and the Global Knowledge Graph (themes, organisations, tone per article).",
+      "economic_rationale": "Volume and tone of world news on the euro, ECB, Fed, sovereign stress.",
+      "frequency": "daily (v1), 15 minutes (v2)",
+      "publication_lag": "same day",
+      "history_verified": "Events: yearly/monthly files 1979 .. 2013-03 (7.7 GB) and daily 2013-04-01 .. 2026-11-10 (4,950 files, 45.2 GB); GKG v1 daily 2013-04-01 .. 2026-11-10 (170.2 GB; counts files 21.1 GB); v2 from 2015-02-18, latest file 2026-11-11 23:30",
+      "verification_method": "Read the bucket's own filesizes manifests and the v2 master list; HEAD on sample files.",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "https://storage.googleapis.com/data.gdeltproject.org/gkg/{YYYYMMDD}.gkg.csv.zip ; .../events/{YYYYMMDD}.export.CSV.zip ; .../gdeltv2/masterfilelist.txt",
+      "hosts_required": [
+        "storage.googleapis.com"
+      ],
+      "reachable_today": true,
+      "format_and_size": "zipped TSV; 45 GB (events) or 170 GB (GKG) for the full history",
+      "github_mirror": null,
+      "pitfalls": "Very large: must be streamed and filtered, not stored. Source mix changes over time (tone drifts); article-level tone history starts 2013, under the BigQuery route it would be easier but bq has no credentials.",
+      "independence_note": "High.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 5,
+        "history": 3,
+        "history_basis": "verified",
+        "plausibility": 1.5,
+        "effort": 4,
+        "expected_value": 5.6
+      },
+      "rank_by_expected_value": 27
+    },
+    {
+      "id": "atlanta_fed_mpt",
+      "category": "2 Policy paths",
+      "name": "Atlanta Fed Market Probability Tracker",
+      "measures": "Option-implied probability distribution of the 3-month SOFR path.",
+      "economic_rationale": "Adds the distribution (skew, tail weight) around the priced Fed path.",
+      "frequency": "daily",
+      "publication_lag": "1 day",
+      "history_verified": "none (host blocked)",
+      "verification_method": "Search confirms a 'MPT Historical Data' download; start date not found.",
+      "history_claimed_unverified": "Start date unknown.",
+      "cost": "free",
+      "url_pattern": "https://www.atlantafed.org/cenfis/market-probability-tracker (historical data link)",
+      "hosts_required": [
+        "www.atlantafed.org"
+      ],
+      "reachable_today": false,
+      "format_and_size": "XLSX/CSV, small",
+      "github_mirror": null,
+      "pitfalls": "US side only; methodology switched from fed funds to SOFR options; history probably under 10 years.",
+      "independence_note": "Low-moderate.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 2.5,
+        "history": 2,
+        "history_basis": "claimed",
+        "plausibility": 2,
+        "effort": 2,
+        "expected_value": 5.0
+      },
+      "rank_by_expected_value": 28
+    },
+    {
+      "id": "zew_fx_expectations",
+      "category": "7 Other",
+      "name": "ZEW Financial Market Survey: share expecting the dollar to rise vs the euro",
+      "measures": "Monthly balance of ~300 analysts on the 6-month dollar/euro direction.",
+      "economic_rationale": "Second survey of FX expectations.",
+      "frequency": "monthly",
+      "publication_lag": "release day",
+      "history_verified": "none (host blocked)",
+      "verification_method": "Monthly result tables found by search for 2023-09 .. 2026-07.",
+      "history_claimed_unverified": "Survey began December 1991; long series on request for researchers.",
+      "cost": "free PDFs; research data set on request",
+      "url_pattern": "https://download.zew.de/e_{MM}_{YYYY}_Tabelle.pdf",
+      "hosts_required": [
+        "download.zew.de"
+      ],
+      "reachable_today": false,
+      "format_and_size": "PDF, one a month",
+      "github_mirror": null,
+      "pitfalls": "PDF scraping; long history only by request.",
+      "independence_note": "High.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 5,
+        "history": 2,
+        "history_basis": "claimed",
+        "plausibility": 2,
+        "effort": 4,
+        "expected_value": 5.0
+      },
+      "rank_by_expected_value": 29
+    },
+    {
+      "id": "cme_cvol",
+      "category": "1 FX options",
+      "name": "CME CVOL for Euro FX (EUVL): implied vol, skew, up/down variance",
+      "measures": "Model-free 30-day implied vol and skew from CME 6E options.",
+      "economic_rationale": "Exchange-traded equivalent of the risk reversal, and the only candidate live feed for one.",
+      "frequency": "daily",
+      "publication_lag": "end of day",
+      "history_verified": "none",
+      "verification_method": "www.cmegroup.com is blocked; documentation found by search only.",
+      "history_claimed_unverified": "Launch material (2020) promised two years of back-history; a 2026-08-17 CME notice quotes EUVL 5.345. Start date of the public series not established.",
+      "cost": "end-of-day values on the website free; full history via CME DataMine (paid)",
+      "url_pattern": "https://www.cmegroup.com/market-data/cme-group-benchmark-administration/cme-volatility-indexes.html (JSON endpoint behind the chart not verified)",
+      "hosts_required": [
+        "www.cmegroup.com"
+      ],
+      "reachable_today": false,
+      "format_and_size": "CSV/JSON, small",
+      "github_mirror": null,
+      "pitfalls": "Website is bot-protected; free look-back window unknown; licence restricts redistribution.",
+      "independence_note": "Moderate (same information as the risk reversal).",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 3,
+        "history": 2,
+        "history_basis": "claimed",
+        "plausibility": 3,
+        "effort": 4,
+        "expected_value": 4.5
+      },
+      "rank_by_expected_value": 30
+    },
+    {
+      "id": "nowcasts",
+      "category": "5 Vintages and nowcasts",
+      "name": "GDPNow full history, NY Fed Staff Nowcast, Philadelphia Fed ADS index and real-time data set",
+      "measures": "Daily/weekly model nowcasts of US GDP and business conditions.",
+      "economic_rationale": "Growth differential in real time.",
+      "frequency": "daily to weekly",
+      "publication_lag": "same day",
+      "history_verified": "FRED GDPNOW holds only one value per quarter: 2011-Q3 .. 2026-Q4 (62 rows); WEI weekly 2008-01-05 .. 2026-10-31",
+      "verification_method": "Downloaded from FRED; other hosts blocked.",
+      "history_claimed_unverified": "GDPNow from 2011/2014; NY Fed nowcast from 2016.",
+      "cost": "free",
+      "url_pattern": "https://www.atlantafed.org/-/media/documents/cqer/researchcq/gdpnow/GDPTrackingModelDataAndForecasts.xlsx ; https://www.newyorkfed.org/research/policy/nowcast ; https://www.philadelphiafed.org/surveys-and-data/real-time-data-research/",
+      "hosts_required": [
+        "www.atlantafed.org",
+        "www.newyorkfed.org",
+        "www.philadelphiafed.org"
+      ],
+      "reachable_today": false,
+      "format_and_size": "XLSX",
+      "github_mirror": null,
+      "pitfalls": "US only (no free euro-area nowcast history); growth indicators already failed as a vote (round 5).",
+      "independence_note": "Low.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 2,
+        "history": 3,
+        "history_basis": "claimed",
+        "plausibility": 1.5,
+        "effort": 2,
+        "expected_value": 4.5
+      },
+      "rank_by_expected_value": 31
+    },
+    {
+      "id": "retail_sentiment",
+      "category": "3 Flows and positioning",
+      "name": "Retail broker positioning (OANDA, IG, Myfxbook, Dukascopy SWFX)",
+      "measures": "Share of retail accounts long vs short EUR/USD.",
+      "economic_rationale": "Contrarian indicator with a published track record at brokers.",
+      "frequency": "intraday",
+      "publication_lag": "none",
+      "history_verified": "none",
+      "verification_method": "No GitHub repository with stored history found (only scrapers). A trading blog reports OANDA removed its order-book and position-book endpoints in September 2024.",
+      "history_claimed_unverified": "Dukascopy shows some history in a web widget.",
+      "cost": "free with account",
+      "url_pattern": "https://www.myfxbook.com/api/get-community-outlook.json?session=... ; https://api.ig.com/gateway/deal/clientsentiment/EURUSD ; https://freeserv.dukascopy.com/2.0/ (widget)",
+      "hosts_required": [
+        "www.myfxbook.com",
+        "api.ig.com",
+        "freeserv.dukascopy.com"
+      ],
+      "reachable_today": false,
+      "format_and_size": "JSON, small",
+      "github_mirror": null,
+      "pitfalls": "Current values only: no usable history, so forward collection for years before any test; terms of use.",
+      "independence_note": "High, untestable.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 4,
+        "history": 1,
+        "history_basis": "none",
+        "plausibility": 2.5,
+        "effort": 3,
+        "expected_value": 3.3
+      },
+      "rank_by_expected_value": 32
+    },
+    {
+      "id": "yahoo_fed_funds_contracts",
+      "category": "2 Policy paths",
+      "name": "Fed funds and SOFR futures by contract month on Yahoo",
+      "measures": "Settlement prices of individual contract months.",
+      "economic_rationale": "Would give the priced policy path at fixed horizons.",
+      "frequency": "daily",
+      "publication_lag": "same day",
+      "history_verified": "Only contracts still listed: ZQZ26.CBT from 2021-12-31, ZQZ27.CBT from 2022-12-30; ZQZ25/ZQZ20/ZQZ15 return 404. Front continuation ZQ=F 2000-09-01 .. today. SR3Z26.CME has 75 non-empty closes.",
+      "verification_method": "Chart API with period1=0, interval=1d.",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "https://query1.finance.yahoo.com/v8/finance/chart/ZQZ26.CBT?period1=0&period2=1900000000&interval=1d",
+      "hosts_required": [
+        "query1.finance.yahoo.com"
+      ],
+      "reachable_today": true,
+      "format_and_size": "JSON, small",
+      "github_mirror": null,
+      "pitfalls": "Expired contracts are gone, so no fixed-horizon (e.g. 6- or 12-month-ahead) history can be built before 2022; SOFR contract data are mostly empty. Rate expectations were already tested (round 3).",
+      "independence_note": "Low: the 2y spread already carries the priced path.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 1.5,
+        "history": 1,
+        "history_basis": "verified",
+        "plausibility": 2,
+        "effort": 1,
+        "expected_value": 3.0
+      },
+      "rank_by_expected_value": 33
+    },
+    {
+      "id": "cboe_fxe_chain",
+      "category": "1 FX options",
+      "name": "CBOE delayed option chain for FXE (forward collection only)",
+      "measures": "Full FXE option chain snapshot (bids, asks, implied vols, open interest).",
+      "economic_rationale": "Lets the project compute its own implied vol and 25-delta skew going forward.",
+      "frequency": "snapshot (15-minute delayed)",
+      "publication_lag": "none",
+      "history_verified": "none",
+      "verification_method": "Host blocked; URL documented in NavyBlueCheese/fx-vrp.",
+      "history_claimed_unverified": "",
+      "cost": "free",
+      "url_pattern": "https://cdn.cboe.com/api/global/delayed_quotes/options/FXE.json ; https://cdn.cboe.com/api/global/us_indices/daily_prices/EVZ_History.csv",
+      "hosts_required": [
+        "cdn.cboe.com"
+      ],
+      "reachable_today": false,
+      "format_and_size": "JSON, <1 MB a snapshot",
+      "github_mirror": null,
+      "pitfalls": "No history at all; FXE options are thin (244 contracts in July 2026 per the fx-vrp note).",
+      "independence_note": "Moderate.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 3,
+        "history": 1,
+        "history_basis": "none",
+        "plausibility": 2.5,
+        "effort": 3,
+        "expected_value": 2.5
+      },
+      "rank_by_expected_value": 34
+    },
+    {
+      "id": "dtcc_sdr_fx_options",
+      "category": "1 FX options",
+      "name": "DTCC swap data repository: public OTC FX option trades (large expiries)",
+      "measures": "Trade-level OTC FX options reported under CFTC rules: notional, strike, expiry, option type.",
+      "economic_rationale": "The only public source for OTC strikes and expiries (NY-cut expiry maps).",
+      "frequency": "intraday / daily cumulative files",
+      "publication_lag": "same day",
+      "history_verified": "none",
+      "verification_method": "Host blocked; DTCC help pages found by search.",
+      "history_claimed_unverified": "DTCC help: cumulative slice reports are kept 366 days (data from 2023-12-29); older data on request.",
+      "cost": "free",
+      "url_pattern": "https://pddata.dtcc.com/ppd/cftcdashboard (per-day zip per asset class; URL pattern not confirmed)",
+      "hosts_required": [
+        "pddata.dtcc.com"
+      ],
+      "reachable_today": false,
+      "format_and_size": "zipped CSV, tens of MB a day",
+      "github_mirror": null,
+      "pitfalls": "About one year of free history: far below the 10-year bar; notionals capped; US-reported trades only. NY-cut expiry lists otherwise exist only as news commentary, not as a dataset.",
+      "independence_note": "High, but untestable on history.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 4,
+        "history": 1,
+        "history_basis": "claimed",
+        "plausibility": 2,
+        "effort": 4,
+        "expected_value": 2.0
+      },
+      "rank_by_expected_value": 35
+    },
+    {
+      "id": "cme_daily_bulletin",
+      "category": "1 FX options",
+      "name": "CME Daily Bulletin: 6E option volume, open interest by strike, put/call",
+      "measures": "Per-strike open interest and volume for Euro FX options (sections 31/32/39) and the FX summary (01B).",
+      "economic_rationale": "Put/call open-interest ratios and large open-interest strikes (pinning into expiry).",
+      "frequency": "daily",
+      "publication_lag": "next morning",
+      "history_verified": "none",
+      "verification_method": "Host blocked; CME documentation says files are 'top day only' and overwritten daily.",
+      "history_claimed_unverified": "CME states volume/open-interest history exists from 1972 in DataMine.",
+      "cost": "current day free; history paid (DataMine)",
+      "url_pattern": "https://www.cmegroup.com/daily_bulletin/current/Section31_Foreign_Exchange_Call_Options.pdf ; .../Section32_Foreign_Exchange_Put_Options.pdf ; .../Section01B_Summary_Volume_And_Open_Interest_FX_Futures_And_Options.pdf",
+      "hosts_required": [
+        "www.cmegroup.com"
+      ],
+      "reachable_today": false,
+      "format_and_size": "PDF, ~1 MB a day",
+      "github_mirror": null,
+      "pitfalls": "No free history: only forward collection from the day the host opens; PDF parsing.",
+      "independence_note": "Moderate.",
+      "already_in_project": false,
+      "live_continuation": "",
+      "hosts_for_live_use": [],
+      "scores": {
+        "independence": 3,
+        "history": 1,
+        "history_basis": "none",
+        "plausibility": 3,
+        "effort": 5,
+        "expected_value": 1.8
+      },
+      "rank_by_expected_value": 36
+    }
+  ]
+}

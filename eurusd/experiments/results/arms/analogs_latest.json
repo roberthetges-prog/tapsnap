@@ -488,7 +488,33 @@
      "share_up_42": 0.5,
      "share_up_63": 0.5
     }
-   ]
+   ],
+   "out_of_sample_record_k20_2010_26": {
+    "21_sessions": {
+     "accuracy_non_overlapping": 0.455,
+     "n": 202,
+     "wilson95": [
+      0.39,
+      0.52
+     ]
+    },
+    "42_sessions": {
+     "accuracy_non_overlapping": 0.48,
+     "n": 102,
+     "wilson95": [
+      0.39,
+      0.58
+     ]
+    },
+    "63_sessions": {
+     "accuracy_non_overlapping": 0.574,
+     "n": 68,
+     "wilson95": [
+      0.46,
+      0.68
+     ]
+    }
+   }
   },
   "B": {
    "name": "macro (inflation, unemployment)",
@@ -941,7 +967,33 @@
      "share_up_42": 0.5,
      "share_up_63": 0.5
     }
-   ]
+   ],
+   "out_of_sample_record_k20_2010_26": {
+    "21_sessions": {
+     "accuracy_non_overlapping": 0.51,
+     "n": 196,
+     "wilson95": [
+      0.44,
+      0.58
+     ]
+    },
+    "42_sessions": {
+     "accuracy_non_overlapping": 0.455,
+     "n": 101,
+     "wilson95": [
+      0.36,
+      0.55
+     ]
+    },
+    "63_sessions": {
+     "accuracy_non_overlapping": 0.485,
+     "n": 68,
+     "wilson95": [
+      0.37,
+      0.6
+     ]
+    }
+   }
   },
   "C": {
    "name": "market",
@@ -1443,7 +1495,33 @@
      "share_up_42": 0.5,
      "share_up_63": 0.0
     }
-   ]
+   ],
+   "out_of_sample_record_k20_2010_26": {
+    "21_sessions": {
+     "accuracy_non_overlapping": 0.478,
+     "n": 205,
+     "wilson95": [
+      0.41,
+      0.55
+     ]
+    },
+    "42_sessions": {
+     "accuracy_non_overlapping": 0.447,
+     "n": 103,
+     "wilson95": [
+      0.35,
+      0.54
+     ]
+    },
+    "63_sessions": {
+     "accuracy_non_overlapping": 0.435,
+     "n": 69,
+     "wilson95": [
+      0.32,
+      0.55
+     ]
+    }
+   }
   },
   "D": {
    "name": "positioning",
@@ -1862,7 +1940,33 @@
      "share_up_42": 1.0,
      "share_up_63": 0.0
     }
-   ]
+   ],
+   "out_of_sample_record_k20_2010_26": {
+    "21_sessions": {
+     "accuracy_non_overlapping": 0.552,
+     "n": 201,
+     "wilson95": [
+      0.48,
+      0.62
+     ]
+    },
+    "42_sessions": {
+     "accuracy_non_overlapping": 0.559,
+     "n": 102,
+     "wilson95": [
+      0.46,
+      0.65
+     ]
+    },
+    "63_sessions": {
+     "accuracy_non_overlapping": 0.559,
+     "n": 68,
+     "wilson95": [
+      0.44,
+      0.67
+     ]
+    }
+   }
   },
   "E": {
    "name": "union A-D, 4 PCs",
@@ -2223,7 +2327,33 @@
      "share_up_42": 0.67,
      "share_up_63": 0.33
     }
-   ]
+   ],
+   "out_of_sample_record_k20_2010_26": {
+    "21_sessions": {
+     "accuracy_non_overlapping": 0.431,
+     "n": 204,
+     "wilson95": [
+      0.37,
+      0.5
+     ]
+    },
+    "42_sessions": {
+     "accuracy_non_overlapping": 0.456,
+     "n": 103,
+     "wilson95": [
+      0.36,
+      0.55
+     ]
+    },
+    "63_sessions": {
+     "accuracy_non_overlapping": 0.478,
+     "n": 69,
+     "wilson95": [
+      0.36,
+      0.59
+     ]
+    }
+   }
   },
   "F": {
    "name": "agreement-rule inputs",
@@ -2681,7 +2811,33 @@
      "share_up_42": 0.0,
      "share_up_63": 0.0
     }
-   ]
+   ],
+   "out_of_sample_record_k20_2010_26": {
+    "21_sessions": {
+     "accuracy_non_overlapping": 0.578,
+     "n": 206,
+     "wilson95": [
+      0.51,
+      0.64
+     ]
+    },
+    "42_sessions": {
+     "accuracy_non_overlapping": 0.592,
+     "n": 103,
+     "wilson95": [
+      0.5,
+      0.68
+     ]
+    },
+    "63_sessions": {
+     "accuracy_non_overlapping": 0.638,
+     "n": 69,
+     "wilson95": [
+      0.52,
+      0.74
+     ]
+    }
+   }
   }
  },
  "headline": {
