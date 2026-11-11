@@ -15,11 +15,14 @@ What does not exist: a proven edge. The plan below treats the next months as the
   the primary, four challengers, three variants, two controls, two benchmarks. One row per scenario per session,
   append-only: every result is saved, good or bad.
 * Save / analyse / keep / dispose: `python -m eurusd.cli scenarios` shows the leaderboard with a verdict per
-  scenario. Under 60 sessions "too early", 60-119 "watch", from 120: DISPOSE (net Sharpe below zero; the scenario
-  stops running, its rows stay), PROMOTE? (beats the primary by 0.3 Sharpe and positive in both halves; needs the
-  owner's decision), otherwise KEEP. The Sunday run applies the rule. A new idea gets a new name and starts at zero.
-* Parallel scenarios do not shorten the calendar: each one still needs its 120 sessions (about six months).
-  They buy breadth, and the benchmarks show what luck alone looks like over the same period.
+  scenario; the Sunday run applies the rule. Disposal stops a scenario from running; its rows stay forever. A new idea
+  gets a new name and starts at zero.
+* What six months can and cannot tell us (historical replay of the same 12 scenarios, `reports/scenario_replay.md`):
+  the primary's long-run Sharpe is ~0.7, yet its Sharpe is negative in 32 % of all 120-session windows, 25 % of
+  250-session windows and 9 % of 500-session windows; a zero-edge benchmark is negative about half the time.
+  So the gates are: 120 sessions DISPOSE only below Sharpe -1.0 (disasters), 250 sessions below -0.5 and PROMOTE?
+  becomes possible, 500 sessions below 0. A trustworthy verdict takes about two years, not six months.
+* Parallel scenarios do not shorten the calendar. They buy breadth, and the benchmarks show what luck looks like.
 
 ## Phase 1 - forward test on paper (now, 3 to 6 months)
 1. Let the daily brief run every weekday (22:41 UTC). Each run refreshes positioning (CFTC), ECB yields and

@@ -53,3 +53,28 @@ tbl  = report(pnl, periods_per_year=252, name="my_arm", n_arms=6)       # per ye
   none is a label in disguise.
 * 4 CPUs are shared by 5 arms: keep any single fit under a minute; LightGBM with <= 400 trees and
   `num_threads=1`, or linear models, are fine. Use `nohup ... &` with logs for long loops and poll the log.
+
+---
+# Round 3 addendum (2026-11-11): new information only
+
+Round 2 verdict: the only predictability that survived is slow macro drift + speculative positioning
+(live exposure = EW of `arms/weak_signals.py` tstat/sign and positioning sign(cot_z52) x vol scale;
+walk-forward net Sharpe 0.56 / 0.64 / 0.36 for 2010-26 / 2016-26 / 2023-26). Daily ML on the existing
+features, intraday ML, regimes, trend and event models all failed (reports/arm_*.md; failed code in research/archive/).
+So round 3 arms must bring NEW INFORMATION, not new models on the same columns.
+
+Extra rules for round 3:
+* At most 12 variants per arm (count them). Prefer simple, economically motivated signals over model searches.
+* Besides the standard table, report INCREMENTAL value: use `eurusd.arms.meta.combine(["weak_signals","regime_trend","<your_arm>"], "EW")`
+  vs `combine(["weak_signals","regime_trend"], "EW")` (both via `report_combo`) and the daily-P&L correlation of your
+  stream with those two. An arm that is positive but 0.8 correlated with positioning adds nothing.
+* Success bar: standalone 2016-2026 net Sharpe > 0.3 at 1.2 pips, 2023-2026 not negative, AND the three-way
+  combination beats the two-way combination on 2016-2026. Say plainly if you fail.
+* New raw data goes to `data/processed/cross/` or `data/macro/` with a line in the arm report saying source, date
+  range and publication lag used. Lag everything honestly (daily closes of other markets: one calendar day, as
+  `featstore._align_lagged` does; weekly CFTC: report date + 6 days).
+* Yahoo chart API works with a browser User-Agent (see `live_data.py`); CFTC zips for 1999-2026 are already in
+  `data/raw/cftc/` (all contracts, legacy `deacot*.zip` and TFF `fut_fin_txt_*.zip`; parsing helpers in `macro_fetch.py`).
+* Deliverables as before: `src/eurusd/arms/<arm>.py` with `run(cost_pips=1.2)`, `experiments/results/arms/<arm>_positions.parquet`
+  (pos, fwd_bp, net_bp), `<arm>_report.csv`, `reports/arm_<arm>.md`, the three leak checks. Do not commit; do not touch
+  `state/`, `config/`, the live modules (`exposure.py`, `scenarios.py`, `brief.py`, `risk.py`) or other arms' files.

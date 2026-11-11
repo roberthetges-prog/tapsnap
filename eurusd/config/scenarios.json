@@ -1,6 +1,6 @@
 {
  "registered": "2026-11-11",
- "protocol": "Pre-registered paper scenarios. Definitions are frozen on the registration date; a changed idea gets a NEW name and starts from zero. Every scenario is logged every session, win or lose, in state/scenarios/ledger.csv (append-only, committed daily). 'base' is the primary system. A challenger may replace it only after >= 120 logged sessions, if its net Sharpe beats base by >= 0.3 AND it is positive in both halves of the record. Benchmarks and controls exist to show what luck looks like.",
+ "protocol": "Pre-registered paper scenarios. Definitions are frozen on the registration date; a changed idea gets a NEW name and starts from zero. Every scenario is logged every session, win or lose, in state/scenarios/ledger.csv (append-only, committed daily). 'base' is the primary system. Benchmarks and controls exist to show what luck looks like. Decisions follow decision_rule.",
  "cost": "1.2 pips per unit of turnover for daily scenarios; 1.2 pips per round trip for the intraday control",
  "scenarios": {
   "base": {
@@ -85,15 +85,16 @@
   }
  },
  "decision_rule": {
-  "too_early": "< 60 sessions: no judgement",
-  "watch": "60-119 sessions: reported, no action",
-  "from_120_sessions": {
-   "DISPOSE": "challenger or variant with net Sharpe < 0: stops running, ledger rows kept forever",
-   "PROMOTE?": "net Sharpe >= base + 0.3 and positive in both halves: flagged for the owner's decision",
-   "KEEP": "everything else",
-   "primary": "base is never auto-disposed; a negative Sharpe raises REVIEW"
+  "amended": "2026-11-11, before the first P&L session was logged, from the historical replay only (reports/scenario_replay.md, experiments/results/scenario_replay/rule_calibration.csv)",
+  "why": "A scenario with true long-run Sharpe ~0.7 has a negative Sharpe in 32% of 120-session windows, 25% of 250-session windows and 9% of 500-session windows; a zero-edge benchmark in about 50%. Six months cannot separate skill from luck; it can only catch disasters.",
+  "gates": {
+   "120 sessions (~6 months)": "DISPOSE if net Sharpe < -1.0",
+   "250 sessions (~1 year)": "DISPOSE if net Sharpe < -0.5; PROMOTE? possible from here (>= base + 0.3 and positive in both halves; owner decides)",
+   "500 sessions (~2 years)": "DISPOSE if net Sharpe < 0; otherwise KEEP"
   },
+  "primary": "base is never auto-disposed; breaching a gate raises REVIEW",
   "yardsticks": "benchmarks and controls are never disposed",
+  "disposal": "the scenario stops running; its ledger rows are kept forever",
   "review": "applied every Sunday by the weekly outlook"
  }
 }

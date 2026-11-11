@@ -145,7 +145,11 @@ def run(D: pd.DataFrame, h1: pd.DataFrame, unit_frac: float) -> list[str]:
     return notes
 
 
-MIN_WATCH, MIN_DECIDE = 60, 120      # sessions before a scenario is watched / decided
+# Decision stages, calibrated on the 2010-2026 replay (reports/scenario_replay.md): a scenario with a true
+# long-run Sharpe of ~0.7 still shows a NEGATIVE Sharpe in 32 % of 120-session windows, 25 % of 250-session
+# windows and 9 % of 500-session windows, against ~50 % for a zero-edge benchmark. So early stages only catch disasters.
+STAGES = [(120, -1.0), (250, -0.5), (500, 0.0)]   # (sessions reached, dispose if net Sharpe below)
+MIN_PROMOTE = 250                    # sessions before a challenger can be flagged PROMOTE?
 PROMOTE_MARGIN = 0.3                 # net Sharpe a challenger must beat base by
 
 
@@ -165,7 +169,8 @@ def _stats(g: pd.DataFrame) -> dict:
 
 def leaderboard() -> pd.DataFrame:
     """All scenarios, live and retired, with the pre-registered verdict:
-    too early (< 60 sessions) | watch (60-119) | from 120: KEEP / PROMOTE? / DISPOSE.  Benchmarks and controls are yardsticks."""
+    too early (< 120 sessions) | gates at 120 / 250 / 500 sessions: DISPOSE below Sharpe -1.0 / -0.5 / 0.0 |
+    PROMOTE? from 250 sessions | KEEP after the last gate.  Benchmarks and controls are yardsticks."""
     if not LEDGER.exists():
         return pd.DataFrame()
     L = pd.read_csv(LEDGER)
@@ -182,16 +187,18 @@ def leaderboard() -> pd.DataFrame:
             v = f"DISPOSED {retired[name]['date'][:10]}"
         elif role in ("benchmark", "control"):
             v = "yardstick"
-        elif n < MIN_WATCH:
-            v = f"too early ({n}/{MIN_WATCH})"
-        elif n < MIN_DECIDE:
-            v = f"watch ({n}/{MIN_DECIDE})"
-        elif sr is not None and sr < 0:
-            v = "REVIEW: primary negative" if role == "primary" else "DISPOSE"
-        elif role != "primary" and base_sr is not None and sr is not None and sr >= base_sr + PROMOTE_MARGIN and r["_h1"] > 0 and r["_h2"] > 0:
-            v = "PROMOTE?"
+        elif n < STAGES[0][0]:
+            v = f"too early ({n}/{STAGES[0][0]})"
         else:
-            v = "KEEP"
+            floor = [f for m, f in STAGES if n >= m][-1]
+            if sr is not None and sr < floor:
+                v = "REVIEW: primary negative" if role == "primary" else "DISPOSE"
+            elif (role != "primary" and n >= MIN_PROMOTE and base_sr is not None and sr is not None
+                  and sr >= base_sr + PROMOTE_MARGIN and r["_h1"] > 0 and r["_h2"] > 0):
+                v = "PROMOTE?"
+            else:
+                nxt = [m for m, _ in STAGES if m > n]
+                v = "KEEP" if not nxt else f"watch (next gate {nxt[0]})"
         out.append({"scenario": name, "role": role, **{k: v2 for k, v2 in r.items() if not k.startswith("_")}, "verdict": v})
     return pd.DataFrame(out).sort_values("net_bp", ascending=False).reset_index(drop=True)
 
@@ -207,7 +214,7 @@ def review(apply: bool = True) -> list[str]:
         if r.verdict == "DISPOSE":
             notes.append(f"disposed {r.scenario}: Sharpe {r.sharpe} after {r.sessions} sessions (ledger kept)")
             if apply:
-                state.setdefault("retired", {})[r.scenario] = {"date": state["_last"], "reason": f"net Sharpe {r.sharpe} < 0 after {r.sessions} sessions"}
+                state.setdefault("retired", {})[r.scenario] = {"date": state["_last"], "reason": f"net Sharpe {r.sharpe} below the stage floor after {r.sessions} sessions"}
         elif r.verdict in ("PROMOTE?", "REVIEW: primary negative"):
             notes.append(f"{r.verdict} {r.scenario}: Sharpe {r.sharpe} after {r.sessions} sessions (needs the owner's decision)")
     if apply and notes:
