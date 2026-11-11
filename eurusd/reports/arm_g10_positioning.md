@@ -50,9 +50,9 @@ Turnover is 7-13 units a year, so costs are irrelevant (2x cost changes Sharpe b
   `datahub_fx_fed_h10_daily.csv` to 1e-4; (b) H.10 vs Yahoo futures level ratio 0.97-1.08, weekly-return correlation
   0.96-0.98; (c) the weekly change of net/OI is positively correlated with the same week's currency return for all
   eight (0.24-0.43), as it must be if specs chase price and the directions are right; (d) the futures-price run gives the
-  same table to +-0.08. All daily moves above 4 % are real events (2008, SNB 2011/2015, Brexit, 2016 election).
+  same table to +-0.09. All daily moves above 4 % are real events (2008, SNB 2011/2015, Brexit, 2016 election).
 * Returns are spot log returns, no carry, exactly as EUR/USD `fwd_1d`. Carry-adjusted sensitivity changes Sharpe by
-  at most +0.08 (MXN), nothing else moves. rv_21d is from daily returns (the EUR/USD store uses hourly realised
+  at most +0.12 (MXN and JPY in 2023-26; <= 0.03 elsewhere). rv_21d is from daily returns (the EUR/USD store uses hourly realised
   variance); the EUR row below (0.77 / 0.64 / 0.34 on H.10 noon data, daily vol) against the feature-store record
   (0.70 / 0.60 / 0.31) shows the cross-currency pipeline reproduces the known result on independent price data.
 
@@ -74,7 +74,7 @@ Turnover is 7-13 units a year, so costs are irrelevant (2x cost changes Sharpe b
 2x cost: basket7 -0.41 / -0.62 / -0.66; no currency changes by more than 0.03. Risk-parity weighting: -0.35 / -0.57 /
 -0.60. Futures prices: basket7 -0.42 / -0.63 / -0.61. Carry-adjusted: -0.34 / -0.54 / -0.53.
 The 2004-09 column (sign rule with an expanding-median vol scale, outside the walk-forward) is mildly positive for the
-others (basket t 0.8), so the whole 2004-2026 record of the ex-EUR basket is about zero, with a negative drift since 2016.
+others (basket t 0.8): the ex-EUR basket went +0.34 (2004-09), -0.08 (2010-15), -0.58 (2016-26), i.e. no stable sign.
 
 Pooled evidence (others = the 7 non-EUR currencies):
 | period | positive of 7 | mean SR others | basket7 SR (t) | Stouffer z (indep., upper bound) | EUR SR | EUR rank of 8 | t(EUR - basket7, unit vol) | EUR SR shrunk to the 8-currency mean |
@@ -147,7 +147,7 @@ signal uses the other currencies with the OPPOSITE sign: EUR positioning relativ
 | diagnostic: third arm = `eur_own` (a copy of regime_trend from 2014) | 0.57 | 0.63 | 0.65 | 0.35 |
 | diagnostic: third arm = `usd5` | 0.34 | 0.37 | 0.37 | -0.21 |
 | diagnostic: third arm = `usd5_lev` | 0.51 | 0.57 | 0.56 | 0.09 |
-| diagnostic: third arm = ex-EUR basket P&L stream (basket7) | 0.48 | 0.53 | 0.52 | 0.36 |
+| diagnostic: third arm = ex-EUR basket P&L stream (basket7; the EW rule admits it only in 2017, where it costs 400 bp) | 0.48 | 0.53 | 0.52 | 0.36 |
 
 Daily-P&L correlation of `eur_rel` with weak_signals 0.26, with regime_trend **0.75** (with `eur_own` 0.79).
 OLS alpha of the `eur_rel` stream on the two survivors: +0.84 bp/day, t 1.8 (2010-26); +0.52 bp/day, **t 1.1** (2016-26).

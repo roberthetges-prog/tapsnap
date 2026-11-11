@@ -10,7 +10,7 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 |---|---|---|---|
 | 1 | 102 practitioner strategies, 51 academic hypotheses, 19 indicator families (train/validate/holdout) | ~290 | 0 stand-alone; 3 weak components |
 | 2 | daily ML, intraday ML, weak-signal combination, regimes/trend, events (walk-forward 2010-2026) | 137 | weak-signal combination + positioning trend -> live exposure (Sharpe 0.56 / 0.64 / 0.36) |
-| 3 | rate expectations & stress (12), deep positioning (12), macro surprises (12), G10 positioning (pending) | 36+ | none so far |
+| 3 | rate expectations & stress (12), deep positioning (12), macro surprises (12), G10 positioning (10) | 46 | none added. Rates/stress: spread trend re-expressed, +0.03 Sharpe = noise. Deep positioning: crude rule not improved (placebo matched). Macro surprises: not timing-dependent, cannot run live. G10: effect does NOT replicate outside EUR |
 
 ## What is established
 * Predictable: slow macro drift and speculative positioning (direction, weakly); volatility and range (strongly).
@@ -18,6 +18,11 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
   the same features, rate-futures and stress measures, macro surprise indices, finer positioning structure.
 * Positioning: the level is the signal; no trader group is specially informed; robust to z-window and to delays.
 * A six-month record cannot separate skill from luck (see reports/scenario_replay.md).
+* **Positioning does not replicate (reports/arm_g10_positioning.md).** The identical rule on GBP, JPY, CHF, AUD, CAD, NZD,
+  MXN gives a basket Sharpe of -0.38 / -0.58 / -0.62; EUR ranks 1 of 8. The live positioning stream therefore rests on
+  the pair it was mined on. Planning Sharpe for it: 0.25-0.45, not 0.6-0.7. Weight kept, not raised.
+* Direction accuracy today: 52 % next session, 55 % next week, 58 % next month (2010-26), fading after 2023.
+  Range / volatility accuracy: 75 % above/below median, 93 % on volatile-day calls (reports/prediction_scoreboard.md).
 
 ## Avenue queue
 Round 4 (launched 2026-11-11): volatility-conditioned intraday tactics; intraday-path signals from 1-minute data
