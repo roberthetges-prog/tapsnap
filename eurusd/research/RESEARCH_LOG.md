@@ -16,6 +16,8 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 
 | 5 | liquidity & stress (12): FAILS; real economy (12): FAILS; regime dependence (4): no rule adopted, one lead (policy-gap direction); policy cycle / reaction functions (10, strict 15): FAILS | 43 | none so far |
 
+| 6 | policy-divergence replication across G10 (6 frozen streams + 1 robustness): FAILS ... (analogs, data scoping pending) | 7+ | none |
+
 ## What is established
 * Predictable: slow macro drift and speculative positioning (direction, weakly); volatility and range (strongly).
 * Not predictable after costs: technical patterns, intraday direction, event reactions, regimes, non-linear ML on
@@ -63,6 +65,10 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
   the agreement rule is right 64 % / 70 % (21 / 42 sessions, 2006-26, n=74/47) when the ECB-Fed policy gap is WIDER
   than six months earlier and 51 % / 49 % otherwise; family-wise p 0.11, so a lead, not a result. 2023-26 was 58 %
   NARROWER sessions. Registered as paper scenario `agreement_wider`.
+  **Replication (reports/arm_divergence_g10.md): FAILS.** Rate-differential trend gated by WIDER on eight other currencies:
+  pooled t 1.98, placebo p 0.056, all of it from 2000-09 (2010-26: +0.10 vs complement -0.04, p 0.33); the gate sorts trades
+  into earn-carry / pay-carry, and spot-only shows nothing. On EUR/USD the contrast also vanishes with interbank instead of
+  policy rates. Third EUR-specific artefact; engine stays unconditional; scenario demoted to a control.
 * **Central-bank reaction functions (reports/arm_policy_cycle.md): no edge.** Predicting cut / hold / hike from inflation
   and unemployment does not beat persistence (Fed 71 vs 77 %, ECB 80 vs 76 % next meeting; 3-6 months worse) and calls
   almost no turning point. EUR/USD after cycle turns: textbook sign right ~half the time (n 10-17 per cell, 1975-2026);

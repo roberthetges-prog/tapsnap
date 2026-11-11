@@ -92,12 +92,12 @@
    "note": "position-trade form: hold only when positioning, 2y-spread trend and macro score agree (arm N: 59 % at 1 month, 61-72 % at 2-3 months, 2010-26)"
   },
   "agreement_wider": {
-   "role": "challenger",
+   "role": "control",
    "signal": "agree_wider",
    "band": 0.5,
    "stop_atr": null,
    "registered": "2026-11-11",
-   "note": "agreement rule only while the ECB-Fed policy gap is wider than six months earlier (arm S lead, family-wise p 0.11)"
+   "note": "agreement rule only while the ECB-Fed policy gap is wider than six months earlier (arm S lead, family-wise p 0.11) | UPDATE 2026-11-11: failed replication on eight other currencies (arm V); prior is now 'probably chance'; kept running as a control"
   }
  },
  "decision_rule": {

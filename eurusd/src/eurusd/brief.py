@@ -257,8 +257,8 @@ def weekly_outlook(refresh: bool = True) -> str:
         a14 = float(last["atr14_pips"]) * PIP
         g = D["policy_diff"].abs()
         gdir = "WIDER" if g.iloc[-1] > g.iloc[-127] + 1e-9 else ("NARROWER" if g.iloc[-1] < g.iloc[-127] - 1e-9 else "UNCHANGED")
-        gtxt = (f"Policy gap vs six months ago: {gdir} ({g.iloc[-127]:.2f} -> {g.iloc[-1]:.2f} pts). Historically the call was right 64 % at 1 month when WIDER "
-                f"and 51 % otherwise (2006-26, a lead under paper test, not established)")
+        gtxt = (f"Policy gap vs six months ago: {gdir} ({g.iloc[-127]:.2f} -> {g.iloc[-1]:.2f} pts). Context only: the 'call works when the gap widens' "
+                f"lead did not replicate on eight other currencies (reports/arm_divergence_g10.md)")
         if abs(tot) == 3:
             side = 1 if tot > 0 else -1
             acc, nt = pc["accuracy_non_overlapping"], pc["no_touch"]
