@@ -217,10 +217,13 @@ def build_cot(verbose: bool = True) -> dict:
 
 
 def _fred(series: str) -> pd.DataFrame:
-    import requests
-    r = requests.get(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}", headers={"User-Agent": UA}, timeout=120)
-    r.raise_for_status()
-    d = pd.read_csv(io.StringIO(r.text))
+    # FRED answers curl through the session proxy but drops python-requests connections (2026-11-11), hence curl.
+    import subprocess
+    url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}"
+    txt = subprocess.run(["curl", "-sS", "-f", "-m", "120", url], capture_output=True, text=True, check=True).stdout
+    if not txt.startswith("observation_date"):
+        raise RuntimeError(f"unexpected FRED payload for {series}: {txt[:60]!r}")
+    d = pd.read_csv(io.StringIO(txt))
     d.columns = ["date", "value"]
     d["value"] = pd.to_numeric(d["value"], errors="coerce")
     return d.dropna().reset_index(drop=True)
