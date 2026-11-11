@@ -1,0 +1,176 @@
+{
+ "gbpusd": {
+  "files": 34,
+  "rows": 8391546,
+  "bad_price_rows": 0,
+  "dst_dropped": 0,
+  "duplicates": 440,
+  "first": "2003-01-02 00:02:00+00:00",
+  "last": "2026-11-06 21:58:00+00:00",
+  "tz_check": {
+   "summer_EDT": {
+    "n_first_fridays": 175,
+    "modal_minute_utc": "12:30",
+    "share_at_mode": 0.5828571428571429,
+    "share_1230": 0.5828571428571429,
+    "share_1330": 0.0,
+    "share_1130": 0.022857142857142857
+   },
+   "winter_EST": {
+    "n_first_fridays": 106,
+    "modal_minute_utc": "13:30",
+    "share_at_mode": 0.5754716981132075,
+    "share_1230": 0.0,
+    "share_1330": 0.5754716981132075,
+    "share_1130": 0.0
+   }
+  },
+  "m5_rows": 1755507,
+  "sessions": 6187
+ },
+ "usdjpy": {
+  "files": 34,
+  "rows": 8385376,
+  "bad_price_rows": 0,
+  "dst_dropped": 0,
+  "duplicates": 535,
+  "first": "2003-01-01 23:59:00+00:00",
+  "last": "2026-11-06 21:58:00+00:00",
+  "tz_check": {
+   "summer_EDT": {
+    "n_first_fridays": 176,
+    "modal_minute_utc": "12:30",
+    "share_at_mode": 0.7272727272727273,
+    "share_1230": 0.7272727272727273,
+    "share_1330": 0.005681818181818182,
+    "share_1130": 0.028409090909090908
+   },
+   "winter_EST": {
+    "n_first_fridays": 106,
+    "modal_minute_utc": "13:30",
+    "share_at_mode": 0.6226415094339622,
+    "share_1230": 0.0,
+    "share_1330": 0.6226415094339622,
+    "share_1130": 0.0
+   }
+  },
+  "m5_rows": 1759928,
+  "sessions": 6189
+ },
+ "audusd": {
+  "files": 34,
+  "rows": 8204202,
+  "bad_price_rows": 2,
+  "dst_dropped": 0,
+  "duplicates": 430,
+  "first": "2003-01-02 00:05:00+00:00",
+  "last": "2026-11-06 21:58:00+00:00",
+  "tz_check": {
+   "summer_EDT": {
+    "n_first_fridays": 175,
+    "modal_minute_utc": "12:30",
+    "share_at_mode": 0.6514285714285715,
+    "share_1230": 0.6514285714285715,
+    "share_1330": 0.0,
+    "share_1130": 0.017142857142857144
+   },
+   "winter_EST": {
+    "n_first_fridays": 106,
+    "modal_minute_utc": "13:30",
+    "share_at_mode": 0.5660377358490566,
+    "share_1230": 0.0,
+    "share_1330": 0.5660377358490566,
+    "share_1130": 0.0
+   }
+  },
+  "m5_rows": 1752016,
+  "sessions": 6188
+ },
+ "usdchf": {
+  "files": 34,
+  "rows": 8376167,
+  "bad_price_rows": 0,
+  "dst_dropped": 0,
+  "duplicates": 429,
+  "first": "2003-01-02 00:02:00+00:00",
+  "last": "2026-11-06 21:58:00+00:00",
+  "tz_check": {
+   "summer_EDT": {
+    "n_first_fridays": 176,
+    "modal_minute_utc": "12:30",
+    "share_at_mode": 0.6363636363636364,
+    "share_1230": 0.6363636363636364,
+    "share_1330": 0.0,
+    "share_1130": 0.028409090909090908
+   },
+   "winter_EST": {
+    "n_first_fridays": 106,
+    "modal_minute_utc": "13:30",
+    "share_at_mode": 0.5471698113207547,
+    "share_1230": 0.0,
+    "share_1330": 0.5471698113207547,
+    "share_1130": 0.0
+   }
+  },
+  "m5_rows": 1755159,
+  "sessions": 6180
+ },
+ "usdcad": {
+  "files": 34,
+  "rows": 7881828,
+  "bad_price_rows": 0,
+  "dst_dropped": 0,
+  "duplicates": 445,
+  "first": "2003-01-02 00:03:00+00:00",
+  "last": "2026-11-06 21:58:00+00:00",
+  "tz_check": {
+   "summer_EDT": {
+    "n_first_fridays": 176,
+    "modal_minute_utc": "12:30",
+    "share_at_mode": 0.5738636363636364,
+    "share_1230": 0.5738636363636364,
+    "share_1330": 0.0,
+    "share_1130": 0.028409090909090908
+   },
+   "winter_EST": {
+    "n_first_fridays": 106,
+    "modal_minute_utc": "13:30",
+    "share_at_mode": 0.5660377358490566,
+    "share_1230": 0.0,
+    "share_1330": 0.5660377358490566,
+    "share_1130": 0.0
+   }
+  },
+  "m5_rows": 1728781,
+  "sessions": 6190
+ },
+ "nzdusd": {
+  "files": 32,
+  "rows": 7294251,
+  "bad_price_rows": 1,
+  "dst_dropped": 0,
+  "duplicates": 444,
+  "first": "2005-08-12 21:01:00+00:00",
+  "last": "2026-11-06 21:58:00+00:00",
+  "tz_check": {
+   "summer_EDT": {
+    "n_first_fridays": 161,
+    "modal_minute_utc": "12:30",
+    "share_at_mode": 0.6273291925465838,
+    "share_1230": 0.6273291925465838,
+    "share_1330": 0.0,
+    "share_1130": 0.024844720496894408
+   },
+   "winter_EST": {
+    "n_first_fridays": 90,
+    "modal_minute_utc": "13:30",
+    "share_at_mode": 0.5222222222222223,
+    "share_1230": 0.0,
+    "share_1330": 0.5222222222222223,
+    "share_1130": 0.0
+   }
+  },
+  "m5_rows": 1560621,
+  "sessions": 5505
+ }
+}

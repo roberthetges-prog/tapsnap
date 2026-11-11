@@ -12,7 +12,7 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 | 2 | daily ML, intraday ML, weak-signal combination, regimes/trend, events (walk-forward 2010-2026) | 137 | weak-signal combination + positioning trend -> live exposure (Sharpe 0.56 / 0.64 / 0.36) |
 | 3 | rate expectations & stress (12), deep positioning (12), macro surprises (12), G10 positioning (10) | 46 | none added. Rates/stress: spread trend re-expressed, +0.03 Sharpe = noise. Deep positioning: crude rule not improved (placebo matched). Macro surprises: not timing-dependent, cannot run live. G10: effect does NOT replicate outside EUR |
 
-| 4 | vol-conditioned intraday tactics (12), FX relative value (12, strict count 24), flows & calendar (12), intraday path from M1 (22), selective + swing + OFI replication pending | 70+ | vol tactics: none; range forecast kept for stop/target placement (78 % above/below-median accuracy; oracle ceiling for intraday tactics ~0.8-1.1 Sharpe) |
+| 4 | vol-conditioned intraday tactics (12), FX relative value (12, strict count 24), flows & calendar (12), intraday path from M1 (22), selective probabilities (12), swing + OFI replication pending | 82+ | vol tactics: none; range forecast kept for stop/target placement (78 % above/below-median accuracy; oracle ceiling for intraday tactics ~0.8-1.1 Sharpe) |
 
 ## What is established
 * Predictable: slow macro drift and speculative positioning (direction, weakly); volatility and range (strongly).
@@ -29,6 +29,14 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
   order-flow proxy): none robust; most are ret_1d in disguise and flip sign across eras. One post-hoc lead: the 5-day
   order-flow proxy orthogonalised to the day's return (+0.53 / +0.41 / +0.68, 13 of 17 years). Being tested as a single
   pre-registered replication on six other pairs (arm P). The 'fade the last hour' effect is a closing-bid artefact.
+* **Selective probabilities (reports/arm_selective.md).** Calibrated P>=60 % directional calls do not work (no better than
+  chance; logistic model anti-informative at long horizons). Accuracy rises with HOLDING PERIOD: hit = Phi(Sharpe x sqrt(h/252)).
+  Agreement rule (positioning, 2y-spread trend, house score all agree; 44 % of the time): 57 / 59 / 65 / 67 % right at
+  10 / 21 / 42 / 63 sessions (non-overlapping 56 / 59 / 61 / 72), +46 bp net at 21 sessions; holds 2016-26, unconfirmed
+  2023-26 (tiny n). Same information as the live streams (corr 0.63), in position-trade form. 70 % at a quarter would need
+  Sharpe ~1.05, 80 % ~1.7.
+* Path / level probabilities are real and calibrated to 1-3 points in every era: level 2 ATR away untouched in 10 sessions
+  69 %, 3 ATR 87 %; in 21 sessions 52 % / 71 %. No expectancy alone; use for stops and targets.
 * Positioning: the level is the signal; no trader group is specially informed; robust to z-window and to delays.
 * A six-month record cannot separate skill from luck (see reports/scenario_replay.md).
 * **Positioning does not replicate (reports/arm_g10_positioning.md).** The identical rule on GBP, JPY, CHF, AUD, CAD, NZD,
