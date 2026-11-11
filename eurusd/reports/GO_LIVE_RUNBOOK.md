@@ -5,6 +5,22 @@ What exists: a clean 26-year dataset, a correct engine, one walk-forward-validat
 sizing, VaR, stress, event gating and kill switches, a daily brief and a weekly outlook, and a forward-test log.
 What does not exist: a proven edge. The plan below treats the next months as the test that decides that.
 
+## How the forward test runs (set up 2026-11-11)
+* A persistent cloud session ("EUR/USD forward test") holds the branch with push rights. Two schedules wake it:
+  weekdays 22:41 UTC `brief --paper`, Sundays 20:19 UTC `weekly`. Each run pulls, executes, appends a heartbeat,
+  commits `state/` and refreshed data, and pushes. The git history is the tamper-evident record.
+* `state/book.json` is the paper book of the primary system (modelled fills at the session close, 1 pip spread,
+  stops checked against the session range). `state/signal_log.csv` has one row per session.
+* `state/scenarios/ledger.csv` holds 12 pre-registered scenarios run in parallel (`config/scenarios.json`):
+  the primary, four challengers, three variants, two controls, two benchmarks. One row per scenario per session,
+  append-only: every result is saved, good or bad.
+* Save / analyse / keep / dispose: `python -m eurusd.cli scenarios` shows the leaderboard with a verdict per
+  scenario. Under 60 sessions "too early", 60-119 "watch", from 120: DISPOSE (net Sharpe below zero; the scenario
+  stops running, its rows stay), PROMOTE? (beats the primary by 0.3 Sharpe and positive in both halves; needs the
+  owner's decision), otherwise KEEP. The Sunday run applies the rule. A new idea gets a new name and starts at zero.
+* Parallel scenarios do not shorten the calendar: each one still needs its 120 sessions (about six months).
+  They buy breadth, and the benchmarks show what luck alone looks like over the same period.
+
 ## Phase 1 - forward test on paper (now, 3 to 6 months)
 1. Let the daily brief run every weekday (22:41 UTC). Each run refreshes positioning (CFTC), ECB yields and
    FRED mirrors, recomputes the target, and appends a row to `state/signal_log.csv`.
