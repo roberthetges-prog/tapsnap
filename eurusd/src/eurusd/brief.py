@@ -97,6 +97,14 @@ def daily_brief(refresh: bool = True, paper: bool = False) -> str:
         L.append("Events 48h: none high-impact")
     if paper:
         L.append("Paper: " + ("; ".join(paper_notes) if paper_notes else "no fills (hold)"))
+        try:
+            from . import scenarios as SC
+            unit_frac = eng.cfg.target_annual_vol / math.sqrt(252) / max(vol["har_daily_vol"], 1e-6)
+            sc_notes = SC.run(D, h1, unit_frac)
+            stops = [n for n in sc_notes if "stop hit" in n]
+            L.append(SC.summary_line() + (" | " + ", ".join(stops) if stops else ""))
+        except Exception as e:
+            L.append(f"Scenarios: FAILED {type(e).__name__}: {str(e)[:100]}")
     bad = [m for m in status if "FAILED" in m or "skipped" in m]
     L.append("Data: " + (status[0] if status and status[0].startswith("COT") else "COT not refreshed") + (" | WARN " + "; ".join(bad) if bad else ""))
     try:
@@ -146,4 +154,13 @@ def weekly_outlook(refresh: bool = True) -> str:
     L.append(f"Exposure: {'SHORT' if exp.target_units < 0 else ('LONG' if exp.target_units > 0 else 'FLAT')} {abs(exp.target_units):.2f} units (positioning {exp.d_units:+.2f}, weak-signal {exp.c_units:+.2f})")
     L.append("Events this week: " + ("; ".join(f"{r.event} {r.time:%a %H:%M}Z" for r in key.itertuples()) if not key.empty else "none high-impact"))
     L.append("Honesty note: the tilt's historical weekly hit rate is ~52-55 %; the cone is where most movement lies.")
+    try:
+        from . import scenarios as SC
+        lb = SC.leaderboard()
+        if not lb.empty:
+            L.append("Scenario leaderboard (paper, net bp per unit since " + str(pd.read_csv(SC.LEDGER)["session_close"].iloc[0])[:10] + "):")
+            L.append(lb[["scenario", "role", "sessions", "net_bp", "sharpe", "hit_rate", "max_dd_bp", "held_units", "verdict"]].to_string(index=False))
+            L.extend(SC.review(apply=True))
+    except Exception as e:
+        L.append(f"(leaderboard unavailable: {e})")
     return "\n".join(L)

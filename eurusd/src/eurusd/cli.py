@@ -3,6 +3,7 @@
   python -m eurusd.cli signals [--asof 2026-11-06T21:00] [--no-refresh] [--json]   # entries, sized by the risk engine
   python -m eurusd.cli exposure [--no-refresh] [--json]   # today's target daily exposure (round-2 survivor) with lots and stop
   python -m eurusd.cli brief                              # daily: exposure + risk digest (<= 12 lines)
+  python -m eurusd.cli scenarios                          # paper leaderboard of all pre-registered scenarios
   python -m eurusd.cli weekly                             # weekly: trend, tilt, vol cone, levels, events
   python -m eurusd.cli risk [--asof ...] [--no-refresh] [--out reports/risk_latest.md]  # full risk report
   python -m eurusd.cli book add --strategy S --side long|short --entry P --stop P --lots L --opened ISO [--exit ISO]
@@ -102,6 +103,18 @@ def cmd_weekly(a):
     print(weekly_outlook(refresh=not a.no_refresh))
 
 
+def cmd_scenarios(a):
+    from . import scenarios as SC
+    lb = SC.leaderboard()
+    if lb.empty:
+        print("no scenario ledger yet (run: brief --paper)"); return
+    pd.set_option("display.width", 220)
+    print(lb.to_string(index=False))
+    if a.review:
+        for n in SC.review(apply=True) or ["review: nothing to dispose or promote"]:
+            print(n)
+
+
 def cmd_risk(a):
     eng, _ = _engine(a)
     txt = eng.report()
@@ -156,6 +169,7 @@ def main(argv=None):
     x = sub.add_parser("exposure"); x.add_argument("--no-refresh", action="store_true"); x.add_argument("--json", action="store_true"); x.set_defaults(f=cmd_exposure)
     bb = sub.add_parser("brief"); bb.add_argument("--no-refresh", action="store_true"); bb.add_argument("--paper", action="store_true", help="apply the plan to the book as modelled fills (forward test)"); bb.set_defaults(f=cmd_brief)
     ww = sub.add_parser("weekly"); ww.add_argument("--no-refresh", action="store_true"); ww.set_defaults(f=cmd_weekly)
+    sc = sub.add_parser("scenarios"); sc.add_argument("--review", action="store_true", help="apply the keep/dispose rule"); sc.set_defaults(f=cmd_scenarios)
     r = sub.add_parser("risk"); r.add_argument("--asof"); r.add_argument("--no-refresh", action="store_true"); r.add_argument("--out"); r.set_defaults(f=cmd_risk)
     k = sub.add_parser("book"); k.add_argument("action", choices=["show", "add", "close", "equity"]); k.add_argument("--strategy"); k.add_argument("--side", choices=["long", "short"])
     k.add_argument("--entry", type=float); k.add_argument("--stop", type=float); k.add_argument("--lots", type=float); k.add_argument("--opened"); k.add_argument("--exit")

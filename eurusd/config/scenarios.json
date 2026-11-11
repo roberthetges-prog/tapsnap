@@ -1,0 +1,99 @@
+{
+ "registered": "2026-11-11",
+ "protocol": "Pre-registered paper scenarios. Definitions are frozen on the registration date; a changed idea gets a NEW name and starts from zero. Every scenario is logged every session, win or lose, in state/scenarios/ledger.csv (append-only, committed daily). 'base' is the primary system. A challenger may replace it only after >= 120 logged sessions, if its net Sharpe beats base by >= 0.3 AND it is positive in both halves of the record. Benchmarks and controls exist to show what luck looks like.",
+ "cost": "1.2 pips per unit of turnover for daily scenarios; 1.2 pips per round trip for the intraday control",
+ "scenarios": {
+  "base": {
+   "role": "primary",
+   "signal": "0.5*weak_sign + 0.5*positioning",
+   "band": 0.5,
+   "stop_atr": 2.0,
+   "note": "the live exposure"
+  },
+  "positioning_only": {
+   "role": "challenger",
+   "signal": "positioning",
+   "band": 0.5,
+   "stop_atr": 2.0,
+   "note": "sign(cot_z52) x vol scale"
+  },
+  "weak_signals_sign": {
+   "role": "challenger",
+   "signal": "weak_sign",
+   "band": 0.5,
+   "stop_atr": 2.0,
+   "note": "14 signals, t-stat weights, sign position above median score"
+  },
+  "weak_signals_linear": {
+   "role": "challenger",
+   "signal": "weak_linear",
+   "band": 0.25,
+   "stop_atr": 2.0,
+   "note": "14 signals, ridge weights, linear position (best post-2016 variant, not the rule-selected one)"
+  },
+  "round1_combo": {
+   "role": "challenger",
+   "signal": "round1",
+   "band": 0.25,
+   "stop_atr": 2.0,
+   "note": "(FOMC eve + positioning sign + 2y-spread trend sign)/3 x vol scale"
+  },
+  "base_no_stop": {
+   "role": "variant",
+   "signal": "0.5*weak_sign + 0.5*positioning",
+   "band": 0.5,
+   "stop_atr": null,
+   "note": "does the disaster stop help or hurt"
+  },
+  "base_tight_stop": {
+   "role": "variant",
+   "signal": "0.5*weak_sign + 0.5*positioning",
+   "band": 0.5,
+   "stop_atr": 1.0,
+   "note": "1 x ATR stop"
+  },
+  "base_daily": {
+   "role": "variant",
+   "signal": "0.5*weak_sign + 0.5*positioning",
+   "band": 0.0,
+   "stop_atr": 2.0,
+   "note": "rebalance to target every session"
+  },
+  "trend_3m": {
+   "role": "control",
+   "signal": "trend",
+   "band": 0.5,
+   "stop_atr": 2.0,
+   "note": "sign of 3-month return x vol scale; research says ~0"
+  },
+  "london_short": {
+   "role": "control",
+   "signal": "intraday_london_short",
+   "note": "short 07:00-13:00 London every weekday; retired after round 2"
+  },
+  "always_long": {
+   "role": "benchmark",
+   "signal": "const:+1",
+   "band": 0.5,
+   "stop_atr": null
+  },
+  "always_short": {
+   "role": "benchmark",
+   "signal": "const:-1",
+   "band": 0.5,
+   "stop_atr": null
+  }
+ },
+ "decision_rule": {
+  "too_early": "< 60 sessions: no judgement",
+  "watch": "60-119 sessions: reported, no action",
+  "from_120_sessions": {
+   "DISPOSE": "challenger or variant with net Sharpe < 0: stops running, ledger rows kept forever",
+   "PROMOTE?": "net Sharpe >= base + 0.3 and positive in both halves: flagged for the owner's decision",
+   "KEEP": "everything else",
+   "primary": "base is never auto-disposed; a negative Sharpe raises REVIEW"
+  },
+  "yardsticks": "benchmarks and controls are never disposed",
+  "review": "applied every Sunday by the weekly outlook"
+ }
+}

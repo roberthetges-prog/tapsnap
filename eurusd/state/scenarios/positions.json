@@ -1,0 +1,50 @@
+{
+ "_last": "2026-11-10 22:00:00+00:00",
+ "_start": "2026-11-10 22:00:00+00:00",
+ "pos": {
+  "base": {
+   "held": -0.6719,
+   "stop": 1.12909
+  },
+  "positioning_only": {
+   "held": -1.3438,
+   "stop": 1.12909
+  },
+  "weak_signals_sign": {
+   "held": 0.0,
+   "stop": null
+  },
+  "weak_signals_linear": {
+   "held": 0.2192,
+   "stop": 1.10455
+  },
+  "round1_combo": {
+   "held": 0.0,
+   "stop": null
+  },
+  "base_no_stop": {
+   "held": -0.6719,
+   "stop": null
+  },
+  "base_tight_stop": {
+   "held": -0.6719,
+   "stop": 1.12295
+  },
+  "base_daily": {
+   "held": -0.6719,
+   "stop": 1.12909
+  },
+  "trend_3m": {
+   "held": -1.3438,
+   "stop": 1.12909
+  },
+  "always_long": {
+   "held": 1.0,
+   "stop": null
+  },
+  "always_short": {
+   "held": -1.0,
+   "stop": null
+  }
+ }
+}
