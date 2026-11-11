@@ -269,7 +269,7 @@ def weekly_signals(W: pd.DataFrame, px: pd.Series) -> tuple[pd.DataFrame, pd.Dat
     p26 = sg(np.log(px).diff(26))
     S["diag_base_with_trend26"] = sg(z52).where(sg(z52) == p26, 0.0).where(z52.notna() & p26.notna())
     S["diag_base_against_trend26"] = sg(z52).where(sg(z52) != p26, 0.0).where(z52.notna() & p26.notna())
-    # composite (mean over the live components; TFF parts are masked to their live years in `daily_signal`)
+    # the composite deep_combo is formed in `daily_signal` (mean over the live components)
     # theme 6: z-window robustness
     for w in (26, 104, 156):
         S[f"rob_nc_z{w}"] = sg(_z(nc, w)); S[f"rob_am_z{w}"] = sg(_z(grp["am"], w)); S[f"rob_lev_z{w}"] = sg(_z(grp["lev"], w))
@@ -584,7 +584,7 @@ def analysis(verbose: bool = True) -> dict:
     out = {}
     out["extremes"] = extremes_table(X, VW)
     out["flow_price"] = flow_price_table(W, weekly_close(X, W.index))
-    probe = [BASELINE, final, "deep_combo", "am_lev_agree", "diag_flow_d1"]
+    probe = list(dict.fromkeys([BASELINE, final, "deep_combo", "am_lev_agree", "div_follow_pos", "diag_base_against_trend26", "diag_flow_d1"]))
     out["lags"] = lag_table(X, SW, probe)
     out["shutdown"] = shutdown_check(X, SW, [BASELINE, final, "deep_combo"])
     out["shuffle"] = shuffle_check(X, SW)

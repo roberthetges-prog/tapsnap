@@ -559,9 +559,12 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True):
 
 
 # ================================================================================================ leak checks
-def leak_checks(final: str, cost_pips: float = 1.2, seed: int = 0) -> pd.DataFrame:
-    """(1) shuffled labels; (2) features lagged by 1 / 21 / 63 extra sessions and a look-ahead control (-21);
-    (3) full-sample correlation of every standardised signal with the label."""
+def leak_checks(final: str, cost_pips: float = 1.2, seed: int = 0, n_null: int = 200) -> pd.DataFrame:
+    """(1) shuffled labels (5 permutations); (2) features lagged by 1..504 extra sessions and look-ahead controls
+    (-5, -21, -63); (2b) circular-shift null: the final signal rolled by a random offset of >= 1 year inside
+    2010-2026 (keeps its autocorrelation, destroys its timing) - the right null for a slow signal;
+    (3) full-sample correlation of every standardised signal with the label; (4) truncation test of the
+    surprise index (value at T must not change when every release available after T is deleted)."""
     D = load_frame()
     signals = list(SIGNALS)
     sigs = signals if final == "combo_tstat" else [final.replace("single_", "")]
@@ -572,17 +575,71 @@ def leak_checks(final: str, cost_pips: float = 1.2, seed: int = 0) -> pd.DataFra
         Ds["fwd_1d"] = rng.permutation(D["fwd_1d"].values)
         _, _, t = run_variant(Ds, sigs, cost_pips, f"shuffled_labels_{k}")
         out.append(t.assign(check=f"shuffled_labels_{k}"))
-    for lag in (1, 21, 63, 126, -21):
+    for lag in (1, 5, 21, 42, 63, 126, 189, 252, 378, 504, -5, -21, -63):
         Dl = D.copy()
         Dl[signals] = D[signals].shift(lag)
         nm = f"features_shift_plus{lag}" if lag > 0 else f"features_shift_minus{-lag}_lookahead_control"
         _, _, t = run_variant(Dl, sigs, cost_pips, nm)
         out.append(t.assign(check=nm))
+    idx = np.where(D.index.year >= 2010)[0]
+    null = []
+    for k in range(n_null):
+        off = int(rng.integers(252, len(idx) - 252))
+        Dl = D.copy()
+        for c in sigs:
+            v = D[c].values.copy()
+            v[idx] = np.roll(v[idx], off)
+            Dl[c] = v
+        _, _, t = run_variant(Dl, sigs, cost_pips, "null")
+        null.append(t.set_index("period").loc[["2010-2026", "2016-2026", "2023-2026"], "sharpe"].values)
+    null = np.array(null)
+    _, _, t0 = run_variant(D, sigs, cost_pips, "actual")
+    act = t0.set_index("period").loc[["2010-2026", "2016-2026", "2023-2026"], "sharpe"].values
+    nulls = pd.DataFrame({"period": ["2010-2026", "2016-2026", "2023-2026"], "sharpe": act, "null_mean": null.mean(0), "null_sd": null.std(0),
+                          "null_q95": np.quantile(null, 0.95, axis=0), "p_null_ge_actual": (null >= act).mean(0), "check": "circular_shift_null"})
     st = _scaler_fit(D[signals])
     Z = _scaler_apply(D[signals], st)
     c = Z.corrwith(D["fwd_1d"])
     corr = pd.DataFrame({"period": c.index, "corr_with_fwd_1d": c.values, "n": Z.notna().sum().values, "check": "signal_label_corr"})
-    return pd.concat(out + [corr], ignore_index=True)
+    return pd.concat(out + [nulls, corr, truncation_test()], ignore_index=True)
+
+
+def truncation_test(n_dates: int = 40, seed: int = 0) -> pd.DataFrame:
+    """Rebuild the surprise index from releases with avail <= T only and compare the row at T with the full build."""
+    df = pd.read_parquet(FEATURES)
+    ct = pd.DatetimeIndex(df["close_time"])
+    R = load_releases()
+    full = build_surprise_index(ct, R)
+    cols = [c for c in full.columns if c.startswith("esi_")]
+    rng = np.random.default_rng(seed)
+    cand = np.where((ct.year >= 2011) & (ct.year <= 2026))[0]
+    worst = 0.0
+    nan_mismatch = 0
+    for i in rng.choice(cand, n_dates, replace=False):
+        part = build_surprise_index(ct[: i + 1], R[R.avail <= ct[i]])
+        a, b = full.iloc[i][cols].values.astype(float), part.iloc[i][cols].values.astype(float)
+        nan_mismatch += int((np.isnan(a) != np.isnan(b)).sum())
+        worst = max(worst, float(np.nanmax(np.abs(a - b))) if np.isfinite(a - b).any() else 0.0)
+    return pd.DataFrame([{"period": f"{n_dates} random sessions", "max_abs_diff": worst, "nan_mismatch": nan_mismatch, "check": "surprise_index_truncation"}])
+
+
+def bias_timing(final: str, cost_pips: float = 1.2) -> pd.DataFrame:
+    """Is the record a static short/long bias? Splits the final position into its expanding mean (known at t)
+    and the remainder, and compares with 'always short at the same size when the arm is active'."""
+    D = load_frame()
+    sigs = list(SIGNALS) if final == "combo_tstat" else [final.replace("single_", "")]
+    pos, _, _ = run_variant(D, sigs, cost_pips, final)
+    em = pos.where(pos.index.year >= 2010, 0.0).expanding().mean().shift(1).fillna(0.0)
+    rows = []
+    for nm, p in (("final", pos), ("timing_only(pos - expanding mean pos)", pos - em), ("bias_only(expanding mean pos)", em),
+                  ("always_short_when_active", -pos.abs()), ("always_long_when_active", pos.abs())):
+        pnl = pnl_from_positions(p, D["fwd_1d"], D["close"], cost_pips)
+        pnl = pnl[pnl.index.year >= 2010]
+        t = report(pnl, 252, ARM, 1).set_index("period")
+        rows.append({"stream": nm, **{f"SR_{k}": t.loc[k, "sharpe"] for k in ("2010-2026", "2016-2026", "2023-2026")},
+                     "t_2010-2026": t.loc["2010-2026", "t"], "long_frac": float((p[p.index.year >= 2010] > 0).mean()),
+                     "short_frac": float((p[p.index.year >= 2010] < 0).mean())})
+    return pd.DataFrame(rows)
 
 
 # ================================================================================================ incremental value
@@ -638,11 +695,17 @@ if __name__ == "__main__":
     final = rep.loc[rep["final"], "variant"].iloc[0]
     lc = leak_checks(final, cost_pips=cost)
     lc.to_csv(RES / f"{ARM}_leakchecks.csv", index=False)
-    for chk in [c for c in lc.check.unique() if c != "signal_label_corr"]:
+    skip = ("signal_label_corr", "circular_shift_null", "surprise_index_truncation")
+    for chk in [c for c in lc.check.unique() if c not in skip]:
         r = lc[lc.check == chk].set_index("period")
         print(f"leak check {chk:42s} 2010-26 SR {r.loc['2010-2026','sharpe']:+.2f} t {r.loc['2010-2026','t']:+.2f} | "
               f"2016-26 SR {r.loc['2016-2026','sharpe']:+.2f} | 2023-26 SR {r.loc['2023-2026','sharpe']:+.2f}")
+    print(lc[lc.check == "circular_shift_null"][["period", "sharpe", "null_mean", "null_sd", "null_q95", "p_null_ge_actual"]].round(3).to_string(index=False))
+    print(lc[lc.check == "surprise_index_truncation"][["period", "max_abs_diff", "nan_mismatch"]].to_string(index=False))
     print(lc[lc.check == "signal_label_corr"][["period", "corr_with_fwd_1d", "n"]].to_string(index=False))
+    bt = bias_timing(final, cost)
+    bt.to_csv(RES / f"{ARM}_bias_timing.csv", index=False)
+    print(bt.round(3).to_string(index=False))
     inc, cor = incremental()
     print(inc[inc.period.isin(["2010-2026", "2016-2026", "2023-2026"])].round(3).to_string(index=False))
     print(cor.round(3).to_string(index=False))
