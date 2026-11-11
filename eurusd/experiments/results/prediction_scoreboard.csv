@@ -1,0 +1,34 @@
+target,model,period,n,accuracy,naive_baseline,edge_pts,note
+direction next session,live exposure (when active),2010-26,3901,52.4,50.1,2.3,active 89% of sessions
+direction next session,both components agree,2010-26,1626,53.1,50.1,3.0,37% of sessions
+direction next session,live exposure (when active),2016-26,2478,51.7,50.2,1.4,active 88% of sessions
+direction next session,both components agree,2016-26,1028,51.9,50.2,1.7,37% of sessions
+direction next session,live exposure (when active),2023-26,873,51.2,50.5,0.8,active 87% of sessions
+direction next session,both components agree,2023-26,398,51.3,50.5,0.8,40% of sessions
+direction next 5 sessions,live exposure (when active),2010-26,762,55.0,51.6,3.4,
+direction next 5 sessions,live exposure (when active),2016-26,480,54.2,50.9,3.3,
+direction next 5 sessions,live exposure (when active),2023-26,175,50.3,50.8,-0.5,
+direction next 21 sessions,live exposure (when active),2010-26,190,57.9,54.3,3.6,
+direction next 21 sessions,live exposure (when active),2016-26,121,56.2,51.9,4.3,
+direction next 21 sessions,live exposure (when active),2023-26,42,47.6,51.1,-3.4,
+next session range above/below 1-year median,HAR + events (walk-forward),2010-26,4372,75.1,68.2,6.9,baseline = yesterday's class
+'volatile day' call (forecast in top 20%) -> range above median,HAR + events,2010-26,713,93.5,45.6,48.0,baseline = unconditional rate
+'quiet day' call (forecast 15% below median) -> range below median,HAR + events,2010-26,1636,82.0,54.4,27.7,baseline = unconditional rate
+next session range inside the 80% forecast band,HAR + events,2010-26,4372,80.1,80.0,0.1,calibration target = 80%
+"next session range, mean abs error (pips)",HAR + events,2010-26,4372,27.0,36.3,9.3,lower is better; baseline = yesterday's range
+next session range above/below 1-year median,HAR + events (walk-forward),2016-26,2816,75.6,68.0,7.6,baseline = yesterday's class
+'volatile day' call (forecast in top 20%) -> range above median,HAR + events,2016-26,486,93.4,45.8,47.6,baseline = unconditional rate
+'quiet day' call (forecast 15% below median) -> range below median,HAR + events,2016-26,1142,80.6,54.2,26.5,baseline = unconditional rate
+next session range inside the 80% forecast band,HAR + events,2016-26,2816,80.5,80.0,0.5,calibration target = 80%
+"next session range, mean abs error (pips)",HAR + events,2016-26,2816,22.8,30.8,8.0,lower is better; baseline = yesterday's range
+next session range above/below 1-year median,HAR + events (walk-forward),2023-26,999,75.0,66.9,8.1,baseline = yesterday's class
+'volatile day' call (forecast in top 20%) -> range above median,HAR + events,2023-26,87,92.0,39.4,52.5,baseline = unconditional rate
+'quiet day' call (forecast 15% below median) -> range below median,HAR + events,2023-26,520,79.0,60.6,18.5,baseline = unconditional rate
+next session range inside the 80% forecast band,HAR + events,2023-26,999,78.4,80.0,-1.6,calibration target = 80%
+"next session range, mean abs error (pips)",HAR + events,2023-26,999,22.0,28.8,6.8,lower is better; baseline = yesterday's range
+next close inside the 1-sigma cone,21-day realised vol,2010-26,4372,70.7,68.3,2.4,calibration target = 68.3%
+next close inside the 2-sigma cone,21-day realised vol,2010-26,4372,95.0,95.4,-0.4,calibration target = 95.4%
+next close inside the 1-sigma cone,21-day realised vol,2016-26,2816,71.3,68.3,3.0,calibration target = 68.3%
+next close inside the 2-sigma cone,21-day realised vol,2016-26,2816,95.3,95.4,-0.1,calibration target = 95.4%
+next close inside the 1-sigma cone,21-day realised vol,2023-26,999,72.0,68.3,3.7,calibration target = 68.3%
+next close inside the 2-sigma cone,21-day realised vol,2023-26,999,95.1,95.4,-0.3,calibration target = 95.4%

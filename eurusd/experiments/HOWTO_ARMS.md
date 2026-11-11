@@ -78,3 +78,18 @@ Extra rules for round 3:
 * Deliverables as before: `src/eurusd/arms/<arm>.py` with `run(cost_pips=1.2)`, `experiments/results/arms/<arm>_positions.parquet`
   (pos, fwd_bp, net_bp), `<arm>_report.csv`, `reports/arm_<arm>.md`, the three leak checks. Do not commit; do not touch
   `state/`, `config/`, the live modules (`exposure.py`, `scenarios.py`, `brief.py`, `risk.py`) or other arms' files.
+
+---
+# Round 4 addendum (2026-11-11)
+
+Read the Round 3 addendum first; all of it still applies (max 12 variants, incremental test against
+`combine(["weak_signals","regime_trend"], "EW")`, honest lags, no touching live files or other arms).
+Rounds 1-3 summary and what is already known NOT to work: `research/RESEARCH_LOG.md` and `reports/arm_*.md`. Do not
+re-test those; bring new information or new structure.
+Additional reporting for round 4: besides Sharpe/t, report the out-of-sample HIT RATE of the final variant
+(share of active decisions with positive net P&L, and share with the correct sign before costs) for
+2010-26 / 2016-26 / 2023-26, with the number of decisions. If your target is not direction (e.g. range, volatility,
+probability of touching a level), report classification accuracy or Brier score against a naive baseline as well.
+CPU: four arms share 4 cores; one process per arm, set OMP_NUM_THREADS=1; when working with M1/M5 data load only the
+columns and years you need (M1 parquet is 106 MB, 9 M rows) and cache intermediate daily aggregates to
+`data/processed/` under a name starting with your arm.
