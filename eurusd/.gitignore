@@ -4,3 +4,9 @@ data/processed/EURUSD_M1.parquet
 data/processed/EURUSD_M5.parquet
 __pycache__/
 *.pyc
+
+# large regenerable caches from research arms
+data/processed/cross/ofi_*_M5.parquet
+data/processed/ofi_replication_daily_*.parquet
+data/processed/intraday_path_features.parquet
+data/processed/vol_tactics_days.parquet

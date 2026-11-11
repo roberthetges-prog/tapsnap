@@ -12,7 +12,7 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 | 2 | daily ML, intraday ML, weak-signal combination, regimes/trend, events (walk-forward 2010-2026) | 137 | weak-signal combination + positioning trend -> live exposure (Sharpe 0.56 / 0.64 / 0.36) |
 | 3 | rate expectations & stress (12), deep positioning (12), macro surprises (12), G10 positioning (10) | 46 | none added. Rates/stress: spread trend re-expressed, +0.03 Sharpe = noise. Deep positioning: crude rule not improved (placebo matched). Macro surprises: not timing-dependent, cannot run live. G10: effect does NOT replicate outside EUR |
 
-| 4 | vol-conditioned intraday tactics (12), FX relative value (12, strict count 24), flows & calendar (12), intraday path from M1 (22), selective probabilities (12), swing + OFI replication pending | 82+ | vol tactics: none; range forecast kept for stop/target placement (78 % above/below-median accuracy; oracle ceiling for intraday tactics ~0.8-1.1 Sharpe) |
+| 4 | vol-conditioned intraday tactics (12), FX relative value (12, strict count 24), flows & calendar (12), intraday path from M1 (22), selective probabilities (12), OFI replication (1: FAILS, basket Sharpe 0.06, 3 of 6 pairs), swing pending | 83+ | vol tactics: none; range forecast kept for stop/target placement (78 % above/below-median accuracy; oracle ceiling for intraday tactics ~0.8-1.1 Sharpe) |
 
 ## What is established
 * Predictable: slow macro drift and speculative positioning (direction, weakly); volatility and range (strongly).
@@ -27,8 +27,8 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
   record is ~0.3 Sharpe since 2016. Candidate scenario for later: December-only season.
 * Intraday path features from 1-minute data (signed jumps, realised skew, session shares, efficiency, late-day move,
   order-flow proxy): none robust; most are ret_1d in disguise and flip sign across eras. One post-hoc lead: the 5-day
-  order-flow proxy orthogonalised to the day's return (+0.53 / +0.41 / +0.68, 13 of 17 years). Being tested as a single
-  pre-registered replication on six other pairs (arm P). The 'fade the last hour' effect is a closing-bid artefact.
+  order-flow proxy orthogonalised to the day's return (+0.53 / +0.41 / +0.68, 13 of 17 years). Tested as a single
+  pre-registered replication on six other pairs (arm P): FAILS (basket 0.06 / 0.16 / 0.21, pooled t 0.5). Dropped. The 'fade the last hour' effect is a closing-bid artefact.
 * **Selective probabilities (reports/arm_selective.md).** Calibrated P>=60 % directional calls do not work (no better than
   chance; logistic model anti-informative at long horizons). Accuracy rises with HOLDING PERIOD: hit = Phi(Sharpe x sqrt(h/252)).
   Agreement rule (positioning, 2y-spread trend, house score all agree; 44 % of the time): 57 / 59 / 65 / 67 % right at
