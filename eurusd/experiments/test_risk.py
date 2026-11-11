@@ -51,3 +51,20 @@ assert st2["checks"]["daily_loss"]["breached"] and st2["trading_halted"], st2
 halted = eng.size("london_short", -1, price, price + 50e-4, decided_at=pd.Timestamp("2026-11-05 06:00", tz="UTC"))
 assert not halted.approved, halted
 print("risk engine tests pass")
+
+# ---- alerts
+book2 = Book(tmp); book2.positions.clear(); book2.closed.clear(); book2.equity = 10000; book2.peak_equity = 10000
+eng2 = RiskEngine(h1, cfg, book2)
+codes = lambda e: {a["code"] for a in e.alerts()}
+assert not ({"stop_near", "stop_touched", "open_loss", "halted"} & codes(eng2)), eng2.alerts()      # flat book: no position alerts
+adr = eng2.vol_forecast()["adr14_pips"]
+book2.add(strategy="macro_exposure", side=-1, entry=eng2.price, stop=eng2.price + 0.2 * adr * 1e-4, lots=0.1, opened=str(h1.index[-1]))
+assert "stop_near" in codes(eng2), eng2.alerts()                                                     # stop 0.2 ADR away
+book2.positions[0].stop = eng2.price - 0.0005                                                        # stop already behind the market for a short
+assert "stop_touched" in codes(eng2), eng2.alerts()
+book2.positions[0].stop = eng2.price + 0.02; book2.positions[0].entry = eng2.price - 0.0150           # 150 pips under water on 0.1 lots = -150 USD = -1.5 %
+c2 = codes(eng2); assert "open_loss" in c2 and "limit_daily_loss_near" in c2, eng2.alerts()
+book2.positions[0].entry = eng2.price - 0.0250                                                       # -2.5 % -> daily loss limit breached -> halted
+c3 = codes(eng2); assert "limit_daily_loss" in c3 and "halted" in c3 and eng2.alerts()[0]["severity"] == "CRITICAL", eng2.alerts()
+assert "cot_stale" not in codes(eng2)
+print("alert tests pass")

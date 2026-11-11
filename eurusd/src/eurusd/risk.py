@@ -70,6 +70,14 @@ class RiskConfig:
     stress_gap_adr_multiples: list = field(default_factory=lambda: [1.0, 2.0, 3.0])
     health_window_trades: int = 40
     health_z_alert: float = -2.0
+    alert_stop_distance_adr: float = 0.5     # warn when the stop is closer than this many ADRs
+    alert_adverse_move_adr: float = 1.0      # warn when today's move against the book exceeds this many ADRs
+    alert_open_loss: float = 0.01            # warn when open P&L is worse than this fraction of equity
+    alert_limit_fraction: float = 0.5        # warn when a loss limit is more than this fraction used
+    alert_range_shock_adr: float = 1.75      # info when the current session's range exceeds this many ADRs
+    alert_event_hours: float = 12.0          # info when a high-impact event is this close and a position is open
+    alert_data_age_hours: float = 3.0        # warn when the last bar is older than this on a trading day
+    alert_cot_stale_days: int = 12           # warn when the latest CFTC report is older than this
 
     @classmethod
     def load(cls, path: Path = CONFIG) -> "RiskConfig":
@@ -501,6 +509,68 @@ class RiskEngine:
                 rec.update({"live_mean_r": None, "z": None, "alert": False, "consecutive_losses": self.consecutive_losses(s)})
             out[s] = rec
         return out
+
+    # ------------------------------------------------------------------ alerts
+    def alerts(self) -> list[dict]:
+        """Risk alerts for the current book and market state. severity: CRITICAL > WARNING > INFO."""
+        cfg, out = self.cfg, []
+        add = lambda sev, code, text: out.append({"severity": sev, "code": code, "text": text})
+        st = self.limits_status()
+        vol = self.vol_forecast()
+        adr = vol["adr14_pips"]
+        eq = st["equity_with_mtm"]
+        for k, v in st["checks"].items():
+            if v["breached"]:
+                add("CRITICAL", f"limit_{k}", f"limit breached: {k} = {v['value']:+.4f} vs {v['limit']}")
+            elif k in ("daily_loss", "monthly_loss", "drawdown") and v["value"] <= v["limit"] * cfg.alert_limit_fraction:
+                add("WARNING", f"limit_{k}_near", f"{k} at {v['value']:+.2%}, more than {cfg.alert_limit_fraction:.0%} of the {v['limit']:.0%} limit")
+            elif k == "open_risk" and v["value"] > v["limit"] * 0.9:
+                add("WARNING", "open_risk_near", f"open risk {v['value']:.2%} is close to the {v['limit']:.2%} cap")
+        if st["trading_halted"]:
+            add("CRITICAL", "halted", "trading halted by a kill switch: no new entries until reviewed")
+        # session so far (NY-close session containing the last bar)
+        sess_start = (self.h1.index[-1] - pd.Timedelta(hours=22)).floor("D") + pd.Timedelta(hours=22)
+        sess = self.h1.loc[sess_start:]
+        s_open, s_hi, s_lo = float(sess["open"].iloc[0]), float(sess["high"].max()), float(sess["low"].min())
+        net = sum(p.side * p.lots for p in self.book.positions)
+        for p in self.book.positions:
+            side = "short" if p.side < 0 else "long"
+            since = self.h1.loc[pd.Timestamp(p.opened):] if p.opened else sess
+            touched = (not since.empty) and ((p.side > 0 and since["low"].min() <= p.stop) or (p.side < 0 and since["high"].max() + PIP >= p.stop))
+            dist = (p.stop - self.price) * (-p.side) / PIP if p.side < 0 else (self.price - p.stop) / PIP
+            if touched:
+                add("CRITICAL", "stop_touched", f"stop {p.stop:.5f} of the {side} {p.lots} lots was touched since entry; the paper book closes it at the next run")
+            elif dist < cfg.alert_stop_distance_adr * adr:
+                add("WARNING", "stop_near", f"stop {p.stop:.5f} is {dist:.0f} pips away ({dist / adr:.2f} ADR) on the {side} {p.lots} lots")
+        if self.book.positions:
+            mtm = st["mtm"]
+            if mtm <= -cfg.alert_open_loss * st["equity"]:
+                add("WARNING", "open_loss", f"open P&L {mtm:+,.0f} USD ({mtm / st['equity']:+.2%} of equity)")
+            move = (self.price - s_open) / PIP
+            if net != 0 and move * np.sign(net) <= -cfg.alert_adverse_move_adr * adr:
+                add("WARNING", "adverse_move", f"today's move {move:+.0f} pips is against the book ({abs(move) / adr:.1f} ADR)")
+            ev = self.events_ahead(cfg.alert_event_hours).drop_duplicates("time")
+            if not ev.empty:
+                r = ev.iloc[0]
+                add("INFO", "event_ahead", f"{r.event} in {r.hours_ahead:.0f}h with a position open")
+        rng = (s_hi - s_lo) / PIP
+        if rng >= cfg.alert_range_shock_adr * adr:
+            add("INFO", "range_shock", f"session range {rng:.0f} pips = {rng / adr:.1f} ADR (volatility shock)")
+        # data freshness
+        now = pd.Timestamp.now(tz="UTC")
+        age = (now - (self.h1.index[-1] + pd.Timedelta(hours=1))).total_seconds() / 3600
+        market_open = not ((now.dayofweek == 5) or (now.dayofweek == 4 and now.hour >= 22) or (now.dayofweek == 6 and now.hour < 22))
+        if market_open and age > cfg.alert_data_age_hours:
+            add("WARNING", "data_stale", f"last price bar is {age:.1f}h old")
+        try:
+            last_cot = pd.Timestamp(pd.read_csv(MACRO / "cot_eurofx_legacy.csv", usecols=["report_date"])["report_date"].max())
+            days = (now.tz_localize(None) - last_cot).days
+            if days > cfg.alert_cot_stale_days:
+                add("WARNING", "cot_stale", f"latest CFTC report is {days} days old ({last_cot:%Y-%m-%d}); the positioning signal is running on old data")
+        except Exception as e:
+            add("WARNING", "cot_unreadable", f"positioning file unreadable: {e}")
+        order = {"CRITICAL": 0, "WARNING": 1, "INFO": 2}
+        return sorted(out, key=lambda a: order[a["severity"]])
 
     # ------------------------------------------------------------------ report
     def report(self) -> str:

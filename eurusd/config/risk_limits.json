@@ -7,7 +7,7 @@
   "max_open_risk": 0.015,
   "max_daily_loss": 0.02,
   "max_monthly_loss": 0.05,
-  "max_drawdown": 0.10,
+  "max_drawdown": 0.1,
   "max_consecutive_losses": 8,
   "event_block_minutes_before": 30,
   "event_block_minutes_after": 15,
@@ -16,7 +16,19 @@
   "max_spread_pips": 2.5,
   "max_data_age_hours": 30,
   "var_confidence": 0.99,
-  "stress_gap_adr_multiples": [1.0, 2.0, 3.0],
+  "stress_gap_adr_multiples": [
+    1.0,
+    2.0,
+    3.0
+  ],
   "health_window_trades": 40,
-  "health_z_alert": -2.0
+  "health_z_alert": -2.0,
+  "alert_stop_distance_adr": 0.5,
+  "alert_adverse_move_adr": 1.0,
+  "alert_open_loss": 0.01,
+  "alert_limit_fraction": 0.5,
+  "alert_range_shock_adr": 1.75,
+  "alert_event_hours": 12.0,
+  "alert_data_age_hours": 3.0,
+  "alert_cot_stale_days": 12
 }

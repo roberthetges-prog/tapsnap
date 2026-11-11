@@ -59,6 +59,30 @@ def paper_execute(exp, pl: dict, eng: RiskEngine, h1: pd.DataFrame) -> list[str]
     return notes
 
 
+def log_alerts(alerts: list[dict], session: str) -> None:
+    from .refresh import ROOT
+    path = ROOT / "state" / "alerts_log.csv"
+    new = not path.exists()
+    with path.open("a") as fh:
+        if new:
+            fh.write("logged_utc,session_close,severity,code,text\n")
+        for a in alerts:
+            fh.write(f"{pd.Timestamp.now(tz='UTC'):%Y-%m-%dT%H:%MZ},{session},{a['severity']},{a['code']},\"{a['text']}\"\n")
+
+
+def live_alerts(refresh: bool = True) -> str:
+    """Stand-alone alert check (no book changes): refresh prices, run the risk engine's alerts."""
+    eng, h1 = _engine(refresh)
+    al = eng.alerts()
+    head = f"EUR/USD alerts | {pd.Timestamp.now(tz='UTC'):%Y-%m-%d %H:%M} UTC | price {eng.price:.4f} | data to {h1.index[-1]:%d %b %H:%M}"
+    pos = eng.book.positions
+    book = (f"Book: {'short' if pos[0].side < 0 else 'long'} {pos[0].lots} lots from {pos[0].entry:.4f}, stop {pos[0].stop:.5f}, P&L {eng.mtm():+.0f} USD"
+            if pos else "Book: flat")
+    if not al:
+        return "\n".join([head, book, "ALERTS: none"])
+    return "\n".join([head, book] + [f"[{a['severity']}] {a['text']}" for a in al])
+
+
 def daily_brief(refresh: bool = True, paper: bool = False) -> str:
     from .refresh import refresh_macro, log_signal
     status = refresh_macro() if refresh else ["macro refresh skipped"]
@@ -105,6 +129,22 @@ def daily_brief(refresh: bool = True, paper: bool = False) -> str:
             L.append(SC.summary_line() + (" | " + ", ".join(stops) if stops else ""))
         except Exception as e:
             L.append(f"Scenarios: FAILED {type(e).__name__}: {str(e)[:100]}")
+    # ---- alerts: risk engine + operational events of this run
+    alerts = eng.alerts()
+    if pl["action"] == "rebalance":
+        alerts.append({"severity": "INFO", "code": "rebalance", "text": f"target changed: {pl['side']} {pl['target_lots']} lots, stop {pl['stop']}"})
+    for n in paper_notes:
+        if n.startswith("STOP hit"):
+            alerts.insert(0, {"severity": "CRITICAL", "code": "stop_hit", "text": n})
+    for m in status:
+        if "FAILED" in m:
+            alerts.append({"severity": "WARNING", "code": "refresh_failed", "text": m})
+    if alerts:
+        L.insert(1, "ALERTS: " + " | ".join(f"[{a['severity']}] {a['text']}" for a in alerts))
+    else:
+        L.insert(1, "ALERTS: none")
+    if paper and alerts:
+        log_alerts(alerts, exp.asof_session_close)
     bad = [m for m in status if "FAILED" in m or "skipped" in m]
     L.append("Data: " + (status[0] if status and status[0].startswith("COT") else "COT not refreshed") + (" | WARN " + "; ".join(bad) if bad else ""))
     try:

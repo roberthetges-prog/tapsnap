@@ -4,6 +4,7 @@
   python -m eurusd.cli exposure [--no-refresh] [--json]   # today's target daily exposure (round-2 survivor) with lots and stop
   python -m eurusd.cli brief                              # daily: exposure + risk digest (<= 12 lines)
   python -m eurusd.cli scenarios                          # paper leaderboard of all pre-registered scenarios
+  python -m eurusd.cli alerts                             # live risk alerts (read-only): stops, limits, moves, events, stale data
   python -m eurusd.cli weekly                             # weekly: trend, tilt, vol cone, levels, events
   python -m eurusd.cli risk [--asof ...] [--no-refresh] [--out reports/risk_latest.md]  # full risk report
   python -m eurusd.cli book add --strategy S --side long|short --entry P --stop P --lots L --opened ISO [--exit ISO]
@@ -98,6 +99,11 @@ def cmd_brief(a):
     print(daily_brief(refresh=not a.no_refresh, paper=a.paper))
 
 
+def cmd_alerts(a):
+    from .brief import live_alerts
+    print(live_alerts(refresh=not a.no_refresh))
+
+
 def cmd_weekly(a):
     from .brief import weekly_outlook
     print(weekly_outlook(refresh=not a.no_refresh))
@@ -168,6 +174,7 @@ def main(argv=None):
     s.add_argument("--json", action="store_true"); s.set_defaults(f=cmd_signals)
     x = sub.add_parser("exposure"); x.add_argument("--no-refresh", action="store_true"); x.add_argument("--json", action="store_true"); x.set_defaults(f=cmd_exposure)
     bb = sub.add_parser("brief"); bb.add_argument("--no-refresh", action="store_true"); bb.add_argument("--paper", action="store_true", help="apply the plan to the book as modelled fills (forward test)"); bb.set_defaults(f=cmd_brief)
+    al = sub.add_parser("alerts"); al.add_argument("--no-refresh", action="store_true"); al.set_defaults(f=cmd_alerts)
     ww = sub.add_parser("weekly"); ww.add_argument("--no-refresh", action="store_true"); ww.set_defaults(f=cmd_weekly)
     sc = sub.add_parser("scenarios"); sc.add_argument("--review", action="store_true", help="apply the keep/dispose rule"); sc.set_defaults(f=cmd_scenarios)
     r = sub.add_parser("risk"); r.add_argument("--asof"); r.add_argument("--no-refresh", action="store_true"); r.add_argument("--out"); r.set_defaults(f=cmd_risk)
