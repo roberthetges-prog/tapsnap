@@ -115,6 +115,15 @@ FINAL (declared): the candidate whose declared vote rule has the highest non-ove
   42-session accuracy. If none is eligible there is no final and the stream written to disk is the standalone signal
   `gap_rel`, flagged as failing. The delivered daily stream is always the STANDALONE daily sign of the final signal
   (pos in -1/0/+1), so that the incremental test measures new information.
+
+ADDED AFTER THE FIRST RUN (labelled as such in the report; none of it changes a candidate, a signal value inside an
+evaluated period, the selection or the success test):
+  * `rf_diagnostics`: which block of predictors carries the ordered logit, more shrinkage, trailing-direction signs
+    (the first run showed the model below plain persistence; nothing was adopted from the diagnostics);
+  * the table "when a model departs from persistence, who is right?" (the false-alarm side of the turning points);
+  * `turn63` ignores turning points dated before the price sample starts (the first version painted the first 63
+    sessions of 2003 with the last pre-2003 event; 2003 is outside every evaluated period);
+  * the report writer and the verdict text.
 """
 from __future__ import annotations
 
@@ -663,7 +672,7 @@ def reaction_functions(end: pd.Timestamp, verbose: bool = True, extra_lag: int =
     """All reaction-function experiments. Returns accuracy rows, confusion rows, turning-point rows, coefficient tables
     and (unless light) the daily model-implied / market-priced 6-month change for each bank."""
     fed, ecb = fed_policy(), ecb_policy()
-    acc, conf, tp_rows, coef, grids = [], [], [], [], {}
+    acc, conf, tp_rows, coef, grids, dis = [], [], [], [], {}, []
     daily = {}
     cfg = {"fed": dict(pol=fed, feat=lambda d: us_features(d, fed, None, extra_lag), full=[c for c in US_FULL if c not in drop], taylor=US_TAYLOR,
                        m_start=FED_TARGET_START, m_years=range(1990, 2027), meet_years=range(1996, 2027),
@@ -712,6 +721,16 @@ def reaction_functions(end: pd.Timestamp, verbose: bool = True, extra_lag: int =
                                 "acc_market": float(np.sqrt(((d_ - mk["exp"][k]) ** 2).mean())), "acc_ologit+market": float(np.sqrt(((d_ - bo["exp"][k]) ** 2).mean()))})
             acc += _acc_rows(bank, target, G, preds, subsets, periods)
             y = G["y"].values
+            for mdl in ("taylor", "ologit", "market"):          # when a model departs from persistence, who is right?
+                if mdl not in preds:
+                    continue
+                for plab, a, b in periods[:1] + periods[-1:]:
+                    inp = np.isfinite(y) & np.isfinite(preds[mdl]) & np.isfinite(preds["ologit"]) & (G["origin"].dt.year.values >= a) & (G["origin"].dt.year.values <= b)
+                    k = inp & (preds[mdl] != preds["persistence"])
+                    dis.append({"bank": bank, "target": target, "period": plab, "model": mdl, "n_all": int(inp.sum()), "n_disagree": int(k.sum()),
+                                "model_right": float((preds[mdl][k] == y[k]).mean()) if k.sum() else np.nan,
+                                "persistence_right": float((preds["persistence"][k] == y[k]).mean()) if k.sum() else np.nan,
+                                "neither_right": float(((preds[mdl][k] != y[k]) & (preds["persistence"][k] != y[k])).mean()) if k.sum() else np.nan})
             for plab, a, b in periods[:1] + periods[-1:]:
                 k = np.isfinite(y) & np.isfinite(ol["pred"]) & (G["origin"].dt.year.values >= a) & (G["origin"].dt.year.values <= b)
                 conf += _confusion(bank, target, y[k], ol["pred"][k], "ologit", plab)
@@ -747,7 +766,7 @@ def reaction_functions(end: pd.Timestamp, verbose: bool = True, extra_lag: int =
             if verbose:
                 print(f"  reaction function {bank}/{target}: {len(G)} rows", flush=True)
     return {"acc": pd.DataFrame(acc), "conf": pd.DataFrame(conf), "tp": pd.DataFrame(tp_rows), "coef": pd.DataFrame(coef), "grids": grids,
-            "daily": daily, "fed": fed, "ecb": ecb}
+            "daily": daily, "fed": fed, "ecb": ecb, "dis": pd.DataFrame(dis)}
 
 
 def bundesbank_robustness() -> pd.DataFrame:
@@ -779,6 +798,51 @@ def bundesbank_robustness() -> pd.DataFrame:
         chg = G["y"].values != G["b_persistence"].values
         rows += _acc_rows("bundesbank (3m rate proxy, +-25bp band)", f"m{h}", G, preds,
                           {"all": np.ones(len(G), bool), "label differs from the trailing direction": chg}, (("1975-1998", 1975, 1998),))
+    return pd.DataFrame(rows)
+
+
+def rf_diagnostics(end: pd.Timestamp) -> pd.DataFrame:
+    """ADDED AFTER THE FIRST RUN OF PART (1) (diagnostic only, nothing is selected from it and no signal uses it): which
+    block of predictors carries the ordered logit, and does more shrinkage or handing it the trailing direction help?"""
+    fed, ecb = fed_policy(), ecb_policy()
+    rows = []
+
+    def add_tr(X, pol):
+        lv = pol.level(X.index)
+        for nm, k in (("own_tr1", 45), ("own_tr3", 91), ("own_tr6", 182)):
+            X[nm] = np.sign(np.round(lv - pol.level(X.index - pd.Timedelta(days=k)), 6))
+        return X
+
+    for bank, pol, feat, full, start, years in (("fed", fed, lambda d: add_tr(us_features(d, fed), fed), US_FULL, FED_TARGET_START, range(1990, 2027)),
+                                                ("ecb", ecb, lambda d: add_tr(ea_features(d, ecb, fed), ecb), EA_FULL, pd.Timestamp("1999-01-01"), range(2004, 2027))):
+        Xm = feat(pd.date_range(start, end, freq="ME"))
+        own = [c for c in full if c.startswith("own")]
+        mac = [c for c in full if not c.startswith("own")]
+        tr = ["own_tr1", "own_tr3", "own_tr6"]
+        for h in (3, 6):
+            G = _grid_month(pol, Xm, h, start, end)
+            y, yr = G["y"].values, G["origin"].dt.year.values
+            base = wf_model(G, full, "ologit", years)["pred"]
+            k = np.isfinite(y) & np.isfinite(base)
+            r = {"bank": bank, "target": f"m{h}", "period": f"{min(years)}-2026", "n": int(k.sum()),
+                 "always_hold": float((y[k] == 0).mean()), "persistence": float((G["b_persistence"].values[k] == y[k]).mean()),
+                 "ologit (declared: all predictors, penalty 0.02)": float((base[k] == y[k]).mean())}
+            for lab, cols in (("own-policy block only", own), ("economy and markets only (no own-policy block)", mac),
+                              ("all + trailing-direction signs", full + tr), ("trailing-direction signs only", tr)):
+                p = wf_model(G, cols, "ologit", years)["pred"]
+                r[lab] = float((p[k] == y[k]).mean())
+            d0 = ologit_fit.__defaults__
+            for al in (0.2, 1.0):
+                ologit_fit.__defaults__ = (al,)
+                p = wf_model(G, full, "ologit", years)["pred"]
+                r[f"all predictors, penalty {al}"] = float((p[k] == y[k]).mean())
+            ologit_fit.__defaults__ = d0
+            kk = np.isfinite(y)
+            X = G[full].values.astype(float)[kk]
+            mu, sd = _standardise(X)
+            Z = _z(X, mu, sd)
+            r["IN-SAMPLE fit on the whole history (ceiling)"] = float((np.argmax(ologit_proba(ologit_fit(Z, y[kk]), Z), 1) - 1 == y[kk]).mean())
+            rows.append(r)
     return pd.DataFrame(rows)
 
 
@@ -960,8 +1024,8 @@ def build_signals(D: pd.DataFrame, PS: pd.DataFrame, fed: Policy, ecb: Policy) -
     Sg["model_rel"] = sg(g("model_rel_bp"))
     Sg["mkt_rel"] = sg(g("priced_rel_bp"))
     fd, ed = g("fed_dir3"), g("ecb_dir3")
-    Sg["phase_rel"] = np.sign(ed - fd)
-    Sg["fed_phase"] = -fd
+    Sg["phase_rel"] = np.sign(ed - fd) + 0.0
+    Sg["fed_phase"] = 0.0 - fd + 0.0
     Sg["ecb_phase"] = ed
     t63 = np.zeros(len(D))
     evs = []
@@ -976,6 +1040,8 @@ def build_signals(D: pd.DataFrame, PS: pd.DataFrame, fed: Policy, ecb: Policy) -
             s = (1.0 if cut_ else -1.0) * (1.0 if bank == "fed" else -1.0)
             evs.append((t["date"], s))
     for a, s in sorted(evs):
+        if a + pd.Timedelta(days=1) < cd[0]:
+            continue                                            # before the price sample
         i0 = cd.searchsorted(a + pd.Timedelta(days=1), side="left")
         t63[i0:i0 + 63] = s
     Sg["turn63"] = t63
@@ -1232,6 +1298,7 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True):
         rf["conf"].to_csv(RES / f"{ARM}_reaction_confusion.csv", index=False)
         rf["tp"].to_csv(RES / f"{ARM}_reaction_turning_points.csv", index=False)
         rf["coef"].to_csv(RES / f"{ARM}_reaction_coefficients.csv", index=False)
+        rf["dis"].to_csv(RES / f"{ARM}_reaction_disagreement.csv", index=False)
         E.to_csv(RES / f"{ARM}_events.csv", index=False)
         EC.to_csv(RES / f"{ARM}_event_cells.csv", index=False)
         drift.to_csv(RES / f"{ARM}_event_drift.csv", index=False)
@@ -1242,9 +1309,8 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True):
         pd.DataFrame(Sg).to_parquet(RES / f"{ARM}_signals.parquet")
         ps = PS[(PS.index.dayofweek < 5) & (PS.index >= "1990-01-01")].copy()
         cdl = pd.DatetimeIndex(D["close_time"]).tz_convert("UTC").normalize().tz_localize(None)
-        known = cdl - pd.Timedelta(days=1)
-        for nm, _ in CANDIDATES:      # the signal value that uses the row of date d is the one of the first session closing after d
-            ps[f"sig_{nm}"] = pd.Series(Sg[nm].values, index=known).groupby(level=0).last().reindex(ps.index)
+        for nm, _ in CANDIDATES:      # sig_<name> on date d = the signal in force for the session CLOSING on d (it uses the row of d - 1)
+            ps[f"sig_{nm}"] = pd.Series(Sg[nm].values, index=cdl).groupby(level=0).last().reindex(ps.index)
         ps.round(4).to_csv(MACRO / "policy_state.csv")
     run.last = out
     return pos["pos"], rep
@@ -1312,7 +1378,7 @@ def leak_checks(out: dict, verbose: bool = True) -> pd.DataFrame:
     # (4) truncation test: the state table rebuilt from data cut at three dates
     tr = []
     PS = out["PS"]
-    num = [c for c in PS.columns if PS[c].dtype != object]
+    num = list(PS.select_dtypes(include="number").columns)
     for cut in ("2012-06-29", "2019-03-29", "2024-09-30"):
         cut = pd.Timestamp(cut)
         P2 = policy_state(end, None, cut=cut)
@@ -1332,18 +1398,445 @@ def leak_checks(out: dict, verbose: bool = True) -> pd.DataFrame:
     return L
 
 
+# ============================================================================= report
+VERDICT = """**The owner's idea was tested properly and it does not give a tradeable edge. No candidate meets the Round 5 bar; the arm adds no vote.**
+The three questions, in order:
+
+1. **Can we predict what each central bank does from the economy? Not better than "it will keep doing what it has been doing".**
+   Out of sample (walk-forward), three classes cut / hold / hike:
+   * Next meeting. Fed 1996-2026 (252 meetings; 12 % cuts, 70 % holds, 18 % hikes): ordered logit on the economy + own policy 71 %, "always
+     hold" 70 %, "same as the last decision" 77 %, transparent Taylor-type rule 46 %. ECB 2004-2026 (227 meetings; 11 / 79 / 10): 80 % vs 79 %
+     vs 76 % vs 49 %. The model equals the base rate.
+   * Direction over the next 3 / 6 months. Fed 1990-2026: model 48 % / 45 %, persistence (the trailing direction) 71 % / 63 %, always hold
+     54 % / 39 %, Taylor rule 32 % / 32 %. ECB 2004-2026: model 66 % / 45 %, persistence 72 % / 60 %, always hold 61 % / 49 %, Taylor 39 % / 32 %.
+     The economy-only part of the model (no own-policy block) is at 34-42 %, below "always hold"; even fitted IN-SAMPLE on the whole history the
+     model reaches only 63-74 %. Bundesbank 1975-98 (3-month rate as proxy): model 35 % / 41 %, persistence 52 % / 46 %.
+   * **At turning points** (where persistence is wrong by construction). Meetings: first cut after hikes - Fed 1 of 5, ECB 0 of 3; first hike
+     after cuts - Fed 1 of 6, ECB 0 of 4; all decisions that differ from the previous one - Fed 47 % (n=59) against 51 % for "always hold", ECB
+     48 % (n=54) against 50 %. Month-ends whose 6-month label differs from the trailing direction: Fed 32 % (n=160) against 44 % for "always
+     hold", ECB 28 % (n=108) against 43 %. The one place the Fed model looks good - at the last month-end before each first cut / first hike it
+     names the 6-month direction in 8 of 12 cases (Taylor rule 7 of 12) - is matched exactly by the 2-year yield alone (8 of 12): by then the
+     market knows. And the price of those hits is false alarms: when the ordered logit departs from persistence (227 of 436 months) it is right
+     23 % of the time and persistence 58 %. ECB at the same month-ends: 1 of 6 (2-year yield 2 of 5).
+   * Why: reaction functions are unstable across regimes (the 1980s disinflation, the zero bound 2009-15 and 2020-21, 2022's inflation - on
+     2022-02-28 both the logit and the Taylor rule said "cut"). Forecasting the 6-month change in bp, 2010-26: Fed RMSE 79 bp for the model, 69 bp
+     for "no change", 66 bp for the 2-year slope; ECB 58 / 56 / 53. The market slope is the best of a poor lot; the economy adds nothing to it.
+   * Data-revision risk (latest-vintage payrolls, production, NFCI) can only flatter the model; it does not change a negative.
+2. **What did EUR/USD do around the cycle? Nothing systematic; every cell is small and split.** 1975-2026, forward 3-month return from the day after
+   the announcement, mean (up / down episodes): Fed first cut after hikes n=16: +0.2 % (7 / 9); Fed first hike after cuts n=17: -0.1 % (8 / 8);
+   ECB / Bundesbank first cut n=10: -0.7 % (6 / 4); first hike n=11: -0.5 % (6 / 5). With true target data only (1999-2026) there are 4-5 episodes
+   per cell. The textbook prior (the bank that turns to easing gets the weaker currency) is right in 7 of 16, 8 of 16, 4 of 10 and 6 of 11 cases at
+   3 months. The only lopsided cell is BEFORE the event: in the 3 months before a first Fed hike EUR/USD fell in 14 of 17 episodes (mean -3.1 %;
+   4 of 5 since 1999) - the dollar moves in anticipation, not afterwards (afterwards 8 up / 8 down). Joint states, 1999-2026, n spells and 3-month
+   return from the start of the spell: both hiking n=4, -2.7 % (1 up / 2 down); Fed hiking, ECB on hold n=5, -0.2 % (3 / 2); Fed hiking, ECB cutting
+   n=2, +3.5 % (2 / 0); Fed cutting, ECB on hold n=9, +2.4 % (6 / 3); Fed cutting, ECB hiking n=3, -4.7 % (1 / 2); both cutting n=7, +0.8 % (5 / 2);
+   both on hold n=16, +0.6 % (9 / 7); Fed on hold, ECB cutting n=12, +1.1 % (8 / 4); Fed on hold, ECB hiking n=6, -1.4 % (3 / 3). With the 1975-98
+   proxies: "Fed cutting, ECB on hold" n=19, +3.1 % (15 / 4) is the one cell that leans the way economics says, but the 19 spells come from 11 Fed
+   easing cycles (median spell 31 sessions; 9 spells from 4 cycles since 1999), the drift inside the state is +6.9 % a year with t 1.5 (0.3 %, t 0.05 since 1999), and
+   the rule built on it (below) is at 49 % in 2010-26. Divergence widening with the Fed tightening: -0.8 % a year (t -0.3) over 1975-2026.
+3. **Is there a signal the market has not priced? No.** Ten candidates, priors fixed before any result.
+   * The owner's idea in its purest form, `gap_rel` (the economy implies a higher ECB-minus-Fed path than the 2-year yields price): standalone
+     50 / 50 / 52 % at 21 / 42 / 63 sessions (non-overlapping, n = 208 / 104 / 69, 2010-26), daily Sharpe +0.02 / -0.19 / -0.29. As an extra vote it
+     moves the agreement rule by +2.6 / +0.6 points (2010-26) and +5.2 / +7.7 (2016-26) at 21 / 42 sessions on 4.7 decisions a year, is 10 points WORSE
+     at 21 sessions in 2023-26, and the signal made 63 sessions stale "gains" more (+6.1 / +1.6 and +11.7 / +10.5): a regime artefact.
+   * Phase rules. `turn63` ("Fed has turned to cutting while the ECB has not => long for 3 months", and its mirror images): 43 % at 21 sessions
+     (n=21), 36 % at 42 (n=14); 7 qualifying turns in 2010-26. `phase_rel` (the relatively tightening bank's currency): 50 / 49 / 43 %. `fed_phase`
+     49 / 51 / 48 %, `ecb_phase` 51 / 44 / 36 %. As vetoes on the agreement rule they change it by -4.7 to +2.5 points
+     (2010-26).
+   * The best-looking numbers belong to the MARKET leg, not to the economy: `mkt_rel` (sign of the priced relative path) 54 / 56 / 61 % standalone,
+     daily Sharpe +0.30 / +0.33 / +0.11, vote gain +0.8 / +9.7 (2010-26) and +3.4 / +10.8 (2016-26). It fails the bar on three counts: under 3 points
+     at 21 sessions in 2010-26, 5.5 / 5.2 decisions a year, and the placebo keeps two thirds of the 42-session gain (+6.6 and +4.6 of +9.7). On
+     the weekly grid the same vote is -1.0 points [-8.7, +6.2] at 42 sessions, so the non-overlapping "gain" is which trades the greedy stream
+     happened to pick. `gap_fed` (+3.5 / +4.7; +2.0 / +6.7; 5.3 / 5.0 a year) is the same story: at 21 sessions the stale signal gains more
+     (+5.2 and +3.9) than the timely one.
+   * Coverage extension: when the three old signals do not agree, the new signals are right 35-56 % of the time at 21 sessions (n = 20-170,
+     2010-26).
+   * Paired weekly difference (block bootstrap): every interval of every candidate at every horizon contains zero.
+   * Extra years: in 2006-09 the vote gain at 21 sessions is positive for 9 of 10 candidates (+0.5 to +27 points) but on 7-36 non-overlapping
+     decisions each, against an agreement rule that itself has 36; standalone 2004-09 is 44-61 % at 21 sessions for the signals with at least
+     25 decisions. Too small to weigh against 2010-26.
+   * **Final by the declared rule: `phase_rel`** as a veto (best eligible 2010-15 vote accuracy, 59 %). Full record: gain -4.7 / -2.3 points
+     (2010-26), -6.0 / -2.1 (2016-26), -13.6 / -7.5 (2023-26) at 21 / 42 sessions; standalone daily stream net Sharpe **+0.01 / -0.10 / -0.40**
+     (2010-26 / 2016-26 / 2023-26), hit rate 49.6 / 48.5 / 46.9 %; three-way combination 0.45 / 0.44 / 0.15 against 0.56 / 0.64 / 0.36 for the
+     two live streams (worse), correlation +0.02 / -0.02. **Round 5 bar: not met** (0 of 10 candidates pass the 3-point test, 0 of 10 the
+     placebo test). Round 3 bar: not met.
+
+What is worth keeping: `data/macro/policy_state.csv` as CONTEXT for the weekly outlook (phase of each bank, months since the last move, the
+2-year slope as the priced path). The model-implied 6-month change is in the file because it was asked for; its out-of-sample error is larger
+than "no change", so it should be shown, if at all, as a low-confidence line and never as a call. Leak checks are clean (section 4): shuffled
+exchange-rate labels give 50 %, the daily state table rebuilt from data truncated at three dates is identical to the last digit, shuffled
+policy labels take the Fed 6-month model from 45 % to 25 %."""
+
+
+def _vc(V: pd.DataFrame, signal: str, test: str, h: int, mode: str, period: str) -> str:
+    x = V[(V.signal == signal) & (V.test == test) & (V.h == h) & (V["mode"] == mode) & (V.period == period)]
+    if not len(x) or x["n"].iloc[0] == 0 or "accuracy" not in x or pd.isna(x["accuracy"].iloc[0]):
+        return "-"
+    q = x.iloc[0]
+    return f"{100 * q['accuracy']:.0f} [{100 * q['lo']:.0f}-{100 * q['hi']:.0f}] n={int(q['n'])} ({q['dec_per_year']:.1f}/y)"
+
+
+def _md(df: pd.DataFrame, floatfmt: str = ".2f", numparse: bool = True) -> str:
+    if not len(df):
+        return "(no rows)"
+    return df.to_markdown(index=False, floatfmt=floatfmt) if numparse else df.to_markdown(index=False, disable_numparse=True)
+
+
+def _acc_table(A: pd.DataFrame, subsets, banks=("fed", "ecb")) -> pd.DataFrame:
+    x = A[A["subset"].isin(subsets) & A["bank"].isin(banks)].copy()
+    rows = []
+    for _, q in x.iterrows():
+        r = {"bank": q["bank"], "target": q["target"], "period": q["period"], "subset": q["subset"], "n": int(q["n"])}
+        if q["n"]:
+            r["cut / hold / hike %"] = f"{100 * q['share_cut']:.0f} / {100 * q['share_hold']:.0f} / {100 * q['share_hike']:.0f}"
+            for m, lab in (("always_hold", "always hold"), ("persistence", "persistence"), ("last_move", "same as last move"), ("taylor", "Taylor-type rule"),
+                           ("ologit", "ordered logit"), ("market", "market slope only"), ("ologit+market", "logit + slope")):
+                v = q.get(f"acc_{m}", np.nan)
+                r[lab] = f"{100 * v:.0f}" if pd.notna(v) else ""
+        rows.append(r)
+    return pd.DataFrame(rows)
+
+
+def _ev(g: pd.Series, w: str) -> str:
+    n = g.get(f"{w}_n", 0)
+    if not n or pd.isna(n):
+        return "-"
+    return f"{g[f'{w}_mean']:+.1f} ({int(g[f'{w}_pos'])}+/{int(g[f'{w}_neg'])}-)"
+
+
+def _event_table(EC: pd.DataFrame, kind: str, era: str, bank: str | None = None, prior: bool = False) -> pd.DataFrame:
+    x = EC[(EC.kind == kind) & (EC.era == era)]
+    if bank:
+        x = x[x.bank == bank]
+    rows = []
+    for _, g in x.iterrows():
+        r = {"bank": g["bank"], "state / event": g["type"], "n episodes": int(g["n"])}
+        if pd.notna(g.get("median_sessions", np.nan)):
+            r["median length (sessions)"] = int(g["median_sessions"])
+        if kind in ("turning_point", "pause"):
+            r["3m before"] = _ev(g, "pre63")
+        for w, lab in (("f21", "+1m"), ("f63", "+3m"), ("f126", "+6m"), ("f252", "+12m")):
+            r[lab] = _ev(g, w)
+        if kind.endswith("episode"):
+            r["over the spell"] = _ev(g, "spell")
+        if prior:
+            for w, lab in (("f63", "+3m"), ("f126", "+6m")):
+                v = g.get(f"{w}_prior_hits", np.nan)
+                r[f"prior sign right {lab}"] = f"{int(v)}/{int(g[f'{w}_n'])}" if pd.notna(v) else ""
+        rows.append(r)
+    return pd.DataFrame(rows)
+
+
+def write_report(o: dict, path: Path | None = None) -> None:
+    A, CONF, TP, COEF = (o["rf_tables"][k] for k in ("acc", "conf", "tp", "coef")) if "rf_tables" in o else (o["rf"][k] for k in ("acc", "conf", "tp", "coef"))
+    V, PL, B, BO, REP, E, EC, DR = o["votes"], o["placebo"], o["bar"], o["boot"], o["report"], o["events"], o["event_cells"], o["drift"]
+    Sg = o["signals"]
+    L = []
+    w = L.append
+    w("# Arm T - policy_cycle: central-bank reaction functions, the policy cycle and EUR/USD (round 5)\n")
+    w("Code `src/eurusd/arms/policy_cycle.py` (`run(cost_pips=1.2)`; `PYTHONPATH=src python -m eurusd.arms.policy_cycle` runs everything incl. leak "
+      "checks and this report in under a minute on one core; `... policy_cycle report` rebuilds this file from the saved tables). Outputs in "
+      "`experiments/results/arms/`: `policy_cycle_positions.parquet` (daily stream of the final signal: `pos`, `fwd_bp`, `net_bp`), "
+      "`policy_cycle_report.csv` (protocol table, all 10 candidates, `variant`, `final`), `policy_cycle_reaction_accuracy.csv`, "
+      "`policy_cycle_reaction_confusion.csv`, `policy_cycle_reaction_turning_points.csv`, `policy_cycle_reaction_coefficients.csv`, "
+      "`policy_cycle_reaction_diagnostics.csv`, `policy_cycle_events.csv` (every turning point, phase spell and joint-state spell with dates and "
+      "forward returns), `policy_cycle_event_cells.csv`, `policy_cycle_event_drift.csv`, `policy_cycle_votes.csv` (every signal x test x horizon x mode "
+      "x period, incl. the timing placebo), `policy_cycle_bar.csv` (the Round 5 success test), `policy_cycle_paired_bootstrap.csv`, "
+      "`policy_cycle_signals.parquet`, `policy_cycle_incremental.csv`, `policy_cycle_leakchecks*.csv`. New data file `data/macro/policy_state.csv` "
+      "(daily, reproducible from `run()`). Everything in the module docstring (definitions, priors, the 10 candidates, the selection rule, the "
+      "success test) was written before the first result.\n")
+    w("## Verdict\n")
+    w(VERDICT + "\n")
+    # ------------------------------------------------------------------ data
+    w("## 0. Data, lags, definitions\n")
+    w("| series | file | range | publication lag assumed |\n|---|---|---|---|\n"
+      "| Fed target | `fred_DFEDTAR`, `fred_DFEDTARL/U`, `fomc_decisions.csv` (meeting dates, target after the mirror ends 2026-09-20) | 1982-09-27 .. 2026-10-28 | announcement day (FOMC date at most one day before the change date) |\n"
+      "| Fed proxy before 1982-10 (event study only) | `fred_FEDFUNDS` monthly | 1954 .. 1982-08 | day after month end |\n"
+      "| ECB key-rate index | `ecb_policy_rates.csv` (MRO changes before 2014-06-11, deposit-rate changes after), `ecb_decisions.csv` | 1999 .. 2026-11-10 | Governing Council date (at most 14 days before the effective date) |\n"
+      "| Bundesbank proxy before 1999 | `fred_IR3TIB01DEM156N` (German 3-month interbank, monthly average) | 1960 .. 1998 | day after month end |\n"
+      "| US CPI, core CPI, unemployment, Sahm gap, payrolls, industrial production, retail sales | `fred_CPIAUCSL`, `CPILFESL`, `UNRATE`, `SAHMREALTIME`, `PAYEMS`, `INDPRO`, `RSAFS` | to 2026-09 | reference-month end + 21 days |\n"
+      "| US core PCE | `fred_PCEPILFE` | to 2026-09 | + 35 days |\n"
+      "| US initial claims / NFCI | `fred_ICSA` / `fred_NFCI` (ends 2026-09-11, then stale > 60 days = missing) | weekly | week end + 5 days |\n"
+      "| VIX, US 2y, euro-area AAA 2y, EONIA / EUR-STR | `fred_VIXCLS`, `fred_DGS2`, `ea_aaa_yield_curve.csv` (2004-09+), `ea_overnight_rates.csv` | daily | same day in `policy_state.csv`; the FX tests read the row of closing date - 1 |\n"
+      "| Euro-area HICP | `fred_CP0000EZ19M086NEST` (index, y/y by differencing; `ea_hicp.csv` is stale after 2025-12 and not used) | 1996-12 .. 2026-09 | + 21 days |\n"
+      "| Euro-area unemployment | `ea_unemployment.csv` | 2000-01 .. 2026-09 | + 35 days |\n"
+      "| German CPI (Bundesbank line) | `fred_DEUCPIALLMINMEI` | 1955 .. 1998 used | + 30 days |\n"
+      "| EUR/USD | synthetic DEM euro 1975-98, H.10 / ECB reference 1999-2002, feature store 2003+ (`arms/swing.load_prices`) | 1975 .. 2026-11-06 | - |\n")
+    w("* US reference months 2025-09..2025-11 (shutdown) are not used before 2026-01-31; October 2025 CPI / unemployment are missing in the mirror and "
+      "yield no observation. Availability dates are forced to be non-decreasing; a value older than 150 days (weekly series 60, daily 10) is missing.\n"
+      "* **Data-revision risk.** The FRED mirrors hold the LATEST vintage. Unemployment rate and CPI are lightly revised (seasonal factors only), "
+      "`SAHMREALTIME` is a real-time series by construction; payrolls, industrial production and retail sales are revised materially (benchmark "
+      "revisions of payrolls can move the 12-month growth by 0.3-0.5 points), and the NFCI is re-estimated on the full sample every week, so its "
+      "history contains information that was not available at the time (the reaction functions are re-run without it in section 5: nothing "
+      "changes). Euro-area unemployment is revised by 0.1-0.3 points. Revisions favour the fitted models, so the true real-time accuracy of the "
+      "reaction functions is, if anything, lower than shown; the conclusions below do not depend on a small margin.\n"
+      "* No euro-area activity series (production, surveys) exists in `data/macro/`; the ECB reaction function has inflation, unemployment, VIX, "
+      "its own policy block and the Fed's stance only. Core HICP is not used because `ea_hicp.csv` stops in 2025-12.\n"
+      "* `data/macro/policy_state.csv` (business days 1990-01-01 .. data end, rebuilt by `run()`): each row is what is known at the END of that "
+      "date. Columns: `fed_target`, `ecb_deposit_rate`, `ecb_main_refi_rate`, `ecb_key_index` (an index of key-rate CHANGES, not a rate); per bank "
+      "`*_phase` (hiking / cutting / hold_after_hikes / hold_after_cuts), `*_dir3`, `*_months_since_move`, `*_last_move_pp`; `joint_state`; "
+      "`*_p_cut_6m / p_hold_6m / p_hike_6m` and `*_model_chg6m_bp` (walk-forward ordered logit; Fed from 1990, ECB from 2004), "
+      "`*_slope_2y_minus_policy` (pp) and `*_priced_chg6m_bp` (the market model; ECB from 2008), `*_gap_bp` = model - priced, `model_rel_bp`, "
+      "`priced_rel_bp`, `gap_rel_bp` (ECB minus Fed); `sig_<candidate>` = the signal in force for the session CLOSING on that date (it uses the "
+      "row of the previous calendar day).\n"
+      f"* Phases are causal: a bank is hiking / cutting while its last move in the trend direction is at most {HOLD_DAYS} days old, then on hold. "
+      "Turning points = the first move against the trend (cumulative 20 bp; 75 bp for the monthly proxies).\n")
+    # ------------------------------------------------------------------ (1)
+    w("## 1. Can the next policy move be predicted from the economy?\n")
+    w("Walk-forward (yearly expanding; a model for year Y sees only rows whose label is known before Y-01-01). `next` = direction of the change from "
+      "just after one scheduled meeting to just after the next (features as known on the day of the earlier meeting); `m3`, `m6` = direction of the "
+      "cumulative change over the next 3 / 6 months from each month-end. Accuracy in %, three classes.\n")
+    w("**Overall accuracy against the naive baselines**\n")
+    w(_md(_acc_table(A, ["all"])) + "\n")
+    w("**At turning points - meetings (`next`)**: persistence is right by construction on the 'no change' rows and wrong on every 'change' row, "
+      "so these rows are where a reaction function has to earn its keep.\n")
+    tsub = ["first cut after hikes", "first hike after cuts", "first pause (hold after a move)", "resumption (same direction after a hold)",
+            "any change vs previous decision", "no change vs previous decision"]
+    x = _acc_table(A[(A.target == "next")], tsub)
+    w(_md(x.drop(columns=["market slope only", "logit + slope"], errors="ignore")) + "\n")
+    w("**At turning points - month-end targets**: rows whose label differs from the trailing 3- / 6-month direction (persistence is wrong on all of them).\n")
+    x = _acc_table(A[A.target.isin(["m3", "m6"])], ["label differs from the trailing direction"])
+    w(_md(x) + "\n")
+    DIS = (o["rf_tables"] if "rf_tables" in o else o["rf"]).get("dis")
+    if DIS is not None and len(DIS):
+        d = DIS.copy()
+        d["departs from persistence"] = d.apply(lambda q: f"{int(q['n_disagree'])} of {int(q['n_all'])}", axis=1)
+        for c in ("model_right", "persistence_right", "neither_right"):
+            d[c] = d[c].map(lambda v: f"{100 * v:.0f}" if pd.notna(v) else "")
+        w("**When a model departs from persistence, who is right?** (% of the decisions on which the model's call differs from the persistence "
+          "call; this is the false-alarm side of the turning-point tables)\n")
+        w(_md(d[["bank", "target", "period", "model", "departs from persistence", "model_right", "persistence_right", "neither_right"]], numparse=False) + "\n")
+    w("**The forecast made at the last month-end before each first cut / first hike** (the label is the realised direction over the following "
+      "3 / 6 months; 2026 turns have no 6-month label yet). Count of correct calls:\n")
+    rows = []
+    for (bank, tg), g in TP.groupby(["bank", "target"]):
+        g = g[g["label"].notna()]
+        r = {"bank": bank, "target": tg, "turning points": len(g)}
+        for m in ("always_hold", "persistence", "last_move", "taylor", "ologit", "market", "ologit+market"):
+            c = f"pred_{m}"
+            if c in g:
+                k = g[c].notna()
+                r[m] = f"{int((g.loc[k, c] == g.loc[k, 'label']).sum())}/{int(k.sum())}" if k.sum() else ""
+        rows.append(r)
+    w(_md(pd.DataFrame(rows)) + "\n")
+    t6 = TP[TP.target == "m6"].copy()
+    for c in ("label", "pred_persistence", "pred_taylor", "pred_ologit", "pred_market"):
+        t6[c] = t6[c].map({-1.0: "cut", 0.0: "hold", 1.0: "hike"}).fillna("")
+    t6 = t6.rename(columns={"turn_date": "turn", "origin": "forecast date", "label": "realised 6m", "pred_persistence": "persistence", "pred_taylor": "Taylor",
+                            "pred_ologit": "ordered logit", "pred_market": "market slope"})
+    for c in ("p_cut", "p_hold", "p_hike"):
+        t6[c] = (100 * t6[c]).round(0)
+    w("Every turn, 6-month model (probabilities in %):\n")
+    w(_md(t6[["bank", "turn", "type", "forecast date", "realised 6m", "persistence", "Taylor", "ordered logit", "p_cut", "p_hold", "p_hike", "market slope"]], ".0f") + "\n")
+    w("**Is the reaction function already in the 2-year yield?** RMSE of the realised 6-month change (bp), 2010-2026, rows where a slope exists:\n")
+    x = A[A["subset"].str.startswith("RMSE")][["bank", "n", "acc_always_hold", "acc_ologit", "acc_market", "acc_ologit+market"]]
+    x.columns = ["bank", "n", "forecast = no change", "ordered logit (economy + own policy)", "market slope only", "both"]
+    w(_md(x, ".1f") + "\n")
+    w("**Confusion matrices, ordered logit (rows = what happened, columns = what was predicted), longest out-of-sample period**\n")
+    for bank in ("fed", "ecb"):
+        for tg in ("next", "m6"):
+            c = CONF[(CONF.bank == bank) & (CONF.target == tg) & (CONF.model == "ologit")]
+            c = c[c.period == c.period.iloc[0]]
+            w(f"*{bank}, {tg}, {c.period.iloc[0]}*\n\n" + _md(c[["actual", "n", "pred_cut", "pred_hold", "pred_hike"]]) + "\n")
+    w("**Bundesbank robustness line** (German 3-month rate as the policy proxy, +-25 bp dead band, test years 1975-1998):\n")
+    w(_md(_acc_table(o["bbk"], ["all", "label differs from the trailing direction"], banks=tuple(o["bbk"]["bank"].unique()))) + "\n")
+    if "rf_diag" in o:
+        d = o["rf_diag"].copy()
+        for c in d.columns[4:]:
+            d[c] = (100 * d[c]).round(0)
+        d = d.drop(columns=["period"]).set_index(["bank", "target"]).T.reset_index().rename(columns={"index": "variant (accuracy %, all out-of-sample months)"})
+        d.columns = [" ".join(c) if isinstance(c, tuple) else c for c in d.columns]
+        w("**Diagnostics added after the first run of this part** (nothing selected from them, no signal uses them): which block carries the model?\n")
+        w(_md(d, ".0f") + "\n")
+    w("**Largest standardised coefficients of the last fit (2026), ordered logit**; `corr` = full-sample correlation of the standardised feature "
+      "with the label (leak check 3: the largest is the bank's own recent change, i.e. persistence; nothing is a label in disguise).\n")
+    rows = []
+    for (bank, tg), g in COEF.groupby(["bank", "target"]):
+        g = g.reindex(g["coef_std"].abs().sort_values(ascending=False).index).head(6)
+        rows.append({"bank": bank, "target": tg, "top features (coef, corr)": "; ".join(f"{a} ({b:+.2f}, {c:+.2f})" for a, b, c in zip(g.feature, g.coef_std, g.corr_with_label))})
+    w(_md(pd.DataFrame(rows)) + "\n")
+    # ------------------------------------------------------------------ (2)
+    w("## 2. What did EUR/USD do around the policy cycle?\n")
+    w("Returns in % (log x 100) of EUR/USD, entry at the first close at least one calendar day after the announcement; `3m before` = the 63 sessions "
+      "ending at the last close before it. Cells: mean (count of positive / negative episodes). **n is the number of episodes; with n of 4-17 a mean "
+      "of +-2 % is noise** (one 63-session return has a standard deviation of about 5 %, so the standard error of a mean over 10 episodes is 1.6 %).\n")
+    tp = E[(E.kind == "turning_point")].copy()
+    tp = tp[["bank", "type", "start", "source", "price_src", "other_bank_phase", "pre63_pct", "react_pct", "f21_pct", "f63_pct", "f126_pct", "f252_pct"]]
+    tp.columns = ["bank", "turn", "announced", "policy series", "price", "other bank then", "3m before", "day of", "+1m", "+3m", "+6m", "+12m"]
+    w("**Every turning point since 1975** (`proxy` = monthly market-rate proxy: Fed before 1982-10, Bundesbank before 1999; confirmed only when the "
+      "counter-move reaches 75 bp, so dated late; `ecb` before 1999 = Bundesbank):\n")
+    w(_md(tp, ".1f") + "\n")
+    for era in ("1999-2026", "1975-2026"):
+        w(f"**Turning points, {era}** (prior: the bank that turns to easing has the weaker currency; `prior sign right` counts episodes moving that way):\n")
+        w(_md(_event_table(EC, "turning_point", era, prior=True)) + "\n")
+    w("**Pause confirmed (122 days after the last move), 1975-2026:**\n")
+    w(_md(_event_table(EC, "pause", "1975-2026")) + "\n")
+    for era in ("1999-2026", "1975-2026"):
+        w(f"**Phases of each bank, {era}** (forward returns from the first session of each spell):\n")
+        w(_md(_event_table(EC, "phase_episode", era)) + "\n")
+    for era in ("1999-2026", "1975-2026"):
+        w(f"**Joint states (Fed x ECB; hiking / hold / cutting), {era}:**\n")
+        w(_md(_event_table(EC, "joint_episode", era)) + "\n")
+    for era in ("1999-2026", "1975-2026"):
+        w(f"**Policy divergence, {era}** (widening / narrowing of the policy-rate gap, and who is tightening relative to the other):\n")
+        w(_md(_event_table(EC, "divergence_episode", era)) + "\n")
+    d = DR[DR.era.isin(["1999-2026", "1975-2026"]) & DR.kind.isin(["joint", "divergence"])].copy()
+    d = d[["kind", "state", "era", "sessions", "years", "ann_drift_pct", "t_daily_naive", "share_up_days"]]
+    w("**Drift of EUR/USD while each joint state lasted** (annualised %, t from daily returns; the t-statistic treats days as independent and still "
+      "finds nothing above 2 in 1999-2026):\n")
+    w(_md(d, ".2f") + "\n")
+    # ------------------------------------------------------------------ (3)
+    w("## 3. Is there a tradeable signal the market has not priced?\n")
+    cov = []
+    for nm, typ in CANDIDATES:
+        x = Sg[nm][Sg.index.year >= 2010]
+        cov.append({"candidate": nm, "type": typ, "declared vote form": {"vote_agree": "agreement rule AND signal agrees", "vote_veto": "agreement rule UNLESS signal opposes"}[FORM[typ]],
+                    "long %": round(100 * float((x > 0).mean())), "short %": round(100 * float((x < 0).mean())), "silent %": round(100 * float(((x == 0) | x.isna()).mean())),
+                    "sign changes / year": round(float((np.sign(x.fillna(0)).diff().abs() > 0).sum()) / 16.85, 1)})
+    w("**The ten candidates (2010-2026 coverage)**; definitions and priors in the module docstring.\n")
+    w(_md(pd.DataFrame(cov)) + "\n")
+    rc = o["reconcile"].copy()
+    w("**Reconciliation of the agreement rule with arm N** (2010-26):\n")
+    w(_md(rc, ".3f") + "\n")
+    w("### 3.1 Standalone accuracy (direction of the next 21 / 42 / 63 sessions), % [95 % interval] n (decisions a year)\n")
+    for mode, lab in (("nonoverlap", "NON-OVERLAPPING decisions (Wilson interval)"), ("weekly", "weekly decisions (Wilson with the conservative effective n of arm N)")):
+        rows = []
+        for nm, _ in CANDIDATES:
+            for h in HORIZONS:
+                rows.append({"candidate": nm, "h": h, **{per: _vc(V, nm, "standalone", h, mode, per) for per in ("2010-26", "2016-26", "2023-26", "2004-09")}})
+        w(f"*{lab}*\n\n" + _md(pd.DataFrame(rows)) + "\n")
+    w("### 3.2 As an extra vote on the agreement rule (non-overlapping decisions)\n")
+    rows = []
+    for h in HORIZONS:
+        rows.append({"rule": "AGREEMENT RULE alone", "h": h, **{per: _vc(V, CANDIDATES[0][0], "agree3", h, "nonoverlap", per) for per in ("2010-26", "2016-26", "2023-26", "2006-09")}})
+    for nm, typ in CANDIDATES:
+        for h in HORIZONS:
+            rows.append({"rule": f"{nm} ({'agrees' if typ == 'dense' else 'veto'})", "h": h,
+                         **{per: _vc(V, nm, FORM[typ], h, "nonoverlap", per) for per in ("2010-26", "2016-26", "2023-26", "2006-09")}})
+    w("(a) vote rule in its declared form against the agreement rule alone:\n")
+    w(_md(pd.DataFrame(rows)) + "\n")
+    rows = []
+    for nm, typ in CANDIDATES:
+        if typ == "sparse":
+            for h in HORIZONS:
+                rows.append({"rule": f"{nm} (agrees; NOT the declared form)", "h": h, **{per: _vc(V, nm, "vote_agree", h, "nonoverlap", per) for per in ("2010-26", "2016-26", "2023-26", "2006-09")}})
+    w("The other form for the sparse signals (reported, never selectable; note the decisions a year):\n")
+    w(_md(pd.DataFrame(rows)) + "\n")
+    rows = []
+    for nm, _ in CANDIDATES:
+        for h in HORIZONS:
+            rows.append({"candidate": nm, "h": h, **{per: _vc(V, nm, "extend", h, "nonoverlap", per) for per in ("2010-26", "2016-26", "2023-26", "2006-09")}})
+    w("(b) calls the signal makes when the three old signals do NOT agree (does it extend coverage?):\n")
+    w(_md(pd.DataFrame(rows)) + "\n")
+    bo = BO[BO.declared_form].copy()
+    bo["weekly accuracy, vote minus agreement rule (points) [95 % block bootstrap]"] = bo.apply(lambda q: f"{100 * q['diff']:+.1f} [{100 * q['lo']:+.1f}, {100 * q['hi']:+.1f}]" if pd.notna(q["diff"]) else "-", axis=1)
+    bo["kept minus removed decisions"] = bo.apply(lambda q: f"{100 * q['diff_kept_minus_dropped']:+.1f} [{100 * q['lo_kd']:+.1f}, {100 * q['hi_kd']:+.1f}]" if pd.notna(q["diff_kept_minus_dropped"]) and pd.notna(q["lo_kd"]) else "-", axis=1)
+    w("(c) paired difference on the weekly grid (circular block bootstrap, block 2h/5 weeks, 2000 draws):\n")
+    w(_md(bo[["signal", "h", "period", "weekly accuracy, vote minus agreement rule (points) [95 % block bootstrap]", "kept minus removed decisions"]]) + "\n")
+    w("### 3.3 The Round 5 success test and the timing placebo\n")
+    rows = []
+    for _, q in B.iterrows():
+        r = {"candidate": q["candidate"], "form": "agrees" if q["form"] == "vote_agree" else "veto"}
+        for per in ("2010-26", "2016-26", "2023-26"):
+            for h in (21, 42):
+                r[f"gain {h}s {per}"] = f"{100 * q[f'gain_{h}_{per}']:+.1f}"
+        r["dec/y 21s (2010-26 / 2016-26)"] = f"{q['vote_dpy_21_2010-26']:.1f} / {q['vote_dpy_21_2016-26']:.1f}"
+        for k in PLACEBO_SHIFTS:
+            r[f"placebo +{k}: gain 21s / 42s (2010-26; 2016-26)"] = (f"{100 * q[f'placebo{k}_gain_21_2010-26']:+.1f} / {100 * q[f'placebo{k}_gain_42_2010-26']:+.1f}; "
+                                                                      f"{100 * q[f'placebo{k}_gain_21_2016-26']:+.1f} / {100 * q[f'placebo{k}_gain_42_2016-26']:+.1f}")
+        for c, lab in (("pass_gain_3pts", ">= 3 pts x4"), ("pass_6_per_year", ">= 6 / y"), ("pass_2023_not_worse", "2023-26 not worse"), ("pass_placebo", "placebo loses half"),
+                       ("PASS_ROUND5_BAR", "BAR MET")):
+            r[lab] = "yes" if q[c] else "no"
+        r["2010-15 vote acc 21s (selection)"] = f"{100 * q['vote_21_2010-15']:.0f}" + (" *" if q["final"] else "") + ("" if q["eligible_for_final"] else " (not eligible)")
+        rows.append(r)
+    w("Gain = non-overlapping accuracy of the vote rule minus the agreement rule, in points. The bar: gain >= 3 at 21 and 42 sessions in 2010-26 "
+      "and 2016-26, at least 6 non-overlapping 21-session decisions a year, 2023-26 not worse, and the signal shifted by +63 and +126 sessions keeps "
+      "at most half of the gain. `*` = final by the declared rule (best 2010-15 vote accuracy at 21 sessions among eligible candidates).\n")
+    w(_md(pd.DataFrame(rows), numparse=False) + "\n")
+    w(f"**Final by the declared rule: `{o['final']}`** ({o['final_status']}). Delivered stream = its standalone daily sign.\n")
+    w("### 3.4 Protocol table (standalone daily sign of each candidate, 1.2 pips, net Sharpe / t) and the incremental test\n")
+    rows = []
+    for vn, g in REP.groupby("variant", sort=False):
+        g = g.set_index("period")
+        r = {"variant": vn, "kind": g["kind"].iloc[0], "final": bool(g["final"].iloc[0])}
+        for per in ("2010-2026", "2016-2026", "2023-2026", "2010-2015"):
+            r[per] = f"{g.loc[per, 'sharpe']:+.2f} ({g.loc[per, 't']:+.1f})"
+        r["active"] = f"{100 * g.loc['2010-2026', 'active_frac']:.0f} %"
+        r["deflated-Sharpe p (n=10)"] = f"{g.loc['2010-2026', 'deflated_sharpe_p']:.2f}"
+        rows.append(r)
+    w(_md(pd.DataFrame(rows)) + "\n")
+    hit = o["hit"].copy()
+    w("Hit rate of the delivered daily stream (active sessions):\n\n" + _md(hit, ".3f") + "\n")
+    if "incremental" in o:
+        inc = o["incremental"]
+        x = inc[inc.period.isin(["2010-2026", "2016-2026", "2023-2026"])][["combo", "period", "sharpe", "t"]]
+        w("Incremental test (`meta.combine(..., 'EW')`, `report_combo`):\n\n" + _md(x, ".3f") + "\n")
+        w(f"Daily-P&L correlation of the delivered stream with `weak_signals` {inc['corr_weak_signals'].iloc[0]:+.2f}, with `regime_trend` {inc['corr_regime_trend'].iloc[0]:+.2f}.\n")
+    # ------------------------------------------------------------------ leak checks
+    w("## 4. Leak checks\n")
+    if "leak" in o:
+        Lk = o["leak"]
+        x = Lk[Lk.h == 21].groupby(["check"], sort=False)[["standalone_weekly_2010-26", "vote_nonoverlap_2010-26"]].mean().reset_index()
+        x["agreement rule itself"] = Lk[Lk.h == 21].groupby(["check"], sort=False)["agree3_nonoverlap_2010-26"].mean().values
+        w("(1) and (2) for the exchange-rate side: average over the ten candidates, 21 sessions, 2010-26 (standalone weekly accuracy; non-overlapping "
+          "accuracy of the declared vote rule; the agreement rule on the same labels). No signal is fitted to an exchange rate, so the shuffle "
+          "must give a coin and does. Shifting the signals INTO THE FUTURE does not help either: the signals contain no price, so there is nothing "
+          "for a look-ahead to exploit, and making them 1-21 sessions staler changes nothing, which is the same message as the timing placebo: "
+          "what little they show is regime, not timing.\n")
+        w(_md(x, ".3f") + "\n")
+        fin = o["stream_name"]
+        y = Lk[(Lk.signal == fin)][["check", "h", "standalone_weekly_2010-26", "vote_nonoverlap_2010-26", "agree3_nonoverlap_2010-26"]]
+        w(f"The same for the final signal `{fin}`:\n\n" + _md(y, ".3f") + "\n")
+    if "leak_rf" in o:
+        R = o["leak_rf"]
+        x = R[(R.subset == "all")].pivot_table(index=["bank", "target", "period"], columns="check", values="acc_ologit", sort=False).reset_index()
+        w("(1) and (2) for the reaction functions (ordered logit, accuracy on all out-of-sample decisions): policy labels shuffled inside every "
+          "training window; every publication lag 365 days longer; every publication lag 182 days SHORTER (a deliberate look-ahead: the Fed's "
+          "3- and 6-month targets gain 5-7 points, the meeting target and the ECB do not, i.e. what limits these models is the instability of "
+          "the relation, not the timeliness of the data); the model without the NFCI (revision risk: no difference).\n")
+        w(_md(x, ".3f") + "\n")
+    if "leak_trunc" in o:
+        w("(4) Truncation test: `policy_state` rebuilt from raw data cut at three dates; every numeric column of every row up to the cut is compared "
+          "with the full-history table (phases, model probabilities, priced path, gaps).\n")
+        w(_md(o["leak_trunc"], ".2e") + "\n")
+    w("(3) Top features: see the coefficient table in section 1. The reaction functions never see an exchange rate; the FX signals are fixed-sign "
+      "rules, so no feature can be an FX label in disguise.\n")
+    w("## 5. Variant count, caveats\n")
+    w("* **Exchange-rate candidates: 10** (limit 12), each with one declared vote form; the other vote form of the five sparse signals is tabulated "
+      "and not selectable (strict count 15). Not candidates: the timing placebo (20 shifted copies), 3 label shuffles, 5 staleness / look-ahead "
+      "shifts, one 0.6-pip re-costing.\n"
+      "* Reaction functions (no exchange rate involved): 2 banks x 3 targets x (ordered logit, Taylor-type rule) + 2 x 2 market / combined models, "
+      "one Bundesbank line, and the diagnostics table added after the first run (4 feature-block variants and 2 penalties per bank and target; "
+      "nothing was adopted from it: the declared model is the one used everywhere).\n"
+      "* Added after the first run and labelled as such: the diagnostics table, the 'departs from persistence' table, and a fix that keeps "
+      "pre-2003 turning points out of the first 63 sessions of `turn63` (2003 is outside every evaluated period). Candidates, signals, "
+      "selection rule and success test are exactly as declared in the module docstring before the first result.\n"
+      "* The 2026 policy history in the mirrors (ECB hikes of 2026-06 and 2026-09, Fed hike of 2026-09) is taken as given.\n"
+      "* The market-priced path is a 2-year yield minus the policy rate. It mixes a term premium and two years of expectations; proper pricing "
+      "(OIS / futures strips) is not reachable from here (see arm H). That limits the 'economy vs priced' test.\n")
+    (path or REPORTS / f"arm_{ARM}.md").write_text("\n".join(L))
+
+
 if __name__ == "__main__":
     import pickle
+    pk = RES / "logs" / f"{ARM}_tables.pkl"
+    if len(sys.argv) > 1 and sys.argv[1] == "report":
+        with open(pk, "rb") as fh:
+            write_report(pickle.load(fh))
+        print("report rebuilt")
+        sys.exit(0)
     cp = float(sys.argv[1]) if len(sys.argv) > 1 else 1.2
     pos, rep = run(cp)
     o = run.last
-    print("final:", o["final"], "|", o["final_status"])
-    inc = incremental()
-    o["incremental"] = inc
+    print("final:", o["final"], "|", o["final_status"], flush=True)
+    o["rf_diag"] = rf_diagnostics(o["end"])
+    o["rf_diag"].to_csv(RES / f"{ARM}_reaction_diagnostics.csv", index=False)
+    o["incremental"] = incremental()
     leak_checks(o)
     (RES / "logs").mkdir(exist_ok=True)
     keep = {k: v for k, v in o.items() if k not in ("K", "rf", "streams")}
-    keep["rf_tables"] = {k: o["rf"][k] for k in ("acc", "conf", "tp", "coef")}
-    with open(RES / "logs" / f"{ARM}_tables.pkl", "wb") as fh:
+    keep["rf_tables"] = {k: o["rf"][k] for k in ("acc", "conf", "tp", "coef", "dis")}
+    with open(pk, "wb") as fh:
         pickle.dump(keep, fh)
+    write_report(keep)
     print("done", flush=True)

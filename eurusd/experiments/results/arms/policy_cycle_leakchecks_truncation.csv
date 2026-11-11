@@ -1,0 +1,4 @@
+cut,rows_compared,max_abs_diff_numeric,cells_nan_mismatch,phase_mismatch
+2012-06-29,8223,7.105427357601002e-15,0,0
+2019-03-29,10687,0.0,0,0
+2024-09-30,12699,7.105427357601002e-15,0,0

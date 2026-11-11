@@ -827,6 +827,34 @@ def daily_gated(P: Panel, speak: np.ndarray, cost_pips: float, comp: str = "agre
     return pnl[pnl.index.year >= 2010]
 
 
+def daily_gate_checks(P: Panel, cls: np.ndarray, cost_pips: float, reps: int = 300, seed: int = 23) -> pd.DataFrame:
+    """Added after the first run: robustness of the post hoc daily-gated strict stream of ONE regime variable."""
+    rng = np.random.default_rng(seed)
+    lo = int(np.flatnonzero(P.year >= 2006)[0]); hi = len(P.year)
+
+    def srs(sp, drop=()):
+        x = daily_gated(P, sp, cost_pips)["net_bp"]
+        x = x[~x.index.year.isin(drop)]
+        return {f"sharpe_{lab}": sharpe(x[(x.index.year >= a) & (x.index.year <= b)].values)[0] for lab, a, b in EVAL[:3]}
+
+    U = P.speak["agree3"]
+    base = wf_mute(P, cls, strict=True)[0]
+    rows = [{"table": "daily_gate", "check": "unconditional daily stream", **srs(U)},
+            {"table": "daily_gate", "check": "strict gate, walk-forward class choice (post hoc candidate)", **srs(base)},
+            {"table": "daily_gate", "check": "strict gate, class chosen with hindsight", **srs(wf_mute(P, cls, hindsight=True, strict=True)[0])}]
+    for lag in (5, 21, 63, 126):
+        rows.append({"table": "daily_gate", "check": f"strict gate, regime labels lagged +{lag} sessions", **srs(wf_mute(P, shift_labels(cls, lag), strict=True)[0])})
+    for Y in (2015, 2023, 2019):
+        rows.append({"table": "daily_gate", "check": f"year {Y} removed: unconditional", **srs(U, (Y,))})
+        rows.append({"table": "daily_gate", "check": f"year {Y} removed: strict gate", **srs(base, (Y,))})
+    G = pd.DataFrame([srs(wf_mute(P, np.r_[cls[:lo], np.roll(cls[lo:], int(rng.integers(252, hi - lo - 252)))], strict=True)[0]) for _ in range(reps)])
+    b = srs(base)
+    r = {"table": "daily_gate", "check": f"this variable's labels rotated by >= 1 year ({reps} draws, no screen): mean Sharpe", **{c: float(G[c].mean()) for c in G}}
+    r.update({f"share_placebo_ge_real_{c[7:]}": float((G[c] >= b[c] - 1e-12).mean()) for c in G})
+    rows.append(r)
+    return pd.DataFrame(rows)
+
+
 def gain(P: Panel, speak: np.ndarray, comp: str = "agree3") -> dict:
     """Non-overlapping accuracy gain of a conditional rule over the unconditional one (2010-26, 2016-26), no bootstrap."""
     out = {}
@@ -1107,6 +1135,7 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True, fast: 
     res["leak"] = LK
     PP = pipeline_placebo(P, R, reps=60 if fast else 300)
     res["pipeline_placebo"] = PP
+    res["daily_gate"] = pd.concat([daily_gate_checks(P, cb[v], cost_pips, reps=60 if fast else 300).assign(regime=v) for v in subject.split("+")], ignore_index=True)
     if adopted:
         x = LK[LK.check.str.contains("block rotation") & (LK["rule"] == "cond")].iloc[0]
         if max(x["p_placebo_ge_real_21_2010-26"], x["p_placebo_ge_real_42_2010-26"]) > 0.10:
@@ -1123,7 +1152,8 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True, fast: 
         bk = rule_book(P, sp, cost_pips)
         books[name] = bk
         tb = report(bk, periods_per_year=252, name=ARM, n_arms=max(1, len(speaks)))
-        tb.insert(1, "variant", name); tb["kind"] = "diagnostic" if diagnostic else "candidate"; tb["cost_pips"] = cost_pips
+        tb.insert(1, "variant", name); tb["cost_pips"] = cost_pips
+        tb["kind"] = "diagnostic" if diagnostic else ("candidate (post hoc, added after the first run)" if name.startswith("strict_") else "candidate (declared)")
         tb["final"] = bool(adopted and name == final)
         reps_.append(tb)
     dU = daily_gated(P, P.speak["agree3"], cost_pips)
@@ -1156,7 +1186,7 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True, fast: 
         out.to_parquet(RES / f"{ARM}_positions.parquet")
         rep.to_csv(RES / f"{ARM}_report.csv", index=False)
         tabs = [PW, res["power_joint"], ROLL, res["step"], T, res["regime_sub"], S, res["screen_placebo"], res["mix"], C, res["bar"] if "bar" in res else pd.DataFrame(),
-                res["mute_log"], LK, PP.assign(table="pipeline_placebo"),
+                res["mute_log"], LK, PP.assign(table="pipeline_placebo"), res["daily_gate"],
                 rec.assign(table="reconcile"), regime_timeline(P, R).assign(table="regime_timeline")]
         if "strict_positions" in res:
             res["strict_positions"].to_parquet(RES / f"{ARM}_strict_posthoc_positions.parquet")
@@ -1167,6 +1197,7 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True, fast: 
             res["incremental"] = inc
         except Exception as e:  # pragma: no cover
             say("incremental failed:", e)
+        write_report(res)
     run.last = res
     return out["pos"], rep
 
@@ -1191,6 +1222,403 @@ def incremental() -> pd.DataFrame:
         x = pd.concat([s, load_arm_daily(o)], axis=1).dropna()
         x = x[x.index.year >= 2010]
         out[f"corr_{o}"] = float(x.corr().iloc[0, 1])
+    return out
+
+
+# ================================================================ report (tables are generated; the verdict text was written after the results)
+def _f(x, d=2, sign=False):
+    return "-" if x is None or not np.isfinite(x) else (f"{x:+.{d}f}" if sign else f"{x:.{d}f}")
+
+
+def _p(x):
+    return "-" if x is None or not np.isfinite(x) else f"{100 * x:.0f}"
+
+
+def _a(acc, lo, hi, n):
+    return "-" if not n or not np.isfinite(acc) else f"{100 * acc:.0f} [{100 * lo:.0f}-{100 * hi:.0f}] n={int(n)}"
+
+
+def _md(df: pd.DataFrame) -> str:
+    return df.to_markdown(index=False)
+
+
+NAMES = {"cot": "positioning sign", "spread": "2y-spread 20d trend", "house": "house macro score", "dec": "December long", "eqrel": "relative equity momentum",
+         "agree3": "AGREEMENT RULE", "agree3_book": "agreement rule, weekly-tranche book", "ew5": "equal-weight of the five component streams"}
+
+
+# The text below was written AFTER the results; every number in it is in the generated tables that follow it.
+VERDICT = """# Arm S: regime dependence (`regime_dependence`) - is the post-2023 fade noise, decay or regime?
+
+Code `src/eurusd/arms/regime_dependence.py` (`run(cost_pips=1.2)`; `python -m eurusd.arms.regime_dependence` runs everything in about
+3 minutes and rewrites this file). Results in `experiments/results/arms/`: `regime_dependence_positions.parquet` (daily stream `pos`,
+`fwd_bp`, `net_bp`, `conditional`, `rule`: it is the UNCONDITIONAL agreement rule, flagged `conditional = False`, because no conditional
+rule was adopted), `regime_dependence_report.csv` (protocol table of every stream, `variant`, `kind`, `final`),
+`regime_dependence_tables.csv` (all tables, column `table`: power, power_joint, rolling3y, rolling5y, eras, step, regime, regime_sub,
+screen, screen_placebo, mix, candidates, bar, mute_log, leak, pipeline_placebo, daily_gate, reconcile, regime_timeline),
+`regime_dependence_incremental.csv`, `regime_dependence_strict_posthoc_positions.parquet` (the post hoc candidate, not for stacking).
+The protocol, the components, the eight regime definitions, the screen, the candidate rule and the final-selection rule are in the
+module docstring and were written before any result; what was added after the first run is listed there and marked below.
+Reconciliation with arm N first: agreement rule at 21 sessions 59.4 % on 387 weekly decisions, 59.0 % on 156 non-overlapping ones,
+weekly-tranche book Sharpe 0.52 / 0.51 / 0.43 - identical to `reports/arm_selective.md`.
+
+## Verdict
+**The fade is mostly noise, partly a return of positioning to its long-run level, and only weakly a regime. No conditional rule is adopted.**
+
+1. **(a) Noise - yes for the P&L, for every signal.** With the 2010-22 record unchanged, a 2023-26 Sharpe as low as the observed one
+   arrives 18 % of the time for positioning (0.77 -> 0.32), 40 % for the spread trend, 26 % for the house score, 27 % for December,
+   48 % for equity momentum, 19 % for the agreement rule as a daily stream and 40 % for its weekly-tranche book (0.55 -> 0.43);
+   jointly for the five component streams p = 0.19. None is distinguishable from noise. The sample could not have told us more:
+   a signal with NO edge left would fall below the 5 % critical value only 17-50 % of the time. Rolling windows say the same: the
+   agreement rule's 3-year Sharpe was -0.46, -0.14 and +0.08 in the windows ending 2015-2017 and then 0.9-1.0; the present trough is
+   +0.25 to +0.49. The record has already contained a deeper fade and recovered from it.
+2. **The hit rate is a different matter, and it is one signal, not all of them.** Weekly accuracy 2010-22 -> 2023-26: positioning
+   61 -> 50 % at 21 sessions (p 0.02) and 65 -> 48 % at 42 (p 0.004); house score 61 -> 46 % at 42 (p 0.011); agreement rule
+   61 -> 55 % at 21 (p 0.24, not a fade: the non-overlapping stream reads 59 -> 60 %) and 69 -> 47 % at 42 (p 0.010). The spread
+   trend (49 -> 53 %, 51 -> 49 %) and equity momentum (53 -> 55 %, 54 -> 53 %) did not fade at all. Priced as a family on common
+   pseudo-samples: pooled p 0.049, largest drop (positioning at 42 sessions) family-wise p 0.03; with positioning-free signals only
+   (spread, equity momentum) p 0.47. Against a true 0.5-Sharpe process instead of the 2010-22 level the same numbers are p 0.13 / 0.04
+   for positioning and 0.43 / 0.08 for the agreement rule. So: "every surviving signal fades" is wrong. Positioning's directional hit
+   rate after 2023 is distinguishably below its 2010-22 level; the rest is inside the noise. Positioning still made money in 2023-26
+   (Sharpe 0.32) because its wins were larger than its losses.
+3. **(b) Decay of a mined effect - not the pattern for positioning or the agreement rule, yes for equity momentum.** A mined rule
+   steps down at the edge of its selection window. Positioning: Sharpe 0.73 (2010-15, selection) -> 0.83 (2016-22), weekly accuracy
+   61 -> 60 %; agreement rule 0.63 -> 0.68; house score 0.57 -> 0.88. No step (z between -0.5 and +0.2). Equity momentum does step:
+   0.50 -> 0.28 (2016-22), weekly accuracy 59 -> 50 % over 2016-26 (p < 0.01). What the long history shows instead is that
+   2010-22 was the exceptional stretch for positioning: Sharpe +0.15 in 2000-02 (before any selection window, H.10 prices), +0.29 to
+   +0.38 in 2003-09, +0.73 to +0.83 in 2010-22, +0.32 to +0.36 in 2023-26. The agreement rule in 2006-09 (house weights walk-forward,
+   outside round 2's window): Sharpe +0.19, weekly accuracy 47 % / 31 %. The post-2023 numbers look like the long-run level
+   (arm G's planning Sharpe of 0.25-0.45 for positioning), not like a new decay. The spread trend never had directional accuracy at
+   21-42 sessions in any era (46-53 % weekly); its Sharpe of 0.3 is payoff asymmetry. December: 6 of 7, 4 of 6, 6 of 7, 2 of 3.
+4. **(c) Regime - one of eight pre-declared regimes shows in both halves; it is suggestive, not established, and it does not make a
+   better call.** For the agreement rule only `div_change` passes the screen: when the gap between the ECB deposit rate and the fed
+   funds target is WIDER than six months earlier the rule is right 68 % / 70 % at 21 / 42 sessions in 2006-15 and 60 % / 70 % in
+   2016-26, against 54 / 44 % and 48 / 56 % outside (2006-26: 64 % [52-74], n=74 and 70 % [56-81], n=47 inside; 51 % and 49 % outside);
+   its daily Sharpe is 1.52 / 1.02 inside and 0.02 / 0.02 outside. NARROWER is the mirror (54 / 42 % and 50 / 39 %, Sharpe -0.2).
+   The P&L concentration is the same for positioning alone (Sharpe 1.34, t 3.9, on WIDER sessions; 0.12 elsewhere) and for the spread
+   trend (0.95 against 0.10). Chance: 21 classes were looked at; rotating the regime labels against the calls, this class shows such
+   a gap in 0.8 % of draws, but SOME class passes in 30 % of draws, two or more in 12 %, and the family-wise p of the largest gap is
+   0.11 (accuracy) and 0.17 (Sharpe). The other seven: policy regime (lower bound / hiking / cutting) flips sign between the halves
+   (hiking: -25 / -16 points, then +10 / +14); policy-gap level, rate volatility, dollar trend, US inflation and with- / counter-trend
+   show nothing consistent; crowding: calls with |z| < 1 are worse at 21 sessions in both halves (-13, -17 points) but not in Sharpe,
+   and the agreement rule does not weaken above |z| = 2 (63 % at both horizons). For the single components, positioning "works at
+   the lower bound / small policy gap" passes the screen but is the fade restated: inside 2016-22 the large-gap sessions were as good
+   (Sharpe 0.86 against 0.74) and 2023-26 is 100 % large-gap; the house score's inflation and trend classes and equity momentum's
+   trend class all reverse in 2023-26.
+   Does it explain the fade? In part, in money terms only. 2023-26 was a NARROWER period (58 % of sessions against 12 % in 2010-22;
+   WIDER 27 % against 45 %). Holding each class at its 2010-22 record, the mix alone explains 35 % of positioning's drop in net bp per
+   session and 44 % of the agreement rule's. Inside WIDER the P&L held up after 2023 (positioning Sharpe 1.06, agreement rule 1.38;
+   outside -0.02 and -0.37), but the hit rate did not (agreement rule 50 % / 36 % on 22 weekly calls): the mix explains none of the
+   accuracy drop (implied 60 % / 66 % for positioning, actual 50 % / 48 %).
+5. **Tradeable test: fails the Round 5 bar; nothing adopted.** The declared walk-forward rule (`cond_div_change`: mute a class once
+   its training-window accuracy is 5 points below the rest; it mutes NARROWER from 2013 on) against the unconditional rule,
+   non-overlapping decisions:
+
+   | | 21 sessions | 42 sessions |
+   |---|---|---|
+   | 2010-26 | 62 % (n=128, 7.4 a year) vs 59 % (n=156): **+2.7** [-1, +8] | 65 % (n=75) vs 61 % (n=89): **+4.7** [-3, +10] |
+   | 2016-26 | 62 % (n=68, 6.1 a year) vs 57 % (n=96): **+4.5** [-2, +14] | 67 % (n=42) vs 59 % (n=56): **+7.7** [-4, +17] |
+   | 2023-26 | 63 % (n=19) vs 60 % (n=35): +3.2 [-6, +29] | 50 % (n=12) vs 45 % (n=20): +5.0 [-10, +33] |
+
+   It misses the 3-point bar at 21 sessions in 2010-26, every paired-bootstrap interval includes zero (p 0.08-0.19), the calls it
+   refuses were still right 54 % / 57 % of the time, the weekly figures move by 1-2 points only, and its tranche-book Sharpe is
+   unchanged (0.52 / 0.53 / 0.43 against 0.52 / 0.51 / 0.43). The full-pipeline placebo (rotate the labels, apply the same screen,
+   run the same rule on whatever passes) gives +0.7 / +3.1 points on average and matches or beats the real gain in 19-27 % of
+   passing draws: a quarter of the 21-session gain and two thirds of the 42-session gain is what choosing the regime variable on
+   the whole sample buys.
+   Two post hoc variants (written after seeing where the P&L sits, counted as trials, not eligible): the literal "speak only in
+   the favourable class" rule is no better (59 % on 83 decisions, 4.8 a year; +0.1 / +4.0 points; book Sharpe 0.46 / 0.41 / 0.31);
+   the same gate applied daily (hold the agreement position only on favourable sessions) has Sharpe 0.80 / 0.69 / 0.71 against
+   0.56 / 0.52 / 0.20 and beats the pipeline placebo (2-4 % of passing draws do as well) - but the walk-forward chose the wrong class
+   (SAME) in 2012-14, the whole 2010-26 gain is the year 2015 (0.75 against 0.72 without it) and most of the 2016-26 gain is 2023
+   (0.65 against 0.61 without it). That is a lead for a paper forward test under its own name, not a rule.
+6. **Leak checks.** Regime labels shuffled: gain -1.0 / +2.2 points (i.i.d.) and -0.1 / +1.6 (block rotation) against the real
+   +2.7 / +4.7; the shuffles reach the real gain in 2-15 % and 7-13 % of draws, i.e. the gain does not cleanly vanish at 42 sessions
+   because muting any persistent subset of a small sample moves a 75-decision accuracy by a few points. Labels lagged 21 sessions:
+   +3.5 / +11.3 (no loss); lagged 63: -0.6 / +0.8; lagged 126: +1.0 / +2.0 - the class changes several times a year, so the
+   information is gone within a quarter (it is a state of the policy cycle, not a slow level, and it is known at the close: both
+   policy rates are public the day they change). Look-ahead controls: an oracle regime built from the future outcome gives 93 % /
+   80 %, features taken 21 sessions ahead give 86 % - the harness exposes a leak; choosing the muted class with hindsight gives
+   the same +2.8 / +4.6 as the walk-forward choice. Outcomes rotated against the calls: 49.7 %. Inputs of the regime labels are
+   policy rates, the US 2y yield, the broad dollar index, US CPI, CFTC positioning and the 200-day average, all lagged; none
+   contains a forward return.
+7. **Round 3 incremental test.** The delivered stream is the unconditional agreement rule, so it repeats arm N: EW(weak_signals,
+   regime_trend) 0.56 / 0.64 / 0.36 -> 0.57 / 0.64 / 0.40 with it; correlation 0.43 and 0.63. Nothing new for the stack.
+
+**What to do with this.** (i) Keep the engine speaking unconditionally; do not gate it on any regime. (ii) Plan positioning-driven
+calls at the long-run level (Sharpe 0.3-0.5, about 55 % at one month), not at the 2010-22 level (61-65 %). (iii) Show the
+policy-gap direction (WIDER / SAME / NARROWER, known the day a policy rate changes) next to each call as context, and start a paper
+forward test of "agreement rule on WIDER sessions only" as a new named scenario from zero. As of the last session (2026-11-05) the
+class is NARROWER. (iv) The 2023-26 window cannot decide between "edge intact" and "edge gone" (power 17-50 %). An 80 %-power test
+of 59 % against 50 % needs about 190 non-overlapping calls, two decades at nine a year; only more markets or more history shorten that.
+
+**Counts for deflation.** Tradeable rules run: 1 declared (`cond_div_change`) + 3 post hoc (`strict_div_change`, and the daily-gated
+form of both) = 4. Diagnostics, never selected from: 6 components x 21 regime classes x 3 periods, the screen, the power tables.
+No threshold or window of any regime definition was changed after the first run.
+
+**Caveats.** The regime variable was chosen on the whole sample (the walk-forward protects only the class choice); the pipeline
+placebo is the correction. `div_change` uses a 182-day comparison fixed in advance; no other window was tried. The fed target file
+ends 2026-09-20 and is held constant after it. CPI and CFTC data are current vintages. The broad dollar index starts in 2006, so the
+dollar regime is defined from October 2006. The house score before 2010 is fitted on 3-6 years of data. Non-overlapping accuracy
+of a 4-year window moves by up to 9 points with the phase of the stream (positioning 2023-26: 47 % or 55 %), which is why the weekly
+statistic with a block bootstrap carries the power test. 2026 runs to 5 November.
+"""
+
+
+def build_report(res: dict) -> str:
+    PW, PJ, ROLL, STP, T, TS, S, SP, M, C, LK, PP, REP = (res[k] for k in ("power", "power_joint", "rolling", "step", "regime", "regime_sub", "screen",
+                                                                           "screen_placebo", "mix", "candidates", "leak", "pipeline_placebo", "report"))
+    L = []
+    w = L.append
+
+    def pw(comp, stat, mode, base="2010-22", block=BLOCK):
+        x = PW[(PW.component == comp) & (PW.stat == stat) & (PW["mode"] == mode) & (PW.base == base) & (PW.block == block) & (PW.observed_window == ("2023-26" if base in ("2010-22", "2016-22") else "2016-26"))]
+        return x.iloc[0] if len(x) else None
+
+    # ------------------------------------------------ 1 power
+    w("## 1. Power: is 2023-26 distinguishable from the earlier record?")
+    w("Null = the 2010-2022 record unchanged; circular block bootstrap of the 2010-22 sessions (block 126), pseudo-samples as long as 2023-26, same decision rule; "
+      "5,000 draws. `p unchanged` = share of draws at or below the observed 2023-26 value. `p true-0.5` = the same distribution re-centred on what a true 0.5-Sharpe "
+      "process gives (55.7 % at 21 sessions, 58.1 % at 42, Sharpe 0.5): the answer to \"is this within what a 0.5-Sharpe process produces\" (added after the first run). "
+      "`power` = probability that a process with NO edge would fall below the 5 % critical value of the unchanged null, i.e. how often this sample could even see a dead signal.\n")
+    rows = []
+    for comp in ("cot", "spread", "house", "eqrel", "agree3"):
+        r = {"component": NAMES[comp]}
+        for h in HS:
+            q = pw(comp, f"acc{h}", "W")
+            r[f"{h} sessions: 2010-22 -> 2023-26 (n)"] = f"{_p(q['base_value'])} -> {_p(q['observed'])} ({int(q['n_obs'])})"
+            r[f"p unchanged @{h}"] = _f(q["p_unchanged"], 3); r[f"p true-0.5 @{h}"] = _f(q["p_recentred_sr05"], 3)
+        rows.append(r)
+    w("**Weekly decisions (overlap handled by the bootstrap; primary accuracy test)**\n\n" + _md(pd.DataFrame(rows)) + "\n")
+    rows = []
+    for comp in ("cot", "spread", "house", "eqrel", "agree3", "dec"):
+        r = {"component": NAMES[comp]}
+        for h in HS:
+            q = pw(comp, f"acc{h}", "N")
+            r[f"{h}: 2010-22 -> 2023-26 (n)"] = f"{_p(q['base_value'])} -> {_p(q['observed'])} ({int(q['n_obs'])})"
+            r[f"p unchanged @{h}"] = _f(q["p_unchanged"], 3); r[f"p true-0.5 @{h}"] = _f(q["p_recentred_sr05"], 3); r[f"power @{h}"] = _f(q["power_vs_no_edge"], 2)
+        rows.append(r)
+    w("**Non-overlapping decisions** (stream started 2010 as in arm N; the 2023-26 figure of a single stream moves by up to 9 points with the phase of the stream: "
+      "positioning reads 47 % here and 55 % on the stream started in 2003)\n\n" + _md(pd.DataFrame(rows)) + "\n")
+    rows = []
+    for comp in ("cot", "spread", "house", "dec", "eqrel", "agree3", "agree3_book", "ew5"):
+        q = pw(comp, "sharpe", "daily")
+        rows.append({"stream (daily, net 1.2 pips)": NAMES[comp], "Sharpe 2010-22": _f(q["base_value"]), "Sharpe 2023-26": _f(q["observed"]), "p unchanged": _f(q["p_unchanged"], 3),
+                     "p true-0.5": _f(q["p_recentred_sr05"], 3), "5 % critical value": _f(q["null_p05"]), "power vs no edge": _f(q["power_vs_no_edge"], 2)})
+    w("**Net Sharpe**\n\n" + _md(pd.DataFrame(rows)) + "\n")
+    x = PJ.copy()
+    x = x.rename(columns={"observed_mean": "observed 2023-26 (mean)", "null_mean": "null mean", "p_pooled_mean": "p pooled mean", "worst": "largest drop", "worst_z": "its z",
+                          "p_largest_drop": "family-wise p of the largest drop"}).drop(columns=["table"])
+    w("**Joint test on common pseudo-samples (added after the first run; picking the worst component afterwards is a selection, this prices it)**\n\n" + _md(x.round(3)) + "\n")
+    rows = []
+    for comp in ("cot", "spread", "house", "eqrel", "agree3"):
+        r = {"component": NAMES[comp]}
+        for base, lab in (("2016-22", "2016-22 -> 2023-26"), ("2010-15", "2010-15 -> 2016-26")):
+            for stat, mode, nm in (("acc21", "W", "W21"), ("acc42", "W", "W42"), ("sharpe", "daily", "Sharpe")):
+                q = pw(comp, stat, mode, base)
+                r[f"{lab} {nm}"] = "-" if q is None else (f"{_p(q['base_value'])}->{_p(q['observed'])} p {_f(q['p_unchanged'], 2)}" if stat != "sharpe" else f"{_f(q['base_value'])}->{_f(q['observed'])} p {_f(q['p_unchanged'], 2)}")
+        rows.append(r)
+    w("**Other base windows** (2016-22 is not a selection window; 2010-15 -> 2016-26 is the selection-step test)\n\n" + _md(pd.DataFrame(rows)) + "\n")
+    bs = PW[(PW.base == "2010-22") & (PW["mode"] != "N")].pivot_table(index=["component", "stat"], columns="block", values="p_unchanged")
+    w(f"Block-length sensitivity (63 / 126 / 252 sessions): the largest change of any weekly-accuracy or Sharpe p-value is {float((bs.max(axis=1) - bs.min(axis=1)).max()):.3f}; all in `{ARM}_tables.csv` (`table == power`).\n")
+
+    # ------------------------------------------------ 2 decay
+    w("## 2. Decay: eras and rolling windows around the selection windows")
+    w("Round 1 chose its rules on 2003-2015 (validation 2016-22, holdout 2023-26); round 2 chose walk-forward variants on 2010-2015. `2000-02` precedes every selection window "
+      "(Fed H.10 noon prices; positioning and December only). Components start when their data do: spread 2004-10, house score and agreement rule 2006, equity momentum 2007-04. "
+      "Cells: net Sharpe (t) / weekly accuracy at 21 / at 42 sessions; December: Sharpe (t) / hits of the one yearly call.\n")
+    er = ROLL[ROLL.table == "eras"]
+    rows = []
+    for pn, comp in (("h10", "cot"), ("store", "cot"), ("store", "spread"), ("store", "house"), ("store", "eqrel"), ("store", "agree3"), ("h10", "dec"), ("store", "dec")):
+        r = {"component": NAMES[comp] + (" (H.10 noon)" if pn == "h10" else "")}
+        for lab, _, _ in ERAS:
+            q = er[(er.panel == pn) & (er.component == comp) & (er.window == lab)]
+            if not len(q):
+                r[lab] = "-"; continue
+            q = q.iloc[0]
+            if comp == "dec":
+                r[lab] = f"{_f(q['sharpe'], 2, True)} ({_f(q['t'], 1)}) / {int(round(q['N21_acc'] * q['N21_n']))} of {int(q['N21_n'])}"
+            else:
+                r[lab] = f"{_f(q['sharpe'], 2, True)} ({_f(q['t'], 1)}) / {_p(q['W21_acc'])} / {_p(q['W42_acc'])}"
+        rows.append(r)
+    w(_md(pd.DataFrame(rows)) + "\n")
+    x = STP[(STP.component != "dec")].copy()
+    x["component"] = [NAMES[c] + (" (H.10)" if p_ == "h10" else "") for c, p_ in zip(x.component, x.panel)]
+    x["Sharpe"] = [f"{_f(a, 2, True)} -> {_f(b, 2, True)}" for a, b in zip(x.sharpe_from, x.sharpe_to)]
+    x["weekly acc 21"] = [f"{_p(a)} -> {_p(b)}" for a, b in zip(x.W21_from, x.W21_to)]
+    x["step z (Sharpe)"] = x["z"].map(lambda v: _f(v, 2, True))
+    piv = x[x["from"].isin(["2010-15", "2016-22", "2003-09", "2000-02"])]
+    w("**Steps** (z > 0 = lower afterwards; |z| < 1 everywhere, a 6-11 year Sharpe has a standard error of 0.3-0.4)\n\n"
+      + _md(piv[["component", "from", "to", "Sharpe", "step z (Sharpe)", "weekly acc 21"]]) + "\n")
+    for W_, stat, ttl in ((3, "sharpe", "Rolling 3-year net Sharpe (window ending in the year shown)"), (5, "sharpe", "Rolling 5-year net Sharpe"),
+                          (5, "W21_acc", "Rolling 5-year weekly accuracy at 21 sessions (%)"), (5, "W42_acc", "Rolling 5-year weekly accuracy at 42 sessions (%)")):
+        x = ROLL[ROLL.table == f"rolling{W_}y"].copy()
+        if stat != "sharpe":
+            x = x[x.component != "dec"]
+        x["key"] = [NAMES[c].split(",")[0] + (" H.10" if p_ == "h10" else "") for c, p_ in zip(x.component, x.panel)]
+        pv = x.pivot(index="end", columns="key", values=stat)
+        pv = pv.map(lambda v: "" if not np.isfinite(v) else (f"{100 * v:.0f}" if stat != "sharpe" else f"{v:+.2f}"))
+        pv.index.name = "window end"
+        w(f"**{ttl}**\n\n" + pv.reset_index().to_markdown(index=False) + "\n")
+
+    # ------------------------------------------------ 3 regimes
+    w("## 3. Pre-declared economic regimes")
+    w("Definitions are in the module docstring (written before the results). Regime labels use only data stamped at least one calendar day before the session close "
+      "(broad dollar 7 days, CPI 60 days after the month stamp). Share of sessions by year for every regime: `table == regime_timeline` in the tables file.\n")
+    A = S[S.component == "agree3"].copy()
+    x = pd.DataFrame({"regime": A.regime, "class": A["class"],
+                      "gap 21 / 42, 2006-15 (pts)": [f"{_f(100 * a, 0, True)} / {_f(100 * b, 0, True)}" for a, b in zip(A["gap21_2006-15"], A["gap42_2006-15"])],
+                      "gap 21 / 42, 2016-26 (pts)": [f"{_f(100 * a, 0, True)} / {_f(100 * b, 0, True)}" for a, b in zip(A["gap21_2016-26"], A["gap42_2016-26"])],
+                      "Sharpe in - out, 2006-15 / 2016-26": [f"{_f(a, 2, True)} / {_f(b, 2, True)}" for a, b in zip(A["sharpe_gap_2006-15"], A["sharpe_gap_2016-26"])],
+                      ">= 10 decisions each side": A["enough_n"].map({True: "yes", False: "NO"}),
+                      "screen": np.where(A.favourable, "FAVOURABLE", np.where(A.unfavourable, "UNFAVOURABLE", "-")),
+                      "rotation p (accuracy gap)": A["placebo_p_consistent_gap"].map(lambda v: _f(v, 3)),
+                      "rotation p (Sharpe gap)": A["placebo_p_consistent_sharpe_gap"].map(lambda v: _f(v, 3))})
+    w("**Screen for the agreement rule** (gap = non-overlapping accuracy inside the class minus outside it; a class passes only if all four gaps are >= 5 points "
+      "with one sign and the Sharpe gaps agree; rotation p = share of 1,000 joint rotations of the regime labels in which THIS class shows a consistent gap at least as large; "
+      "it is not adjusted for the 21 classes looked at)\n\n" + _md(x) + "\n")
+    x = SP.drop(columns=["table"]).copy()
+    x["component"] = x["component"].map(NAMES)
+    x = x.rename(columns={"observed_classes_passing": "classes passing", "placebo_mean_classes_passing": "placebo: mean passing", "placebo_share_draws_with_any_pass": "placebo: share of draws with any pass",
+                          "p_at_least_as_many_pass": "p(as many pass)", "observed_max_consistent_gap": "largest consistent accuracy gap", "placebo_p95_max_consistent_gap": "placebo 95th pct",
+                          "p_max_consistent_gap": "family-wise p (accuracy)", "observed_max_consistent_sharpe_gap": "largest consistent Sharpe gap",
+                          "placebo_p95_max_consistent_sharpe_gap": "placebo 95th pct (Sharpe)", "p_max_consistent_sharpe_gap": "family-wise p (Sharpe)"})
+    w("**Chance control: all regime labels rotated jointly against the calls by at least a year** (binary variables count as two mirrored classes, in the data and in the placebo alike)\n\n"
+      + _md(x.round(3)) + "\n")
+    x = S[S.passes & (S.component != "agree3")]
+    x = pd.DataFrame({"component": x.component.map(NAMES), "regime": x.regime, "class": x["class"], "screen": np.where(x.favourable, "FAVOURABLE", "UNFAVOURABLE"),
+                      "gap 21 / 42, 2006-15": [f"{_f(100 * a, 0, True)} / {_f(100 * b, 0, True)}" for a, b in zip(x["gap21_2006-15"], x["gap42_2006-15"])],
+                      "gap 21 / 42, 2016-26": [f"{_f(100 * a, 0, True)} / {_f(100 * b, 0, True)}" for a, b in zip(x["gap21_2016-26"], x["gap42_2016-26"])],
+                      "Sharpe gap 2006-15 / 2016-26": [f"{_f(a, 2, True)} / {_f(b, 2, True)}" for a, b in zip(x["sharpe_gap_2006-15"], x["sharpe_gap_2016-26"])]})
+    w("**Classes that pass the same screen for the single components** (information only; nothing is traded on them)\n\n" + _md(x) + "\n")
+
+    def sub(comp, v):
+        x = TS[(TS.component == comp) & (TS.regime == v)]
+        return pd.DataFrame({"component": NAMES[comp], "regime": v, "class": x["class"], "period": x.period, "sessions": x.sessions,
+                             "Sharpe in / out": [f"{_f(a, 2, True)} / {_f(b, 2, True)}" for a, b in zip(x.sharpe_in, x.sharpe_out)],
+                             "weekly acc 21 in / out (n in)": [f"{_p(a)} / {_p(b)} ({int(n)})" for a, b, n in zip(x.W21_in_acc, x.W21_out_acc, x.W21_in_n)],
+                             "weekly acc 42 in / out": [f"{_p(a)} / {_p(b)}" for a, b in zip(x.W42_in_acc, x.W42_out_acc)]})
+
+    w("**Is a regime effect the fade restated? Second half split at 2023** (added after the first run)\n\n"
+      + _md(pd.concat([sub("agree3", "div_change"), sub("cot", "div_change"), sub("cot", "div_level"), sub("cot", "policy"), sub("house", "inflation"),
+                       sub("house", "trend_rel"), sub("eqrel", "trend_rel")], ignore_index=True)) + "\n")
+    x = M[(M.regime == "div_change") & (M["class"] != "__MIX_IMPLIED__")]
+    x = pd.DataFrame({"component": x.component.map(NAMES), "class": x["class"], "share of sessions 2010-22 / 2023-26 (%)": [f"{_p(a)} / {_p(b)}" for a, b in zip(x["share_2010-22"], x["share_2023-26"])],
+                      "net bp per session 2010-22 / 2023-26": [f"{_f(a, 2, True)} / {_f(b, 2, True)}" for a, b in zip(x["mean_bp_2010-22"], x["mean_bp_2023-26"])],
+                      "Sharpe 2010-22 / 2023-26": [f"{_f(a, 2, True)} / {_f(b, 2, True)}" for a, b in zip(x["sharpe_2010-22"], x["sharpe_2023-26"])],
+                      "weekly acc 21, 2010-22 / 2023-26 (n)": [f"{_p(a)} / {_p(b)} ({int(n)})" for a, b, n in zip(x["W21_acc_2010-22"], x["W21_acc_2023-26"], x["W21_n_2023-26"])],
+                      "weekly acc 42, 2010-22 / 2023-26": [f"{_p(a)} / {_p(b)}" for a, b in zip(x["W42_acc_2010-22"], x["W42_acc_2023-26"])]})
+    w("**Policy-gap direction (`div_change`): 2023-26 next to 2010-22** (added after the first run)\n\n" + _md(x) + "\n")
+    x = M[(M.regime == "div_change") & (M["class"] == "__MIX_IMPLIED__")]
+    x = pd.DataFrame({"component": x.component.map(NAMES), "net bp/session 2010-22": x["mean_bp_2010-22"].map(_f), "implied for 2023-26 by its regime mix": x["mix_implied_mean_bp_2023-26"].map(_f),
+                      "actual 2023-26": x["mean_bp_2023-26"].map(_f),
+                      "share of the P&L drop explained by the mix (%)": [_p((a - b) / (a - c)) if a > c else "-" for a, b, c in zip(x["mean_bp_2010-22"], x["mix_implied_mean_bp_2023-26"], x["mean_bp_2023-26"])],
+                      "weekly acc 21: 2010-22 / implied / actual": [f"{_p(a)} / {_p(b)} / {_p(c)}" for a, b, c in zip(x["W21_acc_2010-22"], x["mix_implied_W21_acc_2023-26"], x["W21_acc_2023-26"])],
+                      "weekly acc 42: 2010-22 / implied / actual": [f"{_p(a)} / {_p(b)} / {_p(c)}" for a, b, c in zip(x["W42_acc_2010-22"], x["mix_implied_W42_acc_2023-26"], x["W42_acc_2023-26"])]})
+    w("**How much of the fade does the 2023-26 regime mix explain?** (each class keeps its 2010-22 record, only the mix changes)\n\n" + _md(x) + "\n")
+    w("### Full regime tables\nCells: non-overlapping accuracy at 21 sessions [Wilson 95 %] n · the same at 42 sessions · net Sharpe of the daily stream on the class's sessions "
+      "(for the agreement rule and December zero-position days are included). Stream of \"component speaks AND class holds\", started 2006. Weekly accuracy, the outside-class "
+      "figures and net bp per decision are in the tables file (`table == regime`).\n")
+    for comp in COMPONENTS:
+        x = T[T.component == comp]
+        rows = []
+        for (v, c), g in x.groupby(["regime", "class"], sort=False):
+            g = g.set_index("period")
+            r = {"regime": v, "class": c, "share of sessions 2006-26 (%)": _p(g.loc["2006-26", "share_of_defined"])}
+            for lab, _, _ in PERIODS3:
+                q = g.loc[lab]
+                r[lab] = (f"{_a(q['N21_in_acc'], q['N21_in_lo'], q['N21_in_hi'], q['N21_in_n'])} · {_a(q['N42_in_acc'], q['N42_in_lo'], q['N42_in_hi'], q['N42_in_n'])} · "
+                          f"SR {_f(q['sharpe_in'], 2, True)}")
+            rows.append(r)
+        w(f"**{NAMES[comp]}**\n\n" + _md(pd.DataFrame(rows)) + "\n")
+
+    # ------------------------------------------------ 4 tradeable
+    w("## 4. Tradeable test")
+    if bool(C["diagnostic"].iloc[0]):
+        w("Nothing passed the screen; the single run below is the declared near-miss DIAGNOSTIC, not a candidate.\n")
+    ML = res["mute_log"]
+    for rule, g in ML.groupby("rule", sort=False):
+        col = "favourable" if rule.startswith("strict_") else "muted"
+        prev, parts = None, []
+        for y, m in zip(g.year, g[col].fillna("")):
+            if m != prev:
+                parts.append(f"from {int(y)}: {m if m else 'none'}")
+                prev = m
+        w(f"`{rule}`, walk-forward choice of the {col} class(es) by test year: " + "; ".join(parts) + ".\n")
+    rows = []
+    for rule in dict.fromkeys(C.rule):
+        for h in HS:
+            for lab in ("2010-26", "2016-26", "2023-26"):
+                q = C[(C.rule == rule) & (C.h == h) & (C["mode"] == "N") & (C.period == lab)].iloc[0]
+                qw = C[(C.rule == rule) & (C.h == h) & (C["mode"] == "W") & (C.period == lab)].iloc[0]
+                rows.append({"rule": rule, "hold": h, "period": lab, "unconditional": f"{_a(q['acc_uncond'], q['lo_uncond'], q['hi_uncond'], q['n_uncond'])} ({q['dec_yr_uncond']:.1f}/yr)",
+                             "conditional": f"{_a(q['acc'], q['lo'], q['hi'], q['n'])} ({q['dec_yr']:.1f}/yr)", "difference (pts)": _f(100 * q["diff"], 1, True),
+                             "paired bootstrap 95 %": f"[{_f(100 * q.get('boot_lo', np.nan), 0, True)}, {_f(100 * q.get('boot_hi', np.nan), 0, True)}]", "p(diff <= 0)": _f(q.get("boot_p_le0", np.nan), 2),
+                             "weekly: uncond -> cond (n)": f"{_p(qw['acc_uncond'])} -> {_p(qw['acc'])} ({int(qw['n'])})", "refused calls right % (n)": f"{_p(qw.get('acc_refused', np.nan))} ({int(qw.get('n_refused', 0) or 0)})",
+                             "net bp/decision: uncond -> cond": f"{_f(q['net_bp_uncond'], 0, True)} -> {_f(q['net_bp'], 0, True)}"})
+    w("**Non-overlapping decisions, conditional rule against the unconditional agreement rule** (`cond_` = the rule declared before the first run; `strict_` = post hoc)\n\n" + _md(pd.DataFrame(rows)) + "\n")
+    if len(res.get("bar", [])):
+        w("**Round 5 bar**\n\n" + _md(res["bar"].drop(columns=["table"])) + "\n")
+    x = REP[REP.period.isin(["2010-2026", "2016-2026", "2023-2026", "2010-2015"]) & (REP.cost_pips == 1.2)]
+    pv = x.pivot(index="variant", columns="period", values="sharpe").round(2)
+    pt = x.pivot(index="variant", columns="period", values="t").round(2)
+    pv = pv.assign(**{"t 2010-2026": pt["2010-2026"], "t 2016-2026": pt["2016-2026"]}).reset_index()
+    w("**Protocol table, net Sharpe at 1.2 pips** (weekly-tranche books `agree3_unconditional`, `cond_*`, `strict_*`; `daily_*` = position held only on sessions on which the rule "
+      "speaks, added after the first run; 0.6-pip rows in the report csv change nothing beyond 0.02)\n\n" + _md(pv) + "\n")
+    xp = PP[PP.n_vars_pass > 0]
+    rows = []
+    real = {}
+    for rule, pre in (("cond_div_change", ""), ("strict_div_change", "strict_")):
+        if rule not in set(C.rule):
+            continue
+        for h in HS:
+            for lab in ("2010-26", "2016-26"):
+                real[f"{pre}gain{h}_{lab}"] = float(C[(C.rule == rule) & (C.h == h) & (C["mode"] == "N") & (C.period == lab)]["diff"].iloc[0])
+        for lab, pl in (("2010-26", "2010-2026"), ("2016-26", "2016-2026"), ("2023-26", "2023-2026")):
+            real[f"{pre}book_sharpe_{lab}"] = float(REP[(REP.variant == rule) & (REP.period == pl)]["sharpe"].iloc[0])
+            real[f"{pre}daily_sharpe_{lab}"] = float(REP[(REP.variant == f"daily_{rule}") & (REP.period == pl)]["sharpe"].iloc[0])
+    for k, v in real.items():
+        if k in xp:
+            rows.append({"statistic": k, "real": _f(v, 3), "placebo mean": _f(xp[k].mean(), 3), "placebo 5 % / 95 %": f"{_f(xp[k].quantile(.05), 3)} / {_f(xp[k].quantile(.95), 3)}",
+                         "share of passing placebo draws >= real": _f(float((xp[k] >= v).mean()), 3)})
+    w(f"**Full-pipeline placebo** ({len(PP)} joint rotations of the regime labels; the screen of section 3 is applied to each, and the walk-forward rules are run on whatever passes: "
+      f"{len(xp)} draws, {100 * len(xp) / len(PP):.0f} %, pass something). This prices the fact that the regime VARIABLE was chosen on the whole sample. Unconditional references: "
+      f"non-overlapping gain 0 by definition, tranche-book Sharpe {REP[(REP.variant == 'agree3_unconditional') & (REP.period == '2010-2026')]['sharpe'].iloc[0]:.2f} / "
+      f"{REP[(REP.variant == 'agree3_unconditional') & (REP.period == '2016-2026')]['sharpe'].iloc[0]:.2f} / {REP[(REP.variant == 'agree3_unconditional') & (REP.period == '2023-2026')]['sharpe'].iloc[0]:.2f}, "
+      f"daily-stream Sharpe {REP[(REP.variant == 'daily_agree3_unconditional') & (REP.period == '2010-2026')]['sharpe'].iloc[0]:.2f} / "
+      f"{REP[(REP.variant == 'daily_agree3_unconditional') & (REP.period == '2016-2026')]['sharpe'].iloc[0]:.2f} / {REP[(REP.variant == 'daily_agree3_unconditional') & (REP.period == '2023-2026')]['sharpe'].iloc[0]:.2f}.\n\n"
+      + _md(pd.DataFrame(rows)) + "\n")
+    x = REP[REP.variant.str.startswith("daily_") & REP.period.str.len().eq(4)].pivot(index="period", columns="variant", values="sharpe").round(2).reset_index()
+    w("**Daily streams per year (net Sharpe)**\n\n" + _md(x) + "\n")
+    if "daily_gate" in res:
+        x = res["daily_gate"].drop(columns=["table"]).copy()
+        for c in x.columns:
+            if c not in ("check", "regime"):
+                x[c] = x[c].map(lambda v: _f(v, 3 if "share" in c else 2))
+        x.columns = [c.replace("share_placebo_ge_real_", "share placebo >= real ").replace("_", " ") for c in x.columns]
+        w("**Robustness of the post hoc daily-gated stream** (added after the first run)\n\n" + _md(x) + "\n")
+
+    # ------------------------------------------------ 5 leak checks
+    w("## 5. Leak checks")
+    x = LK.copy()
+    cols = ["rule", "check", "gain21_2010-26", "gain42_2010-26", "gain21_2016-26", "gain42_2016-26", "acc21_2010-26", "acc42_2010-26", "n21_2010-26",
+            "p_placebo_ge_real_21_2010-26", "p_placebo_ge_real_42_2010-26", "p_placebo_ge_real_21_2016-26", "p_placebo_ge_real_42_2016-26"]
+    x = x[[c for c in cols if c in x]].copy()
+    for c in x.columns[2:]:
+        x[c] = x[c].map(lambda v: _f(v, 3))
+    x.columns = [c.replace("p_placebo_ge_real_", "share placebo >= real ").replace("_", " ") for c in x.columns]
+    w("Gain = non-overlapping accuracy of the conditional rule minus the unconditional rule.\n\n" + _md(x.fillna("")) + "\n")
+    if "incremental" in res:
+        inc = res["incremental"]
+        x = inc[inc.period.isin(["2010-2026", "2016-2026", "2023-2026"])][["combo", "period", "sharpe", "t"]].round(2)
+        w("## 6. Round 3 incremental test of the delivered stream\n\n" + _md(x) + f"\n\nDaily-P&L correlation of the delivered stream with weak_signals "
+          f"{inc['corr_weak_signals'].iloc[0]:.2f}, with regime_trend {inc['corr_regime_trend'].iloc[0]:.2f}.\n")
+    return "\n".join(L)
+
+
+def write_report(res: dict, head: str | None = None) -> Path:
+    head = VERDICT if head is None else head
+    out = REPORTS / f"arm_{ARM}.md"
+    out.write_text(head.rstrip() + "\n\n" + build_report(res) + "\n")
     return out
 
 
