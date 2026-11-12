@@ -416,7 +416,16 @@ def fetch_bis_live(since: str, refresh: bool = False, verbose: bool = True) -> p
             t = dest.read_text(encoding="utf-8", errors="replace")
             i = t.find("block--system-main")
             j = t.find("The views expressed in this speech")
-            texts.append(_strip_html(t[max(i, 0): j if j > 0 else len(t)]))
+            txt = _strip_html(t[max(i, 0): j if j > 0 else len(t)])
+            if len(txt) < 5000 and (u + ".pdf") in t:           # the page carries an abstract only: the speech is the PDF
+                pdf = dest.with_suffix(".pdf")
+                if not pdf.exists():
+                    _curl(u + ".pdf", pdf, tries=8)
+                    time.sleep(0.3)
+                r = subprocess.run(["pdftotext", "-q", str(pdf), "-"], capture_output=True, text=True)
+                if r.returncode == 0 and len(r.stdout) > len(txt):
+                    txt = r.stdout
+            texts.append(txt)
         except RuntimeError:
             texts.append("")
     L["text"] = texts
@@ -600,3 +609,894 @@ def fetch_all(refresh: bool = False, verbose: bool = True) -> pd.DataFrame:
     if verbose:
         print(cat.drop(columns=["url"]).to_string(index=False), flush=True)
     return cat
+
+
+# ================================================================ raw series -> signals
+SIGNALS = (  # name, family, prior
+    ("tone_rel_lvl", "1 tone", "- Fed tone above its own norm relative to the ECB (90-day windows) = dollar up"),
+    ("tone_rel_d1m", "1 tone", "- relative tone (30-day windows) rising over a month = dollar up"),
+    ("tone_rel_d3m", "1 tone", "- relative tone (90-day windows) rising over three months = dollar up"),
+    ("news_lvl", "2 news", "- US news sentiment above its own history = dollar up (copy ends 2025-05)"),
+    ("news_d1m", "2 news", "- US news sentiment improving over a month = dollar up (copy ends 2025-05)"),
+    ("epu_rel_d3m", "3 uncertainty", "- Europe-minus-US policy uncertainty rising over three months = euro down"),
+    ("tpu_d3m", "3 uncertainty", "sign from the training window: 3-month change of US trade-policy uncertainty"),
+    ("gpr_d3m", "3 uncertainty", "- geopolitical risk rising over three months = euro down (weak prior)"),
+    ("jk_mp_3m", "4 surprises", "- Fed-minus-ECB pure policy surprises cumulated over 3 months = dollar up"),
+    ("jk_mp_6m", "4 surprises", "- same over 6 months"),
+    ("jk_cbi_3m", "4 surprises", "- Fed-minus-ECB information surprises over 3 months = dollar up (weak prior)"),
+    ("jk_cbi_6m", "4 surprises", "- same over 6 months"),
+)
+NAMES = [s[0] for s in SIGNALS]
+TONE_NAMES = NAMES[:3]
+CTRL_PRICE = ("ret_21d", "ret_63d")
+CTRL_ALL = ("ret_21d", "ret_63d", "cot_z52", "d_spread2y_20", "house")
+CAL0 = "1997-01-01"
+
+
+def load_raw() -> dict:
+    R = {"docs": pd.read_csv(MACRO / f"{ARM}_docs.csv", parse_dates=["date", "post_date"])}
+    s = pd.read_csv(MACRO / f"{ARM}_sentiment_daily.csv", parse_dates=["date"]).set_index("date")["sentiment"].astype(float)
+    R["news"] = s[~s.index.duplicated()].sort_index()
+    u = pd.read_csv(MACRO / f"{ARM}_epu_us_daily.csv", parse_dates=["date"]).set_index("date")["value"].astype(float)
+    R["epu_us_d"] = u.sort_index()
+    m = pd.read_csv(MACRO / f"{ARM}_epu_monthly.csv")
+    m.index = pd.PeriodIndex(m.pop("month"), freq="M")
+    R["epu_m"] = m.sort_index()
+    g = pd.read_csv(MACRO / f"{ARM}_gpr_daily.csv", parse_dates=["date"]).set_index("date")["GPRD"].astype(float)
+    R["gpr"] = g.sort_index()
+    R["jk"] = pd.read_csv(MACRO / f"{ARM}_jk_shocks.csv", parse_dates=["date"])
+    return R
+
+
+def truncate_raw(R: dict, asof: pd.Timestamp, date_col: str = "date") -> dict:
+    """The raw data as a user would have held it on calendar date `asof` under the declared lags. Leak check only."""
+    d1 = pd.Timedelta(days=1)
+    out = {"docs": R["docs"][R["docs"][date_col] + d1 * LAG["text"] <= asof],
+           "news": R["news"][R["news"].index + d1 * LAG["news"] <= asof],
+           "gpr": R["gpr"][R["gpr"].index + d1 * LAG["gpr"] <= asof],
+           "epu_us_d": R["epu_us_d"][R["epu_us_d"].index + d1 <= asof],
+           "jk": R["jk"][R["jk"]["date"] + d1 * LAG["jk"] <= asof]}
+    m = R["epu_m"].copy()
+    me = m.index.to_timestamp(how="end").normalize()
+    for c in m.columns:
+        lag = LAG["epu"] if c == "EUEPUINDXM" else LAG["epu_cat"]
+        m.loc[np.asarray(me + d1 * lag > asof), c] = np.nan
+    out["epu_m"] = m
+    return out
+
+
+def tone_panel(docs: pd.DataFrame, end, date_col: str = "date") -> pd.DataFrame:
+    """Calendar-daily Fed, ECB and relative tone. Row d uses documents dated <= d (usable from the next session)."""
+    days = pd.date_range(CAL0, pd.Timestamp(end).normalize(), freq="D")
+    P = pd.DataFrame(index=days)
+    P.index.name = "date"
+    for inst, key in (("FED", "fed"), ("ECB", "ecb")):
+        d = docs[(docs["inst"] == inst) & docs["tone"].notna()]
+        g = d.groupby(d[date_col].dt.normalize())["tone"]
+        sm = g.sum().reindex(days, fill_value=0.0)
+        ct = g.size().reindex(days, fill_value=0).astype(float)
+        for W in (30, 90):
+            n = ct.rolling(W, min_periods=1).sum()
+            tone = (sm.rolling(W, min_periods=1).sum() / n.where(n > 0)).where(n >= MIN_DOCS[W])
+            P[f"{key}_tone_{W}"], P[f"{key}_n_{W}"] = tone, n
+            P[f"{key}_z_{W}"] = (tone - tone.expanding(min_periods=Z_MIN_DAYS).mean()) / tone.expanding(min_periods=Z_MIN_DAYS).std()
+    for W in (30, 90):
+        P[f"rel_{W}"] = P[f"fed_z_{W}"] - P[f"ecb_z_{W}"]
+    P["rel_d1m"] = P["rel_30"] - P["rel_30"].shift(30)
+    P["rel_d3m"] = P["rel_90"] - P["rel_90"].shift(90)
+    return P
+
+
+def _monthly_on_grid(s: pd.Series, lag_days: int, cdate: pd.DatetimeIndex) -> np.ndarray:
+    """Monthly statistic (PeriodIndex) on the session grid: usable from month-end + lag_days (+ 1 day), switched off
+    when the newest usable observation became available more than STALE_M days ago."""
+    s = s.dropna()
+    if s.empty:
+        return np.full(len(cdate), np.nan)
+    av = s.index.to_timestamp(how="end").normalize() + pd.Timedelta(days=lag_days)
+    v = _align_lagged(pd.Series(s.values, index=av), cdate, 1).values
+    stamp = _align_lagged(pd.Series(av.values.astype("datetime64[ns]").astype("int64").astype(float), index=av), cdate, 1).values
+    age = (cdate.values.astype("datetime64[ns]").astype("int64") - stamp) / 86400e9
+    return np.where(age <= STALE_M + 1, v, np.nan)
+
+
+def _orient_wf(raw: np.ndarray, D: pd.DataFrame) -> np.ndarray:
+    """Orientation of a signal without a prior: for test year Y the sign of the covariance between the raw signal and
+    the 21-session forward log return over rows whose label is known before Y-01-01."""
+    lc = np.log(D["close"].values)
+    n = len(lc)
+    f = np.full(n, np.nan)
+    f[: n - 21] = lc[21:] - lc[: n - 21]
+    ct = D["close_time"].values.astype("datetime64[ns]").astype(np.int64)
+    end = np.full(n, SL.NAT, dtype=np.int64)
+    end[: n - 21] = ct[21:]
+    yr = D.index.year.values
+    o = np.full(n, np.nan)
+    for Y in SL.YEARS:
+        start = pd.Timestamp(f"{Y}-01-01", tz="UTC").value
+        tr = (end != SL.NAT) & (end < start) & np.isfinite(raw) & np.isfinite(f)
+        if tr.sum() >= 250:
+            o[yr == Y] = np.sign(np.mean((raw[tr] - raw[tr].mean()) * (f[tr] - f[tr].mean())))
+    return o
+
+
+def build_signals(D: pd.DataFrame, R: dict | None = None, date_col: str = "date", want_panel: bool = False):
+    """The 12 oriented signals on the session grid of the feature store (positive = long EUR/USD)."""
+    R = load_raw() if R is None else R
+    cdate = pd.DatetimeIndex(pd.DatetimeIndex(D["close_time"]).tz_convert("UTC").normalize().tz_localize(None))
+    days = pd.date_range(CAL0, cdate[-1], freq="D")
+    at = lambda s, k: s.reindex(cdate - pd.Timedelta(days=k)).values          # calendar-daily series, value of day c - k
+    S = pd.DataFrame(index=D.index)
+    # ---- 1 tone
+    P = tone_panel(R["docs"], cdate[-1], date_col)
+    S["tone_rel_lvl"] = -at(P["rel_90"], LAG["text"])
+    S["tone_rel_d1m"] = -at(P["rel_d1m"], LAG["text"])
+    S["tone_rel_d3m"] = -at(P["rel_d3m"], LAG["text"])
+    # ---- 2 news sentiment (expanding mean over the published observations; calendar fill of at most STALE_D days)
+    nw = R["news"]
+    lvl = (nw - nw.expanding(min_periods=1825).mean()).reindex(days).ffill(limit=STALE_D)
+    cal = nw.reindex(days).ffill(limit=STALE_D)
+    S["news_lvl"] = -at(lvl, LAG["news"])
+    S["news_d1m"] = -at(cal - cal.shift(30), LAG["news"])
+    # ---- 3 uncertainty
+    us = R["epu_us_d"]
+    per = pd.PeriodIndex(us.index, freq="M")
+    us_m = us.groupby(per).mean()[us.groupby(per).size() >= 25]                # complete months only
+    M = R["epu_m"]
+    ratio = (np.log(M["EUEPUINDXM"]) - np.log(us_m)).dropna()
+    if len(ratio):
+        ratio = ratio.reindex(pd.period_range(ratio.index[0], ratio.index[-1], freq="M"))
+    S["epu_rel_d3m"] = -_monthly_on_grid(ratio.diff(3), LAG["epu"], cdate)
+    tp = np.log(M["EPUTRADE"].dropna())
+    if len(tp):
+        tp = tp.reindex(pd.period_range(tp.index[0], tp.index[-1], freq="M"))
+    raw_tpu = _monthly_on_grid(tp.diff(3), LAG["epu_cat"], cdate)
+    orient = _orient_wf(raw_tpu, D)
+    S["tpu_d3m"] = orient * raw_tpu
+    g = R["gpr"].reindex(days)
+    ma = np.log(g.rolling(30, min_periods=20).mean())
+    S["gpr_d3m"] = -at(ma - ma.shift(90), LAG["gpr"])
+    # ---- 4 policy surprises
+    jk = R["jk"]
+    for col, tag in (("MP_median", "mp"), ("CBI_median", "cbi")):
+        cum = {}
+        for bank in ("FED", "ECB"):
+            b = jk[jk["bank"] == bank]
+            if b.empty:
+                cum[bank] = {W: pd.Series(np.nan, index=days) for W in (91, 182)}
+                continue
+            x = b.groupby("date")[col].sum().reindex(days, fill_value=0.0)
+            live = (days >= b["date"].min()) & (days <= b["date"].max() + pd.Timedelta(days=JK_STALE))
+            cum[bank] = {W: x.rolling(W, min_periods=W).sum().where((days >= b["date"].min() + pd.Timedelta(days=W)) & live) for W in (91, 182)}
+        for W, nm in ((91, "3m"), (182, "6m")):
+            S[f"jk_{tag}_{nm}"] = -at(cum["FED"][W] - cum["ECB"][W], LAG["jk"])
+    S = S[NAMES].replace([np.inf, -np.inf], np.nan)
+    if want_panel:
+        return S, P, pd.Series(orient, index=D.index, name="tpu_orientation")
+    return S
+
+
+def orthogonalise(S: pd.DataFrame, X: pd.DataFrame) -> pd.DataFrame:
+    """Walk-forward residual of each signal on the controls: for test year Y the OLS (with intercept) is fitted on rows
+    dated before Y-01-01 and b'(x - mean_train(x)) is removed, so the signal keeps its own zero point. A control with
+    fewer than 750 training rows (the house score before 2013) is left out for that year."""
+    yr = S.index.year.values
+    out = pd.DataFrame(np.nan, index=S.index, columns=S.columns)
+    for nm in S.columns:
+        s = S[nm].values
+        for Y in SL.YEARS:
+            te = yr == Y
+            pre = yr < Y
+            cols = [c for c in X.columns if (pre & np.isfinite(X[c].values) & np.isfinite(s)).sum() >= 750]
+            if not cols:
+                continue
+            Xv = X[cols].values
+            tr = pre & np.isfinite(s) & np.isfinite(Xv).all(axis=1)
+            if tr.sum() < 750:
+                continue
+            mu = Xv[tr].mean(axis=0)
+            A = np.column_stack([np.ones(tr.sum()), Xv[tr] - mu])
+            b = np.linalg.lstsq(A, s[tr], rcond=None)[0][1:]
+            ok = te & np.isfinite(Xv).all(axis=1)
+            out.loc[ok, nm] = s[ok] - (Xv[ok] - mu) @ b
+    return out
+
+
+# ================================================================ evaluation helpers (as arms Q / R / T)
+def old_votes(ctx: SL.Ctx) -> dict:
+    hs = SL.house_score_wf(ctx)
+    sg = np.sign(hs)
+    cot, spr = np.sign(ctx.G["cot_z52"].values), np.sign(ctx.G["d_spread2y_20"].values)
+    base = np.isfinite(hs) & (sg != 0)
+    return {"hs": hs, "sg": sg, "cot": cot, "spr": spr, "base": base, "agree": base & (cot == sg) & (spr == sg)}
+
+
+def eval_rule(ctx: SL.Ctx, T: dict, speak: np.ndarray, dirs: np.ndarray, tag: dict, horizons=HORIZONS, keep: dict | None = None) -> list[dict]:
+    rows = []
+    for h in horizons:
+        t = T[f"sign{h}"]
+        valid = np.isfinite(t.long)
+        for mode in ("weekly", "nonoverlap"):
+            idx = SL.weekly_idx(speak, valid) if mode == "weekly" else SL.seq_idx(speak, valid, t.hold)
+            dec = SL.decision_frame(ctx, t, idx, dirs, None)
+            if keep is not None:
+                keep[(h, mode)] = dec
+            for r in SL.cell_stats(ctx, t, dec, speak, mode):
+                rows.append({**tag, "h": h, "mode": mode, **r})
+    return rows
+
+
+def era_rows(ctx: SL.Ctx, T: dict, has: np.ndarray, dirs: np.ndarray, nm: str, a: int = 2004, b: int = 2009) -> list[dict]:
+    """Standalone accuracy in an era the walk-forward never tests (no house score there, so no extra-vote test)."""
+    rows = []
+    era = (ctx.year >= a) & (ctx.year <= b)
+    for h in HORIZONS:
+        t = T[f"sign{h}"]
+        valid = np.isfinite(t.long)
+        for mode in ("weekly", "nonoverlap"):
+            idx = SL.weekly_idx(has & era, valid) if mode == "weekly" else SL.seq_idx(has & era, valid, t.hold)
+            r = {"signal": nm, "rule": "standalone_era", "h": h, "mode": mode, "period": f"{a}-{str(b)[2:]}", "n": len(idx)}
+            if len(idx):
+                hit = np.where(dirs[idx] > 0, t.long[idx], t.short[idx]) > 0
+                lo, hi = SL.wilson(float(hit.mean()), float(len(idx)))
+                r.update({"accuracy": float(hit.mean()), "lo": lo, "hi": hi, "dec_per_year": len(idx) / (b - a + 1),
+                          "share_long": float((dirs[idx] > 0).mean())})
+            rows.append(r)
+    return rows
+
+
+def paired_boot(ctx: SL.Ctx, t: SL.Target, sa: np.ndarray, da: np.ndarray, sb: np.ndarray, db: np.ndarray, a: int, b: int,
+                reps: int = 2000, seed: int = 7) -> dict:
+    """acc(rule A) - acc(rule B) on the weekly grid of years a..b; both rules resampled with the SAME circular blocks."""
+    valid = np.isfinite(t.long)
+    g = np.arange(0, len(valid), SL.STEP)
+    g = g[valid[g]]
+    g = g[(ctx.year[g] >= a) & (ctx.year[g] <= b)]
+    out = {"n_a": 0, "n_b": 0, "acc_a": np.nan, "acc_b": np.nan, "diff": np.nan, "lo": np.nan, "hi": np.nan, "p_le0": np.nan}
+    if len(g) < 40:
+        return out
+    xa, xb = sa[g].astype(float), sb[g].astype(float)
+    ha = xa * (np.where(da[g] > 0, t.long[g], t.short[g]) > 0)
+    hb = xb * (np.where(db[g] > 0, t.long[g], t.short[g]) > 0)
+    out.update({"n_a": int(xa.sum()), "n_b": int(xb.sum())})
+    if xa.sum() < 5 or xb.sum() < 5:
+        return out
+    out.update({"acc_a": float(ha.sum() / xa.sum()), "acc_b": float(hb.sum() / xb.sum())})
+    out["diff"] = out["acc_a"] - out["acc_b"]
+    block = max(2, int(math.ceil(2 * t.h / SL.STEP)))
+    Tn = len(g)
+    rng = np.random.default_rng(seed)
+    nb = int(math.ceil(Tn / block))
+    starts = rng.integers(0, Tn, size=(reps, nb))
+    idx = ((starts[:, :, None] + np.arange(block)[None, None, :]) % Tn).reshape(reps, -1)[:, :Tn]
+    na, nbb = xa[idx].sum(1), xb[idx].sum(1)
+    ok = (na > 0) & (nbb > 0)
+    d = ha[idx].sum(1)[ok] / na[ok] - hb[idx].sum(1)[ok] / nbb[ok]
+    out.update({"lo": float(np.quantile(d, 0.025)), "hi": float(np.quantile(d, 0.975)), "p_le0": float((d <= 0).mean())})
+    return out
+
+
+def _cell(V: pd.DataFrame, **kw) -> pd.Series | None:
+    m = np.ones(len(V), bool)
+    for k, v in kw.items():
+        m &= (V[k] == v).values
+    x = V[m]
+    return x.iloc[0] if len(x) else None
+
+
+# ================================================================ main
+def compute(cost_pips: float = 1.2, verbose: bool = True) -> dict:
+    cat = fetch_all(verbose=verbose)
+    D = SL.load_data()
+    ctx = SL.make_ctx(D, cost_pips)
+    T = SL.build_targets(D)
+    R = load_raw()
+    S, panel, orient = build_signals(D, R, want_panel=True)
+    S_post = build_signals(D, R, date_col="post_date")[TONE_NAMES]
+    O = old_votes(ctx)
+    sg, agree = O["sg"], O["agree"]
+    X = pd.DataFrame({"ret_21d": D["ret_21d"].values, "ret_63d": D["ret_63d"].values, "cot_z52": D["cot_z52"].values,
+                      "d_spread2y_20": D["d_spread2y_20"].values, "house": O["hs"]}, index=D.index)
+    S_op = orthogonalise(S, X[list(CTRL_PRICE)])
+    S_oa = orthogonalise(S, X[list(CTRL_ALL)])
+    rows, decs = [], {}
+    keep = {}
+    rows += eval_rule(ctx, T, agree, sg, {"signal": "-", "rule": "agree3"}, horizons=(10, 21, 42, 63), keep=keep)
+    decs["agree3"] = keep
+    P = [(lab, a, b) for lab, a, b in SL.PERIODS if lab != "2010-15"]
+    paired = []
+
+    def votes(s: np.ndarray):
+        ss = np.sign(s)
+        return ss, np.isfinite(s) & (ss != 0)
+
+    for nm in NAMES:
+        ss, has = votes(S[nm].values)
+        rows += eval_rule(ctx, T, has & O["base"], ss, {"signal": nm, "rule": "standalone"})
+        rows += era_rows(ctx, T, has, ss, nm)
+        keep = {}
+        sp_and = agree & has & (ss == sg)
+        rows += eval_rule(ctx, T, sp_and, sg, {"signal": nm, "rule": "and"}, keep=keep)
+        decs[nm] = keep
+        rows += eval_rule(ctx, T, agree & has & (ss == -sg), sg, {"signal": nm, "rule": "agree3_contradicted"})
+        rows += eval_rule(ctx, T, agree & has, sg, {"signal": nm, "rule": "agree3_same_span"})
+        rows += eval_rule(ctx, T, O["base"] & ~agree & has, ss, {"signal": nm, "rule": "outside"})
+        for k in PLACEBO_SHIFTS + (1, 5, 21, -21):                 # staler (+) and look-ahead (-) versions
+            sks, hk = votes(S[nm].shift(k).values)
+            rows += eval_rule(ctx, T, agree & hk & (sks == sg), sg, {"signal": nm, "rule": f"and_shift{k:+d}"})
+            rows += eval_rule(ctx, T, hk & O["base"], sks, {"signal": nm, "rule": f"standalone_shift{k:+d}"})
+            if k in PLACEBO_SHIFTS:
+                rows += eval_rule(ctx, T, O["base"] & ~agree & hk, sks, {"signal": nm, "rule": f"outside_shift{k:+d}"})
+        for lab, So in (("ortho_price", S_op), ("ortho_all", S_oa)):   # round-7 control
+            so, ho = votes(So[nm].values)
+            rows += eval_rule(ctx, T, ho & O["base"], so, {"signal": nm, "rule": f"standalone_{lab}"})
+            rows += eval_rule(ctx, T, agree & ho & (so == sg), sg, {"signal": nm, "rule": f"and_{lab}"})
+            rows += eval_rule(ctx, T, agree & ho, sg, {"signal": nm, "rule": f"agree3_same_span_{lab}"})
+        if nm in TONE_NAMES:                                           # stricter dating: BIS posting date
+            sp_, hp = votes(S_post[nm].values)
+            rows += eval_rule(ctx, T, hp & O["base"], sp_, {"signal": nm, "rule": "standalone_postdate"})
+            rows += eval_rule(ctx, T, agree & hp & (sp_ == sg), sg, {"signal": nm, "rule": "and_postdate"})
+        for h in HORIZONS:
+            t = T[f"sign{h}"]
+            for lab, a, b in P:
+                r1 = paired_boot(ctx, t, sp_and, sg, agree & has, sg, a, b)
+                r2 = paired_boot(ctx, t, sp_and, sg, agree & has & (ss == -sg), sg, a, b)
+                paired.append({"signal": nm, "h": h, "period": lab, "n_and": r1["n_a"], "n_agree_same_span": r1["n_b"], "acc_and": r1["acc_a"],
+                               "acc_agree_same_span": r1["acc_b"], "diff": r1["diff"], "diff_lo": r1["lo"], "diff_hi": r1["hi"], "p_le0": r1["p_le0"],
+                               "n_contradicted": r2["n_b"], "acc_contradicted": r2["acc_b"], "split": r2["diff"], "split_lo": r2["lo"], "split_hi": r2["hi"],
+                               "split_p_le0": r2["p_le0"]})
+        if verbose:
+            print(f"  signal {nm}: done", flush=True)
+    V = pd.DataFrame(rows)
+    return {"cat": cat, "D": D, "ctx": ctx, "T": T, "R": R, "S": S, "S_post": S_post, "S_op": S_op, "S_oa": S_oa, "X": X, "panel": panel, "orient": orient,
+            "O": O, "V": V, "paired": pd.DataFrame(paired), "decs": decs}
+
+
+def select_final(V: pd.DataFrame) -> tuple[pd.DataFrame, str, str]:
+    rows = []
+    for nm in NAMES:
+        c = _cell(V, signal=nm, rule="and", h=SEL_H, mode="nonoverlap", period="2010-15")
+        rows.append({"signal": nm, "n_2010-15": int(c["n"]), "dec_per_year_2010-15": c.get("dec_per_year", np.nan), "accuracy_2010-15": c.get("accuracy", np.nan),
+                     "lo_2010-15": c.get("lo", np.nan), "hi_2010-15": c.get("hi", np.nan)})
+    Sx = pd.DataFrame(rows)
+    Sx["eligible"] = Sx["dec_per_year_2010-15"] >= MIN_DEC_PER_YEAR
+    el = Sx[Sx["eligible"] & Sx["lo_2010-15"].notna()]
+    if len(el):
+        final, status = el.sort_values("lo_2010-15", ascending=False)["signal"].iloc[0], "selected by the declared rule"
+    else:
+        pool = Sx[Sx["lo_2010-15"].notna()]
+        final = pool.sort_values("lo_2010-15", ascending=False)["signal"].iloc[0]
+        status = "NO candidate has 6 decisions a year in 2010-15 - nominal stream only (fails the declared rule)"
+    Sx["final"] = Sx["signal"] == final
+    return Sx, final, status
+
+
+def bar_table(V: pd.DataFrame, nm: str, rule: str = "and") -> pd.DataFrame:
+    """The round-5 success bar, cell by cell, for one candidate's AND rule (non-overlapping decisions)."""
+    rows = []
+    for h in (21, 42, 63):
+        for lab in ("2010-26", "2016-26", "2023-26"):
+            a = _cell(V, signal=nm, rule=rule, h=h, mode="nonoverlap", period=lab)
+            b = _cell(V, signal="-", rule="agree3", h=h, mode="nonoverlap", period=lab)
+            r = {"h": h, "period": lab, "agree3_acc": b["accuracy"], "agree3_n": int(b["n"]), "agree3_per_year": b["dec_per_year"],
+                 "and_acc": a.get("accuracy", np.nan), "and_lo": a.get("lo", np.nan), "and_hi": a.get("hi", np.nan), "and_n": int(a["n"]),
+                 "and_per_year": a.get("dec_per_year", np.nan)}
+            r["gain_pts"] = 100 * (r["and_acc"] - r["agree3_acc"])
+            for k in PLACEBO_SHIFTS:
+                p = _cell(V, signal=nm, rule=f"and_shift{k:+d}", h=h, mode="nonoverlap", period=lab)
+                r[f"placebo{k}_acc"] = p.get("accuracy", np.nan)
+                r[f"placebo{k}_n"] = int(p["n"])
+                r[f"placebo{k}_gain_pts"] = 100 * (r[f"placebo{k}_acc"] - r["agree3_acc"])
+            rows.append(r)
+    return pd.DataFrame(rows)
+
+
+def bar_verdict(B: pd.DataFrame) -> dict:
+    g = lambda h, lab, c: float(B[(B.h == h) & (B.period == lab)][c].iloc[0])
+    v = {}
+    v["gain_ok"] = all(g(h, lab, "gain_pts") >= 3.0 for h in (21, 42) for lab in ("2010-26", "2016-26"))
+    v["count21_ok"] = all(g(21, lab, "and_per_year") >= MIN_DEC_PER_YEAR for lab in ("2010-26", "2016-26"))
+    v["count42_ok"] = all(g(42, lab, "and_per_year") >= MIN_DEC_PER_YEAR for lab in ("2010-26", "2016-26"))
+    v["not_worse_2023"] = all(g(h, "2023-26", "gain_pts") >= 0 for h in (21, 42))
+    pl = []
+    for h in (21, 42):
+        for lab in ("2010-26", "2016-26"):
+            gain = g(h, lab, "gain_pts")
+            pl.append(all(g(h, lab, f"placebo{k}_gain_pts") <= 0.5 * gain for k in PLACEBO_SHIFTS) if gain > 0 else False)
+    v["placebo_ok"] = all(pl)
+    v["met"] = bool(v["gain_ok"] and v["count21_ok"] and v["not_worse_2023"] and v["placebo_ok"])
+    v["met_strict_42_count"] = bool(v["met"] and v["count42_ok"])
+    return v
+
+
+def controls_table(res: dict) -> pd.DataFrame:
+    """Round 7: what each signal is correlated with (2010-26, sessions where it is defined)."""
+    D, S, X, O = res["D"], res["S"], res["X"], res["O"]
+    y = D.index.year.values >= 2010
+    rows = []
+    for nm in NAMES:
+        s = S[nm]
+        r = {"signal": nm, "first_value": str(s.first_valid_index())[:10], "last_value": str(s.last_valid_index())[:10],
+             "defined_2010-26": float(s[y].notna().mean()), "share_long_2010-26": float((s[y] > 0).sum() / max(s[y].notna().sum(), 1)),
+             "sign_flips_per_year": float((np.sign(s[y]).diff().abs() > 0).sum() / (y.sum() / 252))}
+        for c in CTRL_ALL:
+            r[f"corr_{c}"] = float(s[y].corr(X[c][y]))
+        for c, v in (("cot", O["cot"]), ("spr", O["spr"]), ("house", O["sg"])):
+            ok = y & np.isfinite(s.values) & np.isfinite(v) & (v != 0) & (np.sign(s.values) != 0)
+            r[f"sign_agree_{c}"] = float((np.sign(s.values[ok]) == v[ok]).mean()) if ok.sum() else np.nan
+        ok = y & np.isfinite(s.values) & np.isfinite(X[list(CTRL_ALL)].values).all(axis=1)
+        if ok.sum() > 200:
+            A = np.column_stack([np.ones(ok.sum()), X[list(CTRL_ALL)].values[ok]])
+            e = s.values[ok] - A @ np.linalg.lstsq(A, s.values[ok], rcond=None)[0]
+            r["r2_all_controls"] = float(1 - e.var() / s.values[ok].var())
+            A = A[:, :3]
+            e = s.values[ok] - A @ np.linalg.lstsq(A, s.values[ok], rcond=None)[0]
+            r["r2_price_controls"] = float(1 - e.var() / s.values[ok].var())
+        for h in (21, 63):
+            f = pd.Series(res["T"][f"sign{h}"].long, index=D.index)
+            r[f"corr_fwd{h}"] = float(s[y].corr(f[y]))
+        rows.append(r)
+    return pd.DataFrame(rows)
+
+
+def leak_checks(res: dict, final: str, reps: int = 300) -> dict:
+    ctx, T, S, O, D, R = res["ctx"], res["T"], res["S"], res["O"], res["D"], res["R"]
+    sg, agree = O["sg"], O["agree"]
+    out = {}
+    # (1) permuted labels
+    rng = np.random.default_rng(3)
+    rows = []
+    for h in HORIZONS:
+        t = T[f"sign{h}"]
+        valid = np.isfinite(t.long) & (ctx.year >= 2010)
+        vi = np.where(valid)[0]
+        g = np.arange(0, len(valid), SL.STEP)
+        g = g[valid[g]]
+        for nm in dict.fromkeys([final, "tone_rel_d3m", "jk_mp_6m"]):
+            s = np.sign(S[nm].values)
+            has = np.isfinite(S[nm].values) & (s != 0)
+            for rule, sp, dr in (("and", agree & has & (s == sg), sg), ("standalone", has & O["base"], s)):
+                gi = g[sp[g]]
+                if len(gi) < 5:
+                    continue
+                real = float((np.where(dr[gi] > 0, t.long[gi], t.short[gi]) > 0).mean())
+                acc = []
+                for _ in range(reps):
+                    perm = np.arange(len(valid))
+                    perm[vi] = rng.permutation(vi)
+                    L = t.long[perm]
+                    acc.append(float((np.where(dr[gi] > 0, L[gi], -L[gi]) > 0).mean()))
+                acc = np.array(acc)
+                rows.append({"signal": nm, "rule": rule, "h": h, "n_weekly": len(gi), "real_acc": real, "shuffled_mean": acc.mean(),
+                             "shuffled_p05": np.quantile(acc, 0.05), "shuffled_p95": np.quantile(acc, 0.95), "p_shuffled_ge_real": float((acc >= real).mean())})
+    out["shuffle"] = pd.DataFrame(rows)
+    # (2b) truncation test: the row of date T0 built from raw data cut at T0 must equal the full build
+    rows = []
+    cdate = pd.DatetimeIndex(pd.DatetimeIndex(D["close_time"]).tz_convert("UTC").normalize().tz_localize(None))
+    for d0 in ("2012-06-29", "2016-11-15", "2020-03-16", "2022-09-30", "2025-02-14"):
+        i = int(np.searchsorted(cdate.values, np.datetime64(d0), side="right") - 1)
+        St = build_signals(D.iloc[: i + 1], truncate_raw(R, cdate[i]))
+        a, b = S.iloc[i].values.astype(float), St.iloc[i].values.astype(float)
+        same = np.isclose(a, b, rtol=1e-9, atol=1e-12, equal_nan=True)
+        rows.append({"asof": str(cdate[i].date()), "signals_defined": int(np.isfinite(a).sum()), "rows_equal": int(same.sum()), "of": len(a),
+                     "max_abs_diff": float(np.nanmax(np.abs(a - b))) if np.isfinite(a - b).any() else 0.0, "mismatch": ",".join(np.array(NAMES)[~same])})
+    out["truncation"] = pd.DataFrame(rows)
+    out["features"] = controls_table(res)
+    return out
+
+
+def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True) -> tuple[pd.Series, pd.DataFrame]:
+    """Arm entry point: (daily positions of the final AND rule, protocol report). Writes the deliverables."""
+    pos, rep, _ = run_full(cost_pips, write, verbose)
+    return pos, rep
+
+
+def doc_counts(docs: pd.DataFrame) -> pd.DataFrame:
+    d = docs.copy()
+    d["year"] = d["date"].dt.year
+    d["grp"] = np.where(d.inst == "FED", "Fed " + d.kind.str.replace("fomc_", "FOMC "), np.where(d.inst == "ECB", "ECB speech (BIS)", "ECB speech (ECB copy)"))
+    n = d.pivot_table(index="year", columns="grp", values="hits", aggfunc="size", fill_value=0)
+    sc = d[d.tone.notna()].pivot_table(index="year", columns="grp", values="hits", aggfunc="size", fill_value=0)
+    out = n.copy()
+    out["Fed all"] = n[[c for c in n.columns if c.startswith("Fed")]].sum(axis=1)
+    out["Fed scored"] = sc[[c for c in sc.columns if c.startswith("Fed")]].sum(axis=1)
+    out["ECB (BIS) scored"] = sc.get("ECB speech (BIS)", 0)
+    tn = d[d.tone.notna()].groupby(["year", "inst"])["tone"].mean().unstack()
+    out["Fed mean tone"], out["ECB mean tone"] = tn.get("FED"), tn.get("ECB")
+    return out.reset_index()
+
+
+def ecb_crosscheck(docs: pd.DataFrame) -> dict:
+    """Monthly ECB tone from the BIS selection against the same score on the ECB's own complete file (copy to 2023-02)."""
+    d = docs[docs.tone.notna()].copy()
+    d["m"] = d["date"].dt.to_period("M")
+    a = d[d.inst == "ECB"].groupby("m")["tone"].mean()
+    b = d[d.inst == "ECB_COPY"].groupby("m")["tone"].mean()
+    j = pd.concat([a, b], axis=1, keys=["bis", "copy"]).dropna()
+    j = j[j.index >= "1999-01"]
+    q = j.groupby(j.index.asfreq("Q")).mean()
+    return {"months": len(j), "corr_monthly": float(j["bis"].corr(j["copy"])), "corr_quarterly": float(q["bis"].corr(q["copy"])),
+            "corr_monthly_2010on": float(j[j.index >= "2010-01"]["bis"].corr(j[j.index >= "2010-01"]["copy"])),
+            "mean_bis": float(j["bis"].mean()), "mean_copy": float(j["copy"].mean()),
+            "n_bis": int(((docs.inst == "ECB") & (docs.date <= "2023-02-28") & (docs.date >= "1999-01-01")).sum()),
+            "n_copy": int(((docs.inst == "ECB_COPY") & (docs.date >= "1999-01-01")).sum())}
+
+
+def run_full(cost_pips: float = 1.2, write: bool = True, verbose: bool = True):
+    """Builds the signals, evaluates the 12 candidates as rounds 5 and 7 prescribe, applies the declared selection rule
+    and writes the deliverables. Returns (daily positions, protocol report, every intermediate table)."""
+    res = compute(cost_pips, verbose=verbose)
+    ctx, T, V, D = res["ctx"], res["T"], res["V"], res["D"]
+    Sx, final, status = select_final(V)
+    res["selection"], res["final"], res["final_status"] = Sx, final, status
+    res["bar"] = bar_table(V, final)
+    res["bar_verdict"] = bar_verdict(res["bar"])
+    res["bar_all"] = pd.concat([bar_table(V, nm).assign(signal=nm) for nm in NAMES], ignore_index=True)
+    res["bar_verdict_all"] = pd.DataFrame([{"signal": nm, **bar_verdict(bar_table(V, nm))} for nm in NAMES])
+    reps, streams = [], {}
+
+    def book(dec, cp):
+        cx = ctx if cp == cost_pips else SL.make_ctx(D, cp)
+        b = SL.book_time_exit(cx, dec, SEL_H, cp)
+        return b[b.index.year >= 2010]
+
+    for nm in NAMES + ["agree3"]:
+        dec = res["decs"][nm][(SEL_H, "weekly")]
+        streams[nm] = book(dec, cost_pips)
+        tb = report(streams[nm], periods_per_year=252, name=ARM, n_arms=N_ARMS)
+        tb.insert(1, "variant", f"and_{nm}" if nm != "agree3" else "agree3_reference")
+        tb["final"] = nm == final
+        tb["kind"] = "candidate" if nm != "agree3" else "reference"
+        tb["cost_pips"] = cost_pips
+        reps.append(tb)
+    tb = report(book(res["decs"][final][(SEL_H, "weekly")], 0.6), periods_per_year=252, name=ARM, n_arms=N_ARMS)
+    tb.insert(1, "variant", f"and_{final}_cost0.6"); tb["final"] = False; tb["kind"] = "cost_sensitivity"; tb["cost_pips"] = 0.6
+    reps.append(tb)
+    rep = pd.concat(reps, ignore_index=True)
+    daily = streams[final].copy()
+    daily["fwd_bp"] = D["fwd_1d"].reindex(daily.index)
+    daily = daily[["pos", "fwd_bp", "net_bp"]]
+    res["report"], res["streams"], res["daily"] = rep, streams, daily
+    by = SL.by_year(res["decs"][final][(SEL_H, "weekly")])
+    ref = SL.by_year(res["decs"]["agree3"][(SEL_H, "weekly")]).set_index("year")
+    by["agree3_decisions"] = by["year"].map(ref["decisions"])
+    by["agree3_accuracy"] = by["year"].map(ref["accuracy"])
+    yr = rep[(rep["variant"] == f"and_{final}") & rep["period"].str.fullmatch(r"\d{4}")]
+    by["book_sharpe"] = by["year"].map(pd.Series(yr["sharpe"].values, index=yr["period"].astype(int).values))
+    res["by_year"] = by
+    res["leak"] = leak_checks(res, final)
+    docs = res["R"]["docs"]
+    res["doc_counts"] = doc_counts(docs)
+    res["ecb_check"] = ecb_crosscheck(docs)
+    lagd = (docs["post_date"] - docs["date"]).dt.days
+    res["post_lag"] = {k: {"median": float(lagd[(docs.inst == k) & (docs.kind == "speech")].median()), "p90": float(lagd[(docs.inst == k) & (docs.kind == "speech")].quantile(0.9))}
+                       for k in ("FED", "ECB")}
+    # the tone series for the weekly outlook
+    P = res["panel"]
+    tone = P[P.index >= "2000-01-01"].round(4)
+    cur = {}
+    lastdoc = {k: docs[(docs.inst == k) & docs.tone.notna()]["date"].max() for k in ("FED", "ECB")}
+    for c in ("fed_tone_30", "fed_tone_90", "ecb_tone_30", "ecb_tone_90", "fed_z_30", "fed_z_90", "ecb_z_30", "ecb_z_90", "rel_30", "rel_90", "rel_d1m", "rel_d3m"):
+        x = P[c].dropna()
+        cur[c] = {"date": str(x.index[-1].date()), "value": float(x.iloc[-1])} if len(x) else None
+    cur["last_scored_doc"] = {k: str(v.date()) for k, v in lastdoc.items()}
+    cur["panel_last_row"] = {c: (None if pd.isna(P[c].iloc[-1]) else float(P[c].iloc[-1])) for c in P.columns}
+    cur["panel_last_date"] = str(P.index[-1].date())
+    cur["signals_last_row"] = {nm: (None if pd.isna(res["S"][nm].iloc[-1]) else float(res["S"][nm].iloc[-1])) for nm in NAMES}
+    cur["signals_last_session"] = str(D.index[-1])
+    res["current"] = cur
+    if write:
+        RES.mkdir(parents=True, exist_ok=True)
+        (RES / "logs").mkdir(exist_ok=True)
+        daily.to_parquet(RES / f"{ARM}_positions.parquet")
+        rep.to_csv(RES / f"{ARM}_report.csv", index=False)
+        V.insert(0, "arm", ARM) if "arm" not in V else None
+        V["final"] = (V["signal"] == final) & (V["rule"] == "and")
+        V.to_csv(RES / f"{ARM}_votes.csv", index=False)
+        res["paired"].to_csv(RES / f"{ARM}_paired.csv", index=False)
+        Sx.to_csv(RES / f"{ARM}_candidates.csv", index=False)
+        res["bar_all"].to_csv(RES / f"{ARM}_bar.csv", index=False)
+        res["S"].to_parquet(RES / f"{ARM}_signals.parquet")
+        res["cat"].to_csv(RES / f"{ARM}_data_catalogue.csv", index=False)
+        res["doc_counts"].to_csv(RES / f"{ARM}_doc_counts.csv", index=False)
+        pd.concat([v.assign(check=k) for k, v in res["leak"].items()], ignore_index=True).to_csv(RES / f"{ARM}_leakchecks.csv", index=False)
+        tone.to_csv(MACRO / f"{ARM}_tone_daily.csv")
+        sd = res["S"].copy()
+        sd.insert(0, "close_date", pd.DatetimeIndex(D["close_time"]).tz_convert("UTC").strftime("%Y-%m-%d"))
+        sd["tpu_orientation"] = res["orient"].values
+        sd.round(5).to_csv(MACRO / f"{ARM}_signals_daily.csv")
+        res["incremental"], res["corr"] = incremental(streams, final)
+        res["incremental"].to_csv(RES / f"{ARM}_incremental.csv", index=False)
+        keep = ("V", "paired", "selection", "final", "final_status", "bar", "bar_verdict", "bar_all", "bar_verdict_all", "report", "by_year", "leak",
+                "doc_counts", "ecb_check", "post_lag", "current", "incremental", "corr", "cat")
+        pd.to_pickle({k: res[k] for k in keep if k in res}, RES / "logs" / f"{ARM}_tables.pkl")
+    return daily["pos"], rep, res
+
+
+def incremental(streams: dict, final: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+    from eurusd.arms import meta
+    rows = []
+    for lab, arms in (("two-way weak_signals + regime_trend", ["weak_signals", "regime_trend"]),
+                      (f"three-way + {ARM}", ["weak_signals", "regime_trend", ARM]),
+                      ("three-way + selective (agreement rule book, for reference)", ["weak_signals", "regime_trend", "selective_daily"])):
+        if "selective_daily" in arms and not (RES / "selective_daily_positions.parquet").exists():
+            continue
+        pnl, _ = meta.combine(arms, "EW")
+        tb = meta.report_combo(pnl, lab, N_ARMS)
+        rows.append(tb[tb.period.isin(["2010-2026", "2016-2026", "2023-2026"])])
+    inc = pd.concat(rows, ignore_index=True)
+    me = meta.load_arm_daily(ARM)
+    cr = []
+    for other in ("weak_signals", "regime_trend", "selective_daily"):
+        o = meta.load_arm_daily(other)
+        if len(o) < 100:
+            continue
+        j = pd.concat([me, o], axis=1, keys=["me", "o"]).fillna(0.0)
+        j = j[j.index.year >= 2010]
+        act = j[j["me"] != 0]
+        cr.append({"other": other, "corr_all_days": float(j["me"].corr(j["o"])), "corr_active_days": float(act["me"].corr(act["o"])),
+                   "corr_2016-26": float(j[j.index.year >= 2016]["me"].corr(j[j.index.year >= 2016]["o"]))})
+    return inc, pd.DataFrame(cr)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "report":
+        print(write_report()[:3000])
+    else:
+        pos, rep, res = run_full()
+        print(res["selection"].round(3).to_string(index=False))
+        print("final:", res["final"], "|", res["final_status"])
+        print(res["bar"].round(3).to_string(index=False))
+        print(res["bar_verdict"])
+        try:
+            write_report()
+        except NameError:
+            pass
+
+
+# ================================================================ report (python -m eurusd.arms.text_news report)
+def _fmt(c, ci: bool = True, py: bool = False) -> str:
+    if c is None or not c["n"] or not np.isfinite(c.get("accuracy", np.nan)):
+        return "-"
+    s = f"{100 * c['accuracy']:.0f}"
+    if ci:
+        s += f" [{100 * c['lo']:.0f}-{100 * c['hi']:.0f}]"
+    s += f" n={int(c['n'])}"
+    if py:
+        s += f" ({c['dec_per_year']:.1f}/y)"
+    return s
+
+
+def _grid(V: pd.DataFrame, rule: str, mode: str, period: str, sigs, ci=True, py=False, hs=HORIZONS, gain_vs: pd.DataFrame | None = None) -> pd.DataFrame:
+    rows = []
+    for nm in sigs:
+        r = {"signal": nm}
+        for h in hs:
+            c = _cell(V, signal=nm, rule=rule, h=h, mode=mode, period=period)
+            txt = _fmt(c, ci, py)
+            if gain_vs is not None and c is not None and c["n"] and np.isfinite(c.get("accuracy", np.nan)):
+                b = _cell(gain_vs, h=h, mode=mode, period=period)
+                txt += f" {100 * (c['accuracy'] - b['accuracy']):+.1f}"
+            r[f"{h} s"] = txt
+        rows.append(r)
+    return pd.DataFrame(rows)
+
+
+def _dict_md() -> str:
+    d = TONE_DICT
+    L = ["| part | entries |", "|---|---|",
+         "| multi-word expressions merged into one token | " + "; ".join(f"`{p}` -> {t}" for p, t in d["phrases"]).replace("|", "\\|") + " |",
+         "| (A) topic nouns, up = hawkish | " + ", ".join(d["topics_up_hawkish"]) + " |",
+         "| (A) topic nouns, up = dovish (slack group) | " + ", ".join(d["topics_up_dovish"]) + " |",
+         "| (A) direction words: up | " + ", ".join(d["up"]) + " |",
+         "| (A) direction words: down | " + ", ".join(d["down"]) + " |",
+         "| (B) outright hawkish terms | " + ", ".join(d["hawkish"]) + " |",
+         "| (B) outright dovish terms | " + ", ".join(d["dovish"]) + " |",
+         "| (B) hawkish only with a policy word within 4 tokens | " + ", ".join(d["hawkish_if_policy"]) + " |",
+         "| (B) dovish only with a policy word within 4 tokens | " + ", ".join(d["dovish_if_policy"]) + " |",
+         "| policy words | " + ", ".join(d["policy_words"]) + " |",
+         "| dovish nouns that turn hawkish after a removal word (within 4 tokens before) | " + ", ".join(d["reversible_dovish"]) + " |",
+         "| removal words | " + ", ".join(d["reversers"]) + " |",
+         "| negators (within 3 tokens before; flip the hit) | " + ", ".join(d["negators"]) + ", any token ending in n't |",
+         "| British -> American | " + ", ".join(f"{a} -> {b}" for a, b in d["british"].items()) + " |",
+         f"| windows | topic-direction {d['window_topic']} tokens, negation {d['window_negation']}, policy word {d['window_policy']}, removal word {d['window_reverser']}; "
+         f"a document needs {MIN_HITS} hits to carry a tone |"]
+    return "\n".join(L)
+
+
+def write_report(path: Path | None = None) -> str:
+    r = pd.read_pickle(RES / "logs" / f"{ARM}_tables.pkl")
+    V, P, final = r["V"], r["paired"], r["final"]
+    A = V[(V.signal == "-") & (V.rule == "agree3")]
+    md = [VERDICT_MD.strip(), ""]
+    # ---- 1 data
+    cat = r["cat"].copy()
+    md += ["## 1. Data: sources, spans, publication lags", cat[["series", "rows", "first", "last", "lag used", "fetched", "file"]].to_markdown(index=False), "",
+           "URLs: " + "; ".join(f"`{u}`" for u in dict.fromkeys(cat["url"])), "", DATA_MD.strip(), ""]
+    dc = r["doc_counts"].copy()
+    for c in dc.columns:
+        if c not in ("Fed mean tone", "ECB mean tone"):
+            dc[c] = dc[c].fillna(0).astype(int)
+    md += ["**Documents per institution per year** (all documents, then those with at least 5 dictionary hits = the ones that enter the tone; mean tone of the year)", "",
+           dc.round(2).to_markdown(index=False), ""]
+    e, pl = r["ecb_check"], r["post_lag"]
+    md += [f"**ECB cross-check.** The same scorer on the ECB's own complete speech file (copy, 1999-01 .. 2023-02; {e['n_copy']} speeches) against the BIS selection "
+           f"({e['n_bis']} ECB speeches in the same span): monthly mean tone correlates {e['corr_monthly']:.2f} over {e['months']} common months "
+           f"({e['corr_monthly_2010on']:.2f} from 2010; quarterly {e['corr_quarterly']:.2f}); mean tone {e['mean_bis']:+.3f} (BIS) against {e['mean_copy']:+.3f} (copy). "
+           "The BIS selection is therefore a fair sample of what the ECB said; the copy does not enter any signal.", "",
+           f"**BIS posting delay** (posting date in the URL minus speech date): Fed speeches median {pl['FED']['median']:.0f} days (90th percentile {pl['FED']['p90']:.0f}), "
+           f"ECB median {pl['ECB']['median']:.0f} (90th percentile {pl['ECB']['p90']:.0f}). The signals date a speech by its own date (the central bank publishes the text "
+           "itself on the day); section 9 repeats the tone tests dated by the BIS posting date.", ""]
+    # ---- 2 dictionary
+    md += ["## 2. The tone dictionary (frozen in `TONE_DICT` before any result)", DICT_MD.strip(), "", _dict_md(), ""]
+    # ---- 3 signals
+    F = r["leak"]["features"].set_index("signal")
+    rows = []
+    for nm, fam, prior in SIGNALS:
+        f = F.loc[nm]
+        rows.append({"signal": nm, "family": fam, "prior (sign on the raw quantity)": prior, "first value": f["first_value"], "last value": f["last_value"],
+                     "defined 2010-26": f"{100 * f['defined_2010-26']:.0f} %", "long share": f"{100 * f['share_long_2010-26']:.0f} %",
+                     "sign flips / yr": f"{f['sign_flips_per_year']:.1f}"})
+    md += ["## 3. The 12 candidate signals and their priors (fixed before any result)", pd.DataFrame(rows).to_markdown(index=False), "", PRIORS_MD.strip(), ""]
+    # ---- 4 reconciliation
+    rows = []
+    armN = {("nonoverlap", "2010-26"): "56 n=291 / 59 n=156 / 61 n=89 / 72 n=61", ("nonoverlap", "2016-26"): "53 n=178 / 57 n=96 / 59 n=56 / 71 n=38",
+            ("nonoverlap", "2023-26"): "54 n=63 / 60 n=35 / 45 n=20 / 50 n=14", ("weekly", "2010-26"): "57 n=390 / 59 n=387 / 65 n=383 / 67 n=383",
+            ("weekly", "2016-26"): "55 n=246 / 57 n=243 / 63 n=239 / 67 n=239", ("weekly", "2023-26"): "57 n=80 / 55 n=77 / 47 n=73 / 53 n=73"}
+    for (mode, per), ref in armN.items():
+        mine = " / ".join(_fmt(_cell(A, h=h, mode=mode, period=per), ci=False) for h in (10, 21, 42, 63))
+        dy = " / ".join(f"{_cell(A, h=h, mode=mode, period=per)['dec_per_year']:.1f}" for h in (10, 21, 42, 63))
+        rows.append({"decisions": mode, "period": per, "arm N report (10 / 21 / 42 / 63 s)": ref, "rebuilt here": mine, "identical": ref == mine, "decisions / yr": dy})
+    md += ["## 4. Reconciliation of the agreement rule", RECON_MD.strip(), "", pd.DataFrame(rows).to_markdown(index=False), ""]
+    # ---- 5 standalone
+    md += ["## 5. Standalone accuracy of each signal (direction = sign of the oriented signal)", STANDALONE_MD.strip(), ""]
+    for per in ("2010-26", "2016-26", "2023-26"):
+        a = _grid(V, "standalone", "nonoverlap", per, NAMES, py=True).rename(columns={f"{h} s": f"non-overlapping {h} s" for h in HORIZONS})
+        b = _grid(V, "standalone", "weekly", per, NAMES, ci=False).rename(columns={f"{h} s": f"weekly {h} s" for h in HORIZONS})
+        md += [f"*{per}* (accuracy % [Wilson 95 %] n (decisions / year))", "", a.merge(b, on="signal").to_markdown(index=False), ""]
+    E = V[V.rule == "standalone_era"]
+    rows = []
+    for nm in NAMES:
+        x = {"signal": nm}
+        for h in HORIZONS:
+            x[f"non-overlapping {h} s"] = _fmt(_cell(E, signal=nm, h=h, mode="nonoverlap"))
+        for h in HORIZONS:
+            x[f"weekly {h} s"] = _fmt(_cell(E, signal=nm, h=h, mode="weekly"), ci=False)
+        rows.append(x)
+    md += ["*Other era, 2004-09* (never a test year; the same fixed rule; `tpu_d3m` has no orientation before 2010)", "", pd.DataFrame(rows).to_markdown(index=False), ""]
+    # ---- 6 round-7 controls
+    f = r["leak"]["features"]
+    c1 = f[["signal", "corr_cot_z52", "corr_d_spread2y_20", "corr_house", "corr_ret_21d", "corr_ret_63d", "r2_price_controls", "r2_all_controls",
+            "sign_agree_cot", "sign_agree_spr", "sign_agree_house", "corr_fwd21", "corr_fwd63"]].copy()
+    md += ["## 6. Round 7 controls: is it new information or the recent price move restated?", CONTROLS_MD.strip(), "",
+           "**Correlations, 2010-26** (daily sessions; `r2` = share of the signal's variance explained in-sample by the trailing returns / by all five controls; "
+           "`sign_agree` = share of sessions on which the signal's vote equals the old vote; `corr_fwd` = correlation with the forward 21- / 63-session return)", "",
+           c1.round(2).to_markdown(index=False), ""]
+    for per in ("2010-26", "2016-26"):
+        rows = []
+        for nm in NAMES:
+            x = {"signal": nm}
+            for h in (21, 42, 63):
+                x[f"{h} s raw / ex-price / ex-all"] = " / ".join(_fmt(_cell(V, signal=nm, rule=rl, h=h, mode="nonoverlap", period=per), ci=False)
+                                                                for rl in ("standalone", "standalone_ortho_price", "standalone_ortho_all"))
+            rows.append(x)
+        md += [f"**Standalone accuracy after orthogonalising, non-overlapping decisions, {per}** (raw signal / residual on trailing returns / residual on all five controls)", "",
+               pd.DataFrame(rows).to_markdown(index=False), ""]
+    rows = []
+    for nm in NAMES:
+        x = {"signal": nm}
+        for per in ("2010-26", "2016-26"):
+            for h in (21, 42):
+                parts = []
+                for rl, bs in (("and", "agree3_same_span"), ("and_ortho_price", "agree3_same_span_ortho_price"), ("and_ortho_all", "agree3_same_span_ortho_all")):
+                    a_, b_ = _cell(V, signal=nm, rule=rl, h=h, mode="nonoverlap", period=per), _cell(V, signal=nm, rule=bs, h=h, mode="nonoverlap", period=per)
+                    ok = a_ is not None and b_ is not None and a_["n"] and b_["n"]
+                    parts.append(f"{100 * (a_['accuracy'] - b_['accuracy']):+.0f} (n={int(a_['n'])})" if ok else "-")
+                x[f"{per}, {h} s"] = " / ".join(parts)
+        rows.append(x)
+    md += ["**AND-rule gain over the agreement rule on the same span, in points: raw / ex-price / ex-all** (non-overlapping; n = decisions of the AND rule)", "",
+           pd.DataFrame(rows).to_markdown(index=False), ""]
+    # ---- 7 extra vote
+    md += ["## 7. As an extra vote on the agreement rule", EXTRA_MD.strip(), ""]
+    for per in ("2010-26", "2016-26", "2023-26"):
+        base = pd.DataFrame([{"signal": "agreement rule alone", **{f"{h} s": _fmt(_cell(A, h=h, mode="nonoverlap", period=per), py=True) for h in HORIZONS}}])
+        a = _grid(V, "and", "nonoverlap", per, NAMES, py=True, gain_vs=A)
+        md += [f"**(a) AND rule, non-overlapping decisions, {per}** (accuracy % [Wilson] n (decisions / year), then the gain in points over the agreement rule)", "",
+               pd.concat([base, a], ignore_index=True).to_markdown(index=False), ""]
+    for per in ("2010-26", "2016-26"):
+        rows = []
+        for nm in NAMES:
+            x = {"signal": nm}
+            for h in HORIZONS:
+                x[f"{h} s: same span / confirmed / contradicted"] = " / ".join(_fmt(_cell(V, signal=nm, rule=rl, h=h, mode="weekly", period=per), ci=False)
+                                                                              for rl in ("agree3_same_span", "and", "agree3_contradicted"))
+            rows.append(x)
+        md += [f"**Agreement calls the signal confirms vs contradicts, weekly decisions, {per}**", "", pd.DataFrame(rows).to_markdown(index=False), ""]
+    for per in ("2010-26", "2016-26", "2023-26"):
+        a = _grid(V, "outside", "nonoverlap", per, NAMES, py=True)
+        md += [f"**(b) OUTSIDE the agreement (the three old signals disagree; direction = the new signal), non-overlapping, {per}**", "", a.to_markdown(index=False), ""]
+    rows = []
+    for nm in NAMES:
+        for per in ("2010-26", "2016-26"):
+            x = {"signal": nm, "period": per}
+            for h in (21, 42):
+                p = P[(P.signal == nm) & (P.h == h) & (P.period == per)].iloc[0]
+                x[f"{h} s: AND - same span"] = f"{100 * p['diff']:+.1f} [{100 * p['diff_lo']:+.0f}, {100 * p['diff_hi']:+.0f}] p={p['p_le0']:.2f}" if np.isfinite(p["diff"]) else "-"
+                x[f"{h} s: confirmed - contradicted"] = (f"{100 * p['split']:+.1f} [{100 * p['split_lo']:+.0f}, {100 * p['split_hi']:+.0f}] p={p['split_p_le0']:.2f} "
+                                                         f"(n {int(p['n_and'])}/{int(p['n_contradicted'])})") if np.isfinite(p["split"]) else "-"
+            rows.append(x)
+    md += ["**(c) Paired differences on the weekly grid, circular block bootstrap** (points [95 % interval], p = share of draws <= 0)", "", pd.DataFrame(rows).to_markdown(index=False), ""]
+    # ---- 8 selection, bar, placebo
+    md += ["## 8. Selection by the declared rule, the Round 5 bar and the timing placebo", SELECT_MD.strip(), "", r["selection"].round(3).to_markdown(index=False), "",
+           f"Final: **`{final}`** - {r['final_status']}.", ""]
+    B = r["bar"].copy()
+    bt = pd.DataFrame({"horizon": B.h, "period": B.period, "agreement rule": [f"{100 * a:.0f} n={n} ({p:.1f}/y)" for a, n, p in zip(B.agree3_acc, B.agree3_n, B.agree3_per_year)],
+                       f"AND {final}": [f"{100 * a:.0f} [{100 * lo:.0f}-{100 * hi:.0f}] n={n} ({p:.1f}/y)" if n else "-" for a, lo, hi, n, p in zip(B.and_acc, B.and_lo, B.and_hi, B.and_n, B.and_per_year)],
+                       "gain (pts)": B.gain_pts.round(1), "placebo +63: acc n, gain": [f"{100 * a:.0f} n={n}, {g:+.1f}" if n else "-" for a, n, g in zip(B.placebo63_acc, B.placebo63_n, B.placebo63_gain_pts)],
+                       "placebo +126: acc n, gain": [f"{100 * a:.0f} n={n}, {g:+.1f}" if n else "-" for a, n, g in zip(B.placebo126_acc, B.placebo126_n, B.placebo126_gain_pts)]})
+    md += ["**The bar, cell by cell, for the final** (non-overlapping decisions)", "", bt.to_markdown(index=False), "", "Bar components: " +
+           ", ".join(f"{k} = {v}" for k, v in r["bar_verdict"].items()), "",
+           "**The same verdict for every candidate** (so that the selection rule cannot hide a better one)", "", r["bar_verdict_all"].to_markdown(index=False), ""]
+    BA = r["bar_all"]
+    rows = []
+    for nm in NAMES:
+        x = {"signal": nm}
+        for per in ("2010-26", "2016-26"):
+            for h in (21, 42):
+                b = BA[(BA.signal == nm) & (BA.h == h) & (BA.period == per)].iloc[0]
+                x[f"{per} {h} s: live / +63 / +126"] = f"{b.gain_pts:+.0f} / {b.placebo63_gain_pts:+.0f} / {b.placebo126_gain_pts:+.0f}"
+        rows.append(x)
+    md += ["**Timing placebo, all candidates: gain of the AND rule over the agreement rule in points, with the live signal and with the signal 63 / 126 sessions stale**", "",
+           pd.DataFrame(rows).to_markdown(index=False), ""]
+    rows = []
+    for nm in NAMES:
+        x = {"signal": nm}
+        for h in (21, 63):
+            x[f"standalone {h} s: live / +63 / +126"] = " / ".join(_fmt(_cell(V, signal=nm, rule=rl, h=h, mode="nonoverlap", period="2010-26"), ci=False)
+                                                                   for rl in ("standalone", "standalone_shift+63", "standalone_shift+126"))
+        rows.append(x)
+    md += ["**Standalone accuracy when stale, non-overlapping, 2010-26**", "", pd.DataFrame(rows).to_markdown(index=False), "", PLACEBO_MD.strip(), ""]
+    # ---- 9 stream
+    rep = r["report"]
+    agg = rep[rep.period.isin(["2010-2026", "2016-2026", "2023-2026", "2010-2015"])]
+    piv = agg.pivot_table(index="variant", columns="period", values="sharpe", sort=False).round(2).reset_index()
+    md += ["## 9. Daily stream of the final rule, incremental test", STREAM_MD.strip(), "", "**Net Sharpe of every candidate's AND-rule book (1.2 pips), and the agreement-rule book as reference**", "",
+           piv.to_markdown(index=False), "", "**Final rule by year** (weekly decisions held 21 sessions)", "", r["by_year"].round(3).to_markdown(index=False), ""]
+    if "incremental" in r:
+        md += ["**Incremental test (meta.combine EW)**", "", r["incremental"][["combo", "period", "n", "sharpe", "t", "mean_bp"]].round(3).to_markdown(index=False), "",
+               "**Daily P&L correlation of the final stream with the live streams**", "", r["corr"].round(3).to_markdown(index=False), ""]
+    # ---- 10 leak checks
+    L = r["leak"]
+    md += ["## 10. Leak checks", LEAK_MD.strip(), "", "**(1) Labels permuted (300 draws), weekly decisions 2010-26**", "", L["shuffle"].round(3).to_markdown(index=False), ""]
+    rows = []
+    for nm in dict.fromkeys([final] + TONE_NAMES + ["jk_mp_6m"]):
+        for rule in ("and", "standalone"):
+            x = {"signal": nm, "rule": rule}
+            for k, lab in ((-21, "look-ahead -21"), (0, "live"), (1, "+1"), (5, "+5"), (21, "+21")):
+                rl = rule if k == 0 else f"{rule}_shift{k:+d}"
+                x[lab] = " / ".join(_fmt(_cell(V, signal=nm, rule=rl, h=h, mode="nonoverlap", period="2010-26"), ci=False) for h in (21, 42))
+            rows.append(x)
+    md += ["**(2) Signal shifted in time, non-overlapping 2010-26, 21 / 42 sessions**", "", pd.DataFrame(rows).to_markdown(index=False), "",
+           "**(2b) Truncation test** (raw data cut as a user would have held them on that date; the row must be identical)", "", L["truncation"].to_markdown(index=False), ""]
+    rows = []
+    for nm in TONE_NAMES:
+        for per in ("2010-26", "2016-26"):
+            x = {"signal": nm, "period": per}
+            for h in (21, 42, 63):
+                x[f"standalone {h} s: speech date / BIS posting date"] = " / ".join(_fmt(_cell(V, signal=nm, rule=rl, h=h, mode="nonoverlap", period=per), ci=False)
+                                                                                   for rl in ("standalone", "standalone_postdate"))
+            for h in (21, 42):
+                x[f"AND {h} s: speech date / posting date"] = " / ".join(_fmt(_cell(V, signal=nm, rule=rl, h=h, mode="nonoverlap", period=per), ci=False)
+                                                                        for rl in ("and", "and_postdate"))
+            rows.append(x)
+    md += ["**(2c) Tone signals re-dated by the BIS posting date** (non-overlapping)", "", pd.DataFrame(rows).to_markdown(index=False), ""]
+    # ---- 11 current reading
+    cur = r["current"]
+    rows = [{"series": k, "last defined on": v["date"], "value": round(v["value"], 3)} for k, v in cur.items() if isinstance(v, dict) and "date" in v]
+    md += ["## 11. The current reading", CURRENT_MD.strip(), "", pd.DataFrame(rows).to_markdown(index=False), "",
+           f"Last scored document: Fed {cur['last_scored_doc']['FED']}, ECB {cur['last_scored_doc']['ECB']}. Signals on the last session of the store ({cur['signals_last_session'][:10]}): " +
+           ", ".join(f"`{k}` {'n/a' if v is None else format(v, '+.3f')}" for k, v in cur["signals_last_row"].items()) + ".", ""]
+    md += [TAIL_MD.strip(), ""]
+    txt = "\n".join(md)
+    (path or ROOT / "reports" / f"arm_{ARM}.md").write_text(txt)
+    return txt

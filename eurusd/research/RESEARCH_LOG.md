@@ -18,7 +18,7 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 
 | 6 | policy-divergence replication across G10 (7): FAILS; analog / nearest-neighbour 'history rhymes' forecasting (12, strict 36): FAILS; data scoping (36 sources, no backtest) | 43 | none |
 
-| 7 | official and portfolio flows (12): FAILS ... (options, text/news pending) | 12+ | none so far |
+| 7 | official and portfolio flows (12): FAILS; options information (12): FAILS ... (text/news pending) | 24+ | none so far |
 
 ## What is established
 * Predictable: slow macro drift and speculative positioning (direction, weakly); volatility and range (strongly).
@@ -84,6 +84,11 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 * Official and portfolio flows (Fed custody holdings, swap lines, foreign repo pool, ECB BoP portfolio flows, TIC, SPF
   consensus): 40-57 % at 1-3 months; they FOLLOW the exchange rate (custody rises after EUR/USD strength, TIC follows
   dollar weakness, EA flows are coincident); independent of the agreement inputs but uninformative; no extra vote passes.
+* Options market (25-delta risk reversals 2003-2026, implied vol / VRP / term structure, CFTC options-only positioning):
+  skew REACTS to spot (corr +0.45 with the trailing month; look-ahead copy scores 68 %); followed 53-55 %, 'fade extreme
+  skew' 37 % (wrong way); VRP, slope, option positioning independent but empty (47-55 %); extra vote fails (no gain at
+  21 sessions, stale copy gains more at 42); no replication on USD/JPY or EUR/JPY. Unadjusted lead only: agreement calls
+  the skew contradicts are right ~50 % vs 62 % confirmed (weekly grid, 21 sessions, 66 correlated tests).
 * Positioning: the level is the signal; no trader group is specially informed; robust to z-window and to delays.
 * A six-month record cannot separate skill from luck (see reports/scenario_replay.md).
 * **Positioning does not replicate (reports/arm_g10_positioning.md).** The identical rule on GBP, JPY, CHF, AUD, CAD, NZD,

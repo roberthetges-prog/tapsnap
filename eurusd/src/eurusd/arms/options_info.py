@@ -961,19 +961,6 @@ def run_full(cost_pips: float = 1.2, write: bool = True, verbose: bool = True):
     return daily["pos"], rep, res
 
 
-if __name__ == "__main__":
-    import pickle
-    pos, rep, res = run_full()
-    print(res["selection"].round(3).to_string(index=False))
-    print("FINAL:", res["final"], "-", res["final_status"])
-    print(res["bar_verdict_all"].to_string(index=False))
-    (RES / "logs").mkdir(exist_ok=True)
-    keep = {k: res[k] for k in ("V", "paired", "selection", "final", "final_status", "bar_all", "bar_verdict_all", "controls", "jpy", "gate_log",
-                                "by_year", "hit", "leak", "incremental", "corr", "report", "cat", "ivchk", "book_diff")}
-    with open(RES / "logs" / f"{ARM}_tables.pkl", "wb") as fh:
-        pickle.dump(keep, fh)
-
-
 # ================================================================ report (reports/arm_options_info.md)
 def data_quality() -> dict:
     """Data-quality tables for the report (no accuracy): spans, gaps, stale runs, the sign-convention episodes."""
@@ -1142,6 +1129,11 @@ def write_report(K: dict | None = None, path: Path | None = None) -> str:
         g = _grid(V, ["agree3_same_span", "and", "and_shift+63", "and_shift+126", "agree3_contradicted"], "weekly", lab, hs=(21, 42, 63), ci=False, py=False,
                   short={"agree3_same_span": "same span", "and": "AND", "and_shift+63": "stale63", "and_shift+126": "stale126", "agree3_contradicted": "contra"})
         out.append(md(g))
+    out.append("\n### Confirmed against contradicted agreement calls, each as its own non-overlapping stream (accuracy % [Wilson 95 %] n)\n")
+    for lab in ("2010-26", "2016-26", "2023-26"):
+        out.append(f"\n*{lab}*\n")
+        out.append(md(_grid(V, ["and", "agree3_contradicted"], "nonoverlap", lab, sigs=[n for n in NAMES if n != "opt_fut_div"], py=False,
+                            short={"and": "confirmed", "agree3_contradicted": "contradicted"})))
     out.append("\n### (c) Paired differences, weekly grid, circular block bootstrap (2000 draws; points; p = share of draws <= 0, one-sided, NOT adjusted for 12 candidates)\n")
     p = P[P.period.isin(["2010-26", "2016-26"])].copy()
     pt = pd.DataFrame({"signal": p["signal"], "h": p["h"], "period": p["period"], "AND acc n": [f"{100 * a:.1f} n={n}" if np.isfinite(a) else f"- n={n}" for a, n in zip(p["acc_and"], p["n_and"])],
@@ -1233,3 +1225,261 @@ def write_report(K: dict | None = None, path: Path | None = None) -> str:
     path = path or ROOT / "reports" / f"arm_{ARM}.md"
     path.write_text(txt)
     return txt
+
+
+HEAD_MD = r"""# Arm X: what the options market knows (`options_info`)
+
+Code `src/eurusd/arms/options_info.py` (`run(cost_pips=1.2)`; `python src/eurusd/arms/options_info.py` fetches (cached), runs everything in about a
+minute and rebuilds this file; `... options_info.py report` rebuilds the report only). Cleaned series with source columns:
+`data/macro/options_info_rr25.csv`, `options_info_iv.csv`, `options_info_cftc_options.csv`, `options_info_iv_overlap_check.csv`; raw downloads in
+`data/raw/options_info/` (git-ignored). Results in `experiments/results/arms/`: `options_info_positions.parquet` (daily stream of the final rule:
+`pos`, `fwd_bp`, `net_bp`), `options_info_report.csv` (protocol table, every candidate, `variant`, `final`, plus the stale-signal books),
+`options_info_votes.csv` (every signal x rule x horizon x mode x period), `options_info_{bar,bar_verdict,paired,candidates,controls,jpy_replication,
+vrp_gate_log,book_diff,by_year,hit,incremental,pnl_corr,leakchecks,data_catalogue}.csv`, `options_info_signals.parquet`,
+`options_info_stale{63,126}_positions.parquet` (placebo books), log `logs/options_info.log`.
+
+The module docstring (data, lags, the 12 candidates with their signs and citations, the evaluation, the selection rule and the reading of the bar) was
+written BEFORE any accuracy number was computed; only data-quality facts were known. Three things were ADDED after the first run and are marked where
+they appear: the "agreement call on which a vote-type signal is silent" row, the books with a stale signal, and the daily P&L difference against the
+agreement-rule book. None changes the selection.
+"""
+
+VERDICT_MD = r"""## Verdict
+
+1. **The round-5 bar is NOT met, by any of the 12 candidates.** No extra vote from the options market lifts the agreement rule by 3 points at both
+   21 and 42 sessions in both 2010-26 and 2016-26 on non-overlapping decisions. The rule picked by the declared selection rule, the agreement rule
+   confirmed by the risk-reversal skew (`and_rr_z_follow`), moves it by **+0.1 / -2.4 points at 21 sessions and +4.2 / +3.0 at 42** (2010-26 / 2016-26;
+   59 % [50-67] n=125 against 59 % n=154 at 21 sessions), is **worse in 2023-26** (-3.5 and -3.2 points on 28 and 18 decisions) and at 42 sessions the
+   copy that is **63 sessions stale gains more** (+5.4 / +5.5). It has the decisions (7.5 a year). Four separate failures.
+2. **Standalone, no option signal carries directional information at one to three months.** Weekly decisions 2010-26, 21 / 42 / 63 sessions:
+   risk-reversal skew followed 55 / 54 / 53 % (n=861; orthogonalised to spot 55 / 55 / 54 %), its one-month change 53 / 53 / 52 %, RR-against-spot
+   divergence 55 / 57 / 55 % (n=287), implied-minus-realised vol 51 / 53 / 54 % (n=789) and its change 49 / 51 / 50 %, term-structure slope 51 / 54 / 55 %
+   (n=631, ends 2022-02), options-only positioning 50 / 47 / 49 % (n=870) and 52 / 52 / 54 % for leveraged funds. Non-overlapping, the best 21-session
+   cell is 56 % [49-63] (n=188) and every interval contains 50 %. The one cell that looks like something, the skew at 63 sessions non-overlapping
+   (67 % [55-77], n=69), is 53 % on the weekly grid: a lucky phase of the greedy grid.
+3. **The literature's sign for the skew level was wrong here, and so was the practitioner sign in any useful sense.** The PRIMARY reading declared
+   from the literature (an extreme skew is a premium: fade |z| > 2) was right **37 % [25-51] of the time** (n=46 non-overlapping, 21 sessions; weekly
+   44 / 43 / 36 %, n=72): after an extreme skew EUR/USD more often kept going. Following the skew at all times is the 55 % above. Both are consistent
+   with what the literature says first: the risk reversal REACTS. Its daily change is +0.45 correlated with the same day's EUR/USD return, +0.19 with the
+   previous day's and +0.03 with the next day's; its level has an R2 of 0.27 on the trailing one- and three-month spot return; and a skew that is
+   21 sessions "from the future" scores 68 % - the skew knows the move once it has happened.
+4. **The only thing that looks like information is a one-month VETO, and it is not established.** On weekly decisions, a 21-session agreement call
+   that the skew contradicts (rule long while the risk reversal is below its one-year mean, or the reverse) was right **49.5 % (n=95)** in 2010-26,
+   **41.5 % (n=53)** in 2016-26 and 33 % (n=12) in 2023-26, against 62 / 61 / 57 % when the skew confirms; confirmed minus contradicted
+   +12.9 points [-2.0, +29.3], p 0.04, and +19.6 [-1.3, +38.8], p 0.03. For it: the gap is the same after removing the spot return from the skew
+   (`rr_orth`: +11.8 / +15.6, p 0.04), it vanishes when the skew is 63 sessions stale (AND rule 59 %, the agreement rule's own level), and arm N's
+   trend-confirmed agreement rule showed no such gain, so it is not "price confirms". Against it: it exists at 21 sessions only (+2.0 and +1.6 points
+   at 42 and 63); on non-overlapping decisions the confirmed calls are 59 / 55 % (n=125 / 80), no better than the agreement rule (59 / 57 %), with
+   the contradicted calls as their own stream at 49 % [38-61] (n=71) and 52 % (n=42), and for the orthogonalised skew the non-overlapping gap is
+   +4 points in 2010-26 and -5 in 2016-26; the p-values are unadjusted across 11 candidates x 3 horizons x 2 periods (a Bonferroni threshold for 11
+   candidates is 0.0045); the 95 weekly contradicted calls are about 25 independent months; and in money the confirmed-only book earns the SAME bp a
+   day as the agreement book (+0.03 bp, Newey-West t 0.2): the higher Sharpe comes from holding 25 % fewer tranches that earned nothing, not from
+   earning more. A lead for a paper control, not a result.
+5. **Daily stream: passes the round-3 arithmetic, adds a variance cut, not a new return source.** `and_rr_z_follow` as a weekly-tranche book: net
+   Sharpe **0.62 / 0.65 / 0.45** (t 2.57 / 2.16 / 0.91; agreement-rule book 0.52 / 0.51 / 0.43), deflated-Sharpe p 0.18 for 12 candidates, hit rate of
+   its decisions 62 % / 61 % / 57 % (n=287 / 185 / 60), +64 / +54 / +32 bp a decision after costs. Three-way combination 0.60 / **0.70** / 0.42 against
+   0.56 / 0.64 / 0.36 two-way and 0.57 / 0.64 / 0.41 with the plain agreement book; with the skew 63 sessions stale 0.65, 126 stale 0.61 on 2016-26, so
+   three quarters of the +0.06 is timing-dependent. It is 0.92 correlated with the agreement-rule book (0.59 with `regime_trend`, 0.40 with
+   `weak_signals`). +0.06 Sharpe on a combination is the size this project has called noise before (rates/stress: +0.03).
+6. **Variance risk premium (Della Corte et al. sign: expensive insurance => EUR down): no.** 51 / 53 / 54 % standalone, 41 / 42 / 46 % in 2023-25
+   (n=114), nothing as a vote (-0.1 points weekly), and the stale copies score higher than the live one. As a CONDITIONING variable: the agreement
+   rule was right 62 / 70 / 72 % when insurance was cheap against its own year and 55 / 62 / 64 % when dear (weekly, 2010-26, n=181 / 169), but on
+   non-overlapping decisions the gap is 58 vs 52 %, 57 vs 61 %, 66 vs 57 %, the walk-forward gate that chose "cheap" from 2012 on scored 58 / 66 / 68 %
+   out of sample against 59 / 66 / 69 % for the ungated rule on the same span, and in 2023-25 the two sides are level (44 against 45 % at 21 sessions
+   on 18 and 22 weekly calls). No.
+7. **Term-structure slope (inverted curve => EUR up): a slow regime variable that ends in 2022.** 52 / 61 / 61 % weekly in 2016-22 but 58 / 59 / 61 %
+   when 63 sessions stale; as a vote +5.9 / +9.6 points at 42 sessions with the 126-stale copy at +8.7 / +5.9, and -5.0 / +4.3 at 21. Undefined after
+   2022-02-22, so it cannot be judged in 2023-26 and cannot run.
+8. **CFTC options-only positioning: nothing, and probably a hedge book.** The options-only non-commercial net position is small (standard deviation
+   1.6 % of futures open interest against 21 % for the futures net) and NEGATIVELY correlated with the futures position (-0.14; leveraged funds
+   -0.31). Its z-score followed: 50 / 47 / 49 %; as a vote it lowers the agreement rule by 6 to 8 points on non-overlapping decisions. "Options
+   traders disagree with futures traders" can never confirm the agreement rule (it is non-zero only when it opposes `cot_z52`, which the rule requires
+   on its side; found after the first run, it is structural); standalone it is right 41 / 36 / 35 % (n=418), i.e. it is the futures signal with the
+   sign flipped, and agreement calls on which options disagree with futures were as good (59 / 65 %, n=179) as the rest (60 / 65 %, n=208).
+9. **Does the options market know something the three slow signals do not?** Not that this data can show. Skew, implied-minus-realised vol,
+   vol-curve slope and option positioning are each at 49-55 % alone; the skew is the price move restated plus a possible one-month veto that fails
+   the non-overlapping test; nothing extends coverage (outside the agreement 33-58 % at 21-42 sessions, live no better than stale); and the identical skew rules on
+   USD/JPY and EUR/JPY score 46-51 %. **Recommendation: adopt nothing.** If a live skew feed is ever arranged (CME CVOL skew or an own FXE chain;
+   this copy ends 2026-07-29, so nothing here can run today), the veto may be registered as a paper control `agreement_rr_veto` starting from zero.
+"""
+
+DATA_MD = r"""
+All files were fetched on 2026-11-11 (HTTP 200 on every URL; cftc.gov needs a browser user-agent, FRED `curl --http1.1` without one). The two GitHub
+files are third-party copies of vendor (Bloomberg) data: research use only, no licence, and no live continuation.
+
+**Risk reversal.** {rr_n} EUR/USD values 2003-10-02 .. 2026-07-29; {rr_nan} further dates in the file have the yen pairs but no EUR/USD value (2003-05, 2007).
+* Gaps of more than 5 calendar days: {gaps}; none after March 2005. Missing business days: 62 in 2004, 11 in 2005, 5 in 2007, none from 2008.
+* Stale runs (>= 5 identical consecutive values): {nruns}, the longest {maxrun} sessions, the last one starting {lastrun}. Until 2005 the series is
+  quoted in steps of 0.05 (90-98 % of values), so short runs there are rounding, not missing updates. No stale run from 2008-03 on; the test period
+  2010-26 has no gap and no stale run. The z-score window first fills in mid-2004, so the gaps only touch the pre-2010 warm-up.
+* The 1-month tenor jumps when it first spans a dated event: -2.2 in five sessions into 2016-06-14 (UK referendum), -1.85 on 2017-04-06 and +2.56 on
+  2017-04-24 (French election), -1.28 on 2016-11-09 (US election). These are event premia, not views on the trend; they are left in.
+* No independent source of EUR/USD risk reversals is reachable (no ECB or FRED series, no second GitHub copy), so the cross-checks are indirect:
+  (i) the sign convention, table below: every dated episode has the sign it should have under "positive = EUR calls over EUR puts";
+  (ii) daily RR change against the store's NY-close EUR/USD return: {l0:+.2f} same day, {l_1:+.2f} previous day, {l_2:+.2f} two days before,
+  {l1:+.2f} next day, {l2:+.2f} two days after - a series stamped a day late would show its peak at the previous day, one stamped early would
+  correlate with the next day; the +0.19 with the previous day says the quote is taken before the NY close or reacts with a lag;
+  (iii) the sister file from the same vendor (ATM vols) carries a spot column that equals the store's NY close of the SAME date: median absolute
+  difference {pxm:.1f} pips on {pxn} days, return correlation {pc0:.3f} same day, {pc_1:+.3f} / {pc1:+.3f} at one day's lead / lag. So vendor dates
+  are NY dates, and the one-calendar-day lag used here is conservative.
+* After 2026-07-29 there is no value: every RR signal is undefined from the session of 2026-08-06 (5-session carry limit). The 2026 tests stop there.
+
+"""
+
+IV_MD = r"""
+
+**Implied vol and the stitch.** ATM 1M / 3M / 1Y: 5,761 rows 2000-01-25 .. 2022-02-22, no gap over 5 days, no stale run of 5 in the 1M quote (two
+in 3M and four in 1Y, all 2003-06). EVZ: 4,360 values 2007-11-01 .. 2025-03-11 (169 holiday blanks dropped).
+* Overlap check on {n} common days ({a} .. {b}): level correlation {cl:.3f}; correlation of changes {c1:.2f} daily (different fixing times and a
+  thin ETF option market), {c5:.2f} over 5 sessions, {c21:.2f} over 21. EVZ / ATM-1M ratio: median {rm:.3f}, 5-95 % range {r05:.3f}-{r95:.3f}; by year
+  {ry}. The ratio is not constant, so a splice is an approximation.
+* Stitch used: ATM 1M to 2022-02-22, then EVZ / {k:.4f} (median ratio of the last 250 common sessions, i.e. fitted before the stitched segment).
+  On those 250 sessions the mapped EVZ minus ATM is {m250:+.2f} +- {s250:.2f} vol points; with the same ratio over the whole overlap {mall:+.2f} +- {sall:.2f}.
+  The implied-minus-realised gap has a standard deviation of 1.35 vol points, so the splice error is about a fifth of the signal's scale.
+* EVZ quality decays before it dies: share of days sitting in a run of >= 4 identical values - {st}; longest run {mr} sessions (2024-10). The
+  2023-25 part of every VRP signal therefore rests on a partly stale index. VRP signals are undefined from 2025-03-19; the term-structure slope
+  (ATM file only) from 2022-03-02.
+* Realised vol = the store's `rv_21d_bp` (sum of squared hourly returns, 21 sessions) annualised with sqrt(252), lagged one session to match the
+  option stamp. Mean implied 8.9, realised 8.4, gap +0.40 vol points, positive on 61 % of sessions.
+"""
+
+CFTC_MD = r"""
+**CFTC options-only positioning.** {w} weekly legacy rows 1999-01-05 .. 2026-11-03 and {tw} TFF rows 2006-06-13 .. 2026-11-03, every report date
+present in both the combined and the futures-only file; combined open interest is never below futures-only open interest ({viol} violations).
+Options add a median {sh:.0f} % to futures open interest (2010-26). Options-only non-commercial net / futures OI has a standard deviation of {so:.1f} %
+against {sf:.0f} % for the futures-only net, and the two are correlated {c:+.2f} (leveraged funds: {lc:+.2f}): the option book is small and leans
+against the futures book. Caveats: a delta-weighted aggregate (no strikes, expiries, put/call split); in the TFF report a trader's long futures
+against short option delta moves into "spreading", so gross legs are not comparable across the two reports - only NET positions are used; the weeks of
+the 2013, 2018-19 and 2025 shutdowns are in the history files with their original report dates although they were published late (same treatment
+as `cot_z52` in the store; arm G showed the positioning signal is insensitive to it).
+"""
+
+PRIORS_MD = r"""
+Sign sources. Skew level, primary: Farhi, Fraiberger, Gabaix, Ranciere & Verdelhan, "Crash Risk in Currency Markets" (NBER w15062; 2015 version) -
+the risk reversal prices disaster risk, moves with the currency contemporaneously, and its level is a premium; Brunnermeier, Nagel & Pedersen,
+"Carry Trades and Currency Crashes" (NBER Macroeconomics Annual 2008) - the price of crash insurance rises after the crash. I could reach the
+abstracts and summaries only (the regression tables were not readable from here), so the primary sign rests on my reading of these two papers.
+VRP: Della Corte, Ramadorai & Sarno, "Volatility risk premia and exchange rate predictability" (JFE 120, 2016) - sign verified from the abstract
+(cheap insurance appreciates, expensive depreciates, over the next month, spot-driven); a cross-sectional result used here as a time-series analogue.
+Londono & Zhou (JFE 124, 2017) - sign not verifiable, not used. Slope: Ornelas & Mauad, "Implied volatility term structure and exchange rate
+predictability" (Int. J. Forecasting 35, 2019) - developed currencies: buy low slope, sell high slope; slope read as long minus short tenor, not
+verified in the full text (bcb.gov.br is outside the session's network). Options-only positioning and the two divergence votes: no citation.
+The gate's side (candidate 8) was taken from the training window, as declared.
+"""
+
+RECON_MD = r"""
+Arm N reports 56 / 59 / 61 / 72 % on n = 291 / 156 / 89 / 61 for 2010-26: reproduced exactly (2016-26: 53 / 57 / 59 / 71 %, 2023-26: 54 / 60 / 45 / 50 %).
+"""
+
+STANDALONE_MD = r"""
+Reading. The up-share of 21-session returns on the weekly grid is 48 % in 2010-26, and every signal is long 47-58 % of the time, so "chance" is
+50 % for all of them. Nothing clears it from above: the weekly intervals (already generous for overlapping holds) contain 50 % except the lower edge of the
+two skew signals at 21 sessions (50-60 %), and those fall to 51 % when 63 sessions stale and 45-49 % when 126 stale, to 47-53 % in 2023-26, and to
+53 % and 50 % on non-overlapping decisions. `rr_fade_extreme` (the primary sign) is BELOW chance: 37 % [25-51], n=46. `opt_fut_div` is below chance
+because, where it votes, it is minus the futures-positioning sign.
+"""
+
+CONTROLS_MD = r"""
+Reading. (i) The skew is the most "restated" variable: correlation +0.45 / +0.48 with the trailing 21- / 63-session return (R2 0.27), +0.31 with
+`cot_z52`, +0.28 with the house score, and it has the sign of positioning on 66 % of sessions. Its one-month change is +0.37 with the one-month
+return. Implied-minus-realised vol, the slope and option positioning are nearly uncorrelated with everything old (|r| <= 0.19, R2 on spot <= 0.04):
+new, but empty. (ii) Orthogonalising changes almost nothing anywhere: skew 55 / 54 / 53 % raw, 55 / 55 / 54 % orthogonalised; as a vote 62 / 65 / 67 %
+raw, 63 / 66 / 67 % orthogonalised (2010-26, weekly). So what little the skew shows does not come from its linear overlap with the recent price move -
+and what the other signals lack is not restored by it. (iii) For the two vote-type RR signals the orthogonalised column is the orthogonalised
+one-month change, and for `rr_fade_extreme` the orthogonalised fade-at-all-times (45 %): the contrarian reading fails with or without the control.
+"""
+
+EXTRA_MD = r"""
+Reading of the three sub-tests.
+* (a) On the bar's own measure nothing passes: the largest two-horizon, two-period minimum gain is `rr_d21`'s +1.2 points, and wherever a 42-session
+  gain appears (RR family +3 to +10, slope +6 to +10) a stale copy does as well or better. Non-overlapping streams of different rules start on
+  different sessions, so single cells move by several points for no reason; that is why the weekly grid and the paired bootstrap are shown next to it.
+* On the weekly grid the RR family lifts the 21-session accuracy from 59 to 62-63 % (2010-26) and from 57 to 61-62 % (2016-26); stale copies fall
+  back to 56-60 %. At 42 and 63 sessions the lift is 0-2 points. VRP, the gate, option positioning: within +-3 points, wrong-signed as often as not.
+  `rr_spot_div` (options leaning against the month's move) confirms very few calls (26 weekly decisions in 17 years, 2 non-overlapping a year):
+  73-81 % on those, far too few to mean anything, and its contradicted side is the same 54-58 % as the others'.
+* (c) The paired intervals for "AND minus agreement" include zero for every candidate, horizon and period except `rr_fade_extreme` and `rr_spot_div`
+  cells built on 5-26 decisions. The smallest honest p-values are 0.03-0.05 for the RR family at 21 sessions; 66 such tests were run on 11 candidates.
+* (b) Outside the agreement rule (where the three old signals disagree) no signal makes a usable call: 33-58 % at 21-42 sessions, live no better than
+  stale. The options market does not extend coverage.
+* Confirmed against contradicted on non-overlapping decisions (table above): for the skew 59 against 49 % at 21 sessions in 2010-26 and 55 against 52 %
+  in 2016-26; for the orthogonalised skew 59 against 55 % and 56 against 61 %; at 42-63 sessions no gap. The weekly-grid veto of verdict 4 is not
+  confirmed here.
+"""
+
+STREAM_MD = r"""
+Reading. The final stream clears the round-3 arithmetic (standalone 2016-26 Sharpe 0.65 > 0.3, 2023-26 0.45 not negative, three-way 0.70 > 0.64
+two-way), and the stale copies decay in order (0.65 -> 0.46 -> 0.35 stand-alone; 0.70 -> 0.65 -> 0.61 in the combination). But the agreement-rule
+book alone also clears that arithmetic (0.51, 0.43, 0.641 > 0.636), which arm N judged to be nothing, and the step from it to this stream is a
+position cut: the confirmed-only book earns +0.03 bp a day more than the agreement book (t 0.2) while being in the market 58 % instead of 73 % of
+sessions. `and_rr_orth` is the same picture (-0.04 bp, t -0.2). Every other AND book earns LESS than the agreement book (-0.3 to -0.8 bp a day,
+t -1.5 to -2.4): those votes remove calls that made money.
+At 0.6 pips the final stream is 0.63 / 0.66 / 0.47 (turnover is tiny).
+"""
+
+JPY_MD = r"""
+Reading. `EURUSD_h10` is the same rule run through this simpler H.10 pipeline, as a check on the pipeline: 54 / 53 / 53 % weekly for the skew,
+55 / 55 / 53 % orthogonalised - the store-based numbers. On USD/JPY the skew followed is right 48 / 49 / 51 % (2016-26: 46 / 48 / 49 %) and on EUR/JPY
+50 / 48 / 50 %; orthogonalised 49-53 %; the one-month change 49-54 %; the stale copies are as good or better. The contrarian extreme scores 43-53 % on
+USD/JPY and 46-53 % on EUR/JPY weekly (57-67 % on 30 EUR/JPY decisions since 2016). So even the weak standalone 54-55 % of the EUR/USD skew is, once
+more, a EUR/USD-only number. The veto of verdict 4 cannot be replicated: there is no agreement rule for the yen pairs.
+"""
+
+LEAK_MD = r"""
+* (1) With permuted labels every rule sits at 50 % (the AND rules too: the agreement rule's own 59 % disappears with the labels, as it must).
+* (2) One, five and 21 sessions of extra staleness change the AND rules by 0-5 points and the standalone numbers by 0-3: nothing hinges on the last
+  day's quote or on the lag convention. The 21-session LOOK-AHEAD copy lifts the skew to 68 % standalone and 73 % as a vote, and the divergence vote
+  falls to 13 % (a skew that will have risen against a falling spot is a spot that then rose): the pipeline does respond to future information, so its
+  absence in the live numbers is real, and the skew's dependence on the move it accompanies is shown directly. The orthogonalised skew gains only
+  1 point from the look-ahead (the future spot move is regressed out), VRP 4, option positioning 5.
+* Truncation: with every raw file cut at five dates under the declared lags, the row of that date is identical (13 of 13 columns, max difference 0).
+* (3) No signal is a label in disguise: the highest correlation with the forward 21- / 63-session return is +0.12 / +0.13 (skew), against +0.45 / +0.48
+  with the PAST returns. `opt_fut_div`'s -0.21 / -0.31 is `cot_z52` entering with a minus sign.
+* The gate (candidate 8) uses labels, and only labels known before the test year (log in section 6); the orthogonalisation uses no label.
+* Residual look-ahead I could not remove: the copies are final vendor values (no evidence of revisions in option quotes, but unverifiable), and CFTC
+  weeks published late during shutdowns carry their original report dates.
+"""
+
+TAIL_MD = r"""
+## 11 Variant count, what was added after the first run, what could not be done
+
+* **12 candidates, declared before results** (11 distinct AND rules: `opt_fut_div`'s is empty by construction). Controls not selected from: 11
+  orthogonalised copies, 6 stale / look-ahead copies of each, the fixed VRP split, the yen replication (2 pairs x 4 rules).
+* Added after the first run, none affecting selection: the `agree3_no_vote` row for vote-type signals, the stale-signal books and their
+  combination rows, the book-difference table.
+* Not done: no independent risk-reversal source to cross-check values against (indirect checks only); no other-currency test of the extra vote
+  (no agreement rule elsewhere); 3M and 1Y vols and any implied vol after 2025-03 are unavailable, so the slope has no 2022-26 record and the VRP
+  none after 2025-03; butterflies, other tenors and strike-level positioning do not exist in free form.
+* For the research log: options-market information (skew level, change, divergence from spot, orthogonalised skew, implied-minus-realised vol,
+  vol-curve slope, CFTC options-only positioning): standalone 49-55 %, no extra vote passes the round-5 bar; the risk reversal reacts to spot
+  (same-day correlation 0.45, look-ahead copy 68 %); fading an extreme skew was right 37 %; one unadjusted lead (skew contradicts a 21-session
+  agreement call: 49.5 %, n=95) that fails on non-overlapping decisions and cannot run without a live feed.
+
+## Sources
+
+* Risk reversal copy: https://raw.githubusercontent.com/GerardWu100/geographic-equity-rotation/main/data/RiskReversalData_Clean.csv
+* ATM vol copy: https://raw.githubusercontent.com/frederikbachdk/FXVolTrading/master/data/EURUSD.csv ; EVZ: https://fred.stlouisfed.org/graph/fredgraph.csv?id=EVZCLS
+* CFTC combined history: https://www.cftc.gov/files/dea/history/ (deahistfo_1995_2016.zip, deahistfo2017..2026.zip, fin_com_txt_2006_2016.zip, com_fin_txt_2017..2026.zip)
+* Della Corte, Ramadorai & Sarno (2016): https://econpapers.repec.org/RePEc:eee:jfinec:v:120:y:2016:i:1:p:21-40 ; https://openaccess.city.ac.uk/id/eprint/13156/
+* Londono & Zhou (2017): https://econpapers.repec.org/RePEc:eee:jfinec:v:124:y:2017:i:2:p:415-440
+* Ornelas & Mauad (2019): https://econpapers.repec.org/RePEc:eee:intfor:v:35:y:2019:i:4:p:1800-1813 ; https://ideas.repec.org/p/bcb/wpaper/492.html
+* Farhi, Fraiberger, Gabaix, Ranciere & Verdelhan: https://www.nber.org/system/files/working_papers/w15062/w15062.pdf
+* Brunnermeier, Nagel & Pedersen (2008), "Carry Trades and Currency Crashes", NBER Macroeconomics Annual 23 (cited from memory; not fetched).
+"""
+
+
+if __name__ == "__main__":
+    import pickle
+    if len(sys.argv) > 1 and sys.argv[1] == "report":
+        write_report()
+        sys.exit(0)
+    pos, rep, res = run_full()
+    print(res["selection"].round(3).to_string(index=False))
+    print("FINAL:", res["final"], "-", res["final_status"])
+    print(res["bar_verdict_all"].to_string(index=False))
+    (RES / "logs").mkdir(exist_ok=True)
+    keep = {k: res[k] for k in ("V", "paired", "selection", "final", "final_status", "bar_all", "bar_verdict_all", "controls", "jpy", "gate_log",
+                                "by_year", "hit", "leak", "incremental", "corr", "report", "cat", "ivchk", "book_diff")}
+    with open(RES / "logs" / f"{ARM}_tables.pkl", "wb") as fh:
+        pickle.dump(keep, fh)
+    write_report(keep)
