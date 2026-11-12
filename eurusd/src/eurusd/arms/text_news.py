@@ -1239,21 +1239,6 @@ def incremental(streams: dict, final: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     return inc, pd.DataFrame(cr)
 
 
-if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "report":
-        print(write_report()[:3000])
-    else:
-        pos, rep, res = run_full()
-        print(res["selection"].round(3).to_string(index=False))
-        print("final:", res["final"], "|", res["final_status"])
-        print(res["bar"].round(3).to_string(index=False))
-        print(res["bar_verdict"])
-        try:
-            write_report()
-        except NameError:
-            pass
-
-
 # ================================================================ report (python -m eurusd.arms.text_news report)
 def _fmt(c, ci: bool = True, py: bool = False) -> str:
     if c is None or not c["n"] or not np.isfinite(c.get("accuracy", np.nan)):
