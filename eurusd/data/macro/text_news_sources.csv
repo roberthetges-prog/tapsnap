@@ -3,8 +3,8 @@ data/macro/text_news_docs.csv,FED fomc_statement (fomc_csv),https://raw.githubus
 data/macro/text_news_docs.csv,FED fomc_minutes (fomc_csv),https://raw.githubusercontent.com/vtasca/fed-statement-scraping/master/communications.csv,2026-11-11,244,2000-03-23,2026-10-07,release date + 1 d
 data/macro/text_news_docs.csv,FED speech (bis_bulk),https://www.bis.org/pages/download-central-bankers-speeches/speeches-{y}.zip,2026-11-11,2486,1996-12-19,2026-06-22,speech date + 1 d
 data/macro/text_news_docs.csv,ECB speech (bis_bulk),https://www.bis.org/pages/download-central-bankers-speeches/speeches-{y}.zip,2026-11-11,2643,1997-02-07,2026-06-22,speech date + 1 d
-data/macro/text_news_docs.csv,FED speech (bis_live),https://www.bis.org/speeches/central-bank,2026-11-12,24,2026-06-24,2026-10-14,speech date + 1 d
-data/macro/text_news_docs.csv,ECB speech (bis_live),https://www.bis.org/speeches/central-bank,2026-11-12,26,2026-06-30,2026-11-05,speech date + 1 d
+data/macro/text_news_docs.csv,FED speech (bis_live),https://www.bis.org/speeches/central-bank,2026-11-12,26,2026-06-24,2026-10-14,speech date + 1 d
+data/macro/text_news_docs.csv,ECB speech (bis_live),https://www.bis.org/speeches/central-bank,2026-11-12,28,2026-06-30,2026-11-05,speech date + 1 d
 data/macro/text_news_docs.csv,ECB_COPY speech (ecb_copy),https://media.githubusercontent.com/media/Moritz-Pfeifer/CentralBankRoBERTa/main/Data/ECB/all_ECB_speeches.csv,2026-11-11,2603,1997-02-07,2023-02-16,cross-check only
 data/macro/text_news_sentiment_daily.csv,"SF Fed Daily News Sentiment (third-party copy, one vintage)",https://raw.githubusercontent.com/wattyven/VIX-study/main/sentiment/news_sentiment_data.csv,2026-11-11,16556,1980-01-01,2025-05-18,7 d
 data/macro/text_news_epu_us_daily.csv,FRED USEPUINDXD,https://fred.stlouisfed.org/graph/fredgraph.csv?id=USEPUINDXD,2026-11-11,15289,1985-01-01,2026-11-10,"monthly mean, month-end + 30 d"

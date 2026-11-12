@@ -18,7 +18,7 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 
 | 6 | policy-divergence replication across G10 (7): FAILS; analog / nearest-neighbour 'history rhymes' forecasting (12, strict 36): FAILS; data scoping (36 sources, no backtest) | 43 | none |
 
-| 7 | official and portfolio flows (12): FAILS; options information (12): FAILS ... (text/news pending) | 24+ | none so far |
+| 7 | official and portfolio flows (12): FAILS; options information (12): FAILS; text, news, uncertainty, policy surprises (12): FAILS | 36 | none so far |
 
 ## What is established
 * Predictable: slow macro drift and speculative positioning (direction, weakly); volatility and range (strongly).
@@ -89,6 +89,11 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
   skew' 37 % (wrong way); VRP, slope, option positioning independent but empty (47-55 %); extra vote fails (no gain at
   21 sessions, stale copy gains more at 42); no replication on USD/JPY or EUR/JPY. Unadjusted lead only: agreement calls
   the skew contradicts are right ~50 % vs 62 % confirmed (weekly grid, 21 sessions, 66 correlated tests).
+* Text and news (Fed / ECB tone from 4,900 statements, minutes and speeches; SF Fed news sentiment; policy and
+  geopolitical uncertainty; Jarocinski-Karadi policy and information shocks): new information (0-13 % explained by the old
+  inputs) but uninformative: tone 49-57 %, sentiment 48-52 %, uncertainty 41-57 %, pure policy surprises 46-54 %; extra
+  vote fails; stale copies do as well. One lead (6-month information shocks: 60-66 % since 2016, 45 % in 2010-15) for a
+  forward test only; its data end 2025-10.
 * Positioning: the level is the signal; no trader group is specially informed; robust to z-window and to delays.
 * A six-month record cannot separate skill from luck (see reports/scenario_replay.md).
 * **Positioning does not replicate (reports/arm_g10_positioning.md).** The identical rule on GBP, JPY, CHF, AUD, CAD, NZD,
@@ -96,6 +101,24 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
   the pair it was mined on. Planning Sharpe for it: 0.25-0.45, not 0.6-0.7. Weight kept, not raised.
 * Direction accuracy today: 52 % next session, 55 % next week, 58 % next month (2010-26), fading after 2023.
   Range / volatility accuracy: 75 % above/below median, 93 % on volatile-day calls (reports/prediction_scoreboard.md).
+
+## VERDICT AFTER SEVEN ROUNDS (2026-11-12)
+About 560 pre-declared trials across every class of public information reachable from here: price at all frequencies,
+calendar and flows, events and surprises, rates and curves, positioning in every cut, liquidity, stress, the real economy,
+policy cycles and reaction functions, analogs, options, official flows, text and news. Since round 2, some 270 trials have
+produced ZERO new survivors, and all four leads that looked promising (order flow, policy-gap gating, positioning on other
+currencies, analog unanimity) failed replication or placebo tests.
+HIGHEST HONEST PREDICTION NUMBERS:
+* Direction, EUR/USD, when positioning, the 2y-spread trend and the macro score agree (about 44 % of the time):
+  59 % right at one month, 61-65 % at two months, 67-72 % at a quarter (walk-forward 2010-26, net of costs);
+  57-67 % since 2016; unconfirmed since 2023 (too few trades to tell; power analysis says two decades would be needed).
+* Path and level events: 69-87 %, calibrated to 1-3 points in every era (stops and targets at known odds).
+* Next-session range: 75-78 % above/below normal; 93 % on volatile-day calls.
+Planning Sharpe for the directional engine: 0.3-0.5. Higher numbers require a Sharpe near 1 (70 % at a quarter) or 1.7
+(80 %), which no public information tested here supports.
+What could still move the ceiling: time (the paper forward test, currently paused by the owner), data that is paid or
+blocked (live options skew, OIS curves, CLS flow, real-time vintages), and the two forward-only leads (information
+shocks; skew-contradicted calls). More mining of the same public data would now mostly manufacture false positives.
 
 ## Product definition (owner, 2026-11-11)
 Directional POSITION trading: hold for weeks up to a month or more, a few decisions a month, each with a calibrated

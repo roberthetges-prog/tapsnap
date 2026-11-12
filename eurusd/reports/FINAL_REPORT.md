@@ -121,6 +121,36 @@ predictability is slow macro drift and speculative positioning; nothing intraday
 non-linear survived. The live system was reduced to this one exposure (`src/eurusd/exposure.py`), and every
 failed component was moved out of the runtime into `research/archive/`.
 
+## 3d. Research rounds 3-7 (2026-11-11/12): the search for new information
+
+Product redefined by the owner: directional POSITION trading, holds of weeks to a quarter, calls with stated odds.
+Twenty-two further arms, about 290 pre-declared trials, each judged on whether it adds a real vote to the multi-week call
+(accuracy gain of 3 points at one and two months with enough trades, and the gain must vanish when the signal is made stale).
+
+| Round | Information tested | Outcome |
+|---|---|---|
+| 3 | fed funds futures, sovereign stress, bond vol; positioning by trader group, flows, extremes; macro surprise indices; positioning on 7 other currencies | nothing added; **positioning effect does not replicate outside EUR** (basket Sharpe -0.4 to -0.6) |
+| 4 | volatility-conditioned intraday tactics; 1-minute path signals; FX relative value; month-end and calendar flows; selective calibrated probabilities; position trading from 1999 | nothing added; residual order-flow lead failed replication on 6 pairs; December seasonality real, May luck; **agreement rule** identified as the product form |
+| 5 | central-bank liquidity and stress; energy, growth indicators, real yields; regime dependence; central-bank reaction functions and rate cycles | nothing added; the post-2023 fade is statistically noise; rate-cycle turns are priced before they happen |
+| 6 | 'history rhymes' analog forecasting; policy-divergence replication on 8 currencies; data scoping | analogs anti-calibrated; divergence lead failed replication |
+| 7 | options (risk reversals, implied vol, option positioning); official and portfolio flows; central-bank tone, news, uncertainty, policy surprises | all new and independent, all uninformative: options and flows FOLLOW the exchange rate |
+
+**Highest honest prediction numbers** (walk-forward, net of costs):
+
+| What is predicted | Accuracy | Notes |
+|---|---|---|
+| Direction when positioning, 2y-spread trend and macro score agree (44 % of the time) | 59 % at 1 month, 61-65 % at 2 months, 67-72 % at a quarter | 2010-26; 57-67 % since 2016; unconfirmed since 2023 |
+| Level 2 / 3 ATR away not touched within 10 sessions | 69 % / 87 % | calibrated to 1-3 points in every era |
+| Next-session range above or below normal | 75-78 % | 93 % when a volatile day is called |
+| Next-session direction, any model | 51-52 % | not tradeable alone |
+
+Accuracy, edge and holding period are tied together: with a Sharpe of about 0.5, 60 % takes a quarter-long hold; 70 % at a
+quarter would need a Sharpe near 1.05 and 80 % near 1.7. No public information tested supports that.
+
+The product reflects this: the weekly outlook gives the economic backdrop, the trend and volatility cone, and a POSITION
+CALL that speaks only when the three slow signals agree, with its historical odds and stop levels at calibrated odds
+(`python -m eurusd.cli weekly`). `research/RESEARCH_LOG.md` holds the full trial count and every verdict.
+
 ## 4. Recommendation
 
 Do not trade the signals as a stand-alone source of edge: the untouched holdout of round 1 and the walk-forward

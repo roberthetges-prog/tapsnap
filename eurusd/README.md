@@ -47,6 +47,13 @@ p = 0.28, i.e. not significant. The position is rebalanced only on a sign flip o
 disaster stop at 2 x ATR20; the risk engine sizes one unit to the configured volatility target.
 Everything that failed was moved to `research/archive/` (see its README) and `config/live_strategies.json` is empty.
 
+## The verdict after seven research rounds (about 560 trials)
+
+Highest honest numbers, walk-forward and net of costs: **direction 59 % at one month, 61-65 % at two months, 67-72 % at a
+quarter** when positioning, the 2-year spread trend and the macro score agree (2010-26; unconfirmed since 2023);
+**path and level events 69-87 %**, calibrated in every era; next-session range 75-78 %. Nothing else that is public and
+reachable adds to this: see `research/RESEARCH_LOG.md` and `reports/FINAL_REPORT.md` section 3d.
+
 ## Operating it
 
 `reports/GO_LIVE_RUNBOOK.md` is the operating plan: forward test first, small real money only if the forward

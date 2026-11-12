@@ -132,6 +132,13 @@ EVALUATION (HOWTO_ARMS.md rounds 5 and 7; helpers and conventions of eurusd.arms
     (3) what each signal is correlated with, including the forward label.
 Variant count for deflation: 12 candidate signals = 12 AND rules. Nothing else is selected from. The orthogonalised,
   shifted and re-dated versions are controls of those 12, not candidates.
+
+CHANGED AFTER THE DOCSTRING WAS WRITTEN (data handling only; dictionary, signals, signs and rules untouched):
+  * scorer: one-token sentences were skipped (found with hand-written test sentences, before any document was scored);
+  * live BIS pages that carry only an abstract: the speech text is read from the page's PDF (pdftotext);
+  * a speech present in both the bulk file and the live listing is kept once (same institution and title within 45 days).
+  The last two were found by reading the document table, the duplicates after a first full run; the non-overlapping
+  results were unchanged by that fix (it touches eight speeches of April-June 2026).
 """
 from __future__ import annotations
 
@@ -479,7 +486,7 @@ def build_docs(refresh: bool = False, verbose: bool = True) -> pd.DataFrame:
     if verbose:
         print(f"  scored {len(rows)} FOMC documents", flush=True)
     # ---- BIS bulk archive
-    seen = set()
+    seen: dict = {}                                    # (institution, normalised title) -> dates already held
     n_all, bulk_last = 0, pd.Timestamp("1990-01-01")
     for y in BIS_YEARS:
         z = zipfile.ZipFile(RAW / "bis" / f"speeches-{y}.zip")
@@ -495,7 +502,7 @@ def build_docs(refresh: bool = False, verbose: bool = True) -> pd.DataFrame:
         b["date"], b["post_date"] = date, post
         for _, r in b[b["inst"].isin(["FED", "ECB"])].iterrows():
             h, d, n = score_text(r["text"])
-            seen.add((r["inst"], _norm_title(r["title"])))
+            seen.setdefault((r["inst"], _norm_title(r["title"])), []).append(r["date"])
             rows.append({"inst": r["inst"], "kind": "speech", "source": "bis_bulk", "date": r["date"], "post_date": r["post_date"],
                          "title": str(r["title"])[:120], "n_tokens": n, "hawk": h, "dove": d})
     if verbose:
@@ -510,9 +517,10 @@ def build_docs(refresh: bool = False, verbose: bool = True) -> pd.DataFrame:
     for _, r in L.iterrows():
         inst = institution(str(r["description"]))
         key = (inst, _norm_title(r["title"]))
-        if inst not in ("FED", "ECB") or key in seen or not isinstance(r["text"], str) or len(r["text"]) < 500:
+        dup = any(abs((pd.Timestamp(r["date"]) - d0).days) <= 45 for d0 in seen.get(key, []))   # same title within 45 days = the bulk copy
+        if inst not in ("FED", "ECB") or dup or not isinstance(r["text"], str) or len(r["text"]) < 500:
             continue
-        seen.add(key)
+        seen.setdefault(key, []).append(pd.Timestamp(r["date"]))
         h, d, n = score_text(r["text"])
         rows.append({"inst": inst, "kind": "speech", "source": "bis_live", "date": pd.Timestamp(r["date"]), "post_date": pd.Timestamp(r["post_date"]),
                      "title": str(r["title"])[:120], "n_tokens": n, "hawk": h, "dove": d})
@@ -1485,3 +1493,213 @@ def write_report(path: Path | None = None) -> str:
     txt = "\n".join(md)
     (path or ROOT / "reports" / f"arm_{ARM}.md").write_text(txt)
     return txt
+
+
+VERDICT_MD = r"""
+# Arm Z - text_news: central-bank tone, news sentiment, uncertainty and policy surprises as a 1-3 month vote (round 7)
+
+Code `src/eurusd/arms/text_news.py` (`run(cost_pips=1.2)`; `PYTHONPATH=src python -m eurusd.arms.text_news` fetches (cached, resumable), scores the
+texts, runs everything incl. leak checks and writes this report in about 8 minutes on one core; `... text_news report` rebuilds this file from the saved
+tables). Outputs in `experiments/results/arms/`: `text_news_positions.parquet` (daily stream of the final rule: `pos`, `fwd_bp`, `net_bp`),
+`text_news_report.csv` (protocol table, 12 candidates + the agreement-rule book, `variant`, `final`), `text_news_votes.csv` (every signal x rule x horizon x
+mode x period cell, incl. placebo, orthogonalised, re-dated and other-era rows), `text_news_paired.csv`, `text_news_bar.csv`, `text_news_candidates.csv`,
+`text_news_incremental.csv`, `text_news_leakchecks.csv`, `text_news_doc_counts.csv`, `text_news_signals.parquet`, log `logs/text_news.log`. Series for the
+weekly outlook in `data/macro/`: **`text_news_tone_daily.csv`** (calendar-daily Fed, ECB and relative tone, document counts, z-scores, 1- and 3-month
+changes), `text_news_signals_daily.csv` (the 12 signals on the session grid), `text_news_docs.csv` (one row per scored document, no text),
+`text_news_sentiment_daily.csv`, `text_news_epu_monthly.csv`, `text_news_epu_us_daily.csv`, `text_news_gpr_daily.csv`, `text_news_jk_shocks.csv`,
+`text_news_sources.csv`. Raw downloads (BIS zips, FOMC CSV, ECB copy, live BIS pages) are in `data/raw/text_news/` (git-ignored).
+
+The dictionary, the 12 signals with their signs, the lags, the evaluation and the selection rule were written into the module docstring before any
+accuracy number existed. Nothing was changed afterwards: three bugs found on the way were all in data handling and were fixed before the first
+evaluation or without reference to it (one-word sentences skipped by the scorer; BIS pages that carry only an abstract, where the speech is now read
+from the PDF; duplicate speeches between the bulk file and the live listing).
+
+## Verdict
+
+**The Round 5 bar is NOT met by any of the 12 candidates. Text and news add no vote to the agreement rule.** The largest class of information the
+project had never touched turns out to be new (it is nearly uncorrelated with everything we hold) and uninformative about EUR/USD one to three months
+ahead.
+
+1. **Central-bank tone - the measurement works, the forecast does not.** The frozen dictionary gives a tone series with face validity (Fed: low in
+   2001, 2008-09, 2020, high in 2005-06, 2017-18, 2022-23; ECB: high in 2005-08 and 2022, low in 2013-16; table in section 1) and the ECB series built
+   from the BIS selection correlates 0.91 with the same score on the ECB's own complete speech file. As a predictor:
+   * *Level of the relative tone* (`tone_rel_lvl`): right 55 / 57 / 51 % at 21 / 42 / 63 sessions (non-overlapping, n = 207 / 103 / 69, 2010-26),
+     49 / 55 / 45 % since 2016, 46 / 45 / 33 % since 2023. All of it is 2010-15 (64 / 61 / 60 %, n = 75 / 38 / 25): the signal says "Fed more hawkish than
+     its own norm, relative to the ECB" on 77 % of sessions, i.e. it was a standing short-euro position through the 2014-15 fall. Made 63 or 126 sessions
+     stale it scores the same (54 / 53 % at 21 sessions): a regime bet, not information.
+   * *Changes in the relative tone* over one and three months (`tone_rel_d1m`, `tone_rel_d3m`), the form the "communication moves pricing before the
+     turn" idea needed: 49 / 46 / 52 % and 50 / 47 / 58 % (2010-26), 48 / 55 / 50 % and 49 / 43 / 55 % since 2016. Chance.
+   * Dated by the BIS posting date instead of the speech date (median 3 days later) the numbers are the same within noise.
+2. **US news sentiment** (SF Fed index, copy to 2025-05): 48 / 52 / 50 % (level), 48 / 48 / 39 % (1-month change). Nothing; and it cannot run live from the
+   copy.
+3. **Uncertainty.** Europe-minus-US policy uncertainty rising: 51 / 48 / 48 %. Geopolitical risk rising: 47 / 57 / 49 % (it was 59 / 66 / 56 % in 2004-09
+   and did not carry over). US trade-policy uncertainty with the sign taken from the training window: **41 / 40 / 48 %** - the sign that fitted the past
+   was wrong afterwards (the fitted orientation flipped in 2011, 2013, 2023 and 2026): there is no stable relation to learn.
+4. **Policy surprises (the owner's rate-cycle idea in its market-surprise form).** Cumulated Fed-minus-ECB *pure policy* shocks: 46 / 54 / 50 % over three
+   months, 47 / 49 / 53 % over six (2010-26), 30-35 % at 21 sessions in 2023-26, and as an extra vote they LOWER the agreement rule by 7 points at 21
+   sessions. Consistent with arm T: what the central bank does, even the part the market did not expect, is in the price within days.
+   The *information* shocks over six months (`jk_cbi_6m`) are the one lead of the arm: 55 / 55 / 56 % standalone in 2010-26, 60 / 61 / 66 % since 2016
+   (n = 123 / 61 / 41); as an extra vote +6.3 / +4.3 points in 2010-26 (65 % n=95, 65 % n=60), +13.4 / +12.1 in 2016-26 (71 % n=58, 71 % n=38), not worse in
+   2023-26. It does not pass, and it should not be believed yet: (i) 5.7 and 5.4 decisions a year where the bar needs 6; (ii) the placebo keeps more than
+   half of the gain in two of eight cells (2016-26: +7.2 of +13.4 when 126 sessions stale at 21 sessions, +6.8 of +12.1 when 63 stale at 42); (iii) it was
+   45 / 45 / 40 % standalone in 2010-15 (n = 75 / 38 / 25) and 51 / 55 / 52 % in 2004-09, so the whole effect is 2016-25; (iv) removing the five controls takes
+   the 2010-26 21-session gain from +7 to +2 points; (v) it is the best of 12 candidates, its prior was written down as WEAK before the results (the opposite
+   sign was called "as respectable"), and it ranks 7th of 12 on the declared selection statistic; the paired bootstrap gives p = 0.17 (2010-26) and 0.02
+   (2016-26) at 21 sessions before any allowance for 12 candidates; (vi) the ECB shock file lags by months, so the signal has been undefined since
+   2025-12-29 and cannot vote today. A lead for a forward test once the authors update the ECB file, nothing more.
+5. **Final by the declared rule: `tone_rel_lvl`, and it fails every component of the bar.** AND rule against the agreement rule, non-overlapping:
+   57 % (n=101) vs 59 % at 21 sessions and 66 % (n=62) vs 61 % at 42 in 2010-26 (-1.5 / +5.5 points); -2.1 / +5.0 in 2016-26; -8.0 / +1.7 in 2023-26;
+   6.0 and 5.4 decisions a year; the 42-session gain is fully kept by the stale signal (+4.9 / +6.6 in 2010-26, +7.7 / +10.8 in 2016-26). Hit rate of its weekly
+   decisions (correct sign = positive net P&L to within one decision): 61 % (n=246) / 56 % (n=135) / 48 % (n=50) for 2010-26 / 2016-26 / 2023-26. Daily book:
+   net Sharpe 0.49 / 0.38 / 0.01 (t 2.0 / 1.3 / 0.0; deflated-Sharpe p 0.35 for 12 candidates) against 0.52 / 0.51 / 0.43 for the agreement-rule book it is a
+   subset of (daily P&L correlation 0.84). Three-way combination 0.60 / 0.63 / 0.28 against 0.56 / 0.64 / 0.36 for the two live streams: worse where it
+   matters. The Round 3 bar fails as well.
+6. **Round 7 controls: the signals are new, they are not price in disguise - and that does not help.** Trailing 1- and 3-month returns explain 0-7 % of
+   any signal's variance, all five controls 1-13 % (highest: the policy-surprise sums, which load on positioning and the spread trend, as the scoping note
+   expected). Standalone accuracy after orthogonalising stays within a few points of the raw number for every signal (section 6). Being uncorrelated with
+   what we have is necessary, not sufficient.
+7. **Leak checks pass** (section 10): permuted labels put every standalone rule at chance; a 21-session look-ahead does not improve anything materially;
+   the row of five dates rebuilt from raw data truncated at that date is identical for all 12 signals.
+
+**What to keep.** `data/macro/text_news_tone_daily.csv` as a CONTEXT panel for the weekly outlook ("how hawkish does each bank sound against its own
+history"), never as a vote. Current reading in section 11. `jk_cbi_6m` as a named control in the paper forward test if and when the ECB shock file is
+current. Variants tried: 12 (deflate by 12; none survives without deflation either).
+"""
+
+DATA_MD = r"""
+All files fetched 2026-11-11 / 12. Third-party copies (FOMC scrape, ECB speeches copy, SF Fed copy) are research-only. Cross-checks that were possible from
+this sandbox: the ECB tone from the BIS selection against the ECB's complete file (below); FOMC release dates are internally consistent (statements on the
+meeting day, minutes 21 days later from 2005 and 37-50 days later before, as the Fed's practice was); the BIS URL of every bulk speech carries the posting
+date, which gives the delay table below. Not possible: comparing the SF Fed copy with the official file (www.frbsf.org blocked) or the FOMC scrape with
+www.federalreserve.gov (blocked).
+
+Gaps and pitfalls:
+* **BIS coverage is a selection.** ECB: 30-60 speeches a year to 2006, 90-170 in 2007-20, 60-75 since 2021; Fed (incl. FOMC texts): 60-80 documents a
+  year to 2003, 75-135 since. Of the ECB press-conference statements the archive holds 7-13 a year in 2004-21 but only 4-7 a year since 2022. The bulk file (build of 2026-08-23) ends with speeches of 2026-06-22; later Fed and
+  ECB speeches come from the BIS listing pages (`bis_live`: HTML text, or the PDF where the page has only an abstract), which reach 2026-11-05 for the ECB
+  and 2026-10-14 for the Fed. www.bis.org cuts long transfers: the fetch resumes until every zip passes its CRC test.
+* **Only about two thirds of the speeches carry a tone** (at least 5 dictionary hits); the rest are about payments, supervision, digital money etc. and
+  are ignored. 156 of 227 FOMC statements pass (the short ones of 2000-08 and some recent ones have fewer than 5 hits); all 244 minutes do.
+* **The 30-day relative tone is undefined on 20 % of sessions** (fewer than two scored documents of one bank in the window: August, blackout periods,
+  the thin early ECB years); the 90-day tone on 1 %.
+* **SF Fed sentiment**: one vintage of a re-estimated index (not real-time), ends 2025-05-18: both news signals are undefined from 2025-06.
+* **EPU**: the monthly indices are revised and rescaled (current vintage used); Europe is monthly only, so the relative signal is monthly with a 30-day lag.
+* **JK shocks**: the first principal component is scaled on the full sample (units, not signs); the ECB file ends 2025-10-30, so all four surprise
+  signals are undefined from 2025-12-29 (60 days after the last row).
+"""
+
+DICT_MD = r"""
+**Citation and honesty note.** Construction principle: Apel & Blix Grimaldi (2012), "The information content of central bank minutes", Sveriges Riksbank
+Working Paper 261 (journal version: "How informative are central bank minutes?", Review of Economics 65(1), 2014) - directional words next to a small set
+of topic nouns, net index (hawk - dove) / (hawk + dove) - extended with outright stance terms in the manner of Bennani & Neuenkirch (2017, Applied
+Economics 49) and Tadle (2022, Journal of Economics and Business 118), an inverted slack group and a negation rule. The papers' own word lists could not be
+downloaded here (archive.riksbank.se is outside the allowed hosts), so **the English lists below are this arm's own, written from the published principle;
+they are not a verbatim copy of a published dictionary.** They were frozen before any return was looked at and were not touched afterwards: the tone score
+failed as a predictor and was left as it failed.
+
+Scoring: lower-case; merge the multi-word expressions; cut into sentences; (A) every topic noun takes the NEAREST direction word within 4 tokens in its
+sentence (the preceding one wins a tie): up = hawkish, down = dovish, reversed for the slack group, reversed again by a negator within 3 tokens before the
+direction word; (B) each outright term is one hit, the policy-conditioned verbs only with a policy word within 4 tokens, a dovish noun after a removal word
+is hawkish, a negator flips; document tone = (H - D) / (H + D) for documents with at least 5 hits. Institution tone = equal-weighted mean of the document
+tones of the last 30 (>= 2 documents) or 90 (>= 4) calendar days; z-score against the bank's own expanding history (>= 1,095 days); relative tone = z(Fed) -
+z(ECB). Fed = FOMC statements + minutes + speeches of Board members and Reserve Bank presidents; ECB = speeches of Executive Board members (incl. the
+press-conference statements BIS carries), excluding speakers named only as Supervisory Board.
+"""
+
+PRIORS_MD = r"""
+A positive value is a vote for long EUR/USD. `long share` and `sign flips` describe 2010-26. The priors were declared as written in the module docstring;
+two were flagged WEAK in advance (`gpr_d3m`, the two `jk_cbi_*`) and one has no prior at all (`tpu_d3m`: orientation = sign of the training-window
+covariance with the 21-session forward return, refitted each year; fitted orientations: + in 2010, - in 2011-12, + in 2013-22, - in 2023-25, + in 2026).
+EPUMONETARY (US monetary-policy uncertainty) is cached but was not made a candidate: no prior on its sign for the exchange rate and the budget was 12.
+"""
+
+RECON_MD = r"""
+The agreement rule (sign of `cot_z52`, of `d_spread2y_20` and of the walk-forward house score all equal) rebuilt with `selective.house_score_wf` and the
+selective evaluation helpers. Every cell is identical to arm N's report.
+"""
+
+STANDALONE_MD = r"""
+Direction = sign of the oriented signal on every session where it is defined (and the house score exists, i.e. 2010+). Non-overlapping = greedy sequential
+stream, plain Wilson interval. A no-skill caller sits at 50-52 % in these periods (base rate of up-moves 47-51 %).
+"""
+
+CONTROLS_MD = r"""
+Round 7 asks whether a new signal merely restates the agreement inputs or the recent price move. Controls: `cot_z52`, `d_spread2y_20`, the walk-forward
+house score, and EUR/USD's trailing 21- and 63-session returns. Orthogonalised signal = the signal minus the part an OLS fitted on rows before the test year
+attributes to the controls (the signal keeps its own zero point; the house score enters from 2013; `tpu_d3m` has residuals from 2013 only, hence its
+smaller n).
+"""
+
+EXTRA_MD = r"""
+(a) AND rule = the agreement rule speaks and the new signal votes the same way. The gain is against the agreement rule alone on all its decisions; the
+count of decisions per year is printed next to every accuracy, and the agreement rule itself has only 9.3 (21 sessions) and 5.3 (42 sessions) a year.
+(b) OUTSIDE = sessions on which the three old signals do not agree; the new signal alone gives the direction. (c) Paired bootstrap on the weekly grid.
+No signal extends coverage: outside the agreement every candidate is within its interval of 50 % in 2010-26 (best: `jk_cbi_3m` 57 % at 21 sessions, 50 % at
+42).
+"""
+
+SELECT_MD = r"""
+Declared rule: highest LOWER Wilson bound of the AND rule's 2010-15 non-overlapping 21-session accuracy among candidates with at least 6 such decisions a
+year in 2010-15. All 12 are eligible; the lower bounds are 0.35-0.46, i.e. the rule separates nothing: the three tone signals, `news_lvl` and the two
+3-month surprise sums are within 0.02 of each other.
+"""
+
+PLACEBO_MD = r"""
+Reading: a gain that survives when the signal is 3-6 months old is a regime, not information. `tone_rel_lvl` (the final), `news_d1m`, `epu_rel_d3m` and
+`jk_cbi_3m` keep or increase their "gain" when stale. `jk_cbi_6m` loses all of it in 2010-26 and about half in 2016-26, which is why it is called a lead in
+the verdict and why it still fails the placebo test; `gpr_d3m` loses its 42-session gain when stale but has none at 21 sessions.
+"""
+
+STREAM_MD = r"""
+Weekly tranches of each AND rule held 21 sessions (|position| <= 1), `wf.pnl_from_positions` at 1.2 pips per unit turnover, 2010-26. The final rule's book is
+a subset of the agreement-rule book and inherits its record; it does not beat it.
+"""
+
+LEAK_MD = r"""
+(1) With the labels permuted every rule sits at chance (shuffled mean 49-52 %). The AND rules beat the shuffle only because they inherit the agreement
+rule's skill. No standalone rule beats it at 21 sessions (p 0.07-0.77); `tone_rel_lvl` standalone is just above the shuffled 95th percentile at 42 and 63
+sessions on the weekly grid (55 % against 54-55 %; p 0.03-0.05), which is its 2010-15 regime effect. (2) Shifting the signal 21 sessions FORWARD in time (look-ahead)
+does not produce a result the live signal lacks; shifting it 1 / 5 / 21 sessions back barely moves the slow level and leaves the change signals at chance.
+(2b) The truncation test rebuilds all 12 signals from raw data cut at the date (documents published up to the day before, monthly indices by their lag,
+shocks up to the day before) and reproduces the stored row exactly on all five dates. (2c) Re-dating every speech by the day BIS posted it (stricter than
+the declared speech date + 1) changes nothing systematically. (3) The correlation table is in section 6: the largest correlations with the forward
+return are 0.11 at 21 sessions and 0.19-0.20 at 63 (`tone_rel_lvl`, `jk_cbi_3m`); nothing is a label in disguise.
+"""
+
+CURRENT_MD = r"""
+From `data/macro/text_news_tone_daily.csv` (row d = documents published up to and including d). **Context, not a vote** - the tests above give this reading
+no predictive value. As of the last rows: the Fed's 90-day tone is unusually hawkish against its own history (10 scored documents, the latest being the
+September minutes and a speech of 8 October; the October statement has fewer than 5 hits), the ECB's mildly so (13 scored documents to 5 November), so the
+RELATIVE tone is about +1.5 z (Fed more hawkish relative to the ECB) and about 1.4 higher than three months before; the 30-day comparison is undefined after
+5 November because BIS has posted no monetary Fed speech since mid-October. Under the declared prior that is a vote for a LOWER EUR/USD from the level and
+the 3-month change, and a marginal vote the other way from the 1-month change. The news-sentiment and policy-surprise signals are undefined today (copies
+end 2025-05 and 2025-10).
+"""
+
+TAIL_MD = r"""
+## 12. Variant count, replication, what was not done
+* **Variants: 12** candidate signals = 12 AND rules, all reported above; one final by the declared rule. The orthogonalised, shifted, re-dated and other-era
+  rows are controls of those 12 and were never selected from.
+* **Replication (round 6).** Other era: the standalone table for 2004-09 in section 5 (no test year, no selection). The only signal with a 2010-26 record,
+  `jk_cbi_6m`, is at 51 / 55 / 52 % there and at 45 / 45 / 40 % in 2010-15. Other pairs: not run. The shock series exist for the Fed and the ECB only, and a
+  relative tone for other pairs (Fed against the Bank of England, Bank of Japan, ... from the same BIS archive) would replicate a signal that has already
+  failed on the pair it was designed for.
+* **Not done:** a language-model tone score (the brief asked for a transparent fixed dictionary; a second scorer after seeing these results would be
+  tuning); Fed-only and ECB-only tone as separate candidates (budget of 12); intraday reaction to individual speeches (arm E found event reactions
+  unprofitable).
+* **Hosts that would improve the data:** `www.frbsf.org` (live news sentiment), `www.federalreserve.gov` and `www.ecb.europa.eu` (official texts on the day,
+  complete ECB press conferences, the EA-MPD file behind the ECB shocks), `archive.riksbank.se` (the original Apel-Blix Grimaldi word list).
+"""
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "report":
+        write_report()
+        print(f"report written: reports/arm_{ARM}.md")
+    else:
+        pos, rep, res = run_full()
+        print(res["selection"].round(3).to_string(index=False))
+        print("final:", res["final"], "|", res["final_status"])
+        print(res["bar"].round(3).to_string(index=False))
+        print(res["bar_verdict"])
+        write_report()
