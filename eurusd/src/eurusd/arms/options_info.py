@@ -972,3 +972,264 @@ if __name__ == "__main__":
                                 "by_year", "hit", "leak", "incremental", "corr", "report", "cat", "ivchk", "book_diff")}
     with open(RES / "logs" / f"{ARM}_tables.pkl", "wb") as fh:
         pickle.dump(keep, fh)
+
+
+# ================================================================ report (reports/arm_options_info.md)
+def data_quality() -> dict:
+    """Data-quality tables for the report (no accuracy): spans, gaps, stale runs, the sign-convention episodes."""
+    rr = pd.read_csv(MACRO / f"{ARM}_rr25.csv", parse_dates=["date"]).set_index("date")
+    s = rr["rr25_1m_eurusd"].dropna()
+    gaps = s.index.to_series().diff().dt.days
+    bd = pd.bdate_range(s.index[0], s.index[-1]).difference(s.index)
+    run = (s.diff() != 0).cumsum()
+    rl = s.groupby(run).size()
+    long_runs = [(s[run == r].index[0], int(rl[r])) for r in rl[rl >= 5].index]
+    by = pd.DataFrame({"values": s.groupby(s.index.year).size(), "missing business days": pd.Series(1, index=bd).groupby(bd.year).sum(),
+                       "runs of >= 5 identical values": pd.Series(1, index=[d.year for d, _ in long_runs]).groupby(level=0).sum(),
+                       "share quoted in 0.05 steps": ((s * 20).round(6) % 1 == 0).groupby(s.index.year).mean().round(2),
+                       "mean": s.groupby(s.index.year).mean().round(2), "min": s.groupby(s.index.year).min().round(2),
+                       "max": s.groupby(s.index.year).max().round(2)}).fillna(0)
+    for c in ("values", "missing business days", "runs of >= 5 identical values"):
+        by[c] = by[c].astype(int)
+    ep = [("2008-10-27", "Lehman aftermath, dollar squeeze, EUR/USD 1.60 -> 1.25", "-"), ("2010-06-04", "Greek crisis, EUR/USD at 1.19", "-"),
+          ("2011-11-09", "Italian yields above 7 %, euro break-up fear", "-"), ("2015-01-16", "day after the SNB floor exit, a week before ECB QE", "-"),
+          ("2016-06-14", "ahead of the UK referendum (1M tenor spans the vote)", "-"), ("2017-04-18", "ahead of the French election first round", "-"),
+          ("2017-04-24", "the day after the first round (Macron first): put premium collapses", "up"),
+          ("2020-03-09", "carry unwind / EUR short squeeze, EUR/USD spikes to 1.14-1.15", "+"), ("2020-03-20", "dollar funding squeeze, EUR/USD back to 1.07", "-"),
+          ("2022-03-04", "Ukraine invasion, EUR/USD below 1.10", "-"), ("2025-04-11", "April 2025 dollar sell-off, EUR/USD through 1.13", "+")]
+    D = pd.read_parquet(SL.FEATURES, columns=["close", "close_time"])
+    ny = pd.Series(D["close"].values, index=_cdate(D))
+    rows = []
+    for d, what, exp in ep:
+        d0 = pd.Timestamp(d)
+        rows.append({"date": d, "episode": what, "expected sign": exp, "RR 1M 25d": round(float(s.asof(d0)), 2), "change over 5 sessions": round(float(s.asof(d0) - s.shift(5).asof(d0)), 2),
+                     "EUR/USD 21-session return, %": round(float(100 * np.log(ny.asof(d0) / ny.shift(21).asof(d0))), 1)})
+    j = pd.concat([s.diff(), np.log(ny).diff()], axis=1, sort=True).dropna()
+    j.columns = ["drr", "ret"]
+    lead = {k: float(j["drr"].corr(j["ret"].shift(-k))) for k in (-2, -1, 0, 1, 2)}
+    iv = pd.read_csv(MACRO / f"{ARM}_iv.csv", parse_dates=["date"]).set_index("date")
+    px = pd.concat([iv["atm_file_spot"], ny], axis=1, sort=True).dropna()
+    px.columns = ["file", "ny"]
+    r1, r2 = np.log(px["file"]).diff(), np.log(px["ny"]).diff()
+    e = iv["evz"].dropna()
+    st = iv["evz_stale_run"].dropna()
+    cf = pd.read_csv(MACRO / f"{ARM}_cftc_options.csv", parse_dates=["report_date"]).set_index("report_date")
+    y = cf[cf.index.year >= 2010]
+    return {"rr_by_year": by, "episodes": pd.DataFrame(rows), "rr_n": len(s), "rr_nan_rows": int(rr["rr25_1m_eurusd"].isna().sum()),
+            "rr_gaps": [(str(d.date()), int(g)) for d, g in gaps[gaps > 5].items()], "rr_long_runs": [(str(d.date()), n) for d, n in long_runs],
+            "rr_lead": lead, "rr_big_moves": s.diff().abs().sort_values().tail(4).round(2).to_dict(),
+            "px_median_pips": float((px["file"] - px["ny"]).abs().median() * 1e4), "px_corr": {k: float(r1.corr(r2.shift(-k))) for k in (-1, 0, 1)},
+            "px_n": len(px), "evz_n": len(e), "evz_stale_share": (st >= 4).groupby(st.index.year).mean().round(2).to_dict(),
+            "evz_max_run": int(st.max()), "atm_n": int(iv["atm_1m"].notna().sum()),
+            "cftc_weeks": len(cf), "cftc_tff_weeks": int(cf["c_tff_oi"].notna().sum()), "cftc_oi_violations": int((cf["c_oi"] < cf["f_oi"]).sum()),
+            "opt_oi_share": float((y["opt_oi"] / y["f_oi"]).median()), "opt_sd": float(y["opt_nc_net_pct_fut_oi"].std()), "fut_sd": float(y["fut_nc_net_pct_fut_oi"].std()),
+            "opt_fut_corr": float(y["opt_nc_net_pct_fut_oi"].corr(y["fut_nc_net_pct_fut_oi"])),
+            "lev_corr": float(y["opt_lev_net"].corr(y["f_lev_long"] - y["f_lev_short"]))}
+
+
+def _c(r, ci: bool = True, py: bool = True) -> str:
+    if r is None or not np.isfinite(r.get("accuracy", np.nan)):
+        return "-"
+    s = f"{100 * r['accuracy']:.0f}"
+    if ci:
+        s += f" [{100 * r['lo']:.0f}-{100 * r['hi']:.0f}]"
+    s += f" n={int(r['n'])}"
+    if py:
+        s += f" ({r['dec_per_year']:.1f}/y)"
+    return s
+
+
+def _grid(V: pd.DataFrame, rules, mode: str, period: str, sigs=None, hs=HORIZONS, ci=True, py=True, short=None) -> pd.DataFrame:
+    rows = []
+    for nm in (sigs or NAMES):
+        r = {"signal": nm}
+        for rule in rules:
+            for h in hs:
+                lab = (short or {}).get(rule, rule)
+                r[f"{lab} {h}"] = _c(_cell(V, signal=nm, rule=rule, h=h, mode=mode, period=period), ci, py)
+        rows.append(r)
+    return pd.DataFrame(rows)
+
+
+def write_report(K: dict | None = None, path: Path | None = None) -> str:
+    import pickle
+    if K is None:
+        with open(RES / "logs" / f"{ARM}_tables.pkl", "rb") as fh:
+            K = pickle.load(fh)
+    V, B, P = K["V"], K["bar_all"], K["paired"]
+    Q = data_quality()
+    chk = {k: (float(v) if str(v).replace(".", "", 1).replace("-", "", 1).isdigit() else v) for k, v in K["ivchk"].items()}
+    md = lambda d, **kw: d.to_markdown(index=False, **kw)  # noqa: E731
+    out = [HEAD_MD, VERDICT_MD]
+    # ---- 1 data
+    out.append("## 1 Data: provenance, sign convention, gaps\n")
+    out.append(md(K["cat"]))
+    out.append(DATA_MD.format(rr_n=Q["rr_n"], rr_nan=Q["rr_nan_rows"], gaps=", ".join(f"{d} ({g} d)" for d, g in Q["rr_gaps"]),
+                              nruns=len(Q["rr_long_runs"]), lastrun=Q["rr_long_runs"][-1][0], maxrun=max(n for _, n in Q["rr_long_runs"]),
+                              l_2=Q["rr_lead"][-2], l_1=Q["rr_lead"][-1], l0=Q["rr_lead"][0], l1=Q["rr_lead"][1], l2=Q["rr_lead"][2],
+                              pxm=Q["px_median_pips"], pxn=Q["px_n"], pc_1=Q["px_corr"][-1], pc0=Q["px_corr"][0], pc1=Q["px_corr"][1]))
+    out.append("**Sign-convention check** (value of the series on dates whose skew direction is known from the event):\n")
+    out.append(md(Q["episodes"]))
+    out.append("\n**Risk reversal by year** (EUR/USD column of the file):\n")
+    out.append(md(Q["rr_by_year"].reset_index().rename(columns={"index": "year", "date": "year"})))
+    out.append(IV_MD.format(n=int(chk["overlap_days"]), a=chk["overlap_first"], b=chk["overlap_last"], cl=chk["corr_level"], c1=chk["corr_d1"], c5=chk["corr_d5"],
+                            c21=chk["corr_d21"], rm=chk["ratio_median_all"], r05=chk["ratio_p05"], r95=chk["ratio_p95"], k=chk["ratio_used_last250"],
+                            m250=chk["mapped_minus_atm_mean_last250"], s250=chk["mapped_minus_atm_sd_last250"], mall=chk["mapped_minus_atm_mean_all"],
+                            sall=chk["mapped_minus_atm_sd_all"], ry=", ".join(f"{k[6:]} {float(v):.2f}" for k, v in chk.items() if k.startswith("ratio_2")),
+                            st=", ".join(f"{y} {100 * v:.0f} %" for y, v in Q["evz_stale_share"].items() if v > 0), mr=Q["evz_max_run"]))
+    out.append(CFTC_MD.format(w=Q["cftc_weeks"], tw=Q["cftc_tff_weeks"], viol=Q["cftc_oi_violations"], sh=100 * Q["opt_oi_share"], so=100 * Q["opt_sd"],
+                              sf=100 * Q["fut_sd"], c=Q["opt_fut_corr"], lc=Q["lev_corr"]))
+    # ---- 2 priors
+    out.append("## 2 The 12 candidates and their priors (fixed before any result; citations in the module docstring and at the end)\n")
+    out.append(md(pd.DataFrame([{"#": i + 1, "signal": s[0], "family": s[1], "type": s[2], "prior (positive = long EUR/USD)": s[3]} for i, s in enumerate(SIGNALS)])))
+    out.append(PRIORS_MD)
+    # ---- 3 reconciliation
+    x = V[(V.signal == "-") & (V["mode"] == "nonoverlap")]
+    rec = pd.DataFrame([{"period": lab, **{f"{h} sessions": _c(_cell(x, h=h, period=lab)) for h in (10, 21, 42, 63)}} for lab in ("2010-26", "2016-26", "2023-26")])
+    out.append("## 3 Reconciliation with arm N\n\nThe agreement rule rebuilt here (non-overlapping decisions; accuracy % [Wilson 95 %] n (decisions a year)):\n")
+    out.append(md(rec))
+    out.append(RECON_MD)
+    # ---- 4 standalone
+    out.append("## 4 Standalone accuracy of each signal (direction = sign of the vote)\n")
+    for lab in ("2010-26", "2016-26", "2023-26"):
+        out.append(f"\n**Non-overlapping decisions, {lab}** (accuracy % [Wilson 95 %] n (decisions a year)):\n")
+        out.append(md(_grid(V, ["standalone"], "nonoverlap", lab, short={"standalone": "h"})))
+    for lab in ("2010-26", "2016-26", "2023-26"):
+        out.append(f"\n**Weekly decisions, {lab}** (accuracy % [Newey-West effective-n interval] n; live, then 63 and 126 sessions stale):\n")
+        g = _grid(V, ["standalone"], "weekly", lab, short={"standalone": "live"}, py=False)
+        for k in PLACEBO_SHIFTS:
+            g2 = _grid(V, [f"standalone_shift{k:+d}"], "weekly", lab, ci=False, py=False, short={f"standalone_shift{k:+d}": f"stale{k}"})
+            g = g.merge(g2, on="signal")
+        out.append(md(g))
+    out.append(STANDALONE_MD)
+    # ---- 5 controls
+    out.append("## 5 Round 7 controls: is it new, or the price move restated?\n")
+    C = K["controls"].copy()
+    cc = C[["signal", "variable", "last", "votes_2010-26", "share_long", "sign_flips_per_year", "corr_cot_z52", "corr_d_spread2y_20", "corr_house_score",
+            "corr_ret_21d", "corr_ret_63d", "r2_on_spot_21_63", "sign_agree_cot", "sign_agree_spr", "sign_agree_house"]].round(2)
+    out.append("Correlations on 2010-26 sessions (Pearson, of the continuous variable behind each signal; `sign_agree_*` = share of sessions on which the vote has the sign of that old input):\n")
+    out.append(md(cc))
+    for lab in ("2010-26", "2016-26"):
+        out.append(f"\n**Raw against orthogonalised, {lab}** (weekly decisions, accuracy % n; `sa` = standalone, `and` = extra vote on the agreement rule):\n")
+        g = _grid(V, ["standalone", "orth_standalone", "and", "orth_and"], "weekly", lab, sigs=[n for n in NAMES if KIND[n] != "gate"], ci=False, py=False,
+                  short={"standalone": "sa", "orth_standalone": "sa orth", "and": "and", "orth_and": "and orth"})
+        out.append(md(g))
+        out.append(f"\n**The same on non-overlapping decisions, {lab}:**\n")
+        g = _grid(V, ["standalone", "orth_standalone", "and", "orth_and"], "nonoverlap", lab, sigs=[n for n in NAMES if KIND[n] != "gate"], ci=False, py=False,
+                  short={"standalone": "sa", "orth_standalone": "sa orth", "and": "and", "orth_and": "and orth"})
+        out.append(md(g))
+    out.append(CONTROLS_MD)
+    # ---- 6 extra vote
+    out.append("## 6 Each signal as an EXTRA VOTE on the agreement rule\n")
+    out.append("### (a) AND rule against the agreement rule, non-overlapping decisions (the measure of the bar)\n")
+    b = B[B.h.isin([21, 42])].copy()
+    tb = pd.DataFrame({"signal": b["signal"], "h": b["h"], "period": b["period"],
+                       "agreement, same span": [f"{100 * a:.0f} n={n}" if np.isfinite(a) else "-" for a, n in zip(b["same_span_acc"], b["same_span_n"])],
+                       "AND rule": [f"{100 * a:.0f} [{100 * lo:.0f}-{100 * hi:.0f}] n={n} ({py:.1f}/y)" if np.isfinite(a) else f"- n={n}"
+                                    for a, lo, hi, n, py in zip(b["and_acc"], b["and_lo"], b["and_hi"], b["and_n"], b["and_per_year"])],
+                       "gain, pts": b["gain_pts"].round(1), "gain vs full-period agreement": b["gain_vs_full_pts"].round(1),
+                       "63 stale: acc n": [f"{100 * a:.0f} n={n}" if np.isfinite(a) else "-" for a, n in zip(b["placebo63_acc"], b["placebo63_n"])],
+                       "63 stale gain": b["placebo63_gain_pts"].round(1),
+                       "126 stale: acc n": [f"{100 * a:.0f} n={n}" if np.isfinite(a) else "-" for a, n in zip(b["placebo126_acc"], b["placebo126_n"])],
+                       "126 stale gain": b["placebo126_gain_pts"].round(1)})
+    out.append(md(tb))
+    out.append("\n**Bar, cell by cell** (gain >= 3 pts at 21 and 42 sessions in 2010-26 and 2016-26; >= 6 non-overlapping 21-session decisions a year; not worse in 2023-26; "
+               "each stale copy keeps at most half of the gain):\n")
+    out.append(md(K["bar_verdict_all"]))
+    out.append("\n### The same on weekly decisions (accuracy % n; `same span` = agreement rule where the signal is defined, `contra` = agreement calls the signal contradicts)\n")
+    for lab in ("2010-26", "2016-26", "2023-26"):
+        out.append(f"\n*{lab}*\n")
+        g = _grid(V, ["agree3_same_span", "and", "and_shift+63", "and_shift+126", "agree3_contradicted"], "weekly", lab, hs=(21, 42, 63), ci=False, py=False,
+                  short={"agree3_same_span": "same span", "and": "AND", "and_shift+63": "stale63", "and_shift+126": "stale126", "agree3_contradicted": "contra"})
+        out.append(md(g))
+    out.append("\n### (c) Paired differences, weekly grid, circular block bootstrap (2000 draws; points; p = share of draws <= 0, one-sided, NOT adjusted for 12 candidates)\n")
+    p = P[P.period.isin(["2010-26", "2016-26"])].copy()
+    pt = pd.DataFrame({"signal": p["signal"], "h": p["h"], "period": p["period"], "AND acc n": [f"{100 * a:.1f} n={n}" if np.isfinite(a) else f"- n={n}" for a, n in zip(p["acc_and"], p["n_and"])],
+                       "agreement same span": [f"{100 * a:.1f} n={n}" if np.isfinite(a) else "-" for a, n in zip(p["acc_agree_same_span"], p["n_agree_same_span"])],
+                       "AND - agreement": [f"{100 * d:+.1f} [{100 * lo:+.1f}, {100 * hi:+.1f}] p={q:.2f}" if np.isfinite(d) else "-" for d, lo, hi, q in zip(p["diff"], p["diff_lo"], p["diff_hi"], p["p_le0"])],
+                       "contradicted acc n": [f"{100 * a:.1f} n={n}" if np.isfinite(a) else f"- n={n}" for a, n in zip(p["acc_contradicted"], p["n_contradicted"])],
+                       "confirmed - contradicted": [f"{100 * d:+.1f} [{100 * lo:+.1f}, {100 * hi:+.1f}] p={q:.2f}" if np.isfinite(d) else "-" for d, lo, hi, q in zip(p["split"], p["split_lo"], p["split_hi"], p["split_p_le0"])]})
+    out.append(md(pt))
+    out.append("\n### (b) Does the signal extend coverage? Calls on sessions where the three old signals do NOT agree (non-overlapping; live, 63 and 126 sessions stale)\n")
+    for lab in ("2010-26", "2016-26"):
+        out.append(f"\n*{lab}*\n")
+        g = _grid(V, ["outside", "outside_shift+63", "outside_shift+126"], "nonoverlap", lab, sigs=[n for n in NAMES if KIND[n] != "gate"], ci=False, py=False,
+                  short={"outside": "live", "outside_shift+63": "stale63", "outside_shift+126": "stale126"})
+        g1 = _grid(V, ["outside"], "nonoverlap", lab, sigs=[n for n in NAMES if KIND[n] != "gate"], short={"outside": "live"})
+        for h in HORIZONS:
+            g[f"live {h}"] = g1[f"live {h}"]
+        out.append(md(g))
+    out.append("\n### VRP as a conditioning variable\n\nThe agreement rule on each side of the VRP state (implied minus realised above / below its trailing-252 mean), fixed split, no selection:\n")
+    x = V[V.signal == "vrp_state"]
+    rows = []
+    for mode in ("weekly", "nonoverlap"):
+        for lab in ("2010-26", "2016-26", "2023-26"):
+            r = {"decisions": mode, "period": lab}
+            for side in ("vrp_high", "vrp_low"):
+                for h in HORIZONS:
+                    r[f"{side} {h}"] = _c(_cell(x, rule=f"agree3_{side}", h=h, mode=mode, period=lab), ci=(mode == "nonoverlap"), py=False)
+            rows.append(r)
+    out.append(md(pd.DataFrame(rows)))
+    out.append("\nSide chosen for candidate 8 from the training window (weekly 21-session agreement calls with a label known before the test year):\n")
+    out.append(md(K["gate_log"].round(3)))
+    out.append(EXTRA_MD)
+    # ---- 7 selection and final
+    out.append("## 7 Selection by the declared rule, and the final rule's record\n")
+    out.append(md(K["selection"].round(3)))
+    out.append(f"\n**Final: `and_{K['final']}`** - {K['final_status']}.\n")
+    fb = B[B.signal == K["final"]]
+    out.append(md(fb[["h", "period", "agree3_acc", "agree3_n", "same_span_acc", "same_span_n", "and_acc", "and_lo", "and_hi", "and_n", "and_per_year", "gain_pts",
+                      "placebo63_gain_pts", "placebo126_gain_pts"]].round(3)))
+    out.append("\nHit rate of the final rule's weekly decisions (21-session hold; gross = correct sign, net = positive after a 2.4-pip round trip):\n")
+    out.append(md(K["hit"].round(3)))
+    out.append("\nBy year (weekly decisions):\n")
+    out.append(md(K["by_year"][["year", "decisions", "long_share", "accuracy", "net_bp", "agree3_decisions", "agree3_accuracy"]].round(3)))
+    # ---- 8 daily stream
+    out.append("\n## 8 Daily stream and the incremental test (round 3 addendum)\n")
+    R = K["report"]
+    piv = R[R.period.isin(["2010-2015", "2010-2026", "2016-2026", "2023-2026"])].pivot(index="variant", columns="period", values="sharpe").round(2)
+    live = piv[~piv.index.str.contains("stale")].reset_index()
+    out.append("Net Sharpe at 1.2 pips of each AND rule as a book of weekly tranches held 21 sessions:\n")
+    out.append(md(live))
+    st = piv[piv.index.str.contains("stale")].reset_index()
+    out.append("\nThe same books with the signal 63 / 126 sessions stale:\n")
+    out.append(md(st))
+    f = R[(R["final"]) & R.period.isin(["2010-2026", "2016-2026", "2023-2026"])][["period", "n", "sharpe", "t", "mean_bp", "active_frac", "deflated_sharpe_p"]].round(3)
+    out.append("\nFinal stream:\n")
+    out.append(md(f))
+    out.append("\nCombination (meta.combine, EW) and daily P&L correlation of the final stream:\n")
+    out.append(md(K["incremental"][["combo", "period", "sharpe", "t"]].round(3)))
+    out.append("")
+    out.append(md(K["corr"].round(2)))
+    out.append("\nDaily net P&L of each AND book MINUS the agreement-rule book (bp a day, Newey-West t with 21 lags):\n")
+    out.append(md(K["book_diff"].round(2)))
+    out.append(STREAM_MD)
+    # ---- 9 replication
+    out.append("## 9 Replication of the risk-reversal rules on USD/JPY and EUR/JPY (same file, identical rules, Fed H.10 noon rates)\n")
+    J = K["jpy"].copy()
+    J["cell"] = [f"{100 * a:.0f} n={n}" if np.isfinite(a) else "-" for a, n in zip(J["accuracy"], J["n"])]
+    for lab in ("2010-26", "2016-26"):
+        x = J[J.period == lab].pivot_table(index=["pair", "signal", "shift"], columns=["mode", "h"], values="cell", aggfunc="first")
+        x.columns = [f"{m} {h}" for m, h in x.columns]
+        out.append(f"\n*{lab}* (shift = sessions the signal is made stale)\n")
+        out.append(md(x.reset_index()))
+    out.append(JPY_MD)
+    # ---- 10 leak checks
+    out.append("## 10 Leak checks\n\n**(1) Labels permuted** (300 draws, weekly decisions 2010-26):\n")
+    out.append(md(K["leak"]["shuffle"].round(3)))
+    out.append("\n**(2) Shifted signal** (weekly decisions 2010-26, accuracy % n; +k = k sessions staler, -21 = LOOK-AHEAD of 21 sessions):\n")
+    sh = {"and": "AND live", "and_shift+1": "+1", "and_shift+5": "+5", "and_shift+21": "+21", "and_shift-21": "-21 (look-ahead)"}
+    out.append(md(_grid(V, list(sh), "weekly", "2010-26", hs=(21,), ci=False, py=False, short=sh)))
+    sh = {"standalone": "standalone live", "standalone_shift+1": "+1", "standalone_shift+5": "+5", "standalone_shift+21": "+21", "standalone_shift-21": "-21 (look-ahead)"}
+    out.append("")
+    out.append(md(_grid(V, list(sh), "weekly", "2010-26", sigs=[n for n in NAMES if KIND[n] != "gate"], hs=(21,), ci=False, py=False, short=sh)))
+    out.append("\n**Truncation test** (raw files cut at the date under the declared lags; the row of that date rebuilt and compared):\n")
+    out.append(md(K["leak"]["truncation"]))
+    out.append("\n**(3) What the signals are** - correlation of each with the FORWARD return (2010-26, daily sessions):\n")
+    out.append(md(K["controls"][["signal", "variable", "corr_fwd21", "corr_fwd63", "corr_ret_21d", "corr_ret_63d"]].round(3)))
+    out.append(LEAK_MD)
+    out.append(TAIL_MD)
+    txt = "\n".join(out) + "\n"
+    path = path or ROOT / "reports" / f"arm_{ARM}.md"
+    path.write_text(txt)
+    return txt
