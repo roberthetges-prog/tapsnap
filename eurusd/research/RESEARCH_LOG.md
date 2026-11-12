@@ -18,6 +18,8 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
 
 | 6 | policy-divergence replication across G10 (7): FAILS; analog / nearest-neighbour 'history rhymes' forecasting (12, strict 36): FAILS; data scoping (36 sources, no backtest) | 43 | none |
 
+| 7 | official and portfolio flows (12): FAILS ... (options, text/news pending) | 12+ | none so far |
+
 ## What is established
 * Predictable: slow macro drift and speculative positioning (direction, weakly); volatility and range (strongly).
 * Not predictable after costs: technical patterns, intraday direction, event reactions, regimes, non-linear ML on
@@ -79,6 +81,9 @@ without passing; survivors enter the paper forward test as NEW named scenarios s
   analogs one way' came true 45-49 %); the FARTHEST dates forecast as well as the nearest (no stable state-to-outcome
   mapping); 20 neighbours rest on 4-12 independent episodes. Only positioning and agreement-input states beat chance, and
   less than the plain signs. `explain()` kept as a 'what followed last time' context panel, never as a probability.
+* Official and portfolio flows (Fed custody holdings, swap lines, foreign repo pool, ECB BoP portfolio flows, TIC, SPF
+  consensus): 40-57 % at 1-3 months; they FOLLOW the exchange rate (custody rises after EUR/USD strength, TIC follows
+  dollar weakness, EA flows are coincident); independent of the agreement inputs but uninformative; no extra vote passes.
 * Positioning: the level is the signal; no trader group is specially informed; robust to z-window and to delays.
 * A six-month record cannot separate skill from luck (see reports/scenario_replay.md).
 * **Positioning does not replicate (reports/arm_g10_positioning.md).** The identical rule on GBP, JPY, CHF, AUD, CAD, NZD,

@@ -1,0 +1,13 @@
+signal,gain_ok,count21_ok,count42_ok,not_worse_2023,placebo_ok,met
+rr_fade_extreme,False,False,False,False,False,False
+rr_z_follow,False,True,False,False,False,False
+rr_d21,False,True,False,False,False,False
+rr_spot_div,False,False,False,False,False,False
+rr_orth,False,True,False,False,False,False
+vrp_level,False,False,False,False,False,False
+vrp_d21,False,True,False,False,False,False
+agree3_vrp_gate,False,False,False,False,False,False
+ts_slope,False,False,False,False,False,False
+opt_nc_z52,False,False,False,False,False,False
+opt_fut_div,False,False,False,False,False,False
+opt_lev_z52,False,True,False,False,False,False

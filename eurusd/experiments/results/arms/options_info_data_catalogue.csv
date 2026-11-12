@@ -1,0 +1,8 @@
+file,column,rows,first,last,source,fetched
+data/macro/options_info_rr25.csv,rr25_1m_eurusd,5874,2003-10-02,2026-07-29,https://raw.githubusercontent.com/GerardWu100/geographic-equity-rotation/main/data/RiskReversalData_Clean.csv,2026-11-11
+data/macro/options_info_iv.csv,atm_1m,5761,2000-01-25,2022-02-22,https://raw.githubusercontent.com/frederikbachdk/FXVolTrading/master/data/EURUSD.csv,2026-11-11
+data/macro/options_info_iv.csv,atm_1y,5761,2000-01-25,2022-02-22,https://raw.githubusercontent.com/frederikbachdk/FXVolTrading/master/data/EURUSD.csv,2026-11-11
+data/macro/options_info_iv.csv,evz,4360,2007-11-01,2025-03-11,https://fred.stlouisfed.org/graph/fredgraph.csv?id=EVZCLS,2026-11-11
+data/macro/options_info_iv.csv,iv_1m,6525,2000-01-25,2025-03-11,stitched,2026-11-11
+data/macro/options_info_cftc_options.csv,opt_nc_net,1453,1999-01-05,2026-11-03,https://www.cftc.gov/files/dea/history/deahistfo*.zip,2026-11-11
+data/macro/options_info_cftc_options.csv,opt_lev_net,1065,2006-06-13,2026-11-03,"https://www.cftc.gov/files/dea/history/fin_com_txt_2006_2016.zip, com_fin_txt_*.zip",2026-11-11
