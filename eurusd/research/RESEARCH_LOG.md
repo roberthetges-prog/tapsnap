@@ -237,6 +237,31 @@ away untouched within 10 sessions 69 % / 87 %; within 21 sessions 52 % / 71 %). 
   EUR/USD-specific and must be labelled so.
 Status: RUNNING.
 
+## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
+Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
+and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
+desk of 12 of 74 evidence columns, its own research rule, learner, memory and volatility gauge; every bot must vote).
+Test `experiments/72_bots.py`, report `reports/bots.md`, command `cli vote`.
+* DIRECTION: the majority was right 50.3 / 52.0 / 53.2 % at 5 / 21 / 63 sessions (2010-26; 856 / 202 / 67 independent
+  votes), 48.6 / 50.3 / 56.1 % since 2016, 48.5 / 47.0 / 56.1 % since 2023. A bigger majority is no more reliable
+  (21 sessions: thin 51.5, fair 49.7, wide 53.6, very wide 55.9 %). The count is not a probability: when 60-69 bots
+  voted UP the pair rose 37 % of the time at 21 sessions. Median single bot 50-52 %; bots' votes correlate 0.13-0.17.
+* Why below the hand-built committee's 59 %: the committee's analysts were chosen with hindsight (house signs); bots
+  that must find their evidence themselves have none. 52 % is the honest size and matches the out-of-time planning
+  figure from round 9.
+* Track-record weights: +3.7 / +1.8 points in 2010-17 but -1.3 / -1.9 in 2018-26. Equal vote stays.
+* LEVELS (each bot scales the lowest low / highest high of its memory by its own volatility gauge; median of 100):
+  the lower level held 79.1 / 78.0 / 78.0 % and the upper 80.7 / 82.1 / 82.3 % at 5 / 21 / 63 sessions (target 80 %),
+  within 4 points in every era except 63 sessions since 2023 (89 / 74 % on 15 independent periods). Both held about
+  60 %. Levels that ignore current volatility are 12-18 % wider and hold 92 % in calm markets but 80 % in volatile
+  ones. In the worst single year a level held only 58-70 % (21 sessions) and 33-39 % (63 sessions): a trending year.
+Decision: `cli vote` is the product read-out the owner asked for; it prints the count next to its measured worth and
+the levels next to theirs. The weekly outlook carries the vote line instead of the committee line.
+
+## Product definition (owner, 2026-11-17, supersedes the next section where they differ)
+No entries, no take-profit, no stop. Output = direction (the vote count of 100 bots) and a lower and an upper level,
+for one week, one month and three months.
+
 ## Product definition (owner, 2026-11-11)
 Directional POSITION trading: hold for weeks up to a month or more, a few decisions a month, each with a calibrated
 probability; act when P >= 60 % (target band 60-80 %). Not day trading. Backtesting on history is the research engine;

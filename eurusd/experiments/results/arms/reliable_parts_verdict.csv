@@ -1,0 +1,19 @@
+item,value
+A_own_fit_pairs_passing,1
+A_own_fit_PASS,False
+A_frozen_pairs_passing,1
+A_frozen_PASS,False
+A_usd_flag_pairs_passing,1
+B_level_pairs_within_4_per_odds,"{'h10_k2': 6, 'h10_k3': 6, 'h21_k2': 6, 'h21_k3': 6}"
+B_level_PASS,True
+B_stability_cells_stable,21
+B_stability_cells,24
+B_stability_PASS,False
+B_PASS,False
+B_weekly_level_pairs_within_4_per_odds,"{'h10_k2': 6, 'h10_k3': 6, 'h21_k2': 6, 'h21_k3': 6}"
+B_weekly_stability_cells_stable,20
+B_eur_stability_cells_stable,4
+arithmetic_pairs_inside_surrogate_per_odds,"{'h10_k2': 6, 'h10_k3': 6, 'h21_k2': 6, 'h21_k3': 6}"
+arithmetic,True
+candidates,11
+B_stability_noise,"{'expected_unstable_cells_of_24': 3.5300000000000002, 'p_all_24_stable': 0.05505531656625001, 'p_at_least_observed': 0.637720231189375, 'observed_unstable_cells': 3}"

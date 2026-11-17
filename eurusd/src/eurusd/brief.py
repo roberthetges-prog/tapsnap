@@ -281,10 +281,10 @@ def weekly_outlook(refresh: bool = True) -> str:
     except Exception as e:
         L.append(f"(position call unavailable: {e})")
     try:
-        from . import committee as _CM
-        L.append(_CM.one_line(_CM.live(refresh=False)))
+        from . import bots as _BT
+        L.append(_BT.one_line(_BT.live(refresh=False)) + " | direction ~52 % (coin flip), each level holds ~80 %")
     except Exception as e:
-        L.append(f"(committee unavailable: {type(e).__name__}: {str(e)[:100]})")
+        L.append(f"(vote unavailable: {type(e).__name__}: {str(e)[:100]})")
     L.append("Events this week: " + ("; ".join(f"{r.event} {r.time:%a %H:%M}Z" for r in key.itertuples()) if not key.empty else "none high-impact"))
     L.append("Honesty note: the tilt's historical weekly hit rate is ~52-55 %; the cone is where most movement lies.")
     try:

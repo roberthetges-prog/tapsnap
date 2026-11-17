@@ -137,6 +137,23 @@ def cmd_committee(a):
             print(d[["analyst", "school", "vote", "p_up", "what"]].to_string(index=False))
 
 
+def cmd_vote(a):
+    from . import bots as BT
+    o = BT.live(refresh=not a.no_refresh)
+    if a.json:
+        print(json.dumps(o, indent=1, default=str))
+        return
+    print(BT.format_vote(o))
+    if a.all:
+        import pandas as pd
+        for h, r in o["horizons"].items():
+            d = pd.DataFrame(r["bots"])
+            d["p_up"] = (100 * d["p_up"]).round(1)
+            d["trusts"] = d["trusts"].map(lambda x: ", ".join(str(c).replace("x_", "") for c in x))
+            print(f"\n--- all {len(d)} bots, {h} sessions ---")
+            print(d[["bot", "vote", "p_up", "learner", "memory", "research", "lower", "upper", "trusts"]].round(4).to_string(index=False))
+
+
 def cmd_risk(a):
     eng, _ = _engine(a)
     txt = eng.report()
@@ -195,6 +212,8 @@ def main(argv=None):
     sc = sub.add_parser("scenarios"); sc.add_argument("--review", action="store_true", help="apply the keep/dispose rule"); sc.set_defaults(f=cmd_scenarios)
     cm = sub.add_parser("committee"); cm.add_argument("--no-refresh", action="store_true"); cm.add_argument("--json", action="store_true")
     cm.add_argument("--all", action="store_true", help="list every analyst's vote"); cm.set_defaults(f=cmd_committee)
+    vt = sub.add_parser("vote"); vt.add_argument("--no-refresh", action="store_true"); vt.add_argument("--json", action="store_true")
+    vt.add_argument("--all", action="store_true", help="list every bot's vote and levels"); vt.set_defaults(f=cmd_vote)
     r = sub.add_parser("risk"); r.add_argument("--asof"); r.add_argument("--no-refresh", action="store_true"); r.add_argument("--out"); r.set_defaults(f=cmd_risk)
     k = sub.add_parser("book"); k.add_argument("action", choices=["show", "add", "close", "equity"]); k.add_argument("--strategy"); k.add_argument("--side", choices=["long", "short"])
     k.add_argument("--entry", type=float); k.add_argument("--stop", type=float); k.add_argument("--lots", type=float); k.add_argument("--opened"); k.add_argument("--exit")
