@@ -142,6 +142,39 @@ WICK_REL = 0.03
 THIN_H = 20
 
 
+# ---- written AFTER the run of 2026-11-17 (interpretation only; the verdict lines of the report are computed) ----
+ANSWER = ("**Yes, for K2 only:** by the bar declared in advance, the hourly-volatility regression with the event adjustment (`har_rv_ev`) is confirmed on six markets never scored here, "
+          "so the lead may replace the bots' width arithmetic with it, while the daily-returns version K1 is not confirmed and should not be wired in. "
+          "Expect a small gain, not a different product (proper score 2-4 % better, levels 3-5 % narrower on these markets at the same 80 % reliability, holding rates about half as dependent on "
+          "calm / volatile markets, the event-week weakness of one-week levels removed), and note that the statistical margin at 21 and 63 sessions is thin (below), so the bots' levels should keep "
+          "running beside it in the paper forward test.")
+DATA_NOTES = ("**Gold was DROPPED by the declared rule and never scored**: its only independent check (session range against Yahoo gold futures, 2011-26) gave a correlation of 0.77 against the "
+              "declared minimum of 0.85 (median ratio 1.05, inside the band). The same Yahoo comparison gives 0.70-0.84 on the three euro crosses whose ECB check is perfect, so the failure very "
+              "probably says more about Yahoo's daily highs / lows than about the gold bars; the rule was fixed in advance and I did not re-draw it. The first declared reserve, EUR/AUD, took its "
+              "place (ECB fix inside the session range on 99.98 % of days). Consequence: four of the six scored markets are euro crosses and none is a commodity. "
+              "One blemish that the rule tolerates (one signature in the top 20; more than two fail a market): EUR/GBP has a bad print on 2004-08-31 (session range 60 %), which the 3 % wick rule "
+              "did not catch because the bad price is the bar's own close / next open. A second EUR/GBP session of 2004 (03-25, range 11 % with an 11 % open-to-close move) also looks like bad data without carrying the signature. "
+              "Both lie in the training years only (scoring starts 2010) and feed all three methods' fits; they were left as they are. "
+              "The wick rule changed five 5-minute bars in all (EUR/JPY three in 2004, EUR/AUD one in 2004, USD/SEK 2020-11-12), all single prints 7-50 % away from the market. "
+              "USD/SEK and USD/NOK begin in September 2008 on HistData, so their first scored session is 2012-01-01.")
+NOTES = ("## 7. How firm is this? (descriptive, computed once after the verdict, outside `run()`; files `levels_confirm_seed_sensitivity.csv`, `levels_confirm_leave_one_out.csv`)\n\n"
+         "* **What is solid for K2:** the point estimate is better than the bots in 18 of 18 market-horizon cells in 2010-26; the 5-session gain (-2.1 %) excludes zero under every seed, with doubled "
+         "blocks and with any one market left out; the evenness clause holds in 6 of 6 markets (spread roughly halved); the event-week shortfall falls from +2.5 to +0.4 points and stays below "
+         "half with any one market left out (K1, which has no event term, leaves it at +2.0: the repair comes from the event term).\n"
+         "* **What is thin:** clause (1) needs a second interval. At 21 sessions the upper bound is -0.07 % (below zero for 20 of 20 bootstrap seeds, but +0.02 % with doubled block length); at 63 "
+         "sessions -0.11 % (below zero for 10 of 20 seeds). Leaving out EUR/GBP, EUR/JPY or EUR/AUD leaves only the 5-session interval excluding zero, i.e. clause (1) would fail; in particular the "
+         "pass depends on the reserve market EUR/AUD having replaced gold. In 2018-26 alone K2 passes (1), (2), (4) and misses (3) by one cell (63-session lower level held 83.4 %).\n"
+         "* **K1:** better at all three horizons and more even in 6 of 6 markets, with all six holding rates inside 77-83 %, but only the 63-session interval excludes zero (and that for 4 of 20 seeds). "
+         "The evenness lead is real; the score gain of the daily-returns version is not established. K2 gives the same evenness plus the hourly volatility and event information.\n"
+         "* **Side asymmetry:** the regression candidates use ONE constant for both sides; on USD/SEK and USD/NOK, which rose over the sample, K2's 63-session lower level held 86 % and its upper "
+         "76 % (bots 78-79 % each side). Pooled it averages out; on a single trending market it does not. The bots' separate constants per side do not have this.\n"
+         "* **EUR/USD itself** did not pass in round 11 (C6 in 2018-26: -1.8 %* / -0.8 % / -1.2 %, levels 3-6 % wider there). The confirmation here is on other markets; it says the method "
+         "generalises, not that EUR/USD's own history shows the gain beyond 5 sessions.\n"
+         "* **Wiring note for the lead:** `sharper_levels.levels(X, h, asof, name=\"har_rv_ev\")` on `sharper_levels.build(D, h1)` needs the hourly bars (the live product has them) and the "
+         "scheduled-event files in `data/macro` to extend past the forecast window (FOMC is listed to December 2027; ECB and BLS only to December 2026, so they need refreshing before a "
+         "63-session level set in autumn 2026 can count its events correctly).\n")
+
+
 # ====================================================================================================== download
 def download(mkt: str, verbose: bool = True) -> pd.DataFrame:
     """Every yearly file (and the months of the running year) HistData offers for the market, via arm P's fetcher."""
@@ -657,7 +690,7 @@ def write_report(R: dict) -> str:
           f"* **No future data:** {tr.session.nunique()} random sessions of {lab[tr.market.iloc[0]]}, inputs (session bars and hourly realised variances) cut off at the session, frame rebuilt, "
           f"{len(tr)} levels of the three methods recomputed: largest difference in log distance {tr['abs_diff'].max():.2e}.", "",
           "@@NOTES@@", ""]
-    return "\n".join(L)
+    return "\n".join(L).replace("@@ANSWER@@", ANSWER).replace("@@DATA_NOTES@@", DATA_NOTES).replace("@@NOTES@@", NOTES)
 
 
 if __name__ == "__main__":

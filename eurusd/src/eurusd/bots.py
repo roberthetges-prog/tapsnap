@@ -258,6 +258,14 @@ def live(refresh: bool = True) -> dict:
     rec = pd.read_csv(RES / "bots_record.csv") if (RES / "bots_record.csv").exists() else pd.DataFrame()
     lev = pd.read_csv(RES / "bots_levels.csv") if (RES / "bots_levels.csv").exists() else pd.DataFrame()
     out = {"asof": str(X["__ct"].iloc[-1]), "price": float(X["__close"].iloc[-1]), "refresh": notes, "horizons": {}}
+    alt = {}
+    try:      # round 13: event-adjusted, more even levels (confirmed on six other markets, thin margin): shown beside the bots' levels
+        from eurusd.arms import sharper_levels as SL
+        Xs = SL.build(D, load_h1_live(refresh=False))
+        for h in (5, 21):      # the event calendar in the repo ends in December 2026: not enough for a 63-session window
+            alt[h] = SL.levels(Xs, h, name="har_rv_ev")
+    except Exception as e:
+        notes = notes + [f"event-adjusted levels unavailable: {type(e).__name__}"]
     for h in HORIZONS:
         P, LO, HI, kept = run_fold(X, h, now, last)
         t = count(P).iloc[0]
@@ -276,6 +284,7 @@ def live(refresh: bool = True) -> dict:
                               "lower": float(np.nanmedian(LO.iloc[0])), "upper": float(np.nanmedian(HI.iloc[0])),
                               "lower_range": [float(np.nanquantile(LO.iloc[0], 0.1)), float(np.nanquantile(LO.iloc[0], 0.9))],
                               "upper_range": [float(np.nanquantile(HI.iloc[0], 0.1)), float(np.nanquantile(HI.iloc[0], 0.9))],
+                              "event_adjusted": list(map(float, alt[h])) if h in alt else None,
                               "record": r, "level_record": lv, "bots": bots}
     return out
 
@@ -295,6 +304,9 @@ def format_vote(o: dict, detail: bool = True) -> str:
         if lv:
             L.append(f"  Levels: the low stayed above the lower level {100 * lv['lower_held']:.0f} % of the time and the high below the upper level "
                      f"{100 * lv['upper_held']:.0f} % (2010-26); both held {100 * lv['both_held']:.0f} %")
+        if r.get("event_adjusted"):
+            L.append(f"  Event-adjusted levels (second opinion; held more evenly on six other markets, not yet proven on EUR/USD): "
+                     f"{r['event_adjusted'][0]:.4f} / {r['event_adjusted'][1]:.4f}")
         if detail:
             df = pd.DataFrame(r["bots"])
             by = df[df.vote != "none"].groupby("learner")["vote"].value_counts().unstack(fill_value=0).reindex(columns=["up", "down"], fill_value=0)

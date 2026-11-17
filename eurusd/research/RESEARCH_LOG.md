@@ -287,7 +287,18 @@ continue. About 650 trials in twelve rounds; no survivor since round 2, and that
 * EA `levels_confirm`: the two round-11 leads on the levels (evener width; event-week adjustment), frozen exactly as
   round 11 left them, on markets never scored in this project. Adopted into `bots.py` only if both the declared score
   and the evenness improve there.
-Status: RUNNING. (Owner, later the same evening: continue the research loop for now; heartbeat re-enabled.)
+Status: COMPLETE (2026-11-18). 2 candidates. (Owner, same evening: continue the research loop; heartbeat re-enabled.)
+**K1 (har_d) NOT confirmed; K2 (hourly-volatility HAR with event adjustment) CONFIRMED by the declared bar, thinly
+(reports/arm_levels_confirm.md).** Six never-scored markets from HistData 1-minute bars (EUR/GBP, EUR/JPY, EUR/CHF,
+USD/SEK, USD/NOK, EUR/AUD as declared reserve; gold dropped by the declared data-quality rule), pooled 2010-26:
+* K2 score vs the bots -2.1 % / -2.4 % / -3.8 % at 5 / 21 / 63 sessions, all three intervals excluding zero (the 21- and
+  63-session ones barely: upper bounds -0.07 % and -0.11 %, not robust to block length, seeds or leaving out one market);
+  tercile spread of the holding rate smaller on 6 of 6 markets (about halved); levels hold 78-82 %; the one-week
+  event-week shortfall falls from 2.5 to 0.4 points. The 5-session gain, the evenness and the event repair are solid.
+* It did not pass on EUR/USD itself in round 11.
+Decision: K2 is printed with the vote as a second opinion for 5 and 21 sessions (the event calendar in the repo ends in
+December 2026, too short for 63); the bots' levels remain the product. First survivor since round 2, and it concerns
+levels, not direction.
 
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
