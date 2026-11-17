@@ -1,0 +1,7 @@
+control,h,era,sessions,n_indep,acc,lo,hi,note
+"outcomes from sign-flipped daily returns, seed 1, training (a)",21,2010-26,4153,197.8,0.5410546592824464,0.4708767153990927,0.6083933656942004,always-up 50.5 %; median bot 51.9 %
+"outcomes from sign-flipped daily returns, seed 1, training (c)",21,2010-26,4126,196.5,0.5,0.4306760777327969,0.5693239222672031,always-up 50.5 %; median bot 51.2 %
+"outcomes from sign-flipped daily returns, seed 2, training (a)",21,2010-26,4149,197.6,0.5037358399614364,0.4359782220285476,0.5739305381081141,always-up 50.0 %; median bot 49.6 %
+"outcomes from sign-flipped daily returns, seed 2, training (c)",21,2010-26,4101,195.3,0.49451353328456477,0.4279883087282199,0.5669825625582715,always-up 50.0 %; median bot 49.4 %
+"outcomes from sign-flipped daily returns, seed 3, training (a)",21,2010-26,4176,198.9,0.5435823754789272,0.4733420179591829,0.610467220382459,always-up 54.8 %; median bot 53.4 %
+"outcomes from sign-flipped daily returns, seed 3, training (c)",21,2010-26,4162,198.2,0.5360403652090341,0.4658704078081428,0.6034909131484885,always-up 54.8 %; median bot 52.4 %
