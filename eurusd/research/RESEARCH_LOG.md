@@ -256,7 +256,16 @@ volatility estimate, nothing more.
 * CA `sharper_levels`: at the same 80 % holding rate, how narrow can the lower / upper levels be made, and can they be
   made to hold evenly in calm and volatile markets, around events and in trending years? Candidates are volatility
   estimates and calibration methods only; chosen on 2010-17, confirmed on 2018-26 and on six other pairs untouched.
-Status: RUNNING.
+Status: COMPLETE (2026-11-17). 12 candidates. **FAILS the bar (reports/arm_sharper_levels.md).**
+* No method is narrower at the same 80 % reliability in 2018-26. The pick (HAR regression on daily-return volatility) scores
+  -0.2 % / -1.3 % / +0.2 % against the bots at 5 / 21 / 63 sessions, no interval excludes zero, and it is 2-10 % wider.
+  0 of 11 candidates pass. Levels without volatility scaling are 11-19 % worse, so the bots' scaling is doing the work.
+* Evenness is real: regression levels halve the spread of the holding rate across volatility terciles (9.1 -> 4.7 points;
+  6 of 6 other pairs), by being wider in calm markets and narrower in volatile ones (elasticity to today's volatility
+  0.84 / 0.73 / 0.60 rather than the bots' 1.0). Small pooled score gain on six pairs (2-4 %), post hoc.
+* The bots' levels hold about 75 % in quiet markets and 85 % in volatile ones, and one-week levels hold 2-8 points less
+  often in weeks with FOMC, ECB, payrolls or CPI. Adaptive widening after misses makes every score worse.
+Decision: the bots' median level stays. The two caveats are printed with the vote.
 
 ## Round 12 (opened 2026-11-17; owner: 'can we expand the bots' experience')
 * DA `bots_experience`: the same 100 seeded bots on evidence that exists for every dollar pair and back to the 1980s,

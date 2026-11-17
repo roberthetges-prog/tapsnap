@@ -303,7 +303,8 @@ def format_vote(o: dict, detail: bool = True) -> str:
             L.append("  Evidence the bots chose most: " + ", ".join(f"{k.replace('x_', '')} ({v})" for k, v in tr.items()))
     L.append("\nHow to read it: over 2010-26 the direction vote was right 50 % at one week, 52 % at one month and 53 % at three months, "
              "and a bigger majority was no more reliable than a small one, so the count is close to a coin flip. "
-             "The levels are the reliable part: each held about 8 times in 10 in every period tested, less often in a strongly trending year.")
+             "The levels are the reliable part: each held about 8 times in 10 in every period tested, less often in a strongly trending year. "
+             "In quiet markets they held nearer 7.5 in 10 and in volatile ones 8.5 in 10; one-week levels held a few points less often in weeks with a Fed or ECB meeting, payrolls or CPI.")
     return "\n".join(L)
 
 
