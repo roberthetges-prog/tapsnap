@@ -1,0 +1,15 @@
+key,value
+chosen,"""har_d"""
+clause_i_better_score_all_h,false
+clause_i_detail,"{""5"": true, ""21"": true, ""63"": false}"
+clause_ii_interval_excludes_zero_at_2_of_3,false
+clause_ii_detail,"{""5"": false, ""21"": false, ""63"": false}"
+clause_iii_all_six_within_77_83,false
+clause_iii_detail,"{""5_lower"": 81.3, ""5_upper"": 82.5, ""21_lower"": 80.2, ""21_upper"": 85.3, ""63_lower"": 84.3, ""63_upper"": 85.2}"
+clause_iii_baseline,"{""5_lower"": 79.2, ""5_upper"": 80.4, ""21_lower"": 78.5, ""21_upper"": 82.2, ""63_lower"": 80.3, ""63_upper"": 79.0}"
+clause_iv_spread_smaller,true
+spread_chosen_points,4.7
+spread_baseline_points,9.1
+noise_chosen,"{""p_pass_if_exactly_calibrated"": 0.1932, ""boot_sd_points"": [1.5, 1.4, 3.0, 2.7, 4.8, 4.3], ""observed"": [81.3, 82.5, 80.2, 85.3, 84.3, 85.2]}"
+noise_baseline,"{""p_pass_if_exactly_calibrated"": 0.1628, ""boot_sd_points"": [1.5, 1.4, 3.0, 2.8, 5.3, 4.8], ""observed"": [79.2, 80.4, 78.5, 82.2, 80.3, 79.0]}"
+pass,false

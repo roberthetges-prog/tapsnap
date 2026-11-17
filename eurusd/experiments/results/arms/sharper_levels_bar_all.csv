@@ -1,0 +1,12 @@
+candidate,clause_i_better_score_all_h,clause_ii_interval_excludes_zero_at_2_of_3,clause_iii_all_six_within_77_83,clause_iv_spread_smaller,spread_chosen_points,spread_baseline_points,pass
+bots_pooled,True,False,False,False,9.1,9.1,False
+shrink,False,False,False,True,4.1,9.1,False
+har_d,False,False,False,True,4.7,9.1,False
+har_gk,True,False,False,True,4.8,9.1,False
+har_rv,True,False,False,True,4.6,9.1,False
+har_rv_ev,True,False,False,True,4.8,9.1,False
+qr,False,False,False,True,5.0,9.1,False
+qr_semi,False,False,False,True,5.2,9.1,False
+aci_bots,False,False,True,False,9.1,9.1,False
+aci_har,True,False,False,True,4.6,9.1,False
+avg,True,False,False,True,4.5,9.1,False
