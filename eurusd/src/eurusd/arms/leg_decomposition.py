@@ -655,7 +655,7 @@ def save(K: dict) -> None:
     K["cost_table"].to_csv(RES / "leg_decomposition_cost_table.csv")
     K["checks"]["h10_vs_store"].to_csv(RES / "leg_decomposition_check_h10_vs_store.csv", index=False)
     K["checks"]["h10_vs_ecb"].to_csv(RES / "leg_decomposition_check_h10_vs_ecb.csv", index=False)
-    K["positions"].to_parquet(RES / "leg_decomposition_positions.parquet")
+    K["positions"].shift(1).iloc[1:].to_parquet(RES / "leg_decomposition_positions.parquet")   # booked one session later, see incremental()
     K["calls"].to_parquet(RES / "leg_decomposition_calls.parquet")
 
 
@@ -666,6 +666,7 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True):
     K = compute(verbose=verbose)
     if write:
         save(K)
+        write_report(K)
     if verbose:
         pd.set_option("display.width", 250)
         pd.set_option("display.max_rows", 400)
@@ -686,6 +687,280 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True):
         print("\nATTRIBUTION (ADDED)\n", f(K["attribution"]), "\n", f(K["call_mix"]))
         print("\nE minus U, inputs\n", f(K["e_vs_u_inputs"][["signal", "h", "era", "n_indep", "acc_ref", "acc_leg", "gain", "gain_lo", "gain_hi"]]))
     return K["positions"], K["primary"]
+
+
+
+# ============================================================================= report
+def _g(df: pd.DataFrame, col: str, **kw) -> float:
+    m = np.ones(len(df), dtype=bool)
+    for k, v in kw.items():
+        m &= (df[k] == v).values
+    return float(df[m].iloc[0][col])
+
+
+def _md(df: pd.DataFrame, pct=(), dec1=(), dec2=(), dec3=()) -> str:
+    d = df.copy()
+    for c in pct:
+        if c in d:
+            d[c] = (100 * d[c].astype(float)).round(1)
+    for c in dec1:
+        if c in d:
+            d[c] = d[c].astype(float).round(1)
+    for c in dec2:
+        if c in d:
+            d[c] = d[c].astype(float).round(2)
+    for c in dec3:
+        if c in d:
+            d[c] = d[c].astype(float).round(3)
+    return d.to_markdown(index=False)
+
+
+def write_report(K: dict, path: Path | None = None) -> None:
+    P_, M_, EU, A, SH, SD = K["primary"], K["mirror"], K["e_vs_u"], K["accuracy"], K["sharpe"], K["sharpe_diff"]
+    AT, BD, INC, PC, TM, RC = K["attribution"], K["broad_dollar"], K["incremental"], K["pnl_corr"], K["timing"], K["reconcile"]
+    p = lambda df, col, **kw: 100 * _g(df, col, **kw)  # noqa: E731
+    PCT = ("acc", "lo", "hi", "base_mean", "base_lo", "base_hi", "acc_ref", "acc_leg", "leg_lo", "leg_hi", "gain", "gain_lo", "gain_hi", "rand_gain_lo", "rand_gain_hi",
+           "stale_acc_ref", "stale_acc_leg", "stale_gain", "acc_S", "acc_E", "acc_U", "gain_E", "gain_U", "store_close", "h10_next_fixing", "h10_same_day_fixing",
+           "published_2010_26", "share_of_days")
+
+    # ---- key table
+    key = []
+    for h in HORIZONS:
+        for era, _, _ in ERAS:
+            r, m = P_[(P_.h == h) & (P_.era == era)].iloc[0], M_[(M_.h == h) & (M_.era == era)].iloc[0]
+            key.append({"sessions": h, "era": era, "independent calls": r.n_indep, "per year": round(r.per_year, 1),
+                        "plain EUR/USD %": round(100 * r.acc_ref, 1), "EUR leg %": round(100 * r.acc_leg, 1), "USD leg %": round(100 * m.acc_leg, 1),
+                        "EUR leg - plain (95 % paired)": f"{100 * r.gain:+.1f} ({100 * r.gain_lo:+.1f} .. {100 * r.gain_hi:+.1f})",
+                        "USD leg - plain (95 % paired)": f"{100 * m.gain:+.1f} ({100 * m.gain_lo:+.1f} .. {100 * m.gain_hi:+.1f})"})
+    key = pd.DataFrame(key)
+    vr = K["verdict_rows"].copy()
+    vr["gain_pts"], vr["stale_gain_pts"] = vr["gain_pts"].round(1), vr["stale_gain_pts"].round(1)
+    att = AT[AT.signal == "agreement"]
+    a10, a16, a23 = (att[att.era == e].iloc[0] for e in ("2010-26", "2016-26", "2023-26"))
+    sh = lambda name, era: _g(SH, "sharpe_net", expression=name, era=era)  # noqa: E731
+    trio = lambda name: " / ".join(f"{sh(name, e):+.2f}" for e in ("2010-26", "2016-26", "2023-26"))  # noqa: E731
+    ct = K["cost_table"]["mean_bp_per_unit_turnover_2010_26"]
+    to10 = _g(SH, "turnover_per_year", expression="plain EUR/USD (H.10)", era="2010-26")
+    ck = K["checks"]
+    acc3 = lambda sig, c, era: " / ".join(f"{p(A, 'acc', signal=sig, series=c, h=h, era=era):.1f}" for h in HORIZONS)  # noqa: E731
+    pr3 = lambda sig, c, era: " / ".join(f"{_g(A, 'p_random', signal=sig, series=c, h=h, era=era):.2f}" for h in HORIZONS)  # noqa: E731
+    uwins = all(_g(EU, "gain", h=h, era=e) <= -0.03 for h in (21, 42) for e in ("2010-26", "2016-26"))
+    ewins = all(_g(EU, "gain", h=h, era=e) >= 0.03 for h in (21, 42) for e in ("2010-26", "2016-26"))
+    excl = any(_g(EU, "gain_lo", h=h, era="2010-26") > 0 or _g(EU, "gain_hi", h=h, era="2010-26") < 0 for h in (21, 42))
+    formal = "a euro signal" if (ewins and excl) else ("a dollar signal" if (uwins and excl) else "cannot be attributed to one leg")
+
+    L = []
+    L += ["# Arm AC - leg_decomposition: is the agreement rule a euro signal or a dollar signal, and does a hedge help?", "",
+          "Code `src/eurusd/arms/leg_decomposition.py` (`run()`; `PYTHONPATH=src OMP_NUM_THREADS=1 python src/eurusd/arms/leg_decomposition.py`, about two minutes, one process). "
+          "Results `experiments/results/arms/leg_decomposition_*.csv`, log `experiments/results/arms/logs/leg_decomposition.log`. "
+          "The primary test, its pass bar, the basket, the weights, the timing rule and the cost rule were written into the module docstring before any outcome on "
+          "either leg was computed; what was added afterwards is marked ADDED there and here.", "",
+          f"## Verdict: **{'PASS' if K['pass'] else 'FAIL'}** against the declared bar", "",
+          "**The hedged expression is worse, not better.** The same agreement calls scored on the euro against a basket (JPY, GBP, CHF, CAD, AUD, 1/5 each) instead of on "
+          f"plain EUR/USD are right {p(P_, 'acc_leg', h=21, era='2010-26'):.1f} % instead of {p(P_, 'acc_ref', h=21, era='2010-26'):.1f} % at 21 sessions and "
+          f"{p(P_, 'acc_leg', h=42, era='2010-26'):.1f} % instead of {p(P_, 'acc_ref', h=42, era='2010-26'):.1f} % at 42 sessions (2010-26); "
+          f"{p(P_, 'acc_leg', h=21, era='2016-26'):.1f} vs {p(P_, 'acc_ref', h=21, era='2016-26'):.1f} % and {p(P_, 'acc_leg', h=42, era='2016-26'):.1f} vs "
+          f"{p(P_, 'acc_ref', h=42, era='2016-26'):.1f} % since 2016. The bar asked for +3 points in those four cells; the result is "
+          f"{p(P_, 'gain', h=21, era='2010-26'):+.1f}, {p(P_, 'gain', h=21, era='2016-26'):+.1f}, {p(P_, 'gain', h=42, era='2010-26'):+.1f} and {p(P_, 'gain', h=42, era='2016-26'):+.1f} "
+          "points, and at 21 sessions the paired 95 % interval lies entirely below zero in both eras. In 2023-26 it is "
+          f"{p(P_, 'gain', h=21, era='2023-26'):+.1f} points at 21 sessions (bar: not worse) and {p(P_, 'gain', h=42, era='2023-26'):+.1f} at 42 sessions on "
+          f"{_g(P_, 'n_indep', h=42, era='2023-26'):.0f} independent calls. The stale-copy condition cannot be met because there is no gain to lose.", "",
+          _md(vr), "",
+          "**Plain-language answer: it is more a dollar signal than a euro signal, and since 2016 it has been almost only a dollar signal.**", "",
+          f"* On the dollar leg alone (dollar against the same basket, euro excluded) the calls are right {acc3('agreement', 'U', '2010-26')} % at 21 / 42 / 63 sessions in 2010-26 and "
+          f"{acc3('agreement', 'U', '2016-26')} % in 2016-26: about what they score on EUR/USD itself ({acc3('agreement', 'S', '2010-26')} and {acc3('agreement', 'S', '2016-26')} %). "
+          f"On the euro leg alone they are right {acc3('agreement', 'E', '2010-26')} % and {acc3('agreement', 'E', '2016-26')} %, which a random entry with the same call pattern "
+          f"matches or beats {pr3('agreement', 'E', '2010-26')} and {pr3('agreement', 'E', '2016-26')} of the time (the dollar leg: {pr3('agreement', 'U', '2010-26')} and {pr3('agreement', 'U', '2016-26')}).",
+          f"* Exact split of the profit (EUR/USD = euro leg minus dollar leg, so the P&L of a call splits with no residual): of {a10.bp_per_year_eurusd:.0f} bp a year gross on EUR/USD in 2010-26, "
+          f"{a10.bp_per_year_usd_leg:.0f} bp came from the dollar leg (t {a10.t_usd_leg:.1f}) and {a10.bp_per_year_eur_leg:.0f} bp from the euro leg (t {a10.t_eur_leg:.1f}). "
+          f"Since 2016: {a16.bp_per_year_usd_leg:.0f} of {a16.bp_per_year_eurusd:.0f} bp ({100 * a16.share_from_usd_leg:.0f} %) from the dollar leg, {a16.bp_per_year_eur_leg:.0f} bp (t {a16.t_eur_leg:.1f}) from the euro leg. "
+          f"Since 2023: {a23.bp_per_year_usd_leg:.0f} of {a23.bp_per_year_eurusd:.0f} bp from the dollar leg.",
+          f"* By the attribution rule declared in advance the formal answer is **'{formal}'**: accuracy on the dollar leg is higher than on the euro leg by "
+          f"{-p(EU, 'gain', h=21, era='2010-26'):.1f}, {-p(EU, 'gain', h=21, era='2016-26'):.1f}, {-p(EU, 'gain', h=42, era='2010-26'):.1f} and {-p(EU, 'gain', h=42, era='2016-26'):.1f} points in the four "
+          f"cells (3 were required), but the paired intervals in 2010-26 include zero ({p(EU, 'gain_lo', h=21, era='2010-26'):+.1f} .. {p(EU, 'gain_hi', h=21, era='2010-26'):+.1f} at 21 sessions, "
+          f"{p(EU, 'gain_lo', h=42, era='2010-26'):+.1f} .. {p(EU, 'gain_hi', h=42, era='2010-26'):+.1f} at 42); only 2016-26 at 21 sessions excludes it "
+          f"({p(EU, 'gain_lo', h=21, era='2016-26'):+.1f} .. {p(EU, 'gain_hi', h=21, era='2016-26'):+.1f}). So: both legs before 2016, the dollar leg since, and the data cannot prove the difference between the legs.",
+          "* Consequence for the product: **keep trading the calls on plain EUR/USD.** The two legs are almost uncorrelated (correlation of their 21-session moves "
+          f"{_g(K['leg_stats'], 'corr_E_U', era='2010-26', h=21):+.2f} in 2010-26) and EUR/USD is their difference, so the pair collects whatever the calls know about either leg. Hedging the dollar leg "
+          "throws away the larger half of the edge; hedging the euro leg (trading a dollar basket instead) keeps the accuracy but does not raise it and costs five spreads.", "",
+          "## Key table: the same agreement calls scored on three instruments", "",
+          "Phase-averaged accuracy (every call day scored on the next h sessions; independent calls = call days / h). Entry at the first H.10 fixing after the call, all three "
+          "instruments on the same two fixings. USD leg: a long-EUR/USD call counts as right when the dollar FELL against the basket.", "",
+          _md(key), "",
+          "Sharpe of the daily position streams, net of 1.2 pips on every pair traded (2010-26 / 2016-26 / 2023-26): "
+          f"plain EUR/USD {trio('plain EUR/USD (H.10)')}; EUR leg as a hedge (six pairs) {trio('EUR leg (EW5)')}; EUR leg through five direct crosses {trio('EUR leg (EW5), direct crosses')}; "
+          f"USD leg {trio('USD leg (EW5)')}.", "",
+          f"Candidates run: **{K['n_candidates']}** (5 declared + 1 added post hoc; cap 12). None passes.", ""]
+
+    # ---- data
+    L += ["## 1. Data, timing and what was checked before any outcome", "",
+          "* **Used: Federal Reserve H.10 noon-New-York rates** (`data/macro/fred_DEX{USEU,JPUS,USUK,SZUS,CAUS,USAL,SDUS,NOUS}.csv`, 1999-01-04 .. 2026-11-06, 6,984 fixings, no gaps "
+          "inside the panel; 3.5-4.4 % of weekdays have no fixing, the US holidays). One stamp convention for the whole history and every currency at the same instant, so each euro "
+          "cross is derived at one timestamp. **Not used: the Yahoo daily bars** in `data/processed/cross/*_D1.parquet` (stamp convention changed in 2010 Q3).",
+          "* **Timing rule.** The call is made at the 17:00 New York close of date D; the trade is entered at the first fixing strictly after D (noon of the next fixing day, 19 hours later) and "
+          "scored at the first fixing strictly after the close date of session i + h. No series stamped at a different time is joined on the same day.",
+          f"* **H.10 against EUR/USD in the feature store** (same date, noon vs 17:00): median level gap {ck['h10_level_gap_pips']:.0f} pips; return correlation and sign agreement by horizon:", "",
+          _md(ck["h10_vs_store"], dec3=("corr_returns", "sign_agree"), dec1=("median_abs_gap_bp",)), "",
+          "* **Independent source.** ECB euro reference rates (14:15 CET, `data/processed/cross/leg_ecb_ref_rates.parquet`, fetched 2026-11-17 from the ECB data API, flow EXR, "
+          "1999-01-04 .. 2026-11-17). They quote the euro crosses DIRECTLY, whereas H.10 gives the dollar pairs directly and the euro crosses by triangulation. The derived H.10 crosses agree with "
+          "the direct ECB crosses exactly as well as EUR/USD itself agrees between the two sources (the difference is the 3 h 45 min between the fixings, not triangulation error):", "",
+          _md(ck["h10_vs_ecb"], dec3=("corr_5d", "corr_21d", "h10_missing_share_of_weekdays"), dec1=("max_abs_5d_gap_bp",)), "",
+          f"* **SEK and NOK** pass the declared verification rule ({'verified' if ck['sek_nok_verified'] else 'NOT verified'}: 5-session correlation with the ECB rates within 0.01 of the worst core cross "
+          "in every era), so the robustness basket B7 was run.",
+          "* **The identity.** S = E - U holds to floating-point precision on every bar (max error 0.0 bp in `leg_decomposition_leg_stats.csv`), by construction, because the euro crosses are "
+          "derived from the dollar pairs at the same fixing. What the legs look like (21-session moves unless stated):", "",
+          _md(K["leg_stats"][K["leg_stats"].h == 21][["era", "ann_vol_S_pct", "ann_vol_E_pct", "ann_vol_U_pct", "corr_E_U", "var_share_E", "var_share_U", "sign_agree_S_E", "sign_agree_S_minusU"]],
+              dec1=("ann_vol_S_pct", "ann_vol_E_pct", "ann_vol_U_pct"), dec2=("corr_E_U", "var_share_E", "var_share_U", "sign_agree_S_E", "sign_agree_S_minusU")), "",
+          "  S = EUR/USD, E = euro against the basket, U = dollar against the basket. The dollar leg is the larger one: it carries 60-85 % of EUR/USD's variance, the euro leg 28-43 %; "
+          "the two are close to uncorrelated; EUR/USD's 21-session direction agrees with the dollar leg's 79-89 % of the time and with the euro leg's 59-68 %.", "",
+          "## 2. Reconciliation", "",
+          "The agreement rule rebuilt with `committee._fold_columns` (identical to `experiments/70_committee.py::agreement_side`) reproduces the published benchmark exactly on the feature-store "
+          "closes (asserted in `compute()`), and scores within about one point of it on the H.10 fixings:", "",
+          _md(RC, pct=PCT, dec1=("per_year",)), "",
+          "Call pattern: " + "; ".join(f"{r.era}: calls on {100 * r.call_days_share:.0f} % of sessions, {100 * r.long_share_of_call_days:.0f} % of them long, {r.call_episodes} separate call episodes"
+                                       for r in K["call_mix"].itertuples()) + ".", ""]
+
+    # ---- descriptive
+    L += ["## 3. Descriptive (declared): the rule and each of its three inputs on EUR/USD (S), the euro leg (E) and the dollar leg (U)", "",
+          "`n_indep` = independent decisions, `lo`-`hi` = 95 % Wilson interval on that count, `per_year` = independent decisions a year, `base_*` = matched random entry (the era's own call "
+          "sequence rotated to a random position, 1,000 draws: same count, spacing and long / short mix), `p_random` = share of random draws at least as accurate.", ""]
+    for sig, title in (("agreement", "Agreement rule"), ("positioning", "Positioning alone (sign of cot_z52, always on)"), ("spread_trend", "2-year spread trend alone (sign of d_spread2y_20)"),
+                       ("house_score", "House macro score alone (sign, walk-forward)")):
+        d = A[A.signal == sig][["series", "h", "era", "n_indep", "per_year", "acc", "lo", "hi", "base_mean", "base_lo", "base_hi", "p_random"]]
+        L += [f"### {title}", "", _md(d, pct=PCT, dec1=("per_year",), dec2=("p_random",)), ""]
+    pa = AT.copy()
+    L += ["What the inputs say:",
+          f"* **Positioning** (the input the theory was about). Direction accuracy is the same on both legs at 21 sessions ({p(A, 'acc', signal='positioning', series='E', h=21, era='2010-26'):.1f} % euro leg, "
+          f"{p(A, 'acc', signal='positioning', series='U', h=21, era='2010-26'):.1f} % dollar leg, 2010-26) and somewhat higher on the euro leg at 42 and 63 sessions "
+          f"({p(A, 'acc', signal='positioning', series='E', h=42, era='2010-26'):.1f} vs {p(A, 'acc', signal='positioning', series='U', h=42, era='2010-26'):.1f}; "
+          f"{p(A, 'acc', signal='positioning', series='E', h=63, era='2010-26'):.1f} vs {p(A, 'acc', signal='positioning', series='U', h=63, era='2010-26'):.1f}); no paired interval excludes zero. "
+          f"In money terms it is the other way round: {100 * _g(pa, 'share_from_usd_leg', signal='positioning', era='2010-26'):.0f} % of its 2010-26 P&L and "
+          f"{100 * _g(pa, 'share_from_usd_leg', signal='positioning', era='2016-26'):.0f} % of its 2016-26 P&L came from the dollar leg (gross Sharpe {_g(pa, 'sharpe_gross_usd_leg', signal='positioning', era='2016-26'):.2f} "
+          f"on the dollar leg, {_g(pa, 'sharpe_gross_eur_leg', signal='positioning', era='2016-26'):.2f} on the euro leg). 'Net speculative position in euro futures' is a position in the EUR/USD contract; "
+          "it is at least as much a view on the dollar as on the euro. The premise of the primary test is not supported.",
+          f"* **House macro score**: dollar leg ({acc3('house_score', 'U', '2016-26')} % since 2016, p_random {pr3('house_score', 'U', '2016-26')}) rather than euro leg ({acc3('house_score', 'E', '2016-26')} %).",
+          f"* **2-year spread trend**: about 50 % on everything on its own (known); the little there is sits on the dollar leg at 42-63 sessions "
+          f"({p(A, 'acc', signal='spread_trend', series='U', h=42, era='2010-26'):.1f} / {p(A, 'acc', signal='spread_trend', series='U', h=63, era='2010-26'):.1f} %).",
+          "* **2023-26** runs the other way for positioning (euro leg 54-61 %, dollar leg 45-46 %) on 15-47 independent decisions with intervals 25 points wide: not evidence of anything.", "",
+          "Euro leg minus dollar leg, per input (paired 95 % interval, same call days):", "",
+          _md(K["e_vs_u_inputs"].rename(columns={"acc_ref": "acc_U", "acc_leg": "acc_E", "gain": "E_minus_U", "gain_lo": "lo", "gain_hi": "hi"})[["signal", "h", "era", "n_indep", "acc_E", "acc_U", "E_minus_U", "lo", "hi"]]
+              .pipe(lambda d: d[d.era != "2023-26"]), pct=("acc_E", "acc_U", "E_minus_U", "lo", "hi")), ""]
+
+    # ---- primary
+    cols = ["h", "era", "n_indep", "per_year", "acc_ref", "acc_leg", "leg_lo", "leg_hi", "gain", "gain_lo", "gain_hi", "rand_gain_lo", "rand_gain_hi", "p_random_gain", "stale_acc_ref", "stale_acc_leg", "stale_gain"]
+    L += ["## 4. PRIMARY TEST (candidate 1): the calls on the euro leg against the calls on plain EUR/USD", "",
+          "`acc_ref` = plain EUR/USD, `acc_leg` = euro against the basket, `gain` = difference with its paired block-bootstrap 95 % interval (blocks of 126 sessions, 2,000 draws); "
+          "`rand_gain_*` = 95 % range of the same difference under matched random entry; `stale_*` = the calls of 63 sessions earlier.", "",
+          _md(P_[cols], pct=PCT, dec1=("per_year",), dec2=("p_random_gain",)), "",
+          f"**FAIL** on (a) in all four cells and on (b) at 21 sessions. Noteworthy in the placebo columns: the 63-session-stale calls score {p(P_, 'stale_acc_leg', h=21, era='2010-26'):.1f} % on the euro leg at 21 sessions "
+          f"(live calls {p(P_, 'acc_leg', h=21, era='2010-26'):.1f} %) and {p(M_, 'stale_acc_leg', h=21, era='2010-26'):.1f} % on the dollar leg (live {p(M_, 'acc_leg', h=21, era='2010-26'):.1f} %). "
+          "The timely part of the rule is its dollar part; what it has on the euro leg is as good three months stale, i.e. a slow regime read.", "",
+          "## 5. Secondary (declared)", "",
+          "### 5a. Mirror (candidate 2): the calls on the dollar leg (long EUR/USD call = short the dollar against the basket)", "",
+          _md(M_[cols], pct=PCT, dec1=("per_year",), dec2=("p_random_gain",)), "",
+          f"Same accuracy as plain EUR/USD within noise ({p(M_, 'gain', h=21, era='2010-26'):+.1f} / {p(M_, 'gain', h=42, era='2010-26'):+.1f} points in 2010-26, "
+          f"{p(M_, 'gain', h=21, era='2016-26'):+.1f} / {p(M_, 'gain', h=42, era='2016-26'):+.1f} in 2016-26, {p(M_, 'gain', h=21, era='2023-26'):+.1f} / {p(M_, 'gain', h=42, era='2023-26'):+.1f} in 2023-26). "
+          "It would also fail the bar: +3 points is reached in one cell of four.", "",
+          "### 5b. Risk-adjusted comparison and the cost of the hedge", "",
+          "Position = the day's call (+1 / 0 / -1), held from its entry fixing to the next session's entry fixing. Cost arithmetic, 1.2 pips per unit of turnover on EVERY pair traded, in the "
+          "pair's own pip (0.01 for yen pairs), 2010-26 averages:", "",
+          f"| expression | pairs traded | cost per unit of turnover | turnover a year | cost a year |", "|:--|:--|--:|--:|--:|",
+          f"| plain EUR/USD | EUR/USD x 1 | {ct['plain']:.2f} bp | {to10:.0f} | {ct['plain'] * to10:.0f} bp |",
+          f"| USD leg | five dollar pairs x 1/5 | {ct['usd_leg']:.2f} bp | {to10:.0f} | {ct['usd_leg'] * to10:.0f} bp |",
+          f"| EUR leg as a hedge (headline) | EUR/USD x 1 + five dollar pairs x 1/5 = six spreads | {ct['eur_leg_hedge6']:.2f} bp | {to10:.0f} | {ct['eur_leg_hedge6'] * to10:.0f} bp |",
+          f"| EUR leg, five direct crosses at 1.2 pips | EUR/JPY, EUR/GBP, EUR/CHF, EUR/CAD, EUR/AUD x 1/5 | {ct['eur_leg_crosses']:.2f} bp | {to10:.0f} | {ct['eur_leg_crosses'] * to10:.0f} bp |",
+          f"| EUR leg, five direct crosses at 3 pips | same | {ct['eur_leg_crosses'] * 3 / COST_PIPS:.2f} bp | {to10:.0f} | {ct['eur_leg_crosses'] * 3 / COST_PIPS * to10:.0f} bp |", "",
+          "The hedge doubles the cost per unit of notional (2.18 against 1.02 bp) while the hedged position is LESS volatile (5.7 against 8.1 % a year in 2010-26, 4.5 against 6.9 % since 2016), "
+          "so per unit of risk it costs about three times as much. Trading the five crosses directly at a major's spread would cost the same as EUR/USD, but nobody quotes EUR/AUD or EUR/CAD "
+          "at 1.2 pips; the 3-pip row is the realistic one. The rule changes its call about 40 times a year (20 round trips), so this is 40-100 bp a year against a gross edge of "
+          f"{a10.bp_per_year_eur_leg:.0f} bp a year on the euro leg in 2010-26 and {a16.bp_per_year_eur_leg:.0f} bp since 2016.", "",
+          _md(SH[["expression", "cost", "era", "sharpe_net", "t_net", "sharpe_gross", "ann_vol_bp_when_in", "turnover_per_year", "cost_bp_per_year"]],
+              dec2=("sharpe_net", "t_net", "sharpe_gross"), dec1=("ann_vol_bp_when_in", "turnover_per_year", "cost_bp_per_year")), "",
+          "Sharpe difference against plain EUR/USD (same calls, paired block bootstrap, 95 %):", "",
+          _md(SD, dec2=("d_sharpe_vs_plain", "lo", "hi", "pnl_corr_with_plain")), "",
+          f"The hedged expression loses {-_g(SD, 'd_sharpe_vs_plain', expression='EUR leg (EW5)', era='2010-26'):.2f} Sharpe in 2010-26 and {-_g(SD, 'd_sharpe_vs_plain', expression='EUR leg (EW5)', era='2016-26'):.2f} in 2016-26 "
+          "(both intervals below zero) and is not better even before costs (gross 0.45 against 0.74; 0.07 against 0.55). The lower volatility of a basket does not rescue it: the edge "
+          "falls faster than the risk. The dollar-leg expression is level with plain EUR/USD since 2016 and behind it over 2010-26.", "",
+          "Incremental test (Round 3 addendum): `meta.combine` EW of weak_signals + regime_trend, with each stream offered as a third arm:", "",
+          _md(INC, dec2=("sr_2way", "sr_3way", "d_sr")), "",
+          _md(PC, dec2=("corr_weak_signals", "corr_regime_trend")), "",
+          f"The primary stream (`leg_decomposition` = euro leg, hedge costs) LOWERS the combination on 2016-26 ({_g(INC, 'sr_2way', third_arm='leg_decomposition', era='2016-26'):.2f} -> "
+          f"{_g(INC, 'sr_3way', third_arm='leg_decomposition', era='2016-26'):.2f}): fails. The plain agreement stream is the reference (the existing rule, 0.46-0.52 correlated with the live streams; adds nothing "
+          "to them on 2016-26, as known).", "",
+          "### 5c. Other basket weights (candidates 3, 4, 5)", "",
+          "* Candidate 3, ECB trade weights: narrow EER group, overall weights including third-market effects, manufactures and services, 2021 (official figures from the ECB data API, "
+          "`data/processed/cross/leg_ecb_trade_weights.csv`), renormalised over the five: GBP 47.1 %, CHF 26.8 %, JPY 16.5 %, CAD 6.2 %, AUD 3.4 %.",
+          "* Candidate 4, Fed broad-dollar-index weights, APPROXIMATE (2019 revision, quoted from memory because federalreserve.gov is blocked here; not verified): CAD 46.2 %, JPY 21.7 %, "
+          "GBP 18.3 %, CHF 9.0 %, AUD 4.8 % after renormalising.",
+          "* Candidate 5, seven currencies at 1/7 (adds SEK and NOK).", "",
+          _md(K["alt_baskets"][K["alt_baskets"].h.isin([21, 42])][["basket", "leg", "h", "era", "n_indep", "acc_ref", "acc_leg", "gain", "gain_lo", "gain_hi", "stale_gain"]], pct=PCT), "",
+          "`leg` E / U = that leg against plain EUR/USD (`acc_ref` = plain); `E-U` = euro leg against dollar leg (`acc_ref` = dollar leg). **The answer does not change with the weights**: the euro leg is "
+          "2.6-9.8 points below plain EUR/USD in every 2010-26 and 2016-26 cell under all three weightings, the dollar leg is within about 3 points of it, and the dollar leg is at or above the euro leg in every "
+          "such cell. The gap is smallest with the Fed weights, where the basket is half Canadian dollar.", ""]
+
+    # ---- added
+    L += ["## 6. ADDED after the first run", "",
+          "### 6a. Exact split of the P&L between the legs (descriptive)", "",
+          "Because S = E - U bar by bar, the gross P&L of any call on EUR/USD is the P&L of the same call on the euro leg plus its P&L on the (sign-flipped) dollar leg, with no residual "
+          "(`identity_err_bp` = 0). bp a year, gross, all sessions:", "",
+          _md(AT[["signal", "era", "bp_per_year_eurusd", "bp_per_year_eur_leg", "bp_per_year_usd_leg", "share_from_usd_leg", "t_eurusd", "t_eur_leg", "t_usd_leg", "sharpe_gross_eur_leg", "sharpe_gross_usd_leg"]],
+              dec1=("bp_per_year_eurusd", "bp_per_year_eur_leg", "bp_per_year_usd_leg"), dec2=("share_from_usd_leg", "t_eurusd", "t_eur_leg", "t_usd_leg", "sharpe_gross_eur_leg", "sharpe_gross_usd_leg")), "",
+          "For every input and every era more than half of the money came from the dollar leg; since 2016 it is 80-100 %. No t-statistic on the euro leg reaches 2 after 2016.", "",
+          "### 6b. Candidate 6, POST HOC: the calls on a broad dollar basket (dollar against EUR, JPY, GBP, CHF, CAD, AUD at 1/6 each)", "",
+          "Chosen after seeing the per-pair table below, so it could only ever be a lead. It is not one:", "",
+          _md(BD[cols], pct=PCT, dec1=("per_year",), dec2=("p_random_gain",)), "",
+          f"Accuracy within 3 points of plain EUR/USD in every cell ({p(BD, 'gain', h=21, era='2010-26'):+.1f} / {p(BD, 'gain', h=42, era='2010-26'):+.1f} in 2010-26, "
+          f"{p(BD, 'gain', h=21, era='2016-26'):+.1f} / {p(BD, 'gain', h=42, era='2016-26'):+.1f} in 2016-26), net Sharpe {trio('broad dollar USD6 (ADDED)')} against {trio('plain EUR/USD (H.10)')} for plain EUR/USD. "
+          "Spreading the call over six dollar pairs neither helps nor hurts; it is the same bet with six tickets.", "",
+          "### 6c. Per single pair (declared descriptive)", "",
+          "Agreement calls scored on each pair. EURxxx: right when the euro rose against xxx after a long call; USDxxx: right when the dollar FELL against xxx after a long call.", "",
+          _md(K["pairs"][K["pairs"].era != "2023-26"][["series", "h", "era", "n_indep", "acc", "lo", "hi", "base_mean", "p_random"]].pipe(lambda d: d[d.h.isin([21, 42])]), pct=PCT, dec2=("p_random",)), "",
+          "After a long-EUR/USD call the dollar tends to fall against sterling, the franc, the Canadian and the Australian dollar as well (56-63 %), not against the yen at 21 sessions (49-53 %). "
+          "The euro itself gains on the yen and the franc (55-59 %) and LOSES to the Australian dollar (43-45 %): a 'long EUR/USD' call is in practice a 'dollar down' call, and the euro is not the "
+          "currency that gains most from it.", ""]
+
+    # ---- sanity
+    L += ["## 7. Sanity checks", "",
+          "**Timing** (the conclusion must not depend on the fixing used). Accuracy of the same calls on S / E / U and the two gains:", "",
+          _md(TM[TM.h.isin([21, 42])], pct=PCT), "",
+          "Entering at the same-day fixing (five hours before the call, formally a peek), at the declared next fixing, one fixing later, or on the ECB's 14:15 CET fixings gives the same picture to "
+          "within a point or two: euro leg 5-8 points below plain EUR/USD in 2010-26 and 2016-26, dollar leg within 4 points of it. Nothing here is a same-day join across stamp conventions, and "
+          "lagging the cross series by a day changes nothing.", "",
+          "**Shuffled labels** (one joint permutation of all outcomes and of the returns the house score is fitted on, five seeds, 2010-26):", "",
+          _md(K["shuffled"], pct=PCT), "",
+          "Accuracy 48-52 % on every series and the gain within +-2 points: the pipeline finds nothing when there is nothing.", "",
+          "**Identity**: section 1 (exact). **Look-ahead**: the calls are the committee module's walk-forward calls (its truncation control: 0 of 48 columns differ); no parameter is fitted on the legs; "
+          "the basket weights are fixed constants (the ECB weights are 2021 figures applied to the whole history, which is a mild anachronism in a robustness run, not a leak of prices).", "",
+          "## 8. Candidates and counts", "",
+          f"* Candidates: **{K['n_candidates']}**. Declared: (1) euro leg, equal weights [primary]; (2) dollar leg, equal weights [mirror]; (3) ECB weights; (4) Fed weights; (5) seven-currency basket. "
+          "Added post hoc: (6) broad dollar. Each was scored at 21 / 42 / 63 sessions in three eras with the same tables; the Sharpe comparison and the incremental test are other yardsticks on "
+          "candidates 1, 2 and 6, not new candidates.",
+          "* Declared descriptive cells: 4 signals x 3 instruments x 9 (horizon, era) = 108 accuracies; 10 single pairs x 9 = 90. Checks: 4 timing variants, 5 shuffles.", "",
+          "## 9. Suspicious, and caveats", "",
+          f"* **Entry-time noise in 2023-26.** The same calls on plain EUR/USD have a net Sharpe of {sh('plain EUR/USD (H.10)', '2023-26'):.2f} when entered at the next noon fixing and "
+          f"{sh('plain EUR/USD (store closes)', '2023-26'):.2f} on the feature-store closes 19 hours earlier (2010-26: {sh('plain EUR/USD (H.10)', '2010-26'):.2f} vs {sh('plain EUR/USD (store closes)', '2010-26'):.2f}; "
+          f"2016-26: {sh('plain EUR/USD (H.10)', '2016-26'):.2f} vs {sh('plain EUR/USD (store closes)', '2016-26'):.2f}). Accuracy at 21-63 sessions reconciles within a point, so this is the daily-stream yardstick being "
+          "fragile on four years with about 35 position changes a year, not a data error; all comparisons in this report are between instruments on the SAME fixings, where it cancels. It is one more "
+          "reason not to read anything into 2023-26.",
+          "* **The call flickers.** 340 separate call episodes in 17 years, about 6 sessions each; the phase-averaged accuracy scores every call day on the following 21-63 sessions regardless. "
+          "This is the published benchmark's convention and is the same for every instrument here.",
+          "* **The stale euro leg** (section 4): on the euro leg the three-month-old calls beat the live ones. Whatever the rule knows about the euro side is a slow drift, not timing.",
+          "* **Fed weights are from memory**, not from the source (blocked). They enter one robustness candidate whose result agrees with the other baskets.",
+          "* **Spot only.** No carry in any expression, as everywhere in the project. A long-euro-against-basket position earns or pays a different carry from long EUR/USD (the basket holds two "
+          "low-yield and three higher-yield currencies); with the gross edge on the euro leg at 20 bp a year since 2016 this cannot change the verdict.",
+          "* **Small samples.** 2023-26 has 19 / 9 / 6 independent calls at 21 / 42 / 63 sessions; the Wilson intervals are 40-60 points wide.",
+          "* **H.10 is one noon snapshot** of buying rates rounded to four decimals (about 1 bp); irrelevant against 21-session moves of 150-230 bp.",
+          "* The attribution rule was declared in advance and returns 'cannot be attributed'; the stronger statement in the verdict ('more dollar than euro, almost only dollar since 2016') rests on "
+          "the exact P&L split, which was added after the first run and is descriptive.", "",
+          "## 10. Files", "",
+          "* `src/eurusd/arms/leg_decomposition.py` - declaration in the docstring, `run()` entry point, `write_report()`.",
+          "* `experiments/results/arms/leg_decomposition_*.csv`: `reconcile`, `accuracy`, `primary`, `verdict_rows`, `mirror`, `e_vs_u`, `e_vs_u_inputs`, `alt_baskets`, `broad_dollar`, `sharpe`, `sharpe_diff`, "
+          "`cost_table`, `incremental`, `pnl_corr`, `attribution`, `call_mix`, `pairs`, `timing`, `shuffled`, `leg_stats`, `check_h10_vs_store`, `check_h10_vs_ecb`.",
+          "* `experiments/results/arms/leg_decomposition_positions.parquet` (primary expression, 2010+: `pos`, `fwd_bp`, `net_bp`, booked one session later so that it lines up with the "
+          "close-to-close arms) and `leg_decomposition_calls.parquet` (the walk-forward calls and the three input signs).",
+          "* New data: `data/processed/cross/leg_ecb_ref_rates.parquet` (ECB reference rates, USD JPY GBP CHF CAD AUD SEK NOK per EUR, 1999-01-04 .. 2026-11-17, no lag needed: used only at fixings "
+          "after the call) and `data/processed/cross/leg_ecb_trade_weights.csv` (ECB narrow-group trade weights, 2021).", ""]
+    (path or ROOT / "reports" / "arm_leg_decomposition.md").write_text("\n".join(L))
 
 
 if __name__ == "__main__":

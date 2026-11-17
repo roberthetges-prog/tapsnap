@@ -101,13 +101,16 @@ prices (+0.15 2000-02, +0.38 2003-09, +0.82 2010-15, +0.83 2016-22, +0.36 2023-2
 THIS module's z-score, lag and stream functions; the archive's 1999+ rows against the repo's parsed CFTC files.
 
 POST-HOC ADDENDUM (written 2026-11-17 AFTER the 12 evaluations above had been run and read; the primary test had
-failed). Nothing above was changed. Three things were added, none of which can turn the fail into a pass, all labelled
+failed). Nothing above was changed. Four things were added, none of which can turn the fail into a pass, all labelled
 post-hoc in the outputs:
   13  robustness of the fail to the conservative lag: rule 1 with "as-of + 6 days" for every report (the modern
       convention). Before 1993 that is EARLIER than the report was published, so it is an optimistic bound for the
       rule, not a tradable variant.
   14  robustness of the fail to the synthetic price: rule 1 scored at month-ends on an independent price (OECD
       end-of-month DEM spot, FRED CCUSSP01DEM650N) next to the synthetic euro on the same month-ends.
+  15  pipeline check, not a rule: a LOOK-AHEAD copy of rule 1 (every report treated as known 30 days BEFORE its as-of
+      date). If the scoring code and the orientation are right it must score well above 50 %, because speculators
+      chase the price; it shows the fail is not a bug.
   --  pooled Sharpe of the positioning stream across eras (arithmetic on streams already computed: the mark 1987-98
       and EUR/USD 2000-2026 on H.10 with the project's rolling(52) z), split into years inside and outside the
       windows on which the rule was selected (2003-2022).
@@ -795,6 +798,8 @@ def run(cost_pips: float = 1.2, save: bool = True, verbose: bool = True):
     side_early = np.sign(aligned_z("dem", px.index, fixed_lag_days=6))
     acc += score_rule("13 post-hoc: primary with as-of + 6 days throughout (optimistic bound)", "synthetic euro", "post-hoc", side_early, L, ERAS_PRE)
     sr += sharpe_rows("13 post-hoc: as-of + 6 days throughout", "synthetic euro", stream("dem", px, side_early, L, cost_pips), ERAS_PRE)
+    side_look = np.sign(aligned_z("dem", px.index, fixed_lag_days=-30))
+    acc += score_rule("15 pipeline check: LOOK-AHEAD copy (report known 30 days before its as-of date)", "synthetic euro", "pipeline-check", side_look, L, ERAS_PRE)
     ME = month_end_rescore(px, side)
     POOL = pooled_sharpe(pnl, cost_pips)
     ACC, SR = pd.DataFrame(acc), pd.DataFrame(sr)
