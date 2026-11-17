@@ -183,7 +183,25 @@ Round 9 addendum of `experiments/HOWTO_ARMS.md`:
   against a random-entry baseline that shows how much of the win rate is barrier geometry.
 * AC `leg_decomposition`: euro leg or dollar leg? The slow signals on EUR vs a basket and USD vs a basket; does hedging
   the unpredicted leg raise accuracy?
-Status: AB finished; AA and AC running (launched 2026-11-17).
+Status: AA and AB finished; AC running (launched 2026-11-17).
+
+**AA `pre_euro` (6 candidates, 12 declared evaluations, 3 post-hoc checks): CLEAN FAIL (reports/arm_pre_euro.md).**
+The identical positioning rule on Deutsche Mark futures (CFTC history from 1986, never used before), scored on the
+synthetic euro, 1987-02 to 1998-12:
+* right 47.6 / 47.5 / 45.0 % at 21 / 42 / 63 sessions (141 / 70 / 46 independent decisions; random timing 49.7 %);
+  daily-stream Sharpe +0.03 (t 0.1). The agreement-style rule rebuilt for that era: 48.3 / 45.2 / 42.0 %.
+* JPY, GBP, CHF, CAD futures in the same years: 47-52 %; nothing.
+* Not an artefact: one more week of delay, an optimistic lag, an independent month-end price, and an independent
+  re-computation all give 46-51 %; a copy that knows each report 30 days early scores 74 %, so the pipeline would have
+  found information had there been any; the stand-in inputs keep the full record when applied to EUR/USD 2010-26.
+* Pooled Sharpe of the positioning stream OUTSIDE the 2003-22 window it was selected on (mark 1987-98, EUR/USD 2000-02
+  and 2023-26; 18.7 years): +0.10 (t 0.4; 95 % range -0.35 to +0.55). Inside the window: +0.64.
+**CONSEQUENCE (supersedes the planning figures above).** The positioning effect now rests on EUR/USD 2003-2022 alone:
+it failed on seven other currencies (round 3) and on the euro's own predecessor (this arm), and it is unconfirmed since
+2023. Planning Sharpe for positioning-driven calls: 0.1-0.3 (centre 0.2), i.e. about 52 / 53 / 54 % at 1 / 2 / 3 months,
+not 58-63 %. The agreement rule's 59 / 63 / 67 % and the committee's 59 / 63 / 64 % are IN-SAMPLE descriptions of
+2010-26 with no out-of-time support and must be quoted that way. The paper forward test is now the only way left to
+find out whether anything is there.
 
 **AB `trade_design` (12 candidates): FAILS the bar (reports/arm_trade_design.md).** Agreement-rule calls with take-profit /
 stop / time-limit barriers resolved on hourly bars, against the same barriers on random dates and directions.

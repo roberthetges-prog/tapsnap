@@ -54,6 +54,14 @@ quarter** when positioning, the 2-year spread trend and the macro score agree (2
 **path and level events 69-87 %**, calibrated in every era; next-session range 75-78 %. Nothing else that is public and
 reachable adds to this: see `research/RESEARCH_LOG.md` and `reports/FINAL_REPORT.md` section 3d.
 
+## Round 9: the out-of-time test fails (2026-11-17)
+
+The positioning rule was tested on Deutsche Mark futures for 1987-98, a period never used before: right 48 / 48 / 45 %
+at 1 / 2 / 3 months, Sharpe 0.03 (`reports/arm_pre_euro.md`). With the earlier failure on seven other currencies, the
+effect rests on EUR/USD 2003-2022 alone and is unconfirmed since 2023. **The 59 / 63 / 67 % above are descriptions of
+2010-26, not forecasts; the planning figure is 52-54 % (Sharpe 0.1-0.3).** Take-profit / stop designs give 70-78 % win
+rates that are barrier geometry: random entries win 72 % with the same levels (`reports/arm_trade_design.md`).
+
 ## The committee of analysts (round 8)
 
 `PYTHONPATH=src python -m eurusd.cli committee` (add `--all` for every vote) asks 110 analysts whether EUR/USD will be

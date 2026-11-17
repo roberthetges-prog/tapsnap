@@ -272,7 +272,7 @@ def weekly_outlook(refresh: bool = True) -> str:
             side = 1 if tot > 0 else -1
             acc, nt = pc["accuracy_non_overlapping"], pc["no_touch"]
             L.append(f"POSITION CALL: {'LONG' if side > 0 else 'SHORT'} EUR/USD (3 of 3 agree: {vtxt}) | historically right {acc['21']:.0%} at 1 month, "
-                     f"{acc['42']:.0%} at 2 months, {acc['63']:.0%} at a quarter (2010-26; not confirmed since 2023)")
+                     f"{acc['42']:.0%} at 2 months, {acc['63']:.0%} at a quarter (2010-26 only; not confirmed since 2023; the same rule was right 48 % on the Deutsche Mark in 1987-98, so plan on 52-54 %)")
             L.append(f"  Stops at known odds: 3 ATR = {px - side * 3 * a14:.4f} (untouched {nt['21']['3atr']:.0%} of the time over 21 sessions, {nt['10']['3atr']:.0%} over 10) | "
                      f"2 ATR = {px - side * 2 * a14:.4f} ({nt['21']['2atr']:.0%} / {nt['10']['2atr']:.0%})")
         else:

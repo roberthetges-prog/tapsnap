@@ -1,23 +1,23 @@
 # Arm AC - leg_decomposition: is the agreement rule a euro signal or a dollar signal, and does a hedge help?
 
-Code `src/eurusd/arms/leg_decomposition.py` (`run()`; `PYTHONPATH=src OMP_NUM_THREADS=1 python src/eurusd/arms/leg_decomposition.py`, about two minutes, one process). Results `experiments/results/arms/leg_decomposition_*.csv`, log `experiments/results/arms/logs/leg_decomposition.log`. The primary test, its pass bar, the basket, the weights, the timing rule and the cost rule were written into the module docstring before any outcome on either leg was computed; what was added afterwards is marked ADDED there and here.
+Code `src/eurusd/arms/leg_decomposition.py` (`run()`; `PYTHONPATH=src OMP_NUM_THREADS=1 python src/eurusd/arms/leg_decomposition.py`, about half a minute, one process). Results `experiments/results/arms/leg_decomposition_*.csv`, log `experiments/results/arms/logs/leg_decomposition.log`. The primary test, its pass bar, the basket, the weights, the timing rule and the cost rule were written into the module docstring before any outcome on either leg was computed; what was added afterwards is marked ADDED there and here.
 
 ## Verdict: **FAIL** against the declared bar
 
 **The hedged expression is worse, not better.** The same agreement calls scored on the euro against a basket (JPY, GBP, CHF, CAD, AUD, 1/5 each) instead of on plain EUR/USD are right 53.2 % instead of 59.2 % at 21 sessions and 57.4 % instead of 62.9 % at 42 sessions (2010-26); 50.3 vs 58.3 % and 55.8 vs 61.3 % since 2016. The bar asked for +3 points in those four cells; the result is -6.0, -8.0, -5.5 and -5.5 points, and at 21 sessions the paired 95 % interval lies entirely below zero in both eras. In 2023-26 it is -1.5 points at 21 sessions (bar: not worse) and +5.5 at 42 sessions on 9 independent calls. The stale-copy condition cannot be met because there is no gain to lose.
 
-|   h | era     | test                                     |   gain_pts |   stale_gain_pts | pass_a   |   pass_c |
-|----:|:--------|:-----------------------------------------|-----------:|-----------------:|:---------|---------:|
-|  21 | 2010-26 | (a) gain >= 3 pts / (c) stale loses half |       -6   |              0   | False    |        0 |
-|  21 | 2016-26 | (a) gain >= 3 pts / (c) stale loses half |       -8   |              1.7 | False    |        0 |
-|  21 | 2023-26 | (b) not worse                            |       -1.5 |              9.1 | False    |      nan |
-|  42 | 2010-26 | (a) gain >= 3 pts / (c) stale loses half |       -5.5 |              1.6 | False    |        0 |
-|  42 | 2016-26 | (a) gain >= 3 pts / (c) stale loses half |       -5.5 |              1.8 | False    |        0 |
-|  42 | 2023-26 | (b) not worse                            |        5.5 |             10.7 | True     |      nan |
+|   sessions | era     | condition                                            |   gain, points |   gain with 63-session-stale calls | result                                |
+|-----------:|:--------|:-----------------------------------------------------|---------------:|-----------------------------------:|:--------------------------------------|
+|         21 | 2010-26 | (a) gain >= +3.0 and (c) stale copy loses half of it |           -6   |                                0   | FAIL (a), (c) not applicable: no gain |
+|         21 | 2016-26 | (a) gain >= +3.0 and (c) stale copy loses half of it |           -8   |                                1.7 | FAIL (a), (c) not applicable: no gain |
+|         21 | 2023-26 | (b) not worse than plain EUR/USD                     |           -1.5 |                                9.1 | FAIL                                  |
+|         42 | 2010-26 | (a) gain >= +3.0 and (c) stale copy loses half of it |           -5.5 |                                1.6 | FAIL (a), (c) not applicable: no gain |
+|         42 | 2016-26 | (a) gain >= +3.0 and (c) stale copy loses half of it |           -5.5 |                                1.8 | FAIL (a), (c) not applicable: no gain |
+|         42 | 2023-26 | (b) not worse than plain EUR/USD                     |            5.5 |                               10.7 | pass                                  |
 
 **Plain-language answer: it is more a dollar signal than a euro signal, and since 2016 it has been almost only a dollar signal.**
 
-* On the dollar leg alone (dollar against the same basket, euro excluded) the calls are right 56.8 / 62.7 / 65.3 % at 21 / 42 / 63 sessions in 2010-26 and 59.9 / 64.8 / 65.8 % in 2016-26: about what they score on EUR/USD itself (59.2 / 62.9 / 66.2 and 58.3 / 61.3 / 66.1 %). On the euro leg alone they are right 53.2 / 57.4 / 61.2 % and 50.3 / 55.8 / 59.7 %, which a random entry with the same call pattern matches or beats 0.31 / 0.15 / 0.12 and 0.44 / 0.34 / 0.26 of the time (the dollar leg: 0.04 / 0.01 / 0.00 and 0.03 / 0.01 / 0.01).
+* On the dollar leg alone (dollar against the same basket, euro excluded) the calls are right 56.8 / 62.7 / 65.3 % at 21 / 42 / 63 sessions in 2010-26 and 59.9 / 64.8 / 65.8 % in 2016-26: about what they score on EUR/USD itself (59.2 / 62.9 / 66.2 and 58.3 / 61.3 / 66.1 %). On the euro leg alone they are right 53.2 / 57.4 / 61.2 % and 50.3 / 55.8 / 59.7 %, which a random entry with the same call pattern matches or beats in 31 / 15 / 12 % and 44 / 34 / 26 % of 1,000 draws (dollar leg: 4 / 2 / 0 % and 3 / 1 / 1 %; plain EUR/USD: 4 / 2 / 1 % and 7 / 6 / 4 %).
 * Exact split of the profit (EUR/USD = euro leg minus dollar leg, so the P&L of a call splits with no residual): of 403 bp a year gross on EUR/USD in 2010-26, 231 bp came from the dollar leg (t 2.2) and 172 bp from the euro leg (t 1.9). Since 2016: 233 of 253 bp (92 %) from the dollar leg, 20 bp (t 0.2) from the euro leg. Since 2023: 201 of 303 bp from the dollar leg.
 * By the attribution rule declared in advance the formal answer is **'cannot be attributed to one leg'**: accuracy on the dollar leg is higher than on the euro leg by 3.6, 9.6, 5.2 and 9.0 points in the four cells (3 were required), but the paired intervals in 2010-26 include zero (-13.2 .. +5.7 at 21 sessions, -16.3 .. +6.2 at 42); only 2016-26 at 21 sessions excludes it (-18.5 .. -0.7). So: both legs before 2016, the dollar leg since, and the data cannot prove the difference between the legs.
 * Consequence for the product: **keep trading the calls on plain EUR/USD.** The two legs are almost uncorrelated (correlation of their 21-session moves +0.05 in 2010-26) and EUR/USD is their difference, so the pair collects whatever the calls know about either leg. Hedging the dollar leg throws away the larger half of the edge; hedging the euro leg (trading a dollar basket instead) keeps the accuracy but does not raise it and costs five spreads.
@@ -95,7 +95,7 @@ Candidates run: **6** (5 declared + 1 added post hoc; cap 12). None passes.
 | 2016-26   |             6.6 |             3.9 |             6   |       0.17 |          0.35 |          0.83 |             0.64 |                  0.83 |
 | 2023-26   |             6.4 |             3.4 |             5.8 |       0.11 |          0.28 |          0.83 |             0.58 |                  0.89 |
 
-  S = EUR/USD, E = euro against the basket, U = dollar against the basket. The dollar leg is the larger one: it carries 60-85 % of EUR/USD's variance, the euro leg 28-43 %; the two are close to uncorrelated; EUR/USD's 21-session direction agrees with the dollar leg's 79-89 % of the time and with the euro leg's 59-68 %.
+  S = EUR/USD, E = euro against the basket, U = dollar against the basket. The dollar leg is the larger one: its variance is 52-83 % of EUR/USD's, the euro leg's 28-43 % (the shares need not add to 100 because of the covariance); the two are close to uncorrelated; EUR/USD's 21-session direction agrees with the dollar leg's 79-89 % of the time and with the euro leg's 58-73 %.
 
 ## 2. Reconciliation
 
@@ -249,7 +249,7 @@ Call pattern: 2010-26: calls on 44 % of sessions, 45 % of them long, 340 separat
 
 What the inputs say:
 * **Positioning** (the input the theory was about). Direction accuracy is the same on both legs at 21 sessions (54.8 % euro leg, 55.2 % dollar leg, 2010-26) and somewhat higher on the euro leg at 42 and 63 sessions (60.6 vs 56.4; 62.0 vs 57.5); no paired interval excludes zero. In money terms it is the other way round: 68 % of its 2010-26 P&L and 101 % of its 2016-26 P&L came from the dollar leg (gross Sharpe 0.71 on the dollar leg, -0.01 on the euro leg). 'Net speculative position in euro futures' is a position in the EUR/USD contract; it is at least as much a view on the dollar as on the euro. The premise of the primary test is not supported.
-* **House macro score**: dollar leg (54.8 / 60.1 / 60.5 % since 2016, p_random 0.04 / 0.01 / 0.00) rather than euro leg (49.3 / 51.0 / 55.4 %).
+* **House macro score**: dollar leg (54.8 / 60.1 / 60.5 % since 2016; random entry at least as good in 4 / 1 / 0 % of draws) rather than euro leg (49.3 / 51.0 / 55.4 %).
 * **2-year spread trend**: about 50 % on everything on its own (known); the little there is sits on the dollar leg at 42-63 sessions (53.6 / 54.9 %).
 * **2023-26** runs the other way for positioning (euro leg 54-61 %, dollar leg 45-46 %) on 15-47 independent decisions with intervals 25 points wide: not evidence of anything.
 
@@ -292,7 +292,7 @@ Euro leg minus dollar leg, per input (paired 95 % interval, same call days):
 |  63 | 2016-26 |      18.7 |        1.7 |      66.1 |      59.7 |     36.3 |     76.9 |   -6.4 |     -16.6 |       4.4 |          -11.5 |           10.6 |            0.87 |            64.2 |            62.5 |         -1.6 |
 |  63 | 2023-26 |       6.1 |        1.5 |      50.6 |      54.5 |     18.8 |     81.2 |    3.9 |     -14   |      25.5 |          -17   |           23.7 |            0.32 |            48.5 |            52.8 |          4.4 |
 
-**FAIL** on (a) in all four cells and on (b) at 21 sessions. Noteworthy in the placebo columns: the 63-session-stale calls score 59.4 % on the euro leg at 21 sessions (live calls 53.2 %) and 51.4 % on the dollar leg (live 56.8 %). The timely part of the rule is its dollar part; what it has on the euro leg is as good three months stale, i.e. a slow regime read.
+**FAIL** on (a) in all four cells and on (b) at 21 sessions. Noteworthy in the placebo columns: the 63-session-stale calls score 59.4 % on the euro leg at 21 sessions (live calls 53.2 %) and 51.4 % on the dollar leg (live 56.8 %). Since 2016: stale 60.9 vs live 50.3 % on the euro leg, stale 53.8 vs live 59.9 % on the dollar leg. The timely part of the rule is its dollar part; on the euro leg the three-month-old calls do better than the live ones, so whatever is there is slow drift or noise, not timing.
 
 ## 5. Secondary (declared)
 
@@ -485,7 +485,7 @@ Because S = E - U bar by bar, the gross P&L of any call on EUR/USD is the P&L of
 | house_score  | 2016-26 |                466.2 |                  94.5 |                 371.7 |                 0.8  |       2.17 |        0.7  |        1.95 |                   0.21 |                   0.58 |
 | house_score  | 2023-26 |                302.4 |                 142   |                 160.3 |                 0.53 |       0.9  |        0.77 |        0.52 |                   0.39 |                   0.26 |
 
-For every input and every era more than half of the money came from the dollar leg; since 2016 it is 80-100 %. No t-statistic on the euro leg reaches 2 after 2016.
+For every input and every era more than half of the money came from the dollar leg; over 2016-26 it is 80-100 %. No t-statistic on the euro leg reaches 1 in the 2016-26 or 2023-26 windows. (Direction accuracy and money can disagree: positioning calls the euro leg's direction as often as the dollar leg's, but the dollar leg moves further when it is right.)
 
 ### 6b. Candidate 6, POST HOC: the calls on a broad dollar basket (dollar against EUR, JPY, GBP, CHF, CAD, AUD at 1/6 each)
 
@@ -503,7 +503,7 @@ Chosen after seeing the per-pair table below, so it could only ever be a lead. I
 |  63 | 2016-26 |      18.7 |        1.7 |      66.1 |      66   |     41   |     80.9 |   -0.1 |      -5.4 |       5.1 |           -7   |            6.3 |            0.49 |            64.2 |            58.2 |         -5.9 |
 |  63 | 2023-26 |       6.1 |        1.5 |      50.6 |      51.7 |     18.8 |     81.2 |    1   |     -12.3 |      11.1 |           -8.9 |            8.7 |            0.46 |            48.5 |            44.1 |         -4.4 |
 
-Accuracy within 3 points of plain EUR/USD in every cell (-1.4 / -0.4 in 2010-26, +2.8 / +3.0 in 2016-26), net Sharpe +0.50 / +0.49 / +0.46 against +0.66 / +0.47 / +0.63 for plain EUR/USD. Spreading the call over six dollar pairs neither helps nor hurts; it is the same bet with six tickets.
+Accuracy within about 3 points of plain EUR/USD in every cell (-1.4 / -0.4 in 2010-26, +2.8 / +3.0 in 2016-26), net Sharpe +0.50 / +0.49 / +0.46 against +0.66 / +0.47 / +0.63 for plain EUR/USD. Spreading the call over six dollar pairs neither helps nor hurts; it is the same bet with six tickets.
 
 ### 6c. Per single pair (declared descriptive)
 
@@ -552,7 +552,7 @@ Agreement calls scored on each pair. EURxxx: right when the euro rose against xx
 | USDCAD   |  42 | 2016-26 |      28   |  60.7 | 42.4 | 76.4 |        49.6 |       0.02 |
 | USDAUD   |  42 | 2016-26 |      28   |  62.5 | 42.4 | 76.4 |        49.9 |       0    |
 
-After a long-EUR/USD call the dollar tends to fall against sterling, the franc, the Canadian and the Australian dollar as well (56-63 %), not against the yen at 21 sessions (49-53 %). The euro itself gains on the yen and the franc (55-59 %) and LOSES to the Australian dollar (43-45 %): a 'long EUR/USD' call is in practice a 'dollar down' call, and the euro is not the currency that gains most from it.
+After a long-EUR/USD call the dollar tends to fall against sterling, the franc, the Canadian and the Australian dollar as well (55-63 % in these cells); the yen is the weak spot (49-57 %). The euro itself does best against the yen (54-59 %) and LOSES to the Australian dollar (43-45 %): a 'long EUR/USD' call is in practice a 'dollar down' call, and the euro is not the currency that gains most from it. Ten pairs, four cells each: single-pair differences are descriptive, none is a result.
 
 ## 7. Sanity checks
 
@@ -615,7 +615,7 @@ Accuracy 48-52 % on every series and the gain within +-2 points: the pipeline fi
 
 * **Entry-time noise in 2023-26.** The same calls on plain EUR/USD have a net Sharpe of 0.63 when entered at the next noon fixing and 0.23 on the feature-store closes 19 hours earlier (2010-26: 0.66 vs 0.57; 2016-26: 0.47 vs 0.53). Accuracy at 21-63 sessions reconciles within a point, so this is the daily-stream yardstick being fragile on four years with about 35 position changes a year, not a data error; all comparisons in this report are between instruments on the SAME fixings, where it cancels. It is one more reason not to read anything into 2023-26.
 * **The call flickers.** 340 separate call episodes in 17 years, about 6 sessions each; the phase-averaged accuracy scores every call day on the following 21-63 sessions regardless. This is the published benchmark's convention and is the same for every instrument here.
-* **The stale euro leg** (section 4): on the euro leg the three-month-old calls beat the live ones. Whatever the rule knows about the euro side is a slow drift, not timing.
+* **The stale euro leg** (section 4): on the euro leg the three-month-old calls beat the live ones (59 vs 53 % at 21 sessions). Whatever the rule has on the euro side is slow drift or noise, not timing. On plain EUR/USD the stale copy scores the same as the live calls at 21 sessions (59.4 vs 59.2 %), as the committee report already found: the live calls' dollar-leg timing and the stale calls' euro-leg drift happen to add up to the same number.
 * **Fed weights are from memory**, not from the source (blocked). They enter one robustness candidate whose result agrees with the other baskets.
 * **Spot only.** No carry in any expression, as everywhere in the project. A long-euro-against-basket position earns or pays a different carry from long EUR/USD (the basket holds two low-yield and three higher-yield currencies); with the gross edge on the euro leg at 20 bp a year since 2016 this cannot change the verdict.
 * **Small samples.** 2023-26 has 19 / 9 / 6 independent calls at 21 / 42 / 63 sessions; the Wilson intervals are 40-60 points wide.

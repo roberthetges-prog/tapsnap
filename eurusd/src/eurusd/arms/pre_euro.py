@@ -151,7 +151,7 @@ N_SHUFFLE = 500
 MIN_OFFSET = 126
 SEED = 20261117
 
-# currency: (CFTC codes, {code: pounds-style notional weight}, name must contain, price file, inverted?, pip of the pair)
+# currency: (CFTC contract codes, text the market name must contain). PRICE: (H.10 file, quoted as foreign per USD?, pip of the quoted pair)
 CONTRACTS = {
     "dem": (("094741",), "DEUTSCHE MARK"),
     "jpy": (("097741",), "JAPANESE YEN"),

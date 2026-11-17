@@ -36,5 +36,17 @@
    "3atr": 0.71
   }
  },
- "caveat": "same information as the live exposure, expressed as a position trade; EUR-specific positioning effect did not replicate on other currencies"
+ "caveat": "same information as the live exposure, expressed as a position trade; the positioning effect did not replicate on seven other currencies (round 3) nor on the Deutsche Mark in 1987-98 (round 9: 48 / 48 / 45 %), so these 2010-26 figures have no out-of-time support; plan on 52-54 %",
+ "out_of_time": {
+  "deutsche_mark_1987_98": {
+   "21": 0.476,
+   "42": 0.475,
+   "63": 0.45
+  },
+  "planning": {
+   "21": 0.52,
+   "42": 0.53,
+   "63": 0.54
+  }
+ }
 }

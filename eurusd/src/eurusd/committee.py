@@ -514,6 +514,9 @@ def format_readout(o: dict, detail: bool = True) -> str:
             L.append(f"  Weighted by each analyst's own conviction: {'UP' if w['side'] > 0 else 'DOWN'} with a {100 * w['share']:.0f} % weighted majority"
                      + (f"; such calls were right {100 * wr['acc']:.0f} % in 2010-26 (not proven better than the plain vote)" if w.get("call") and wr.get("acc") == wr.get("acc") and wr else "")
                      + ("" if w.get("call") else " (too thin for a call)"))
+        if has and h == 21:
+            L.append("  Caution: these are 2010-26 figures. The positioning rule behind most of the majority was right only 48 % on the "
+                     "Deutsche Mark in 1987-98 and is unconfirmed since 2023; a realistic planning figure is 52-54 %.")
         if detail:
             df = pd.DataFrame(r["analysts"])
             by = df.groupby("school")["vote"].value_counts().unstack(fill_value=0).reindex(columns=["up", "down", "no view"], fill_value=0)
