@@ -746,6 +746,9 @@ def write_report(K: dict, path: Path | None = None) -> None:
     vr = pd.DataFrame(vr)
     att = AT[AT.signal == "agreement"]
     a10, a16, a23 = (att[att.era == e].iloc[0] for e in ("2010-26", "2016-26", "2023-26"))
+    a15 = att[att.era == "2010-15"].iloc[0]
+    A15 = K["accuracy_2010_15"]
+    acc15 = lambda c: " / ".join(f"{p(A15, 'acc', signal='agreement', series=c, h=h):.1f}" for h in HORIZONS)  # noqa: E731
     sh = lambda name, era: _g(SH, "sharpe_net", expression=name, era=era)  # noqa: E731
     trio = lambda name: " / ".join(f"{sh(name, e):+.2f}" for e in ("2010-26", "2016-26", "2023-26"))  # noqa: E731
     ct = K["cost_table"]["mean_bp_per_unit_turnover_2010_26"]
@@ -775,23 +778,31 @@ def write_report(K: dict, path: Path | None = None) -> None:
           f"{p(P_, 'gain', h=21, era='2023-26'):+.1f} points at 21 sessions (bar: not worse) and {p(P_, 'gain', h=42, era='2023-26'):+.1f} at 42 sessions on "
           f"{_g(P_, 'n_indep', h=42, era='2023-26'):.0f} independent calls. The stale-copy condition cannot be met because there is no gain to lose.", "",
           _md(vr), "",
-          "**Plain-language answer: it is more a dollar signal than a euro signal, and since 2016 it has been almost only a dollar signal.**", "",
-          f"* On the dollar leg alone (dollar against the same basket, euro excluded) the calls are right {acc3('agreement', 'U', '2010-26')} % at 21 / 42 / 63 sessions in 2010-26 and "
-          f"{acc3('agreement', 'U', '2016-26')} % in 2016-26: about what they score on EUR/USD itself ({acc3('agreement', 'S', '2010-26')} and {acc3('agreement', 'S', '2016-26')} %). "
-          f"On the euro leg alone they are right {acc3('agreement', 'E', '2010-26')} % and {acc3('agreement', 'E', '2016-26')} %, which a random entry with the same call pattern "
-          f"matches or beats in {pr3('agreement', 'E', '2010-26')} % and {pr3('agreement', 'E', '2016-26')} % of 1,000 draws (dollar leg: {pr3('agreement', 'U', '2010-26')} % and {pr3('agreement', 'U', '2016-26')} %; plain EUR/USD: {pr3('agreement', 'S', '2010-26')} % and {pr3('agreement', 'S', '2016-26')} %).",
-          f"* Exact split of the profit (EUR/USD = euro leg minus dollar leg, so the P&L of a call splits with no residual): of {a10.bp_per_year_eurusd:.0f} bp a year gross on EUR/USD in 2010-26, "
-          f"{a10.bp_per_year_usd_leg:.0f} bp came from the dollar leg (t {a10.t_usd_leg:.1f}) and {a10.bp_per_year_eur_leg:.0f} bp from the euro leg (t {a10.t_eur_leg:.1f}). "
-          f"Since 2016: {a16.bp_per_year_usd_leg:.0f} of {a16.bp_per_year_eurusd:.0f} bp ({100 * a16.share_from_usd_leg:.0f} %) from the dollar leg, {a16.bp_per_year_eur_leg:.0f} bp (t {a16.t_eur_leg:.1f}) from the euro leg. "
-          f"Since 2023: {a23.bp_per_year_usd_leg:.0f} of {a23.bp_per_year_eurusd:.0f} bp from the dollar leg.",
+          "**Plain-language answer: it is not a euro signal, and not reliably a dollar signal either. It is a signal about the pair; the leg that delivered has changed: mostly the euro leg "
+          "in 2010-15, almost only the dollar leg since 2016. Over 2010-26 as a whole slightly more of it came from the dollar side.**", "",
+          f"* Direction, 2010-26: on the dollar leg alone (dollar against the same basket, euro excluded) the calls are right {acc3('agreement', 'U', '2010-26')} % at 21 / 42 / 63 sessions, about what they "
+          f"score on EUR/USD itself ({acc3('agreement', 'S', '2010-26')} %); on the euro leg alone {acc3('agreement', 'E', '2010-26')} %. Since 2016: dollar leg {acc3('agreement', 'U', '2016-26')} %, "
+          f"euro leg {acc3('agreement', 'E', '2016-26')} % (EUR/USD {acc3('agreement', 'S', '2016-26')} %). A random entry with the same call pattern matches or beats the euro-leg numbers in "
+          f"{pr3('agreement', 'E', '2010-26')} % (2010-26) and {pr3('agreement', 'E', '2016-26')} % (2016-26) of 1,000 draws; the dollar-leg numbers in {pr3('agreement', 'U', '2010-26')} % and "
+          f"{pr3('agreement', 'U', '2016-26')} %; plain EUR/USD in {pr3('agreement', 'S', '2010-26')} % and {pr3('agreement', 'S', '2016-26')} %.",
+          f"* But in 2010-15 (ADDED; the euro-crisis years) it was the other way round at one month: euro leg {acc15('E')} %, dollar leg {acc15('U')} %, EUR/USD {acc15('S')} %.",
+          f"* Exact split of the profit (EUR/USD = euro leg minus dollar leg, so the P&L of a call splits with no residual), gross bp a year: 2010-26 {a10.bp_per_year_eurusd:.0f} on EUR/USD = "
+          f"{a10.bp_per_year_eur_leg:.0f} euro leg (t {a10.t_eur_leg:.1f}) + {a10.bp_per_year_usd_leg:.0f} dollar leg (t {a10.t_usd_leg:.1f}); "
+          f"2010-15 {a15.bp_per_year_eurusd:.0f} = {a15.bp_per_year_eur_leg:.0f} euro leg (t {a15.t_eur_leg:.1f}) + {a15.bp_per_year_usd_leg:.0f} dollar leg (t {a15.t_usd_leg:.1f}); "
+          f"2016-26 {a16.bp_per_year_eurusd:.0f} = {a16.bp_per_year_eur_leg:.0f} euro leg (t {a16.t_eur_leg:.1f}) + {a16.bp_per_year_usd_leg:.0f} dollar leg (t {a16.t_usd_leg:.1f}), "
+          f"i.e. {100 * a16.share_from_usd_leg:.0f} % from the dollar leg; 2023-26 {a23.bp_per_year_eurusd:.0f} = {a23.bp_per_year_eur_leg:.0f} + {a23.bp_per_year_usd_leg:.0f}.",
           f"* By the attribution rule declared in advance the formal answer is **'{formal}'**: accuracy on the dollar leg is higher than on the euro leg by "
           f"{-p(EU, 'gain', h=21, era='2010-26'):.1f}, {-p(EU, 'gain', h=21, era='2016-26'):.1f}, {-p(EU, 'gain', h=42, era='2010-26'):.1f} and {-p(EU, 'gain', h=42, era='2016-26'):.1f} points in the four "
-          f"cells (3 were required), but the paired intervals in 2010-26 include zero ({p(EU, 'gain_lo', h=21, era='2010-26'):+.1f} .. {p(EU, 'gain_hi', h=21, era='2010-26'):+.1f} at 21 sessions, "
+          f"declared cells (3 were required), but the paired intervals in 2010-26 include zero ({p(EU, 'gain_lo', h=21, era='2010-26'):+.1f} .. {p(EU, 'gain_hi', h=21, era='2010-26'):+.1f} at 21 sessions, "
           f"{p(EU, 'gain_lo', h=42, era='2010-26'):+.1f} .. {p(EU, 'gain_hi', h=42, era='2010-26'):+.1f} at 42); only 2016-26 at 21 sessions excludes it "
-          f"({p(EU, 'gain_lo', h=21, era='2016-26'):+.1f} .. {p(EU, 'gain_hi', h=21, era='2016-26'):+.1f}). So: both legs before 2016, the dollar leg since, and the data cannot prove the difference between the legs.",
+          f"({p(EU, 'gain_lo', h=21, era='2016-26'):+.1f} .. {p(EU, 'gain_hi', h=21, era='2016-26'):+.1f}). The data cannot prove a difference between the legs, and the sub-periods disagree about its sign.",
+          "* The premise of the primary test (positioning in euro futures is a statement about the euro) is not supported: positioning alone calls the direction of both legs about equally often and "
+          "earned most of its money on the dollar leg (section 3).",
           "* Consequence for the product: **keep trading the calls on plain EUR/USD.** The two legs are almost uncorrelated (correlation of their 21-session moves "
-          f"{_g(K['leg_stats'], 'corr_E_U', era='2010-26', h=21):+.2f} in 2010-26) and EUR/USD is their difference, so the pair collects whatever the calls know about either leg. Hedging the dollar leg "
-          "throws away the larger half of the edge; hedging the euro leg (trading a dollar basket instead) keeps the accuracy but does not raise it and costs five spreads.", "",
+          f"{_g(K['leg_stats'], 'corr_E_U', era='2010-26', h=21):+.2f} in 2010-26) and EUR/USD is their difference, so the pair collects whatever the calls know about either leg, whichever leg it turns out "
+          "to be. A hedge removes one leg's noise only by also removing that leg's share of the edge, and which leg carries the edge was not stable: hedging the dollar leg would have thrown away "
+          "nine tenths of the profit since 2016; hedging the euro leg (trading a dollar basket instead) would have thrown away two thirds of it in 2010-15, and since 2016 it matches plain EUR/USD "
+          "without beating it, for five spreads instead of one.", "",
           "## Key table: the same agreement calls scored on three instruments", "",
           "Phase-averaged accuracy (every call day scored on the next h sessions; independent calls = call days / h). Entry at the first H.10 fixing after the call, all three "
           "instruments on the same two fixings. USD leg: a long-EUR/USD call counts as right when the dollar FELL against the basket.", "",
@@ -844,7 +855,7 @@ def write_report(K: dict, path: Path | None = None) -> None:
           f"({p(A, 'acc', signal='positioning', series='E', h=42, era='2010-26'):.1f} vs {p(A, 'acc', signal='positioning', series='U', h=42, era='2010-26'):.1f}; "
           f"{p(A, 'acc', signal='positioning', series='E', h=63, era='2010-26'):.1f} vs {p(A, 'acc', signal='positioning', series='U', h=63, era='2010-26'):.1f}); no paired interval excludes zero. "
           f"In money terms it is the other way round: {100 * _g(pa, 'share_from_usd_leg', signal='positioning', era='2010-26'):.0f} % of its 2010-26 P&L and "
-          f"{100 * _g(pa, 'share_from_usd_leg', signal='positioning', era='2016-26'):.0f} % of its 2016-26 P&L came from the dollar leg (gross Sharpe {_g(pa, 'sharpe_gross_usd_leg', signal='positioning', era='2016-26'):.2f} "
+          f"{100 * _g(pa, 'share_from_usd_leg', signal='positioning', era='2016-26'):.0f} % of its 2016-26 P&L came from the dollar leg (above 100 means the euro leg lost a little; gross Sharpe {_g(pa, 'sharpe_gross_usd_leg', signal='positioning', era='2016-26'):.2f} "
           f"on the dollar leg, {_g(pa, 'sharpe_gross_eur_leg', signal='positioning', era='2016-26'):.2f} on the euro leg). 'Net speculative position in euro futures' is a position in the EUR/USD contract; "
           "it is at least as much a view on the dollar as on the euro. The premise of the primary test is not supported.",
           f"* **House macro score**: dollar leg ({acc3('house_score', 'U', '2016-26')} % since 2016; random entry at least as good in {pr3('house_score', 'U', '2016-26')} % of draws) rather than euro leg ({acc3('house_score', 'E', '2016-26')} %).",
@@ -918,6 +929,9 @@ def write_report(K: dict, path: Path | None = None) -> None:
               dec1=("bp_per_year_eurusd", "bp_per_year_eur_leg", "bp_per_year_usd_leg"), dec2=("share_from_usd_leg", "t_eurusd", "t_eur_leg", "t_usd_leg", "sharpe_gross_eur_leg", "sharpe_gross_usd_leg")), "",
           "For every input and every era more than half of the money came from the dollar leg; over 2016-26 it is 80-100 %. No t-statistic on the euro leg reaches 1 in the 2016-26 or 2023-26 windows. "
           "(Direction accuracy and money can disagree: positioning calls the euro leg's direction as often as the dollar leg's, but the dollar leg moves further when it is right.)", "",
+          "The split is not stable. In 2010-15 the euro leg earned more than the dollar leg for the agreement rule and the house score; in 2016-26 the dollar leg earned nearly everything. "
+          "The same in direction accuracy, 2010-15 only (ADDED; 34 / 17 / 11 independent calls for the agreement rule, so the intervals are wide):", "",
+          _md(K["accuracy_2010_15"][["signal", "series", "h", "n_indep", "acc", "lo", "hi", "base_mean", "p_random"]], pct=PCT, dec2=("p_random",)), "",
           "### 6b. Candidate 6, POST HOC: the calls on a broad dollar basket (dollar against EUR, JPY, GBP, CHF, CAD, AUD at 1/6 each)", "",
           "Chosen after seeing the per-pair table below, so it could only ever be a lead. It is not one:", "",
           _md(BD[cols], pct=PCT, dec1=("per_year",), dec2=("p_random_gain",)), "",

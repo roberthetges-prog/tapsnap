@@ -18,6 +18,6 @@
   "deflated_sharpe_p_15_variants": 0.28,
   "cost_pips": 1.2,
   "note": "Not significant after multiple-testing correction; best honest record found. Rebalance on sign flip or >=0.5 unit change; disaster stop 2 x ATR20.",
-  "replication_warning": "2026-11-11: the positioning rule does not replicate on seven other currencies (basket Sharpe -0.38 / -0.58 / -0.62; EUR ranks 1 of 8). Planning Sharpe for the positioning half: 0.25-0.45. See reports/arm_g10_positioning.md."
+  "replication_warning": "2026-11-11: the positioning rule does not replicate on seven other currencies (basket Sharpe -0.38 / -0.58 / -0.62; EUR ranks 1 of 8). Planning Sharpe for the positioning half: 0.25-0.45. See reports/arm_g10_positioning.md. 2026-11-17: it also fails on the Deutsche Mark 1987-98 (48 / 48 / 45 % at 1 / 2 / 3 months, Sharpe 0.03; pooled Sharpe outside the 2003-22 selection window +0.10). Planning Sharpe for the positioning half: 0.1-0.3. See reports/arm_pre_euro.md."
  }
 }
