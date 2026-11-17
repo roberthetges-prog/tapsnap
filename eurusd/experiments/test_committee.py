@@ -10,8 +10,8 @@ from eurusd import committee as C
 
 
 def test_roster():
-    assert len(C.AGENTS) == 100 and len(set(C.AGENTS)) == 100
-    assert sum(len([v for v in C.VIEWS.values() if v[0] == s]) for s in C.SCHOOLS) == 50
+    assert len(C.AGENTS) == 110 and len(set(C.AGENTS)) == 110          # the original 100 plus the Fed desk of 10
+    assert sum(len([v for v in C.VIEWS.values() if v[0] == s]) for s in C.SCHOOLS) == 55
     assert all(len([v for v in C.VIEWS.values() if v[0] == s]) == 5 for s in C.SCHOOLS)
 
 
@@ -22,10 +22,28 @@ def test_tally_and_classes():
     P.iloc[2, :11] = 0.505                                   # inside the 51/49 band: nobody has a view
     P.iloc[3, :5] = 0.60; P.iloc[3, 5:50] = 0.30; P.iloc[3, 50:] = np.nan   # 45 of 50 down: strong
     T = C.tally(P)
-    assert (T.loc[0, "up"], T.loc[0, "down"], T.loc[0, "no_view"]) == (26, 14, 60) and T.loc[0, "cls"] == "clear" and T.loc[0, "side"] == 1
+    assert (T.loc[0, "up"], T.loc[0, "down"], T.loc[0, "no_view"]) == (26, 14, 70) and T.loc[0, "cls"] == "clear" and T.loc[0, "side"] == 1
     assert T.loc[1, "cls"] == "none" and T.loc[2, "voters"] == 0 and T.loc[2, "cls"] == "none"
-    assert T.loc[3, "cls"] == "strong" and T.loc[3, "side"] == -1 and T.loc[3, "no_view"] == 50
+    assert T.loc[3, "cls"] == "strong" and T.loc[3, "side"] == -1 and T.loc[3, "no_view"] == 60
     assert C.class_of(0.65, 40, 1.0) == "clear" and C.class_of(0.9, 10, 1.0) == "none" and C.class_of(0.52, 30, -1.0) == "split"
+
+
+def test_fed_desk_timing():
+    """A Fed decision may move the Fed-desk columns only from the first close at or after the statement."""
+    X = C.build_frame()
+    cd = pd.DatetimeIndex(X["__cdate"])
+    cols = ["fed_latest", "fed_cycle", "fed_surprise", "fed_fx"]
+    # 2022-03-16: first hike of the cycle, statement 18:00 UTC -> session closing 2022-03-16 22:00 UTC
+    i = int(np.where(cd == pd.Timestamp("2022-03-16"))[0][0])
+    assert X["fed_latest"].iloc[i] == -1 and X["fed_cycle"].iloc[i] == -1 and X["fed_cycle"].iloc[i - 1] == 1
+    assert X["fed_latest"].iloc[i - 1] == 0                                  # January 2022: held
+    assert np.isclose(X["fed_fx"].iloc[i], np.log(X["__close"].iloc[i] / X["__close"].iloc[i - 1]))
+    assert np.isnan(X["fed_surprise"].iloc[i])                              # decision-day yield is published a day later
+    assert np.isfinite(X["fed_surprise"].iloc[i + 1])
+    # between meetings nothing changes
+    j = int(np.where(cd == pd.Timestamp("2022-04-20"))[0][0])
+    assert (X[cols].iloc[i + 1:j + 1].nunique() == 1).all()
+    assert X["fed_latest"].notna().mean() > 0.95
 
 
 def test_no_future_in_fit():
@@ -40,10 +58,11 @@ def test_no_future_in_fit():
     X2.loc[X2["__ct"] >= start, "ws_fwd_1d"] = -X2.loc[X2["__ct"] >= start, "ws_fwd_1d"]
     b = C.fit_predict(X2, 21, start, rows)
     assert np.allclose(a.values, b.values, equal_nan=True)
-    assert a.notna().any(axis=0).sum() >= 80                 # most analysts have a model by 2015
-    assert ((a.dropna(axis=1, how="all") >= 0) & (a.dropna(axis=1, how="all") <= 1)).all().all()
+    assert a.notna().any(axis=0).sum() >= 88                 # most analysts have a model by 2015
+    v = a.values[np.isfinite(a.values)]
+    assert ((v >= 0) & (v <= 1)).all()
 
 
 if __name__ == "__main__":
-    for f in (test_roster, test_tally_and_classes, test_no_future_in_fit):
+    for f in (test_roster, test_tally_and_classes, test_fed_desk_timing, test_no_future_in_fit):
         f(); print("ok", f.__name__)

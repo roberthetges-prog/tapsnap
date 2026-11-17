@@ -1,4 +1,5 @@
-"""The committee: 100 independent analysts vote on EUR/USD direction, and the vote is scored against history.
+"""The committee: 110 independent analysts (the original 100 plus a Fed desk of 10) vote on EUR/USD direction,
+and the vote is scored against history.
 
 Why it is built this way. A hundred copies of one forecaster agree with each other and their vote share says
 nothing. A vote is worth counting only if (1) the voters look at DIFFERENT evidence or learn DIFFERENTLY and
@@ -27,6 +28,12 @@ earns a vote in the position call only if, on phase-averaged non-overlapping acc
 agreement rule by >= 3 points at BOTH 21 and 42 sessions in BOTH 2010-26 and 2016-26 with >= 6 independent decisions
 a year, AND a copy that is 63 sessions stale loses at least half of the edge over 50 %. If it misses the bar the
 read-out stays available as a description, labelled with the hit rate it actually had, and decides nothing.
+
+TRIAL 2 (2026-11-17, declared before running): the owner asked that the analysts also consider Fed meetings and
+decisions. A FED school of 5 views (10 analysts) is added: what the Fed did at its latest meeting, the direction of its
+last move, the 2-year yield's reaction on decision day, EUR/USD's own reaction on decision day, and what the 2-year
+yield prices relative to the policy rate. Each state is held from the decision until the next meeting. Everything
+else (temperaments, EPS, quorum, classes, keep bar) is unchanged. The test reports the committee with and without it.
 
 Honesty note: the views carrying a HOUSE prior (marked) had their sign chosen by earlier rounds on this same
 history, so the committee's 2010-26 record flatters them. Textbook-prior views do not have this problem.
@@ -59,7 +66,7 @@ E_MIN_T = 1.0
 QUORUM = 20
 CLASSES = (("split", 0.50, 0.55), ("lean", 0.55, 0.65), ("clear", 0.65, 0.80), ("strong", 0.80, 1.0001))
 ERAS = (("2010-26", 2010, 2026), ("2016-26", 2016, 2026), ("2023-26", 2023, 2026))
-SCHOOLS = {"POS": "Positioning", "RC": "Rate momentum", "RL": "Rate levels", "CB": "Central banks", "ECO": "Economy",
+SCHOOLS = {"FED": "Fed meetings", "POS": "Positioning", "RC": "Rate momentum", "RL": "Rate levels", "CB": "Central banks", "ECO": "Economy",
            "TR": "Trend", "VAL": "Value", "RISK": "Risk appetite", "XA": "Curve, oil, dollar", "GEN": "Generalists"}
 
 # view id: (school, column, kind, prior, plain description)
@@ -68,6 +75,11 @@ SCHOOLS = {"POS": "Positioning", "RC": "Rate momentum", "RL": "Rate levels", "CB
 #        'bin'   already in [-1, 1]
 #   column '@name' = fitted inside each fold (see _fold_columns); '{h}' = horizon-specific column
 VIEWS = {
+    "fed_latest":  ("FED", "fed_latest", "bin", "textbook", "the Fed's latest meeting: a cut weakens the dollar, a hike lifts it"),
+    "fed_cycle":   ("FED", "fed_cycle", "bin", "textbook", "direction of the Fed's last rate move (cutting cycle = dollar weaker)"),
+    "fed_surprise": ("FED", "fed_surprise", "cont", "textbook", "the 2-year yield's reaction on Fed decision day (a fall = dovish surprise = dollar weaker)"),
+    "fed_fx":      ("FED", "fed_fx", "cont", "textbook", "EUR/USD's own move on Fed decision day: follow it to the next meeting"),
+    "fed_priced":  ("FED", "fed_priced", "cont", "textbook", "what markets price for the Fed (2-year yield above the policy rate = hikes priced = dollar stronger)"),
     "cot_z52":     ("POS", "cot_z52", "cont", "HOUSE", "speculators' net euro position vs its 1-year norm: follow them"),
     "cot_z156":    ("POS", "cot_z156", "cont", "HOUSE", "speculators' net euro position vs its 3-year norm: follow them"),
     "cot_d4":      ("POS", "cot_d4", "cont", "follow", "4-week change in speculators' position: follow the flow"),
@@ -119,7 +131,7 @@ VIEWS = {
     "season":      ("GEN", "seas{h}", "bin", "HOUSE", "December strength / May weakness"),
     "month":       ("GEN", "seas_month{h}", "bin", "learned", "month-of-year pattern learned from earlier years"),
 }
-assert len(VIEWS) == 50
+assert len(VIEWS) == 55
 AGENTS = [f"{v}:{t}" for v in VIEWS for t in ("D", "E")]
 
 
@@ -148,6 +160,84 @@ def price_frame(D: pd.DataFrame, h1: pd.DataFrame) -> pd.DataFrame:
     return P
 
 
+def refresh_fed_target() -> str:
+    """The mirror that feeds fred_DFEDTAR[UL].csv can lag by months; FRED itself answers curl. Overwrite only with a
+    longer series."""
+    import io
+    import subprocess
+    out = []
+    for sid in ("DFEDTARU", "DFEDTARL"):
+        p = SW.MACRO / f"fred_{sid}.csv"
+        try:
+            txt = subprocess.run(["curl", "-sS", "-f", "--http1.1", "-m", "60", f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}"],
+                                 capture_output=True, text=True, check=True).stdout
+            d = pd.read_csv(io.StringIO(txt))
+            d.columns = ["date", "value"]
+            d["value"] = pd.to_numeric(d["value"], errors="coerce")
+            d = d.dropna()
+            old = pd.read_csv(p)
+            if len(d) > 1000 and str(d["date"].iloc[-1]) >= str(old.iloc[-1, 0]):
+                d.to_csv(p, index=False)
+            out.append(f"{sid} to {d['date'].iloc[-1]}")
+        except Exception as e:
+            out.append(f"{sid} FAILED {type(e).__name__}")
+    return "Fed target: " + ", ".join(out)
+
+
+def fed_target() -> pd.Series:
+    fed_mid = (SW._ms("fred_DFEDTARL.csv") + SW._ms("fred_DFEDTARU.csv")) / 2
+    fed = pd.concat([SW._ms("fred_DFEDTAR.csv"), fed_mid.dropna()]).sort_index()
+    return fed[~fed.index.duplicated(keep="last")]
+
+
+def fed_desk(X: pd.DataFrame, P: pd.DataFrame, A) -> pd.DataFrame:
+    """The five Fed-meeting views. A decision is public at the statement time, so it is known at the first session
+    close at or after it (before 2003 the 'close' is the noon-New-York fix, i.e. the next day's row). The 2-year
+    yield of decision day is published a day later, so that view starts one calendar day after the meeting."""
+    m = pd.read_csv(SW.MACRO / "fomc_decisions.csv")
+    m["t"] = pd.to_datetime(m["statement_utc"], utc=True)
+    cd = pd.DatetimeIndex(P["cdate"])
+    real_close = pd.DatetimeIndex(np.where(P["src"].values == "histdata", pd.DatetimeIndex(P["close_time"]).tz_convert("UTC").tz_localize(None),
+                                           cd + pd.Timedelta(hours=17)))
+    last_close = real_close[-1]
+    m = m[m["t"].dt.tz_localize(None) <= last_close].sort_values("t")
+    tgt = fed_target()
+    us2 = SW._ms("fred_DGS2.csv")
+    lc = np.log(P["close"].values)
+    n = len(P)
+    latest, cycle, sur, fx = (np.full(n, np.nan) for _ in range(4))
+    meet = np.zeros(n, dtype=int)
+    cyc = np.nan
+    for d, t in zip(pd.to_datetime(m["date"]), m["t"].dt.tz_localize(None)):
+        i = int(real_close.searchsorted(t, side="left"))
+        if i >= n or i == 0:
+            continue
+        if tgt.index[-1] < d + pd.Timedelta(days=1):
+            dec = np.nan                                    # target series older than the meeting: decision unknown
+        else:
+            dec = float(tgt.asof(d + pd.Timedelta(days=1)) - tgt.asof(d - pd.Timedelta(days=1)))
+        if dec == dec and abs(dec) > 1e-9:
+            cyc = -np.sign(dec)
+        meet[i] += 1
+        latest[i] = (0.0 - np.sign(dec)) if dec == dec else np.nan
+        cycle[i] = cyc
+        fx[i] = lc[i] - lc[i - 1]
+        a, b = us2.asof(d), us2.asof(d - pd.Timedelta(days=1))
+        j = int(cd.searchsorted(d + pd.Timedelta(days=1), side="left"))
+        if j < n and a == a and b == b and us2.index[-1] >= d:
+            sur[max(i, j)] = -(a - b)
+    F_ = pd.DataFrame({"fed_latest": latest, "fed_cycle": cycle, "fed_surprise": sur, "fed_fx": fx}, index=P.index)
+    F_ = F_.groupby(np.cumsum(meet)).ffill()                 # hold each state until the next meeting's row
+    F_["fed_cycle"] = F_["fed_cycle"].ffill()
+    F_["fed_priced"] = -(A(us2) - A(tgt))
+    F_.attrs["last_meeting"] = str(m["date"].iloc[-1]) if len(m) else ""
+    allm = pd.read_csv(SW.MACRO / "fomc_decisions.csv")
+    nxt = allm[(pd.to_datetime(allm["date"]) > cd[-1]) & allm["scheduled"]]["date"]
+    F_.attrs["next_meeting"] = str(nxt.iloc[0]) if len(nxt) else ""
+    F_.attrs["target_to"] = str(tgt.index[-1].date())
+    return F_
+
+
 def build_frame(D: pd.DataFrame | None = None, h1: pd.DataFrame | None = None) -> pd.DataFrame:
     """All view columns, labels and label-end times on the euro-era daily frame (1999+). D = daily feature frame
     (featstore.build_daily output); default = the stored feature store."""
@@ -164,9 +254,10 @@ def build_frame(D: pd.DataFrame | None = None, h1: pd.DataFrame | None = None) -
     cd = pd.DatetimeIndex(P["cdate"])
     A = lambda s, lag=1: pd.Series(SW._align_lagged(s, cd, lag).values, index=P.index)  # noqa: E731
     # ---- central banks (decisions are public the same day; one calendar day lag as everywhere)
-    fed_mid = (SW._ms("fred_DFEDTARL.csv") + SW._ms("fred_DFEDTARU.csv")) / 2
-    fed = pd.concat([SW._ms("fred_DFEDTAR.csv"), fed_mid.dropna()]).sort_index()
-    fed = fed[~fed.index.duplicated(keep="last")]
+    fed = fed_target()
+    FD = fed_desk(X, P, A)
+    for c in FD.columns:
+        X[c] = FD[c]
     pol = pd.read_csv(SW.MACRO / "ecb_policy_rates.csv", parse_dates=["date"]).set_index("date")
     X["fed_dir"] = -A(fed).diff(126)
     X["ecb_dir"] = A(pol["main_refinancing_rate"].astype(float)).diff(126)
@@ -203,7 +294,9 @@ def build_frame(D: pd.DataFrame | None = None, h1: pd.DataFrame | None = None) -
         X[f"y{h}"] = np.sign(lc.shift(-h) - lc)
         X[f"yend{h}"] = ct.shift(-h)
     X["__ct"] = ct
-    return X[X["__cdate"] >= "1999-01-04"].replace([np.inf, -np.inf], np.nan)
+    out = X[X["__cdate"] >= "1999-01-04"].replace([np.inf, -np.inf], np.nan)
+    out.attrs["fed"] = dict(FD.attrs)
+    return out
 
 
 # ============================================================================= one analyst
@@ -335,14 +428,22 @@ def live(refresh: bool = True) -> dict:
     notes = []
     if refresh:
         from eurusd.refresh import refresh_macro
-        notes = refresh_macro()
+        notes = refresh_macro() + [refresh_fed_target()]
     D = _daily_frame(refresh)
     X = build_frame(D, load_h1_live(refresh=False))
     last = np.zeros(len(X), dtype=bool)
     last[-1] = True
     now = X["__ct"].iloc[-1] + pd.Timedelta(seconds=1)
     rec = pd.read_csv(RES / "committee_record.csv") if (RES / "committee_record.csv").exists() else pd.DataFrame()
-    out = {"asof": str(X["__ct"].iloc[-1]), "price": float(X["__close"].iloc[-1]), "refresh": notes, "horizons": {}}
+    fed = X.attrs.get("fed", {})
+    fl = X[["fed_latest", "fed_cycle", "fed_surprise", "fed_fx", "fed_priced"]].iloc[-1]
+    act = {1.0: "cut", -1.0: "hiked", 0.0: "held"}.get(float(fl["fed_latest"]) if fl["fed_latest"] == fl["fed_latest"] else None, "decision not in the data yet")
+    out = {"asof": str(X["__ct"].iloc[-1]), "price": float(X["__close"].iloc[-1]), "refresh": notes, "horizons": {},
+           "fed": {"last_meeting": fed.get("last_meeting"), "next_meeting": fed.get("next_meeting"), "action": act, "target_data_to": fed.get("target_to"),
+                   "last_move": {1.0: "a cut", -1.0: "a hike"}.get(float(fl["fed_cycle"]) if fl["fed_cycle"] == fl["fed_cycle"] else None, "unknown"),
+                   "two_year_on_decision_day_pp": -float(fl["fed_surprise"]) if fl["fed_surprise"] == fl["fed_surprise"] else None,
+                   "eurusd_on_decision_day_pct": 100 * float(fl["fed_fx"]) if fl["fed_fx"] == fl["fed_fx"] else None,
+                   "two_year_minus_policy_pp": -float(fl["fed_priced"]) if fl["fed_priced"] == fl["fed_priced"] else None}}
     for h in HORIZONS:
         P = fit_predict(X, h, now, last)
         t = tally(P).iloc[0]
@@ -355,7 +456,8 @@ def live(refresh: bool = True) -> dict:
             rows.append({"analyst": a, "school": VIEWS[v][0], "temperament": temp, "p_up": pa, "vote": vote, "what": VIEWS[v][4]})
         r = {}
         if len(rec):
-            q = rec[(rec.h == h) & (rec.cls == t["cls"]) & (rec.clock == "phase-averaged")]
+            grp = "clear+strong" if t["cls"] in ("clear", "strong") else t["cls"]     # majority size does not sort outcomes: pool
+            q = rec[(rec.h == h) & (rec.cls == grp) & (rec.clock == "phase-averaged")]
             r = {e: q[q.era == e].iloc[0].to_dict() for e in q.era.unique()}
         voters_p = p[(p > 0.5 + EPS) | (p < 0.5 - EPS)]
         maj = voters_p[voters_p > 0.5] if t["side"] > 0 else 1 - voters_p[voters_p < 0.5]
@@ -366,29 +468,46 @@ def live(refresh: bool = True) -> dict:
 
 
 def format_readout(o: dict, detail: bool = True) -> str:
-    L = [f"EUR/USD COMMITTEE of 100 analysts | session close {o['asof'][:16]} UTC | price {o['price']:.4f}"]
-    names = {21: "1 month (21 sessions)", 42: "2 months (42 sessions)", 63: "3 months (63 sessions)"}
+    L = [f"EUR/USD COMMITTEE ({len(AGENTS)} analysts: 100 + Fed desk of 10) | session close {o['asof'][:16]} UTC | price {o['price']:.4f}"]
+    f = o.get("fed") or {}
+    if f:
+        bits = [f"last meeting {f['last_meeting']}: {f['action']}", f"last rate move was {f['last_move']}"]
+        if f.get("two_year_on_decision_day_pp") is not None:
+            bits.append(f"2-year yield {f['two_year_on_decision_day_pp']:+.2f} pp on decision day")
+        if f.get("eurusd_on_decision_day_pct") is not None:
+            bits.append(f"EUR/USD {f['eurusd_on_decision_day_pct']:+.2f} % that day")
+        if f.get("two_year_minus_policy_pp") is not None:
+            bits.append(f"2-year yield {f['two_year_minus_policy_pp']:+.2f} pp vs policy rate ({'hikes' if f['two_year_minus_policy_pp'] > 0 else 'cuts'} priced)")
+        if f.get("next_meeting"):
+            bd = int(np.busday_count(pd.Timestamp(o["asof"][:10]).date(), pd.Timestamp(f["next_meeting"]).date()))
+            bits.append(f"next meeting {f['next_meeting']} (in about {bd} sessions)")
+        L.append("Fed: " + " | ".join(bits))
+    names = {21: "1 MONTH", 42: "2 MONTHS", 63: "3 MONTHS"}
     for h, r in o["horizons"].items():
         side = "UP" if r["side"] > 0 else ("DOWN" if r["side"] < 0 else "TIED")
         maj = max(r["up"], r["down"])
         voters = r["up"] + r["down"]
-        L.append(f"\n{names[h]}: UP {r['up']} | DOWN {r['down']} | no view {r['no_view']}")
-        if voters:
-            L.append(f"  {maj} of the {voters} with a view say {side} ({100 * r['share']:.0f} %) -> majority class: {r['cls'].upper()}")
-            if r.get("majority_avg_odds"):
-                L.append(f"  Odds the majority analysts state themselves, on average: {100 * r['majority_avg_odds']:.0f} %")
         rec = r["record"].get("2010-26") if r["record"] else None
-        if rec and rec.get("n_indep", 0) and rec["acc"] == rec["acc"]:
-            L.append(f"  What a {r['cls']} majority was worth out of sample: right {100 * rec['acc']:.0f} % of the time in 2010-26 "
-                     f"({rec['n_indep']:.0f} independent calls, 95 % range {100 * rec['lo']:.0f}-{100 * rec['hi']:.0f} %)"
-                     + "".join(f", {100 * r['record'][e]['acc']:.0f} % in {e}" for e in ("2016-26", "2023-26") if e in r["record"] and r["record"][e]["acc"] == r["record"][e]["acc"]))
-        elif r["cls"] == "none":
-            L.append("  Fewer than 20 analysts have a view, or a tie: no committee call.")
+        has = bool(rec and rec.get("n_indep", 0) and rec["acc"] == rec["acc"])
+        if r["cls"] in ("clear", "strong") and has:
+            L.append(f"\n{names[h]}: {side}, probability {100 * rec['acc']:.0f} %")
+        elif r["cls"] in ("lean", "split") and has:
+            L.append(f"\n{names[h]}: NO CALL (majority too thin; it leans {side}, and such leans were right {100 * rec['acc']:.0f} %)")
+        else:
+            L.append(f"\n{names[h]}: NO CALL (fewer than {QUORUM} analysts have a view, or a tie)")
+        L.append(f"  Vote: UP {r['up']} | DOWN {r['down']} | no view {r['no_view']}" + (f" -> {maj} of the {voters} with a view say {side} ({100 * r['share']:.0f} %)" if voters else ""))
+        if has:
+            L.append(f"  The probability is how often such a majority was right out of sample in 2010-26 ({rec['n_indep']:.0f} independent calls, "
+                     f"95 % range {100 * rec['lo']:.0f}-{100 * rec['hi']:.0f} %)"
+                     + "".join(f"; {100 * r['record'][e]['acc']:.0f} % in {e}" for e in ("2016-26", "2023-26") if e in r["record"] and r["record"][e]["acc"] == r["record"][e]["acc"]))
         if detail:
             df = pd.DataFrame(r["analysts"])
             by = df.groupby("school")["vote"].value_counts().unstack(fill_value=0).reindex(columns=["up", "down", "no view"], fill_value=0)
             L.append("  By school: " + "; ".join(f"{SCHOOLS[s]} {int(by.loc[s, 'up'])}up/{int(by.loc[s, 'down'])}dn" for s in SCHOOLS if s in by.index))
-            loud = df[df.vote != "no view"].assign(c=lambda d: (d.p_up - 0.5).abs()).sort_values("c", ascending=False).head(5)
+            fd = df[df.school == "FED"]
+            L.append("  Fed desk: " + "; ".join(f"{a.what.split(':')[0].split('(')[0].strip()} [{'theory' if a.temperament == 'D' else '10y'}] {a.vote}" for _, a in fd.iterrows() if a.vote != "no view")
+                     if (fd.vote != "no view").any() else "  Fed desk: none of the 10 has a view")
+            loud = df[df.vote != "no view"].assign(c=lambda d: (d.p_up - 0.5).abs()).sort_values("c", ascending=False).head(4)
             for _, a in loud.iterrows():
                 L.append(f"    {a.vote.upper():4s} {100 * max(a.p_up, 1 - a.p_up):.0f} %  {a.what} [{'theory' if a.temperament == 'D' else 'last 10y'}]")
     return "\n".join(L)
@@ -402,7 +521,7 @@ def one_line(o: dict) -> str:
         rec = (r["record"] or {}).get("2010-26")
         worth = f", such majorities were right {100 * rec['acc']:.0f} %" if rec and rec.get("n_indep", 0) and rec["acc"] == rec["acc"] else ""
         parts.append(f"{h}d {max(r['up'], r['down'])} of {r['up'] + r['down']} say {side} ({r['cls']}{worth})")
-    return "COMMITTEE (100 analysts, describes, decides nothing): " + " | ".join(parts)
+    return f"COMMITTEE ({len(AGENTS)} analysts incl. Fed desk; describes, decides nothing): " + " | ".join(parts)
 
 
 if __name__ == "__main__":

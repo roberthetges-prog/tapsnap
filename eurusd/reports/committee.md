@@ -1,16 +1,88 @@
-# The committee: 100 analysts vote on EUR/USD direction
+# The committee: 110 analysts (100 + a Fed desk of 10) vote on EUR/USD direction
 
 Code `src/eurusd/committee.py`, test `experiments/70_committee.py`, results `experiments/results/arms/committee_*`.
-Design, majority classes and keep bar were written into the module before the first run (2026-11-17). One design, no tuning.
+Design, majority classes and keep bar were written into the module before the first run (2026-11-17). Trial 1: 100 analysts. Trial 2 (same day, owner's request): a Fed-meeting school of 10 analysts added, nothing else changed.
 
 ## Verdict against the declared bar: **FAIL**
 
 |   h | era     |   committee clear+strong |   agreement rule |   gain pts |   calls/yr |   63-stale copy | >=3 pts   | >=6/yr   | stale loses half   |
 |----:|:--------|-------------------------:|-----------------:|-----------:|-----------:|----------------:|:----------|:---------|:-------------------|
-|  21 | 2010-26 |                     59.6 |             58.3 |        1.3 |        6.6 |            57.1 | False     | True     | False              |
-|  21 | 2016-26 |                     56.3 |             58   |       -1.7 |        6.3 |            56.1 | False     | True     | False              |
-|  42 | 2010-26 |                     63.8 |             63.3 |        0.6 |        2.7 |            59   | False     | False    | False              |
-|  42 | 2016-26 |                     59.8 |             62   |       -2.1 |        2.7 |            58.6 | False     | False    | False              |
+|  21 | 2010-26 |                     59   |             58.3 |        0.7 |        6.5 |            57.2 | False     | True     | False              |
+|  21 | 2016-26 |                     55.8 |             58   |       -2.1 |        6.3 |            56.2 | False     | True     | False              |
+|  42 | 2010-26 |                     63.1 |             63.3 |       -0.2 |        2.6 |            59.9 | False     | False    | False              |
+|  42 | 2016-26 |                     59.1 |             62   |       -2.9 |        2.6 |            60   | False     | False    | False              |
+
+## Effect of the Fed desk (clear or strong majority, with and without the 10 Fed analysts)
+
+| who              |   h | era     |   n_indep |   acc |   lo |   hi |   per_year |
+|:-----------------|----:|:--------|----------:|------:|-----:|-----:|-----------:|
+| with Fed desk    |  21 | 2010-26 |     111   |  59   | 50.2 | 68.1 |        6.5 |
+| with Fed desk    |  21 | 2016-26 |      69   |  55.8 | 44.8 | 67.6 |        6.3 |
+| with Fed desk    |  21 | 2023-26 |      26.4 |  45   | 28.8 | 64.5 |        6.6 |
+| with Fed desk    |  42 | 2010-26 |      44.6 |  63.1 | 47.6 | 74.9 |        2.6 |
+| with Fed desk    |  42 | 2016-26 |      28.6 |  59.1 | 40.7 | 74.5 |        2.6 |
+| with Fed desk    |  42 | 2023-26 |      11.7 |  42.9 | 19.3 | 68   |        2.9 |
+| with Fed desk    |  63 | 2010-26 |      30.6 |  63.6 | 43.8 | 76.3 |        1.8 |
+| with Fed desk    |  63 | 2016-26 |      18.7 |  63.8 | 41   | 80.9 |        1.7 |
+| with Fed desk    |  63 | 2023-26 |       7.3 |  41.1 | 15.8 | 75   |        1.8 |
+| without Fed desk |  21 | 2010-26 |     112.2 |  59.6 | 50.6 | 68.4 |        6.6 |
+| without Fed desk |  21 | 2016-26 |      69.7 |  56.3 | 44.1 | 66.8 |        6.3 |
+| without Fed desk |  21 | 2023-26 |      26.8 |  46.4 | 27.6 | 62.7 |        6.7 |
+| without Fed desk |  42 | 2010-26 |      46.5 |  63.8 | 49.5 | 76   |        2.7 |
+| without Fed desk |  42 | 2016-26 |      29.7 |  59.8 | 42.3 | 75.4 |        2.7 |
+| without Fed desk |  42 | 2023-26 |      12.7 |  44.1 | 23.2 | 70.9 |        3.2 |
+| without Fed desk |  63 | 2010-26 |      31.2 |  64.7 | 46.9 | 78.9 |        1.8 |
+| without Fed desk |  63 | 2016-26 |      18.8 |  64.6 | 41   | 80.9 |        1.7 |
+| without Fed desk |  63 | 2023-26 |       7.5 |  42.6 | 15.8 | 75   |        1.9 |
+
+## The Fed desk on its own (majority of the Fed analysts with a view)
+
+| who                          |   h | era     |   n_indep |   acc |   lo |   hi |   share_of_days |
+|:-----------------------------|----:|:--------|----------:|------:|-----:|-----:|----------------:|
+| Fed desk majority (any size) |  21 | 2010-26 |      59   |  42.5 | 30.6 | 55.1 |            28.5 |
+| Fed desk majority (any size) |  21 | 2016-26 |      33.5 |  41.9 | 26.4 | 57.8 |            25.2 |
+| Fed desk majority (any size) |  21 | 2023-26 |       8.9 |  40.9 | 18.9 | 73.3 |            19   |
+| Fed desk majority (any size) |  42 | 2010-26 |      71.5 |  43.8 | 32.3 | 54.6 |            69.4 |
+| Fed desk majority (any size) |  42 | 2016-26 |      34.5 |  40.5 | 25.6 | 56.4 |            52.3 |
+| Fed desk majority (any size) |  42 | 2023-26 |      14.6 |  47.5 | 24.8 | 69.9 |            64.2 |
+| Fed desk majority (any size) |  63 | 2010-26 |      55.5 |  49.4 | 35.7 | 61   |            81.2 |
+| Fed desk majority (any size) |  63 | 2016-26 |      34.3 |  51.5 | 36.7 | 68.5 |            78.4 |
+| Fed desk majority (any size) |  63 | 2023-26 |      12.5 |  56.5 | 32   | 80.7 |            84   |
+
+## The ten Fed analysts one by one, 2010-26
+
+| analyst        |   h |   n_indep |   acc |    lo |    hi |   share_of_days |
+|:---------------|----:|----------:|------:|------:|------:|----------------:|
+| fed_latest:D   |  21 |       0   | nan   | nan   | nan   |             0   |
+| fed_latest:E   |  21 |       0   | nan   | nan   | nan   |             0   |
+| fed_cycle:D    |  21 |      12.4 |  37.7 |  19.3 |  68   |             6   |
+| fed_cycle:E    |  21 |       0   | nan   | nan   | nan   |             0   |
+| fed_surprise:D |  21 |       3.6 |  26.7 |   4.6 |  69.9 |             1.7 |
+| fed_surprise:E |  21 |       0   | nan   | nan   | nan   |             0   |
+| fed_fx:D       |  21 |       0   | nan   | nan   | nan   |             0   |
+| fed_fx:E       |  21 |       0   | nan   | nan   | nan   |             0   |
+| fed_priced:D   |  21 |       8.9 |  40.9 |  18.9 |  73.3 |             4.3 |
+| fed_priced:E   |  21 |      37   |  46.5 |  31   |  61.6 |            17.9 |
+| fed_latest:D   |  42 |      11.2 |  37.7 |  15.2 |  64.6 |            10.9 |
+| fed_latest:E   |  42 |       0   | nan   | nan   | nan   |             0   |
+| fed_cycle:D    |  42 |      65.9 |  44   |  32.6 |  55.9 |            63.9 |
+| fed_cycle:E    |  42 |       0   | nan   | nan   | nan   |             0   |
+| fed_surprise:D |  42 |       1   |  20   |   0   |  79.3 |             0.9 |
+| fed_surprise:E |  42 |       0   | nan   | nan   | nan   |             0   |
+| fed_fx:D       |  42 |       0   | nan   | nan   | nan   |             0   |
+| fed_fx:E       |  42 |       4.3 |  60.3 |  30.1 |  95.4 |             4.1 |
+| fed_priced:D   |  42 |       5.4 |  30.7 |  11.8 |  76.9 |             5.3 |
+| fed_priced:E   |  42 |       0   | nan   | nan   | nan   |             0   |
+| fed_latest:D   |  63 |       4.7 |  11.5 |   3.6 |  62.4 |             6.8 |
+| fed_latest:E   |  63 |       0   | nan   | nan   | nan   |             0   |
+| fed_cycle:D    |  63 |      32.9 |  46.1 |  29.8 |  62   |            48.1 |
+| fed_cycle:E    |  63 |       0   | nan   | nan   | nan   |             0   |
+| fed_surprise:D |  63 |       0   | nan   | nan   | nan   |             0   |
+| fed_surprise:E |  63 |       0   | nan   | nan   | nan   |             0   |
+| fed_fx:D       |  63 |       0   | nan   | nan   | nan   |             0   |
+| fed_fx:E       |  63 |       0   | nan   | nan   | nan   |             0   |
+| fed_priced:D   |  63 |      26.3 |  54.4 |  35.5 |  71.2 |            38.4 |
+| fed_priced:E   |  63 |      16.2 |  53.8 |  33.2 |  76.9 |            23.7 |
 
 ## What a majority was worth (walk-forward, out of sample)
 
@@ -20,70 +92,70 @@ Design, majority classes and keep bar were written into the module before the fi
 
 | cls          | era     |   n_days |   n_indep |   acc |   lo |   hi |   per_year |   share_of_days |
 |:-------------|:--------|---------:|----------:|------:|-----:|-----:|-----------:|----------------:|
-| split        | 2010-26 |      510 |      24.3 |  53.7 | 35.1 | 72.1 |        1.4 |            11.7 |
-| split        | 2016-26 |      342 |      16.3 |  55   | 33.2 | 76.9 |        1.5 |            12.2 |
-| split        | 2023-26 |      116 |       5.5 |  62.1 | 18.8 | 81.2 |        1.4 |            11.8 |
-| lean         | 2010-26 |     1364 |      65   |  57.8 | 46.3 | 69.6 |        3.8 |            31.3 |
-| lean         | 2016-26 |      920 |      43.8 |  57.5 | 42.2 | 70.3 |        4   |            32.9 |
-| lean         | 2023-26 |      272 |      13   |  54   | 29.1 | 76.8 |        3.2 |            27.8 |
-| clear        | 2010-26 |     1635 |      77.9 |  60.6 | 49.2 | 70.4 |        4.6 |            37.6 |
-| clear        | 2016-26 |      996 |      47.4 |  57.6 | 43.3 | 70.5 |        4.3 |            35.6 |
-| clear        | 2023-26 |      342 |      16.3 |  48.8 | 28   | 72   |        4.1 |            34.9 |
-| strong       | 2010-26 |      722 |      34.4 |  57.3 | 42.2 | 73.6 |        2   |            16.6 |
-| strong       | 2016-26 |      467 |      22.2 |  53.3 | 34.7 | 73.1 |        2   |            16.7 |
-| strong       | 2023-26 |      221 |      10.5 |  42.5 | 15.2 | 64.6 |        2.6 |            22.6 |
-| clear+strong | 2010-26 |     2357 |     112.2 |  59.6 | 50.6 | 68.4 |        6.6 |            54.2 |
-| clear+strong | 2016-26 |     1463 |      69.7 |  56.3 | 44.1 | 66.8 |        6.3 |            52.3 |
-| clear+strong | 2023-26 |      563 |      26.8 |  46.4 | 27.6 | 62.7 |        6.7 |            57.5 |
-| any majority | 2010-26 |     4231 |     201.5 |  58.3 | 51.8 | 65.3 |       11.9 |            97.2 |
-| any majority | 2016-26 |     2725 |     129.8 |  56.5 | 47.6 | 64.4 |       11.8 |            97.5 |
-| any majority | 2023-26 |      951 |      45.3 |  50.5 | 37   | 65   |       11.3 |            97.1 |
+| split        | 2010-26 |      529 |      25.2 |  55.2 | 37.1 | 73.3 |        1.5 |            12.2 |
+| split        | 2016-26 |      365 |      17.4 |  56.2 | 36   | 78.4 |        1.6 |            13.1 |
+| split        | 2023-26 |      124 |       5.9 |  62.9 | 30   | 90.3 |        1.5 |            12.7 |
+| lean         | 2010-26 |     1369 |      65.2 |  58.7 | 46.3 | 69.6 |        3.8 |            31.5 |
+| lean         | 2016-26 |      911 |      43.4 |  57.8 | 43.3 | 71.6 |        3.9 |            32.6 |
+| lean         | 2023-26 |      273 |      13   |  55.7 | 29.1 | 76.8 |        3.2 |            27.9 |
+| clear        | 2010-26 |     1616 |      77   |  59.7 | 48.6 | 70   |        4.5 |            37.1 |
+| clear        | 2016-26 |      987 |      47   |  56.8 | 43.3 | 70.5 |        4.3 |            35.3 |
+| clear        | 2023-26 |      338 |      16.1 |  46.2 | 23.1 | 66.8 |        4   |            34.5 |
+| strong       | 2010-26 |      715 |      34   |  57.6 | 42.2 | 73.6 |        2   |            16.4 |
+| strong       | 2016-26 |      462 |      22   |  53.7 | 34.7 | 73.1 |        2   |            16.5 |
+| strong       | 2023-26 |      217 |      10.3 |  43.3 | 16.8 | 68.7 |        2.6 |            22.2 |
+| clear+strong | 2010-26 |     2331 |     111   |  59   | 50.2 | 68.1 |        6.5 |            53.6 |
+| clear+strong | 2016-26 |     1449 |      69   |  55.8 | 44.8 | 67.6 |        6.3 |            51.8 |
+| clear+strong | 2023-26 |      555 |      26.4 |  45   | 28.8 | 64.5 |        6.6 |            56.7 |
+| any majority | 2010-26 |     4229 |     201.4 |  58.4 | 51.8 | 65.3 |       11.8 |            97.2 |
+| any majority | 2016-26 |     2725 |     129.8 |  56.6 | 47.6 | 64.4 |       11.8 |            97.5 |
+| any majority | 2023-26 |      952 |      45.3 |  50.4 | 37   | 65   |       11.3 |            97.2 |
 
 ### Horizon 42 sessions
 
 | cls          | era     |   n_days |   n_indep |   acc |   lo |   hi |   per_year |   share_of_days |
 |:-------------|:--------|---------:|----------:|------:|-----:|-----:|-----------:|----------------:|
-| split        | 2010-26 |      585 |      13.9 |  54.9 | 32.6 | 78.6 |        0.8 |            13.5 |
-| split        | 2016-26 |      430 |      10.2 |  53   | 23.7 | 76.3 |        0.9 |            15.5 |
-| split        | 2023-26 |      103 |       2.5 |  53.4 |  9.5 | 90.5 |        0.6 |            10.8 |
-| lean         | 2010-26 |     1569 |      37.4 |  55.7 | 40.9 | 71.3 |        2.2 |            36.2 |
-| lean         | 2016-26 |     1008 |      24   |  57.2 | 38.8 | 75.5 |        2.2 |            36.3 |
-| lean         | 2023-26 |      303 |       7.2 |  44.6 | 15.8 | 75   |        1.8 |            31.6 |
-| clear        | 2010-26 |     1463 |      34.8 |  63.7 | 46.3 | 76.8 |        2   |            33.8 |
-| clear        | 2016-26 |      897 |      21.4 |  61   | 40.9 | 79.2 |        1.9 |            32.3 |
-| clear        | 2023-26 |      341 |       8.1 |  47.8 | 21.5 | 78.5 |        2   |            35.6 |
-| strong       | 2010-26 |      492 |      11.7 |  64.2 | 39.1 | 86.2 |        0.7 |            11.4 |
-| strong       | 2016-26 |      350 |       8.3 |  56.9 | 30.6 | 86.3 |        0.8 |            12.6 |
-| strong       | 2023-26 |      192 |       4.6 |  37.5 | 11.8 | 76.9 |        1.1 |            20   |
-| clear+strong | 2010-26 |     1955 |      46.5 |  63.8 | 49.5 | 76   |        2.7 |            45.1 |
-| clear+strong | 2016-26 |     1247 |      29.7 |  59.8 | 42.3 | 75.4 |        2.7 |            44.9 |
-| clear+strong | 2023-26 |      533 |      12.7 |  44.1 | 23.2 | 70.9 |        3.2 |            55.6 |
-| any majority | 2010-26 |     4109 |      97.8 |  59.5 | 49.3 | 68.4 |        5.8 |            94.9 |
-| any majority | 2016-26 |     2685 |      63.9 |  57.8 | 45.6 | 69.1 |        5.8 |            96.8 |
+| split        | 2010-26 |      611 |      14.5 |  51.6 | 30.1 | 75.2 |        0.9 |            14.1 |
+| split        | 2016-26 |      424 |      10.1 |  51.7 | 23.7 | 76.3 |        0.9 |            15.3 |
+| split        | 2023-26 |      104 |       2.5 |  52.9 |  9.5 | 90.5 |        0.6 |            10.9 |
+| lean         | 2010-26 |     1681 |      40   |  57.4 | 42.2 | 71.5 |        2.4 |            38.8 |
+| lean         | 2016-26 |     1061 |      25.3 |  56.6 | 37.1 | 73.3 |        2.3 |            38.2 |
+| lean         | 2023-26 |      343 |       8.2 |  46.4 | 21.5 | 78.5 |        2   |            35.8 |
+| clear        | 2010-26 |     1449 |      34.5 |  63.6 | 47.9 | 78.5 |        2   |            33.5 |
+| clear        | 2016-26 |      905 |      21.5 |  60.2 | 38.7 | 76.7 |        2   |            32.6 |
+| clear        | 2023-26 |      336 |       8   |  47.9 | 21.5 | 78.5 |        2   |            35.1 |
+| strong       | 2010-26 |      425 |      10.1 |  61.2 | 31.3 | 83.2 |        0.6 |             9.8 |
+| strong       | 2016-26 |      297 |       7.1 |  55.6 | 25   | 84.2 |        0.6 |            10.7 |
+| strong       | 2023-26 |      156 |       3.7 |  32.1 |  4.6 | 69.9 |        0.9 |            16.3 |
+| clear+strong | 2010-26 |     1874 |      44.6 |  63.1 | 47.6 | 74.9 |        2.6 |            43.3 |
+| clear+strong | 2016-26 |     1202 |      28.6 |  59.1 | 40.7 | 74.5 |        2.6 |            43.3 |
+| clear+strong | 2023-26 |      492 |      11.7 |  42.9 | 19.3 | 68   |        2.9 |            51.4 |
+| any majority | 2010-26 |     4166 |      99.2 |  59.1 | 49.7 | 68.7 |        5.8 |            96.2 |
+| any majority | 2016-26 |     2687 |      64   |  56.9 | 44.1 | 67.7 |        5.8 |            96.8 |
 | any majority | 2023-26 |      939 |      22.4 |  45.3 | 26.9 | 65.3 |        5.6 |            98   |
 
 ### Horizon 63 sessions
 
 | cls          | era     |   n_days |   n_indep |   acc |   lo |   hi |   per_year |   share_of_days |
 |:-------------|:--------|---------:|----------:|------:|-----:|-----:|-----------:|----------------:|
-| split        | 2010-26 |      674 |      10.7 |  53.7 | 28   | 78.7 |        0.6 |            15.6 |
-| split        | 2016-26 |      463 |       7.3 |  55.7 | 25   | 84.2 |        0.7 |            16.8 |
-| split        | 2023-26 |      121 |       1.9 |  47.9 |  9.5 | 90.5 |        0.5 |            12.9 |
-| lean         | 2010-26 |     1471 |      23.3 |  64.2 | 44.9 | 81.2 |        1.4 |            34.1 |
-| lean         | 2016-26 |     1009 |      16   |  64.5 | 38.6 | 81.5 |        1.5 |            36.6 |
-| lean         | 2023-26 |      331 |       5.3 |  63.1 | 23.1 | 88.2 |        1.3 |            35.3 |
-| clear        | 2010-26 |     1328 |      21.1 |  63.2 | 40.9 | 79.2 |        1.2 |            30.8 |
-| clear        | 2016-26 |      751 |      11.9 |  62.7 | 32   | 80.7 |        1.1 |            27.3 |
-| clear        | 2023-26 |      274 |       4.3 |  45.3 | 15   | 85   |        1.1 |            29.2 |
-| strong       | 2010-26 |      638 |      10.1 |  67.9 | 39.7 | 89.2 |        0.6 |            14.8 |
-| strong       | 2016-26 |      431 |       6.8 |  67.7 | 35.9 | 91.8 |        0.6 |            15.6 |
-| strong       | 2023-26 |      196 |       3.1 |  38.8 |  6.1 | 79.2 |        0.8 |            20.9 |
-| clear+strong | 2010-26 |     1966 |      31.2 |  64.7 | 46.9 | 78.9 |        1.8 |            45.6 |
-| clear+strong | 2016-26 |     1182 |      18.8 |  64.6 | 41   | 80.9 |        1.7 |            42.9 |
-| clear+strong | 2023-26 |      470 |       7.5 |  42.6 | 15.8 | 75   |        1.9 |            50.2 |
-| any majority | 2010-26 |     4111 |      65.3 |  62.7 | 50.9 | 73.8 |        3.8 |            95.4 |
-| any majority | 2016-26 |     2654 |      42.1 |  63   | 49.2 | 77   |        3.8 |            96.4 |
-| any majority | 2023-26 |      922 |      14.6 |  50.7 | 24.8 | 69.9 |        3.7 |            98.4 |
+| split        | 2010-26 |      710 |      11.3 |  56.8 | 28   | 78.7 |        0.7 |            16.5 |
+| split        | 2016-26 |      475 |       7.5 |  57.7 | 21.5 | 78.5 |        0.7 |            17.2 |
+| split        | 2023-26 |      124 |       2   |  60.5 |  9.5 | 90.5 |        0.5 |            13.2 |
+| lean         | 2010-26 |     1501 |      23.8 |  64.4 | 42.7 | 78.8 |        1.4 |            34.8 |
+| lean         | 2016-26 |     1009 |      16   |  63.7 | 38.6 | 81.5 |        1.5 |            36.6 |
+| lean         | 2023-26 |      334 |       5.3 |  60.8 | 23.1 | 88.2 |        1.3 |            35.6 |
+| clear        | 2010-26 |     1395 |      22.1 |  61.1 | 43   | 80.3 |        1.3 |            32.4 |
+| clear        | 2016-26 |      809 |      12.8 |  59.3 | 35.5 | 82.3 |        1.2 |            29.4 |
+| clear        | 2023-26 |      313 |       5   |  39   | 11.8 | 76.9 |        1.2 |            33.4 |
+| strong       | 2010-26 |      532 |       8.4 |  69.9 | 40.9 | 92.9 |        0.5 |            12.3 |
+| strong       | 2016-26 |      371 |       5.9 |  73.6 | 30   | 90.3 |        0.5 |            13.5 |
+| strong       | 2023-26 |      144 |       2.3 |  45.8 |  9.5 | 90.5 |        0.6 |            15.4 |
+| clear+strong | 2010-26 |     1927 |      30.6 |  63.6 | 43.8 | 76.3 |        1.8 |            44.7 |
+| clear+strong | 2016-26 |     1180 |      18.7 |  63.8 | 41   | 80.9 |        1.7 |            42.8 |
+| clear+strong | 2023-26 |      457 |       7.3 |  41.1 | 15.8 | 75   |        1.8 |            48.8 |
+| any majority | 2010-26 |     4138 |      65.7 |  62.7 | 50.1 | 72.9 |        3.9 |            96   |
+| any majority | 2016-26 |     2664 |      42.3 |  62.7 | 49.2 | 77   |        3.8 |            96.7 |
+| any majority | 2023-26 |      915 |      14.5 |  50.9 | 24.8 | 69.9 |        3.6 |            97.7 |
 
 ## Benchmarks on the same folds
 
@@ -112,98 +184,98 @@ Design, majority classes and keep bar were written into the module before the fi
 
 | who                 |   h | cls          | era     |   n_indep |   acc |   lo |   hi |
 |:--------------------|----:|:-------------|:--------|----------:|------:|-----:|-----:|
-| committee stale 63  |  21 | clear+strong | 2010-26 |     111.7 |  57.1 | 47.9 | 65.9 |
-| committee stale 63  |  21 | clear+strong | 2016-26 |      68.4 |  56.1 | 44.1 | 67.1 |
-| committee stale 63  |  21 | clear+strong | 2023-26 |      25.6 |  49.7 | 32.1 | 67.9 |
-| committee stale 63  |  21 | any majority | 2010-26 |     201.5 |  54.5 | 47.8 | 61.5 |
-| committee stale 63  |  21 | any majority | 2016-26 |     129.8 |  53.2 | 44.5 | 61.4 |
-| committee stale 63  |  21 | any majority | 2023-26 |      45.3 |  48.8 | 35   | 63   |
-| committee stale 63  |  42 | clear+strong | 2010-26 |      46.1 |  59   | 44.3 | 71.7 |
-| committee stale 63  |  42 | clear+strong | 2016-26 |      28.8 |  58.6 | 40.7 | 74.5 |
-| committee stale 63  |  42 | clear+strong | 2023-26 |      12.1 |  46.6 | 25.4 | 74.6 |
-| committee stale 63  |  42 | any majority | 2010-26 |      97.5 |  55.5 | 45.2 | 64.6 |
-| committee stale 63  |  42 | any majority | 2016-26 |      63.9 |  55.8 | 44.1 | 67.7 |
-| committee stale 63  |  42 | any majority | 2023-26 |      22.4 |  45.6 | 26.9 | 65.3 |
-| committee stale 63  |  63 | clear+strong | 2010-26 |      31   |  57.7 | 40.8 | 73.6 |
-| committee stale 63  |  63 | clear+strong | 2016-26 |      18.2 |  63.9 | 43.7 | 83.7 |
-| committee stale 63  |  63 | clear+strong | 2023-26 |       6.9 |  51.7 | 25   | 84.2 |
-| committee stale 63  |  63 | any majority | 2010-26 |      65.2 |  55.6 | 43.3 | 66.8 |
-| committee stale 63  |  63 | any majority | 2016-26 |      42.1 |  58.2 | 42.2 | 70.9 |
-| committee stale 63  |  63 | any majority | 2023-26 |      14.6 |  48.9 | 24.8 | 69.9 |
-| committee stale 126 |  21 | clear+strong | 2010-26 |     110.5 |  51.5 | 42.2 | 60.4 |
-| committee stale 126 |  21 | clear+strong | 2016-26 |      66   |  51.9 | 39.7 | 63.2 |
-| committee stale 126 |  21 | clear+strong | 2023-26 |      25.4 |  52.6 | 33.5 | 70   |
-| committee stale 126 |  21 | any majority | 2010-26 |     201.5 |  48.9 | 42.4 | 56.1 |
-| committee stale 126 |  21 | any majority | 2016-26 |     129.6 |  48.7 | 40   | 57   |
-| committee stale 126 |  21 | any majority | 2023-26 |      45.3 |  49.1 | 35   | 63   |
-| committee stale 126 |  42 | clear+strong | 2010-26 |      44.9 |  51.2 | 37   | 65   |
-| committee stale 126 |  42 | clear+strong | 2016-26 |      27.5 |  51.1 | 34   | 69.3 |
-| committee stale 126 |  42 | clear+strong | 2023-26 |      11.7 |  45.8 | 19.3 | 68   |
-| committee stale 126 |  42 | any majority | 2010-26 |      97   |  53.3 | 43.7 | 63.2 |
-| committee stale 126 |  42 | any majority | 2016-26 |      63.9 |  53.3 | 41.1 | 64.8 |
-| committee stale 126 |  42 | any majority | 2023-26 |      22.4 |  45.5 | 26.9 | 65.3 |
-| committee stale 126 |  63 | clear+strong | 2010-26 |      30.6 |  50.6 | 32   | 65.2 |
-| committee stale 126 |  63 | clear+strong | 2016-26 |      17.6 |  54   | 33.7 | 75.4 |
-| committee stale 126 |  63 | clear+strong | 2023-26 |       7   |  46.4 | 15.8 | 75   |
-| committee stale 126 |  63 | any majority | 2010-26 |      65.3 |  52.4 | 40.4 | 64   |
-| committee stale 126 |  63 | any majority | 2016-26 |      42.1 |  54.3 | 39.9 | 68.8 |
-| committee stale 126 |  63 | any majority | 2023-26 |      14.6 |  45.6 | 24.8 | 69.9 |
+| committee stale 63  |  21 | clear+strong | 2010-26 |     110.4 |  57.2 | 47.9 | 66.1 |
+| committee stale 63  |  21 | clear+strong | 2016-26 |      67.7 |  56.2 | 44.1 | 67.1 |
+| committee stale 63  |  21 | clear+strong | 2023-26 |      25.2 |  49.7 | 33.5 | 70   |
+| committee stale 63  |  21 | any majority | 2010-26 |     201.4 |  54.3 | 47.3 | 61   |
+| committee stale 63  |  21 | any majority | 2016-26 |     129.8 |  52.9 | 44.5 | 61.4 |
+| committee stale 63  |  21 | any majority | 2023-26 |      45.3 |  48.6 | 35   | 63   |
+| committee stale 63  |  42 | clear+strong | 2010-26 |      44.3 |  59.9 | 46.6 | 74.3 |
+| committee stale 63  |  42 | clear+strong | 2016-26 |      27.7 |  60   | 42.4 | 76.4 |
+| committee stale 63  |  42 | clear+strong | 2023-26 |      11.1 |  46.8 | 21.3 | 72   |
+| committee stale 63  |  42 | any majority | 2010-26 |      99   |  54.3 | 44.8 | 64   |
+| committee stale 63  |  42 | any majority | 2016-26 |      64   |  54.6 | 42.6 | 66.3 |
+| committee stale 63  |  42 | any majority | 2023-26 |      22.4 |  45   | 26.9 | 65.3 |
+| committee stale 63  |  63 | clear+strong | 2010-26 |      30.3 |  57.9 | 42.3 | 75.4 |
+| committee stale 63  |  63 | clear+strong | 2016-26 |      18.1 |  64.7 | 43.7 | 83.7 |
+| committee stale 63  |  63 | clear+strong | 2023-26 |       6.7 |  53   | 25   | 84.2 |
+| committee stale 63  |  63 | any majority | 2010-26 |      65.7 |  55.6 | 42.6 | 66   |
+| committee stale 63  |  63 | any majority | 2016-26 |      42.3 |  58.3 | 44.5 | 73   |
+| committee stale 63  |  63 | any majority | 2023-26 |      14.5 |  49.4 | 24.8 | 69.9 |
+| committee stale 126 |  21 | clear+strong | 2010-26 |     109.4 |  51.9 | 43   | 61.4 |
+| committee stale 126 |  21 | clear+strong | 2016-26 |      65.3 |  52.2 | 40.4 | 64   |
+| committee stale 126 |  21 | clear+strong | 2023-26 |      25   |  53.4 | 33.5 | 70   |
+| committee stale 126 |  21 | any majority | 2010-26 |     201.4 |  49.1 | 42.4 | 56.1 |
+| committee stale 126 |  21 | any majority | 2016-26 |     129.6 |  48.5 | 40   | 57   |
+| committee stale 126 |  21 | any majority | 2023-26 |      45.3 |  49.4 | 35   | 63   |
+| committee stale 126 |  42 | clear+strong | 2010-26 |      43.1 |  50.7 | 36.8 | 65.4 |
+| committee stale 126 |  42 | clear+strong | 2016-26 |      26.5 |  50.9 | 35.5 | 71.2 |
+| committee stale 126 |  42 | clear+strong | 2023-26 |      10.7 |  47.8 | 21.3 | 72   |
+| committee stale 126 |  42 | any majority | 2010-26 |      98.7 |  53.3 | 43.8 | 63   |
+| committee stale 126 |  42 | any majority | 2016-26 |      63.9 |  53.4 | 41.1 | 64.8 |
+| committee stale 126 |  42 | any majority | 2023-26 |      22.4 |  46   | 26.9 | 65.3 |
+| committee stale 126 |  63 | clear+strong | 2010-26 |      29.9 |  49.5 | 33.2 | 66.8 |
+| committee stale 126 |  63 | clear+strong | 2016-26 |      17.6 |  52.4 | 29   | 71   |
+| committee stale 126 |  63 | clear+strong | 2023-26 |       6.8 |  44.8 | 15.8 | 75   |
+| committee stale 126 |  63 | any majority | 2010-26 |      65.6 |  52.3 | 39.7 | 63.2 |
+| committee stale 126 |  63 | any majority | 2016-26 |      42.3 |  54   | 39.9 | 68.8 |
+| committee stale 126 |  63 | any majority | 2023-26 |      14.5 |  44.7 | 19.8 | 64.3 |
 
 ## Does the committee add to the three-signal agreement rule?
 
 |   h | era     | case                                              |   n_indep |   acc |    lo |    hi |   per_year |
 |----:|:--------|:--------------------------------------------------|----------:|------:|------:|------:|-----------:|
-|  21 | 2010-26 | rule calls, committee clear majority the same way |      63.2 |  59.6 |  48   |  71.5 |        3.7 |
-|  21 | 2010-26 | rule calls, committee no clear majority           |      26.8 |  55.2 |  37.3 |  72.4 |        1.6 |
-|  21 | 2010-26 | rule calls, committee clear majority AGAINST      |       0.7 |  60   |   0   |  79.3 |        0   |
-|  21 | 2010-26 | rule silent, committee clear majority             |      48.3 |  60   |  46.3 |  73   |        2.8 |
-|  21 | 2016-26 | rule calls, committee clear majority the same way |      37.1 |  59.8 |  43.5 |  73.7 |        3.4 |
-|  21 | 2016-26 | rule calls, committee no clear majority           |      19.2 |  54.2 |  31.7 |  72.7 |        1.7 |
-|  21 | 2016-26 | rule calls, committee clear majority AGAINST      |       0.7 |  64.3 |   0   |  79.3 |        0.1 |
-|  21 | 2016-26 | rule silent, committee clear majority             |      31.9 |  52.5 |  36.4 |  69.1 |        2.9 |
-|  21 | 2023-26 | rule calls, committee clear majority the same way |      14.6 |  51.1 |  24.8 |  69.9 |        3.7 |
-|  21 | 2023-26 | rule calls, committee no clear majority           |       4.8 |  60.4 |  23.1 |  88.2 |        1.2 |
+|  21 | 2010-26 | rule calls, committee clear majority the same way |      62.5 |  59   |  47.3 |  71   |        3.7 |
+|  21 | 2010-26 | rule calls, committee no clear majority           |      27.5 |  56.6 |  39.1 |  73.5 |        1.6 |
+|  21 | 2010-26 | rule calls, committee clear majority AGAINST      |       0.8 |  62.5 |   0   |  79.3 |        0   |
+|  21 | 2010-26 | rule silent, committee clear majority             |      47.8 |  59.4 |  44.3 |  71.2 |        2.8 |
+|  21 | 2016-26 | rule calls, committee clear majority the same way |      37   |  59.7 |  43.5 |  73.7 |        3.4 |
+|  21 | 2016-26 | rule calls, committee no clear majority           |      19.3 |  54.3 |  31.7 |  72.7 |        1.8 |
+|  21 | 2016-26 | rule calls, committee clear majority AGAINST      |       0.7 |  66.7 |   0   |  79.3 |        0.1 |
+|  21 | 2016-26 | rule silent, committee clear majority             |      31.3 |  51.8 |  34.8 |  68   |        2.8 |
+|  21 | 2023-26 | rule calls, committee clear majority the same way |      14.5 |  50.8 |  24.8 |  69.9 |        3.6 |
+|  21 | 2023-26 | rule calls, committee no clear majority           |       4.9 |  61.2 |  23.1 |  88.2 |        1.2 |
 |  21 | 2023-26 | rule calls, committee clear majority AGAINST      |       0   | 100   |   0   |  79.3 |        0   |
-|  21 | 2023-26 | rule silent, committee clear majority             |      12.1 |  40.8 |  19.3 |  68   |        3   |
-|  42 | 2010-26 | rule calls, committee clear majority the same way |      27.8 |  64.2 |  45.8 |  79.3 |        1.6 |
-|  42 | 2010-26 | rule calls, committee no clear majority           |      16.9 |  61.3 |  36   |  78.4 |        1   |
-|  42 | 2010-26 | rule calls, committee clear majority AGAINST      |       0.2 |  88.9 |   0   |  79.3 |        0   |
-|  42 | 2010-26 | rule silent, committee clear majority             |      18.6 |  63.8 |  41   |  80.9 |        1.1 |
-|  42 | 2016-26 | rule calls, committee clear majority the same way |      16.6 |  63.2 |  36   |  78.4 |        1.5 |
-|  42 | 2016-26 | rule calls, committee no clear majority           |      11.2 |  59.7 |  35.4 |  84.8 |        1   |
-|  42 | 2016-26 | rule calls, committee clear majority AGAINST      |       0.2 |  87.5 |   0   |  79.3 |        0   |
-|  42 | 2016-26 | rule silent, committee clear majority             |      12.9 |  56.2 |  29.1 |  76.8 |        1.2 |
-|  42 | 2023-26 | rule calls, committee clear majority the same way |       6   |  42.9 |  18.8 |  81.2 |        1.5 |
-|  42 | 2023-26 | rule calls, committee no clear majority           |       3.3 |  55.8 |  20.8 |  93.9 |        0.8 |
+|  21 | 2023-26 | rule silent, committee clear majority             |      11.9 |  38.2 |  19.3 |  68   |        3   |
+|  42 | 2010-26 | rule calls, committee clear majority the same way |      27.2 |  63.3 |  44.2 |  78.5 |        1.6 |
+|  42 | 2010-26 | rule calls, committee no clear majority           |      17.6 |  62.9 |  38.6 |  79.7 |        1   |
+|  42 | 2010-26 | rule calls, committee clear majority AGAINST      |       0.1 | 100   |   0   |  79.3 |        0   |
+|  42 | 2010-26 | rule silent, committee clear majority             |      17.3 |  63.2 |  41.3 |  82.7 |        1   |
+|  42 | 2016-26 | rule calls, committee clear majority the same way |      16.6 |  62.5 |  36   |  78.4 |        1.5 |
+|  42 | 2016-26 | rule calls, committee no clear majority           |      11.3 |  60.8 |  35.4 |  84.8 |        1   |
+|  42 | 2016-26 | rule calls, committee clear majority AGAINST      |       0.1 | 100   |   0   |  79.3 |        0   |
+|  42 | 2016-26 | rule silent, committee clear majority             |      11.9 |  54.9 |  32   |  80.7 |        1.1 |
+|  42 | 2023-26 | rule calls, committee clear majority the same way |       5.9 |  42.1 |   9.7 |  70   |        1.5 |
+|  42 | 2023-26 | rule calls, committee no clear majority           |       3.4 |  56.6 |  20.8 |  93.9 |        0.9 |
 |  42 | 2023-26 | rule calls, committee clear majority AGAINST      |       0   | nan   | nan   | nan   |        0   |
-|  42 | 2023-26 | rule silent, committee clear majority             |       6.7 |  45.2 |  15.8 |  75   |        1.7 |
-|  63 | 2010-26 | rule calls, committee clear majority the same way |      19.7 |  67.3 |  43.3 |  81.9 |        1.2 |
-|  63 | 2010-26 | rule calls, committee no clear majority           |      10.1 |  66.1 |  39.7 |  89.2 |        0.6 |
-|  63 | 2010-26 | rule calls, committee clear majority AGAINST      |       0.1 |  14.3 |   0   |  79.3 |        0   |
-|  63 | 2010-26 | rule silent, committee clear majority             |      11.4 |  60.1 |  35.4 |  84.8 |        0.7 |
-|  63 | 2016-26 | rule calls, committee clear majority the same way |      11.3 |  69.7 |  43.4 |  90.3 |        1   |
-|  63 | 2016-26 | rule calls, committee no clear majority           |       7.2 |  63.6 |  35.9 |  91.8 |        0.7 |
-|  63 | 2016-26 | rule calls, committee clear majority AGAINST      |       0.1 |  14.3 |   0   |  79.3 |        0   |
-|  63 | 2016-26 | rule silent, committee clear majority             |       7.3 |  56.4 |  25   |  84.2 |        0.7 |
-|  63 | 2023-26 | rule calls, committee clear majority the same way |       4   |  46.5 |  15   |  85   |        1   |
-|  63 | 2023-26 | rule calls, committee no clear majority           |       2.1 |  61.7 |   9.5 |  90.5 |        0.5 |
+|  42 | 2023-26 | rule silent, committee clear majority             |       5.8 |  43.7 |  18.8 |  81.2 |        1.5 |
+|  63 | 2010-26 | rule calls, committee clear majority the same way |      19.4 |  66.1 |  46   |  84.6 |        1.1 |
+|  63 | 2010-26 | rule calls, committee no clear majority           |      10.4 |  68   |  39.7 |  89.2 |        0.6 |
+|  63 | 2010-26 | rule calls, committee clear majority AGAINST      |       0.1 |  25   |   0   |  79.3 |        0   |
+|  63 | 2010-26 | rule silent, committee clear majority             |      11.1 |  59.1 |  35.4 |  84.8 |        0.7 |
+|  63 | 2016-26 | rule calls, committee clear majority the same way |      11.3 |  68.4 |  43.4 |  90.3 |        1   |
+|  63 | 2016-26 | rule calls, committee no clear majority           |       7.3 |  65.2 |  35.9 |  91.8 |        0.7 |
+|  63 | 2016-26 | rule calls, committee clear majority AGAINST      |       0   |   0   |   0   |  79.3 |        0   |
+|  63 | 2016-26 | rule silent, committee clear majority             |       7.4 |  56.6 |  25   |  84.2 |        0.7 |
+|  63 | 2023-26 | rule calls, committee clear majority the same way |       4.1 |  44.2 |  15   |  85   |        1   |
+|  63 | 2023-26 | rule calls, committee no clear majority           |       2   |  66.9 |   9.5 |  90.5 |        0.5 |
 |  63 | 2023-26 | rule calls, committee clear majority AGAINST      |       0   | nan   | nan   | nan   |        0   |
-|  63 | 2023-26 | rule silent, committee clear majority             |       3.4 |  38   |   6.1 |  79.2 |        0.9 |
+|  63 | 2023-26 | rule silent, committee clear majority             |       3.1 |  37.1 |   6.1 |  79.2 |        0.8 |
 
 ## Null: the same machine on labels shifted by years (nothing to find)
 
 |   shift |   h |   n_indep |   acc |   lo |   hi |
 |--------:|----:|----------:|------:|-----:|-----:|
-|    1500 |  21 |      95.6 |  47.7 | 38.2 | 57.8 |
-|    1500 |  42 |      47.7 |  42.7 | 28.8 | 55.7 |
-|    2500 |  21 |      40   |  52.1 | 37.5 | 67.1 |
-|    2500 |  42 |      26.5 |  55.7 | 38.9 | 74.5 |
-|    3500 |  21 |      75   |  57.5 | 46.1 | 67.9 |
-|    3500 |  42 |      34   |  53.3 | 36.7 | 68.5 |
+|    1500 |  21 |      89.4 |  47.8 | 38.2 | 58.5 |
+|    1500 |  42 |      45.3 |  43   | 30.9 | 58.8 |
+|    2500 |  21 |      50.7 |  52.2 | 37.7 | 64.1 |
+|    2500 |  42 |      32.2 |  50.3 | 33.6 | 66.4 |
+|    3500 |  21 |      76.6 |  55.7 | 44.7 | 66.4 |
+|    3500 |  42 |      36.3 |  55.3 | 39.6 | 70.5 |
 
 ## Look-ahead control
 
-View columns from a frame cut at 2018-12-31 against the full frame, last 250 sessions: 0 of 48 columns differ.
+View columns from a frame cut at 2018-12-31 against the full frame, last 250 sessions: 0 of 53 columns differ.
 
 ## League table of the analysts, 1 month, 2010-26 (only analysts with at least 10 independent calls)
 
@@ -264,6 +336,7 @@ View columns from a frame cut at 2018-12-31 against the full frame, last 250 ses
 | slope3m:D    | XA       | textbook |     148   |  47.9 | 40.1 | 56   |            71.4 |
 | spx20:D      | RISK     | textbook |     144.4 |  47.3 | 39.2 | 55.3 |            69.7 |
 | gold20:D     | RISK     | textbook |     115.9 |  46.8 | 37.7 | 55.6 |            55.9 |
+| fed_priced:E | FED      | textbook |      37   |  46.5 | 31   | 61.6 |            17.9 |
 | rev252:E     | VAL      | HOUSE    |      22.1 |  44.1 | 26.9 | 65.3 |            10.7 |
 | rd10_lvl:E   | RL       | textbook |      33.8 |  42.7 | 26.4 | 57.8 |            16.3 |
 | pol_d63:E    | CB       | textbook |      19.4 |  42.5 | 23.1 | 63.7 |             9.4 |
@@ -273,4 +346,5 @@ View columns from a frame cut at 2018-12-31 against the full frame, last 250 ses
 | ppp:E        | VAL      | textbook |      10.3 |  38.7 | 16.8 | 68.7 |             5   |
 | oil63:E      | XA       | textbook |      31.2 |  38.5 | 23.7 | 56.2 |            15.1 |
 | rd10_d126:E  | RC       | textbook |      10.7 |  37.9 | 15.2 | 64.6 |             5.1 |
+| fed_cycle:D  | FED      | textbook |      12.4 |  37.7 | 19.3 | 68   |             6   |
 | spx20:E      | RISK     | textbook |      11.6 |  32.8 | 13.8 | 60.9 |             5.6 |

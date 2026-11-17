@@ -139,6 +139,22 @@ Decision: kept as a READ-OUT only (`cli committee`, one line in the weekly outlo
 majority class actually had; it decides nothing and the position call still follows the agreement rule.
 Also fixed: the live price splice fetched only 5 days, leaving holes after a pause longer than that; it now covers the gap.
 
+### Round 8, trial 2 (2026-11-17): Fed desk added to the committee (owner's request)
+Five Fed-meeting views x 2 temperaments = 10 analysts (latest decision, direction of the last move, 2-year yield reaction
+on decision day, EUR/USD reaction on decision day, what the 2-year prices against the policy rate), each state held from
+the statement until the next meeting; declared in the module before running, nothing else changed.
+* The committee with the Fed desk: 59.0 / 63.1 / 63.6 % at 1 / 2 / 3 months (2010-26), without it 59.6 / 63.8 / 64.7 %.
+  No gain; bar still missed.
+* The Fed desk alone (majority of its analysts with a view): right 42.5 % at one month, 43.8 % at two, 49.4 % at three
+  (59 / 72 / 56 independent calls). The textbook reading ('a hike lifts the dollar') was wrong more often than right
+  after the decision, consistent with round 5: the move is priced before the meeting. Not significant as a contrarian
+  rule either (95 % range at one month about 31-55 %).
+* Most Fed analysts stay silent most of the time because their own history gives them no edge (the design silences them).
+Decision: Fed desk kept in the read-out because the owner asked for it (it shows the last decision, the market reaction,
+what is priced and the next meeting date); it does not improve the probability. The headline now reads
+'direction, probability', the probability being the pooled walk-forward hit rate of clear-or-strong majorities.
+Also added: `committee.refresh_fed_target()` (the mirror's Fed target series was two months stale; FRED answers directly).
+
 ## Product definition (owner, 2026-11-11)
 Directional POSITION trading: hold for weeks up to a month or more, a few decisions a month, each with a calibrated
 probability; act when P >= 60 % (target band 60-80 %). Not day trading. Backtesting on history is the research engine;

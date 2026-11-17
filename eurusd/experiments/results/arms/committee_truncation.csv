@@ -1,4 +1,9 @@
 ,max_abs_diff,nan_mismatch
+fed_latest,0.0,0
+fed_cycle,0.0,0
+fed_surprise,0.0,0
+fed_fx,0.0,0
+fed_priced,0.0,0
 cot_z52,0.0,0
 cot_z156,0.0,0
 cot_d4,0.0,0

@@ -89,6 +89,20 @@ def main():
         Ts[h].to_parquet(RES / f"committee_votes_h{h}.parquet")
     rec = record_table(Ts, X)
     rec.to_csv(RES / "committee_record.csv", index=False)
+    # ---- the same committee without the Fed desk (trial 1's roster), and the Fed desk alone
+    fed_cols = [a for a in C.AGENTS if C.VIEWS[a.split(":")[0]][0] == "FED"]
+    rec_nofed = record_table({h: C.tally(Ps[h].drop(columns=fed_cols)) for h in C.HORIZONS}, X, label="without Fed desk")
+    fed_rows = []
+    for h in C.HORIZONS:
+        up, dn = (Ps[h][fed_cols] > 0.5 + C.EPS).sum(axis=1), (Ps[h][fed_cols] < 0.5 - C.EPS).sum(axis=1)
+        side = np.sign(up - dn).astype(float)
+        for era, a, b in C.ERAS:
+            fed_rows.append({"who": "Fed desk majority (any size)", "h": h, "era": era, **acc_row(side, X[f"y{h}"].reindex(side.index), h, a, b)})
+    fed_alone = pd.DataFrame(fed_rows)
+    cmp_ = pd.concat([rec.assign(who="with Fed desk"), rec_nofed])
+    cmp_ = cmp_[(cmp_.clock == "phase-averaged") & (cmp_.cls == "clear+strong")]
+    cmp_.to_csv(RES / "committee_fed_effect.csv", index=False)
+    fed_alone.to_csv(RES / "committee_fed_alone.csv", index=False)
     # ---- benchmark: the agreement rule on the same folds
     ag = agreement_side(X)
     bench = []
@@ -193,10 +207,16 @@ def main():
         return d.to_markdown(index=False)
 
     pa = rec[rec.clock == "phase-averaged"]
-    md = ["# The committee: 100 analysts vote on EUR/USD direction", "",
+    md = ["# The committee: 110 analysts (100 + a Fed desk of 10) vote on EUR/USD direction", "",
           "Code `src/eurusd/committee.py`, test `experiments/70_committee.py`, results `experiments/results/arms/committee_*`.",
-          "Design, majority classes and keep bar were written into the module before the first run (2026-11-17). One design, no tuning.", "",
+          "Design, majority classes and keep bar were written into the module before the first run (2026-11-17). Trial 1: 100 analysts. "
+          "Trial 2 (same day, owner's request): a Fed-meeting school of 10 analysts added, nothing else changed.", "",
           f"## Verdict against the declared bar: **{verdict}**", "", bar.to_markdown(index=False), "",
+          "## Effect of the Fed desk (clear or strong majority, with and without the 10 Fed analysts)", "",
+          tbl(cmp_, ["who", "h", "era", "n_indep", "acc", "lo", "hi", "per_year"]), "",
+          "## The Fed desk on its own (majority of the Fed analysts with a view)", "", tbl(fed_alone, ["who", "h", "era", "n_indep", "acc", "lo", "hi", "share_of_days"]), "",
+          "## The ten Fed analysts one by one, 2010-26", "",
+          tbl(lg[lg.school == "FED"], ["analyst", "h", "n_indep", "acc", "lo", "hi", "share_of_days"]), "",
           "## What a majority was worth (walk-forward, out of sample)", "",
           "`n_indep` = independent calls (calls on one non-overlapping grid, averaged over all grid phases); `lo`-`hi` = 95 % Wilson range on that count; "
           "`share_of_days` = how often the committee was in that class.", ""]
@@ -214,6 +234,10 @@ def main():
     md += [tbl(l21, ["analyst", "school", "prior", "n_indep", "acc", "lo", "hi", "share_of_days"]), ""]
     (ROOT / "reports" / "committee.md").write_text("\n".join(md))
     print("\nVERDICT", verdict)
+    print("\nFed effect:\n", cmp_.assign(acc=(100 * cmp_.acc).round(1))[["who", "h", "era", "n_indep", "acc", "per_year"]].to_string(index=False))
+    print("\nFed desk alone:\n", fed_alone.assign(acc=(100 * fed_alone.acc).round(1))[["h", "era", "n_indep", "acc", "share_of_days"]].to_string(index=False))
+    fl = lg[lg.school == "FED"]
+    print("\nFed analysts:\n", fl.assign(acc=(100 * fl.acc).round(1), lo=(100 * fl.lo).round(0), hi=(100 * fl.hi).round(0))[["analyst", "h", "n_indep", "acc", "lo", "hi", "share_of_days"]].to_string(index=False))
     print(bar.to_string(index=False))
     print("\nrecord (phase-averaged):\n", pa.assign(acc=(100 * pa.acc).round(1), lo=(100 * pa.lo).round(1), hi=(100 * pa.hi).round(1))[["h", "cls", "era", "n_indep", "acc", "lo", "hi", "per_year", "share_of_days"]].to_string(index=False))
     print("\nbenchmarks:\n", bench.assign(acc=(100 * bench.acc).round(1))[["who", "h", "era", "n_indep", "acc", "per_year"]].to_string(index=False))
