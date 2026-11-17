@@ -839,7 +839,8 @@ def write_report(R, VER, ST, CO, OT, PR, CT, cov, S, rec, LEAK, same_mem, n_all,
     notes = head.read_text() if head.exists() else ""
     i = text.index("## The table")
     j = text.index("## Training rows")
-    (ROOT / "reports" / f"arm_{ARM}.md").write_text(text[:i] + notes + text[i:j] + "\n".join(Lp) + "\n" + text[j:])
+    top, _, end = notes.partition("<!-- END -->")           # hand-written reading (top) and the plain answer (end)
+    (ROOT / "reports" / f"arm_{ARM}.md").write_text(text[:i] + top + text[i:j] + "\n".join(Lp) + "\n" + text[j:] + end)
 
 
 if __name__ == "__main__":

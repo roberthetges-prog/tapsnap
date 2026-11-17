@@ -14,6 +14,24 @@ Code `src/eurusd/arms/bots_experience.py` (design, bar and controls in its docst
 
 Gains are accuracy points of the 100-bot majority on EUR/USD against baseline (a).
 
+## What happened, plainly
+
+* **More years (b): nothing.** Adding the Deutsche Mark era changes the vote by +0.1 / +0.2 points at 21 / 63 sessions in 2018-26 (intervals -1.1 .. +1.4 and -1.7 .. +2.2). Two reasons: 72 of the 100 bots have a 5- or 10-year memory and cannot see 1987-98 at all, and the 28 that can are, if anything, slightly worse with it (their own majority -1.4 / -1.9 points in 2018-26, intervals include zero). They keep trusting the same columns (positioning 24 % of what they keep, against 26 %).
+* **More markets (c) and both (d): worse, not better.** The pooled bots' majority is 8.3 / 9.2 points (c) and 6.8 / 11.0 points (d) LESS accurate than the EUR/USD-only bots in 2018-26, and 7.4 / 4.9 and 5.4 / 3.7 points less in 2010-17. At 21 sessions the paired interval is entirely below zero in both halves; at 63 sessions it is wide and includes zero in 2018-26. The pooled vote on EUR/USD is 45.0 / 46.5 % in 2010-26, which is not distinguishable from 50 % (37.9-51.6 and 34.6-58.1).
+* **Why pooling hurts here.** The bots do what the brief hoped: with seven markets they stop trusting positioning (26 % of kept columns under (a), 5 % under (c)), because it does not generalise. But they replace it with the global columns that every pair shares on the same date (US curve, VIX, equity, oil: 18 % to 37 %), where seven pairs moving together look like seven confirmations of one accident, and the bots agree with each other more (correlation of being right 0.22 to 0.28; share of single bots above 50 %: 65 % to 24 %). What they dropped was the only thing that had worked on EUR/USD in this sample; what they picked up did not carry forward.
+* **The pooled vote works nowhere convincingly.** On the six other pairs it scores 48-52 % at 21 sessions in 2010-26 (every interval includes 50); the best cells (NZD 56 % at 63 sessions, CAD / AUD / NZD 54-56 % in 2018-26) are 6 pairs x 2 horizons x 2 eras read after the fact and none excludes 50 %.
+* **The cost of the smaller evidence set is nil.** The same 100 bots on the 31 generic columns score 52.9 / 53.9 % at 21 / 63 sessions (2010-26) against 52.0 / 53.2 % for the product's bots on 74 EUR-specific columns; scored on the product's own closes 52.5 / 53.3 %. Neither is distinguishable from the other or from a coin.
+
+## Anything suspicious
+
+* **The noise floor is about 4 points.** On outcomes with no structure at all (sign-flipped returns) the same harness scores 50-54 % at 21 sessions. The baseline's 52.9 % sits inside that band. So the honest reading of the -8 points is "pooling is certainly not better, and probably worse", not "pooling predicts the wrong way".
+* **The declared shuffle control came out at 46-49 %, not 50 %.** A permutation keeps the path's total change, which makes the past of a shuffled path slightly anti-informative about its future. The added sign-flip control has no such constraint and centres on 50-54 %. Both are reported.
+* **The baseline's edge in 2018-26 (54.8 / 59.1 %) is where all of the candidates' deficit comes from**, and it rests on positioning columns chosen by bots on EUR/USD 2003-22, the one effect the research log says has no out-of-time support. A pooled learner that refuses it is arguably the more honest learner; it is still the less accurate one on this sample.
+* **Docstring fact corrected after the run**: AUD positioning is usable from 1993-01, not 1988 (too few reports before); the roster has 28 all-history bots. Neither touches a candidate.
+* **Evidence gaps that limit "more years / more markets"**: no 3-month interbank series for CHF before 1999-07 or JPY before 2002-04 (columns neutral there); NZD positioning has holes of up to 3.6 years in 2000-05; VIX starts 1990 and the Fed-meeting file 1989-07; the pre-1999 euro is a synthetic price via the Danish krone; the GBP rate series stops at 2026-01 on FRED (column neutral from 2026-05). US equity is the NASDAQ Composite because it is the only daily index here that spans 1971-2026.
+* **Global columns have one sign for seven pairs.** Risk-off lifts the yen and franc and sinks the Australian dollar; a pooled bot with no pair identifier (as declared) can only learn the average. A design with pair groups might pool better; it was not declared and not run.
+* The truncation control covers one fold (2018) for all four trainings at 21 and 63 sessions: 0 of 24,900 votes differ in each.
+
 ## The table: majority vote on EUR/USD, walk-forward, out of sample
 
 `n_indep` = independent votes (sessions / horizon); `lo`-`hi` = Wilson 95 %; `diff` = accuracy minus baseline (a) on the same sessions, with a paired block-bootstrap 95 % interval. 5 sessions is reported, not judged.
@@ -321,6 +339,32 @@ The same pooled model; each pair's rows standardised on its own history. `always
 Reconciliation: with one pair the pooled fold reproduces `bots.run_bot` bot for bot (largest difference in P(up) 0.0e+00 over 12 fold checks of 100 bots; same kept columns for every bot).
 Pooling leak rule: 816 (training, horizon, year, pair) cells; training rows dated in or after the test year: 0; every training outcome fix is before 1 January of the test year (asserted for every bot and fold; table `bots_experience_pool_leak_check.csv`).
 
+## Post-hoc checks (added after the declared run was read; descriptive)
+
+Outcomes rebuilt from daily returns with random signs (no structure left, no fixed total): what the harness scores on pure noise.
+
+| control                                                        |   h | era     |   sessions |   n_indep |   acc |   lo |   hi | note                                |
+|:---------------------------------------------------------------|----:|:--------|-----------:|----------:|------:|-----:|-----:|:------------------------------------|
+| outcomes from sign-flipped daily returns, seed 1, training (a) |  21 | 2010-26 |       4153 |     197.8 |  54.1 | 47.1 | 60.8 | always-up 50.5 %; median bot 51.9 % |
+| outcomes from sign-flipped daily returns, seed 1, training (c) |  21 | 2010-26 |       4126 |     196.5 |  50   | 43.1 | 56.9 | always-up 50.5 %; median bot 51.2 % |
+| outcomes from sign-flipped daily returns, seed 2, training (a) |  21 | 2010-26 |       4149 |     197.6 |  50.4 | 43.6 | 57.4 | always-up 50.0 %; median bot 49.6 % |
+| outcomes from sign-flipped daily returns, seed 2, training (c) |  21 | 2010-26 |       4101 |     195.3 |  49.5 | 42.8 | 56.7 | always-up 50.0 %; median bot 49.4 % |
+| outcomes from sign-flipped daily returns, seed 3, training (a) |  21 | 2010-26 |       4176 |     198.9 |  54.4 | 47.3 | 61   | always-up 54.8 %; median bot 53.4 % |
+| outcomes from sign-flipped daily returns, seed 3, training (c) |  21 | 2010-26 |       4162 |     198.2 |  53.6 | 46.6 | 60.3 | always-up 54.8 %; median bot 52.4 % |
+
+Vote direction on EUR/USD, 2010-26 (`up_share` = share of sessions the majority voted UP; `went_up` = share that rose):
+
+| training                    |   h |   up_share |   went_up |   acc_when_up |   acc_when_down |   same_side_as_a |
+|:----------------------------|----:|-----------:|----------:|--------------:|----------------:|-----------------:|
+| (a) EUR/USD 1999+           |  21 |       45.8 |      47.4 |          50.3 |            55.1 |            100   |
+| (b) + mark era 1987-98      |  21 |       49.9 |      47.4 |          50.1 |            55.4 |             93.9 |
+| (c) + six other pairs 1999+ |  21 |       51.6 |      47.4 |          42.6 |            47.5 |             71.6 |
+| (d) all pairs 1987+         |  21 |       52.2 |      47.3 |          44   |            49   |             72.3 |
+| (a) EUR/USD 1999+           |  63 |       59   |      46.3 |          50.1 |            59.3 |            100   |
+| (b) + mark era 1987-98      |  63 |       58.7 |      46.2 |          50.1 |            59.4 |             95.7 |
+| (c) + six other pairs 1999+ |  63 |       52.9 |      46.5 |          43.4 |            50   |             79.3 |
+| (d) all pairs 1987+         |  63 |       54.6 |      46.2 |          43   |            49.8 |             79.4 |
+
 ## Training rows
 
 | training                    | eur        | gbp        | jpy        | chf        | cad        | aud        | nzd        |
@@ -402,3 +446,8 @@ Share of 1987-98 sessions on which the column is present:
 | fed_fx       | 0.796 | 0.796 | 0.796 | 0.796 | 0.796 | 0.796 | 0.796 |
 | seas_month   | 1     | 1     | 1     | 1     | 1     | 1     | 1     |
 
+
+
+## Answer to the owner's question
+
+The bots' experience can be expanded, and it was: the same 100 bots were given the Deutsche Mark years back to 1987 and six other dollar pairs, on evidence that exists for all of them. It does not make the vote better: twelve more years change nothing (+0.1 / +0.2 points), and six more markets make the EUR/USD vote about 8 points worse, because the bots then drop positioning (the one thing that had worked on EUR/USD) for patterns shared by all pairs that did not carry forward. Nothing is adopted; the vote stays a coin flip of about 52-53 %, and the reason is the lack of information in public evidence, not a lack of experience.
