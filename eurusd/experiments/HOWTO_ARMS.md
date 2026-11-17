@@ -198,3 +198,12 @@ experience: more YEARS (the Deutsche Mark era before 1999) and more MARKETS (the
 pairs as well). Arm DA `bots_experience` tests both against the same bots trained on EUR/USD 1999+ only, scored on
 EUR/USD in years none of them saw. All Round 9 rules apply (declaration in the module docstring before any outcome;
 counts, intervals, baselines; no commits; no live files, and `bots.py` is a live file).
+
+---
+# Round 13 addendum (2026-11-17): one confirmation study, then stop (owner)
+
+Round 11 left two leads on the levels that could not be confirmed because EUR/USD had no unseen years left: (1) levels
+whose width responds less than one-for-one to today's volatility hold more evenly in calm and volatile markets; (2) an
+event adjustment repairs the weaker one-week levels in weeks with FOMC, ECB, payrolls or CPI. Arm EA `levels_confirm`
+tests exactly these two, frozen, on markets this project has never scored. All Round 9 rules apply. No further round
+is to be opened after it.
