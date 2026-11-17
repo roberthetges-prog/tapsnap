@@ -252,6 +252,12 @@ Decision: quote level odds as the arithmetic of a driftless market at today's vo
 pair), never as an edge; label the 75-78 % and 93 % range figures as EUR/USD-only. What the product can rely on is the
 volatility estimate, nothing more.
 
+## Round 11 (opened 2026-11-17): sharper levels
+* CA `sharper_levels`: at the same 80 % holding rate, how narrow can the lower / upper levels be made, and can they be
+  made to hold evenly in calm and volatile markets, around events and in trending years? Candidates are volatility
+  estimates and calibration methods only; chosen on 2010-17, confirmed on 2018-26 and on six other pairs untouched.
+Status: RUNNING.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a

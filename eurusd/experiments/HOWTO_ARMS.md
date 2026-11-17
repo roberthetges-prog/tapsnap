@@ -179,3 +179,13 @@ geometry, and hedging a leg makes the calls worse. The directional edge has no o
 parts of the product that HAVE been stable in every era on EUR/USD and asks whether they hold on other pairs with nothing
 re-tuned. All Round 9 rules apply (primary test and bar in the module docstring before any outcome; counts, intervals,
 baselines; no commits; no live files).
+
+---
+# Round 11 addendum (2026-11-17): make the reliable half better
+
+Product (owner, 2026-11-17): no entries; DIRECTION by a vote of 100 bots and a LOWER and an UPPER LEVEL for 5, 21 and 63
+sessions (`src/eurusd/bots.py`, `reports/bots.md`). The vote is a coin flip (52 %); the levels hold about 80 % as designed.
+Round 10 showed the level odds are volatility arithmetic and replicate on every pair. So the only thing that can still
+be improved honestly is the volatility estimate behind the levels: narrower levels at the same reliability, and
+reliability that does not depend on the market's state. All Round 9 rules apply (primary test and bar in the module
+docstring before any outcome; counts, intervals, baselines; no commits; no live files).
