@@ -10,3 +10,4 @@ data/processed/cross/ofi_*_M5.parquet
 data/processed/ofi_replication_daily_*.parquet
 data/processed/intraday_path_features.parquet
 data/processed/vol_tactics_days.parquet
+data/processed/trade_design_lookup.parquet

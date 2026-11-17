@@ -1,0 +1,7 @@
+h,era,test,gain_pts,stale_gain_pts,pass_a,pass_c
+21,2010-26,(a) gain >= 3 pts / (c) stale loses half,-6.043277751814258,0.04197462540320718,False,False
+21,2016-26,(a) gain >= 3 pts / (c) stale loses half,-8.040621166030814,1.6595842748417744,False,False
+21,2023-26,(b) not worse,-1.4705882352941235,9.090909090909093,False,
+42,2010-26,(a) gain >= 3 pts / (c) stale loses half,-5.522179484875167,1.6029067136711483,False,False
+42,2016-26,(a) gain >= 3 pts / (c) stale loses half,-5.537028054005988,1.7599293455892395,False,False
+42,2023-26,(b) not worse,5.517764155296289,10.681336416630538,True,

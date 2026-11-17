@@ -1,0 +1,16 @@
+item,value
+verdict,CLEAN FAIL
+acc21,0.47556454330974046
+acc42,0.47522063815342835
+acc63,0.4499145299145299
+random_timing_p42,0.722
+share_sessions_agreement,0.5174029451137885
+share_sessions_non_positioning_legs_agree,0.6736947791164659
+sign_agreement_positioning_vs_rate_standin,0.5789825970548862
+sign_agreement_positioning_vs_macro_subset,0.7888219544846051
+sign_agreement_rate_standin_vs_macro_subset,0.6670013386880856
+weight_share_rebuilt,0.5998695667853746
+weight_share_missing,0.4001304332146254
+standin_sign_equals_d_spread2y_20_sign_2010_26,0.595929567802424
+first_decision,1987-02-17
+last_label_end,1998-12-31
