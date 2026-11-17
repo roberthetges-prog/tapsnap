@@ -35,7 +35,16 @@ def paper_execute(exp, pl: dict, eng: RiskEngine, h1: pd.DataFrame) -> list[str]
     book = eng.book
     pv = eng.cfg.pip_value_per_lot
     close_t = pd.Timestamp(exp.asof_session_close)
-    sess = h1.loc[close_t - pd.Timedelta(hours=24):close_t - pd.Timedelta(seconds=1)]
+    start = close_t - pd.Timedelta(hours=24)
+    try:                                    # after a pause, check every session since the last one that was processed
+        from .refresh import LOG
+        if LOG.exists():
+            prev = pd.Timestamp(pd.read_csv(LOG, usecols=["asof_session_close"])["asof_session_close"].iloc[-1])
+            if prev < close_t:
+                start = min(start, prev)
+    except Exception:
+        pass
+    sess = h1.loc[start:close_t - pd.Timedelta(seconds=1)]
     for p in list(book.positions):
         if p.strategy != "macro_exposure" or sess.empty:
             continue
