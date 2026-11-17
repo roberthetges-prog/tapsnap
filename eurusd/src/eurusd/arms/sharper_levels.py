@@ -999,7 +999,7 @@ def run(cost_pips: float = 1.2, write: bool = True, verbose: bool = True):
         for nm in ("bots", chosen):
             t[f"{nm}_lower"], t[f"{nm}_upper"] = X["__close"] * np.exp(W[f"{nm}|l"]), X["__close"] * np.exp(W[f"{nm}|u"])
         lv.append(t[(t.index.year >= 2010) & t[f"{chosen}_lower"].notna()].reset_index())
-    T["levels"] = pd.concat(lv, ignore_index=True)
+    T["levels"] = pd.concat(lv, ignore_index=True).round(5)
     T["verdict"] = pd.DataFrame([{"key": k, "value": json.dumps(v, default=str)} for k, v in V.items()])
     if write:
         for k, t in T.items():
@@ -1052,38 +1052,52 @@ def write_report(T: dict, V: dict) -> str:
     rows = []
     for h in HORIZONS:
         b = bt(ch, h, TEST_ERA)
-        rows.append({"sessions": hn[h], "bots: score (bp)": round(sc("bots", h, TEST_ERA, "score_bp"), 2), "chosen: score (bp)": round(sc(ch, h, TEST_ERA, "score_bp"), 2),
+        rows.append({"sessions": hn[h], "bots: score (bp)": f"{sc('bots', h, TEST_ERA, 'score_bp'):.2f}", "chosen: score (bp)": f"{sc(ch, h, TEST_ERA, 'score_bp'):.2f}",
                      "difference": f"{100 * (b['ratio'] - 1):+.1f} %", "95 % interval of the difference (bp)": f"{b['lo']:+.2f} .. {b['hi']:+.2f}",
                      "bots: lower / upper held %": f"{100 * sc('bots', h, TEST_ERA, 'lower_held'):.1f} / {100 * sc('bots', h, TEST_ERA, 'upper_held'):.1f}",
                      "chosen: lower / upper held %": f"{100 * sc(ch, h, TEST_ERA, 'lower_held'):.1f} / {100 * sc(ch, h, TEST_ERA, 'upper_held'):.1f}",
-                     "chosen: width vs bots": f"{100 * (sc(ch, h, TEST_ERA, 'width_ratio') - 1):+.1f} %", "independent periods": sc(ch, h, TEST_ERA, "n_indep")})
+                     "chosen: width vs bots": f"{100 * (sc(ch, h, TEST_ERA, 'width_ratio') - 1):+.1f} %", "independent periods": f"{sc(ch, h, TEST_ERA, 'n_indep'):.0f}"})
     a(_md(pd.DataFrame(rows)))
     a("")
     ok = lambda b: "passes" if b else "FAILS"  # noqa: E731
     n_i = sum(V["clause_i_detail"].values())
     n_ii = sum(V["clause_ii_detail"].values())
     n_iii = sum(0.77 <= v / 100 <= 0.83 for v in V["clause_iii_detail"].values())
-    a(f"* (i) better proper score at all three horizons: **{ok(V['clause_i_better_score_all_h'])}** ({n_i} of 3; the three differences are a fifth of a percent to a percent and a half).")
+    a(f"* (i) better proper score at all three horizons: **{ok(V['clause_i_better_score_all_h'])}** ({n_i} of 3; the three differences are " + ", ".join(f"{100 * (bt(ch, h, TEST_ERA)['ratio'] - 1):+.1f} %" for h in HORIZONS) + ").")
     a(f"* (ii) interval excludes zero at two horizons at least: **{ok(V['clause_ii_interval_excludes_zero_at_2_of_3'])}** ({n_ii} of 3).")
     a(f"* (iii) every level holds 77-83 %: **{ok(V['clause_iii_all_six_within_77_83'])}** ({n_iii} of 6 cells inside; the misses are on the HIGH side: the chosen levels held "
       f"up to {max(V['clause_iii_detail'].values()):.1f} %, i.e. they were too wide, not too narrow). Declared with the bar: an exactly calibrated method would pass this clause only "
       f"{100 * V['noise_chosen']['p_pass_if_exactly_calibrated']:.0f} % of the time (the 63-session holding rate has a sampling error of about "
-      f"{V['noise_chosen']['boot_sd_points'][4]:.0f} points on 35 independent periods), so (iii) alone would prove little. The bots' own levels fall inside 77-83 % in all six cells here.")
+      f"{V['noise_chosen']['boot_sd_points'][4]:.0f} points on 35 independent periods), so (iii) alone would prove little. The bots' own levels were inside 77-83 % in "
+      f"{sum(0.77 <= v / 100 <= 0.83 for v in V['clause_iii_baseline'].values())} of 6 cells.")
     a(f"* (iv) holding rate more even across volatility terciles: **{ok(V['clause_iv_spread_smaller'])}** (average spread {V['spread_chosen_points']:.1f} points against the bots' {V['spread_baseline_points']:.1f}).")
     a("")
     ba = T["bar_all"]
     npass = int(ba["pass"].sum())
     n2 = int(ba["clause_ii_interval_excludes_zero_at_2_of_3"].sum())
-    a(f"Descriptive, because only the chosen candidate counts: applying the same bar to each of the other ten candidates, {npass} of 11 pass; {n2} of 11 have an interval excluding zero at two horizons. "
-      "So this is not a case of the rule picking the wrong horse: no volatility estimate or calibration method tried here beats the bots' median level by a margin that the unseen years confirm.")
+    RPv = T["replication_pooled"]
+
+    def pooled(c, era):
+        x = RPv[(RPv.candidate == c) & (RPv.era == era)].set_index("h")
+        return " / ".join(f"{x.loc[h, 'pooled_rel_diff_pct']:+.1f} %{'*' if x.loc[h, 'excludes_zero'] else ''}" for h in HORIZONS)
+
+    a(f"Descriptive, because only the chosen candidate counts: the same bar applied to each of the eleven non-baseline candidates is passed by {npass}; {n2} have an interval excluding zero "
+      "at two horizons (the Garman-Klass, hourly and event versions beat the bots at all three horizons, with an interval excluding zero at 5 sessions only). So this is not the rule "
+      "picking the wrong horse: on EUR/USD, nine unseen years confirm none of them.")
     a("")
-    a("**In plain words.** (1) NARROWER: no. In 2018-26 the chosen levels were "
+    a("**In plain words.**")
+    a("")
+    a("1. NARROWER: **no**. In 2018-26 the chosen levels were "
       + " / ".join(f"{100 * (sc(ch, h, TEST_ERA, 'width_ratio') - 1):+.1f} %" for h in HORIZONS)
-      + " wider than the bots' at 5 / 21 / 63 sessions and held more often than 80 %; the proper score, which trades width against misses, is the same to within "
-      "sampling error. (2) EVENLY RELIABLE: partly yes, and this part is solid. The bots' levels hold too rarely in calm markets and too often in volatile ones "
-      f"(spread across volatility terciles {spread('bots', SELECT_ERA):.1f} points in 2010-17, {spread('bots', TEST_ERA):.1f} in 2018-26); every regression-based candidate halves that "
-      f"({LABEL[ch]}: {spread(ch, SELECT_ERA):.1f} and {spread(ch, TEST_ERA):.1f}), on both halves of the EUR/USD sample and on six of six other pairs. "
-      "Event weeks and trending years: small gains, see section 3.")
+      + " wider than the bots' at 5 / 21 / 63 sessions and held more often than 80 %; the proper score, which trades width against misses, is the same to within sampling error.")
+    a("2. EVENLY RELIABLE: **partly yes, and this part is solid.** The bots' levels hold too rarely in calm markets and too often in volatile ones "
+      f"(spread of the holding rate across volatility terciles {spread('bots', SELECT_ERA):.1f} points in 2010-17, {spread('bots', TEST_ERA):.1f} in 2018-26); every regression-based candidate "
+      f"roughly halves that ({LABEL[ch]}: {spread(ch, SELECT_ERA):.1f} and {spread(ch, TEST_ERA):.1f}), on both halves of the EUR/USD sample and on six of six other pairs. "
+      "Event weeks and trending years: small gains, section 3.")
+    a(f"3. THE WIDER EVIDENCE (descriptive, pooled test added after the primary result): on the six other pairs, where nothing was selected, the chosen candidate's proper score is "
+      f"{pooled(ch, '2010-26')} against the bots at 5 / 21 / 63 sessions in 2010-26 and {pooled(ch, TEST_ERA)} in 2018-26 (`*` = interval excludes zero); the Garman-Klass version "
+      f"{pooled('har_gk', TEST_ERA)} in 2018-26. So there very probably is a small real gain in the QUALITY of the levels, two to four percent of the proper score, from letting the weight "
+      "of today's volatility fall with the horizon. It is not narrower levels, and EUR/USD's own unseen years do not show it.")
     a("")
 
     # ---- 1. key table
@@ -1123,7 +1137,6 @@ def write_report(T: dict, V: dict) -> str:
                              "both held %": f"{100 * r.both_held:.1f}", "avg width %": f"{r.avg_width_pct:.2f}", "median width %": f"{r.med_width_pct:.2f}", "score bp": f"{r.score_bp:.2f}",
                              "score vs bots": "" if c == "bots" else f"{100 * (r.score_ratio - 1):+.1f} %{star}",
                              "worst year: lower / upper held %": f"{100 * r.worst_year_lower:.0f} ({int(r.worst_year_lower_y)}) / {100 * r.worst_year_upper:.0f} ({int(r.worst_year_upper_y)})"})
-        a("") if False else None
     a(_md(pd.DataFrame(rows)))
     a("")
     a("Selection table (2010-17, proper score relative to the bots; the rule takes the lowest mean):")
@@ -1134,10 +1147,10 @@ def write_report(T: dict, V: dict) -> str:
         t[c] = t[c].map(lambda x: f"{x:.3f}")
     a(_md(t.rename(columns={5: "h = 5", 21: "h = 21", 63: "h = 63", "mean_ratio": "mean"})))
     a("")
-    a("Reading. On 2010-17 seven candidates are 2-4 % better than the bots and within a point of each other; the rule's pick among them is close to a coin toss. On 2018-26 the same "
+    a("Reading. On 2010-17 seven candidates are 3-4 % better than the bots and within a point and a half of each other; the rule's pick among them is close to a coin toss. On 2018-26 the same "
       "seven are 0-2 % better at 5 and 21 sessions and indistinguishable from the bots at 63. The only intervals that exclude zero in 2018-26 are at 5 sessions, for the candidates that "
       "use intraday information (Garman-Klass ranges, hourly realised volatility, the event count): about -1.2 to -1.8 %. Direct quantile regression (C7, C8) is the weakest family: "
-      "more parameters fitted on overlapping windows, worse out of sample at 63 sessions. Pooling the two sides (C1) is a small free gain (-0.1 to -1.5 %). "
+      "more parameters fitted on overlapping windows, worse out of sample at 63 sessions. Pooling the two sides (C1) is a small free gain (-0.1 to -1.5 % in 2018-26). "
       "The adaptive correction (C9, C10) is IDENTICAL to its base: its step size is chosen each year by past proper score and the choice was always zero (section 7).")
     a("")
 
@@ -1171,15 +1184,26 @@ def write_report(T: dict, V: dict) -> str:
       + " / ".join(f"{100 * (v.loc[(ch, h, 'low'), 'avg_width_pct'] / v.loc[('bots', h, 'low'), 'avg_width_pct'] - 1):+.0f} %" for h in HORIZONS)
       + " wider than the bots' in the calm third and "
       + " / ".join(f"{100 * (v.loc[(ch, h, 'high'), 'avg_width_pct'] / v.loc[('bots', h, 'high'), 'avg_width_pct'] - 1):+.0f} %" for h in HORIZONS)
-      + " in the volatile third (5 / 21 / 63 sessions). The calm third's holding rate rises from 72-77 % to 77-88 %; the price is the extra width in calm markets, "
-      "which in the low-volatility years since 2018 made the levels wider on average and over-reliable at 63 sessions.")
+      + " in the volatile third (5 / 21 / 63 sessions). The calm third's holding rate rises from "
+      f"{100 * min(v.loc[('bots', h, 'low'), c] for h in HORIZONS for c in ('lower_held', 'upper_held')):.0f}-{100 * max(v.loc[('bots', h, 'low'), c] for h in HORIZONS for c in ('lower_held', 'upper_held')):.0f} % to "
+      f"{100 * min(v.loc[(ch, h, 'low'), c] for h in HORIZONS for c in ('lower_held', 'upper_held')):.0f}-{100 * max(v.loc[(ch, h, 'low'), c] for h in HORIZONS for c in ('lower_held', 'upper_held')):.0f} %; "
+      "the price is the extra width in calm markets, which in the low-volatility years since 2018 made the levels wider on average and over-reliable at 63 sessions.")
+    a("")
+    cf = T["coefs"]
+    last = cf[cf.test_year == cf.test_year.max()].set_index("h")
+    bcols = [c for c in cf.columns if c.startswith("b_") and c != "b_const"]
+    a("What the chosen model is, in one number per horizon: the bots move their level one for one with today's volatility at every horizon. In the fitted regression the level moves by "
+      + " / ".join(f"{float(last.loc[h, bcols].sum()):.2f}" for h in HORIZONS)
+      + f" percent for one percent of volatility at 5 / 21 / 63 sessions (sum of the slopes, fold {int(cf.test_year.max())}; `{ARM}_coefs.csv`); the rest is a fixed long-run level. "
+      "The 63-session volatility carries the largest weight at every horizon, the 5-session one almost none, and the 252-session one a small NEGATIVE weight, so the long-run anchor "
+      "is the constant fitted on all history since 2004, which is why the levels came out too wide in the quiet years since 2018.")
     a("")
 
     # ---- 3. events, trends, worst years
     a("## 3. Event weeks, trending markets, worst years")
     a("")
     a("**Weeks with a scheduled FOMC statement, ECB decision, US payrolls or US CPI inside the 5-session window** against the other weeks (holding rate %, 5 sessions; "
-      "event weeks are 55-60 % of all weeks):")
+      "event weeks are about 59 % of all weeks):")
     a("")
     rows = []
     for era in ("2010-26", TEST_ERA):
@@ -1191,9 +1215,9 @@ def write_report(T: dict, V: dict) -> str:
                          "periods: event / other": f"{v.loc['event week', 'n_indep']:.0f} / {v.loc['other week', 'n_indep']:.0f}"})
     a(_md(pd.DataFrame(rows)))
     a("")
-    a("The event effect is real and the bots ignore it: their one-week levels hold 3-7 points less often in event weeks. The chosen candidate does not use the calendar and keeps "
-      "the same gap. The event candidate (C6, not chosen) widens event weeks by about 5 % and narrows the others; it closes the gap for the lower level and half of it for the upper, "
-      "and it had the best 5-session score of all candidates in 2018-26. At 21 and 63 sessions every window contains several events, so there is nothing to adjust.")
+    a("The event effect is real and the bots ignore it: their one-week levels hold 2-8 points less often in event weeks. The chosen candidate does not use the calendar and keeps "
+      "the same gap. The event candidate (C6, not chosen) makes event-week levels 5-7 % wider than the others; it closes most of the gap for the lower level and about half of it for the upper, "
+      "and it had the best 5-session score of all candidates in 2018-26 (-1.8 %, interval excluding zero). At 21 and 63 sessions every window contains several events, so there is nothing to adjust.")
     a("")
     a("**Trending markets.** Ex ante (tercile of the absolute 63-session move in units of its volatility at the decision; holding rate %, 2010-26):")
     a("")
@@ -1217,7 +1241,8 @@ def write_report(T: dict, V: dict) -> str:
     a(_md(pd.DataFrame(rows)))
     a("")
     a("A strongly trending year still breaks every method. The regression candidates are less badly broken (63 sessions: the worst year improves from 33 / 39 % to about 46 / 49 %; "
-      "21 sessions: 58 / 63 % to 64 / 67 %) because the worst years (2014, 2017) started from record-low volatility, where their levels are wider. That is the same effect as section 2, "
+      "21 sessions: 58 / 63 % to 64 / 67 %) mainly because two of the worst years (2014 and 2020) started from the lowest volatility of the sample, where their levels are wider "
+      "(2014: 63-session lower level held 33 -> 46 %; 2020 upper 39 -> 53 %; 2017, which started from average volatility: 41 -> 49 %). That is the same effect as section 2, "
       "not a trend remedy. The remedy that was meant for trends, the adaptive correction, does repair the holding rate after the fact but costs more in width than it saves in misses (section 7).")
     a("")
 
@@ -1240,7 +1265,7 @@ def write_report(T: dict, V: dict) -> str:
     a(_md(pd.DataFrame(rows)))
     a("")
     a("Two things to read from this. First, matching reliability on the training window does not match it out of sample: the regression candidates then held 80-86 % in 2018-26 and were "
-      "2-10 % wider, the bots 76-84 %. Second, the ex-post column says the regression candidates would need 2-5 % LESS width than the bots to reach exactly 80 % in 2018-26, "
+      "2-11 % wider, the bots 76-84 %. Second, the ex-post column says the regression candidates would need 2-5 % LESS width than the bots to reach exactly 80 % in 2018-26, "
       "but the same column 'prefers' the level with no volatility scaling at all (-3 to -8 %), which is the worst level on every honest measure. Average width at a given overall holding rate "
       "rewards being tight when volatility is high and failing there; it is not a measure of quality on its own. The proper score is, and it shows no confirmed gain.")
     a("")
@@ -1290,11 +1315,12 @@ def write_report(T: dict, V: dict) -> str:
     a(_md(pd.DataFrame(rows)))
     a("")
     x = RP[(RP.candidate == ch) & (RP.era == TEST_ERA)].set_index("h")
-    a("So across the other pairs the regression levels are a little better than the bots' in the proper score in both halves (about "
-      + " / ".join(f"{x.loc[h, 'pooled_rel_diff_pct']:+.1f} %" for h in HORIZONS)
-      + f" in 2018-26 at 5 / 21 / 63 sessions, with intervals " + " / ".join(f"[{x.loc[h, 'lo_pct']:+.1f} .. {x.loc[h, 'hi_pct']:+.1f}]" for h in HORIZONS)
-      + "). The gain is one to three percent of the score: real in the pooled data, too small to see on one pair in nine years, and it is NOT narrower levels: the widths are within a few "
-      "percent of the bots' in either direction. EUR/USD 2018-26 is the weakest of the seven cases, the opposite of the usual pattern in this project.")
+    a("So across the other pairs the regression levels score better than the bots' in both halves. For the chosen candidate in 2018-26: "
+      + " / ".join(f"{x.loc[h, 'pooled_rel_diff_pct']:+.1f} % [{x.loc[h, 'lo_pct']:+.1f} .. {x.loc[h, 'hi_pct']:+.1f}]" for h in HORIZONS)
+      + " at 5 / 21 / 63 sessions; for the versions fed with intraday ranges (C4, C5) the interval excludes zero at all three horizons. The gain is two to four percent of the score: visible in "
+      "the pooled data, too small to see on one pair in nine years, and it is NOT narrower levels (the widths are within a few percent of the bots' in either direction). This pooled test was "
+      "not declared and eleven candidates were looked at, so it is supporting evidence, not a pass. EUR/USD 2018-26 is the weakest of the seven cases, the opposite of the usual pattern in this project. "
+      f"The adaptive correction (C9), which the yearly rule switched on at times on AUD, GBP, CAD and JPY, made the pooled score worse: {pooled('aci_bots', SELECT_ERA)} in 2010-17.")
     a("")
 
     # ---- 6. controls
@@ -1344,10 +1370,13 @@ def write_report(T: dict, V: dict) -> str:
             rows.append(r)
     a(_md(pd.DataFrame(rows)))
     a("")
+    pos = AF[(AF.base == "bots") & (AF.gamma0 > 0) & AF.era.isin(["2010-17", TEST_ERA])].merge(
+        AF[(AF.base == "bots") & (AF.gamma0 == 0)][["h", "era", "avg_width_pct", "score_bp"]], on=["h", "era"], suffixes=("", "_0"))
+    wr, sr = 100 * (pos.avg_width_pct / pos.avg_width_pct_0 - 1), 100 * (pos.score_bp / pos.score_bp_0 - 1)
     a("The correction does what it promises for the average: both levels end within a point or two of 80 % and the worst year is less bad (21 sessions: 58 / 63 % to 70 / 70 % at the "
-      "largest step). But it buys that with width: 2 to 20 % wider levels and a proper score 2 to 23 % WORSE, at every step size, every horizon and both halves. A broken level says "
-      "little about whether the next one will break; widening after misses mostly widens after the move is over. On the other pairs the yearly rule sometimes switched it on and it cost "
-      "0.5-2 % of the score there (AUD, GBP, CAD, JPY). As a remedy for trending years it fails the honest test.")
+      f"largest step). But it buys that with width: levels {wr.min():+.0f} to {wr.max():+.0f} % wider and a proper score {sr.min():+.0f} to {sr.max():+.0f} % WORSE, at every step size, every horizon "
+      "and in both halves of the sample. A broken level says little about whether the next one will break; widening after misses mostly widens after the move is over. "
+      "As a remedy for trending years it fails the honest test.")
     a("")
 
     # ---- 8. count, 9. suspicious, 10. gain
@@ -1363,6 +1392,8 @@ def write_report(T: dict, V: dict) -> str:
     a("* **The pick is noisy.** Seven candidates were within one point of each other on 2010-17. The rule picked the plainest HAR (daily returns); on 2018-26 the Garman-Klass and "
       "event versions did better at 5 sessions. Re-picking by the 2018-26 score would be hindsight and I have not done it.")
     a("* **Clause (iii) of my bar is tight** (an exactly calibrated method passes 16-19 % of the time). It is reported as declared. It is not what decides the verdict: clauses (i) and (ii) fail on their own.")
+    a("* **The pooled six-pair test is post hoc.** It was added after the EUR/USD result and eleven candidates were looked at on the pairs. Its strength is consistency (every regression "
+      "candidate, every horizon, both halves, six of six pairs), not a p-value. The six pairs share the dollar and the same calendar years, so they are far from six independent confirmations.")
     a("* **Why the regression levels were over-wide in 2018-26.** Their constants and long-run anchor come from an expanding window that starts in 2004 and contains 2008-12; "
       "volatility since 2018 has been lower than that history, so shrinking towards the long-run level over-shoots (63 sessions: 84-85 % held). Two thirds of the bots forget after 5 or 10 "
       "years and do not have this problem. A rolling window is the obvious next variant; it is NOT tested here (it would be a thirteenth candidate chosen after seeing the result).")
@@ -1378,18 +1409,23 @@ def write_report(T: dict, V: dict) -> str:
     a("## 10. What a user gains")
     a("")
     cal = ST[(ST.state == "vol tercile") & (ST.era == "2010-26")].set_index(["candidate", "h", "class"])
-    a("**No method makes the levels narrower at the same 80 % reliability by a margin that survives the unseen years.** The best that can be said for 2018-26 is 'the same quality': "
-      f"the chosen levels were {100 * (sc(ch, 5, TEST_ERA, 'width_ratio') - 1):+.0f} / {100 * (sc(ch, 21, TEST_ERA, 'width_ratio') - 1):+.0f} / {100 * (sc(ch, 63, TEST_ERA, 'width_ratio') - 1):+.0f} % "
+    wq = {k: [100 * (cal.loc[(ch, h, k), 'avg_width_pct'] / cal.loc[('bots', h, k), 'avg_width_pct'] - 1) for h in HORIZONS] for k in ("low", "high")}
+    a("**No method makes the levels narrower at the same 80 % reliability by a margin that survives the unseen years.** On EUR/USD 2018-26 the chosen levels were "
+      f"{100 * (sc(ch, 5, TEST_ERA, 'width_ratio') - 1):+.0f} / {100 * (sc(ch, 21, TEST_ERA, 'width_ratio') - 1):+.0f} / {100 * (sc(ch, 63, TEST_ERA, 'width_ratio') - 1):+.0f} % "
       "wider at one week / one month / three months, held a few points more often than 80 %, and scored within one and a half percent of the bots' levels, not distinguishable from zero. "
-      "The bots' median level stays the product.")
+      "By the declared bar the bots' median level stays the product.")
     a("")
     a("What a user could gain, if the owner wants it, is EVENNESS rather than narrowness, and that part held in both halves of the sample and on all six other pairs: "
       f"in calm markets (lowest third of volatility, 2010-26) the bots' one-month levels held {100 * cal.loc[('bots', 21, 'low'), 'lower_held']:.0f} / {100 * cal.loc[('bots', 21, 'low'), 'upper_held']:.0f} % "
       f"and in volatile markets {100 * cal.loc[('bots', 21, 'high'), 'lower_held']:.0f} / {100 * cal.loc[('bots', 21, 'high'), 'upper_held']:.0f} %; the regression levels held "
       f"{100 * cal.loc[(ch, 21, 'low'), 'lower_held']:.0f} / {100 * cal.loc[(ch, 21, 'low'), 'upper_held']:.0f} % and {100 * cal.loc[(ch, 21, 'high'), 'lower_held']:.0f} / {100 * cal.loc[(ch, 21, 'high'), 'upper_held']:.0f} %. "
-      "They do it by being about 10-25 % wider when the market is quiet and a few percent narrower when it is volatile. Two honest caveats belong on the product's levels as they are: "
-      "(a) 'holds 8 times in 10' is an average; in a quiet market it is nearer 7.5 in 10 and in a volatile one 8.5 in 10; (b) one-week levels hold 3-7 points less often in a week with a Fed "
-      "or ECB decision, payrolls or CPI. A strongly trending year breaks every version (a three-month level held 33-49 % in the worst year), and widening after misses does not help.")
+      f"They do it by being {min(wq['low']):.0f}-{max(wq['low']):.0f} % wider when the market is quiet and {-max(wq['high']):.0f}-{-min(wq['high']):.0f} % narrower when it is volatile, "
+      "and on the six other pairs that re-allocation is worth two to four percent of the proper score (descriptive). If the owner wants that, the honest way in is a shadow run: publish "
+      f"`{ARM}.levels()` next to the bots' levels in the paper forward test and score both; the history has no unseen years left to confirm it on.")
+    a("")
+    a("Two caveats belong on the product's levels as they are: (a) 'holds 8 times in 10' is an average; in a quiet market it is nearer 7.5 in 10 and in a volatile one 8.5 in 10; "
+      "(b) one-week levels hold 2-8 points less often in a week with a Fed or ECB decision, payrolls or CPI. A strongly trending year breaks every version "
+      "(a three-month level held 33-49 % in the worst year), and widening after misses does not help.")
     a("")
     return "\n".join(L)
 
