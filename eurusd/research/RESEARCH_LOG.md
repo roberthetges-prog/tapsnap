@@ -258,6 +258,12 @@ volatility estimate, nothing more.
   estimates and calibration methods only; chosen on 2010-17, confirmed on 2018-26 and on six other pairs untouched.
 Status: RUNNING.
 
+## Round 12 (opened 2026-11-17; owner: 'can we expand the bots' experience')
+* DA `bots_experience`: the same 100 seeded bots on evidence that exists for every dollar pair and back to the 1980s,
+  trained (a) on EUR/USD 1999+ only, (b) plus the Deutsche Mark era, (c) plus six other dollar pairs, (d) both; all
+  scored on EUR/USD 2010-26. Adopted only if the vote is at least 2 points better at 21 and 63 sessions in 2018-26.
+Status: RUNNING.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a

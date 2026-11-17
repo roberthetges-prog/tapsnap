@@ -189,3 +189,12 @@ Round 10 showed the level odds are volatility arithmetic and replicate on every 
 be improved honestly is the volatility estimate behind the levels: narrower levels at the same reliability, and
 reliability that does not depend on the market's state. All Round 9 rules apply (primary test and bar in the module
 docstring before any outcome; counts, intervals, baselines; no commits; no live files).
+
+---
+# Round 12 addendum (2026-11-17): more experience for the bots (owner's request)
+
+The owner asked whether the bots' experience can be expanded. There are two honest ways to give a learner more
+experience: more YEARS (the Deutsche Mark era before 1999) and more MARKETS (the same bots learning from other dollar
+pairs as well). Arm DA `bots_experience` tests both against the same bots trained on EUR/USD 1999+ only, scored on
+EUR/USD in years none of them saw. All Round 9 rules apply (declaration in the module docstring before any outcome;
+counts, intervals, baselines; no commits; no live files, and `bots.py` is a live file).
