@@ -287,7 +287,7 @@ continue. About 650 trials in twelve rounds; no survivor since round 2, and that
 * EA `levels_confirm`: the two round-11 leads on the levels (evener width; event-week adjustment), frozen exactly as
   round 11 left them, on markets never scored in this project. Adopted into `bots.py` only if both the declared score
   and the evenness improve there.
-Status: RUNNING. No further round after this one.
+Status: RUNNING. (Owner, later the same evening: continue the research loop for now; heartbeat re-enabled.)
 
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
