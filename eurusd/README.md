@@ -62,7 +62,9 @@ that reads the last Fed decision, the market's reaction to it and what is priced
 a prior-follower and once by a ten-year empiricist. It prints direction and probability; the probability is how often
 such a majority was right in the walk-forward test. A clear majority was right 59 / 63 / 64 % (2010-26), the same as the
 three-signal rule; a bigger majority was not more reliable than a smaller one, and the Fed desk added nothing (on its own
-42-49 %). The committee describes and decides nothing. See `reports/committee.md`.
+42-49 %). Eight ways of weighting the analysts (track record, own conviction, per school, event weeks such as a Fed meeting,
+similar past patterns, learned weights, pattern replay) were tested against the equal vote; none beat it by the declared
+margin, so the equal vote stays (`reports/committee_weights.md`). The committee describes and decides nothing. See `reports/committee.md`.
 
 ## Operating it
 

@@ -461,7 +461,15 @@ def live(refresh: bool = True) -> dict:
             r = {e: q[q.era == e].iloc[0].to_dict() for e in q.era.unique()}
         voters_p = p[(p > 0.5 + EPS) | (p < 0.5 - EPS)]
         maj = voters_p[voters_p > 0.5] if t["side"] > 0 else 1 - voters_p[voters_p < 0.5]
-        out["horizons"][h] = {"up": int(t["up"]), "down": int(t["down"]), "no_view": int(t["no_view"]), "share": float(t["share"]) if t["share"] == t["share"] else None,
+        conv = (p - 0.5).where((p > 0.5 + EPS) | (p < 0.5 - EPS)).dropna()
+        cw = float(conv.sum() / conv.abs().sum()) if len(conv) and conv.abs().sum() > 0 else 0.0     # conviction-weighted net vote
+        cw_rec = {}
+        if (RES / "committee_weights.csv").exists():
+            wt = pd.read_csv(RES / "committee_weights.csv")
+            q2 = wt[(wt.scheme == "W2 conviction") & (wt.h == h) & (wt.era == "2010-26")]
+            cw_rec = q2.iloc[0].to_dict() if len(q2) else {}
+        out["horizons"][h] = {"conviction_weighted": {"net": cw, "share": (1 + abs(cw)) / 2, "side": float(np.sign(cw)),
+                                                      "call": bool(abs(cw) >= 0.30 and len(conv) >= QUORUM), "record": cw_rec},"up": int(t["up"]), "down": int(t["down"]), "no_view": int(t["no_view"]), "share": float(t["share"]) if t["share"] == t["share"] else None,
                               "side": float(t["side"]), "cls": t["cls"], "mean_p_up": float(t["mean_p"]),
                               "majority_avg_odds": float(maj.mean()) if len(maj) else None, "record": r, "analysts": rows}
     return out
@@ -500,6 +508,12 @@ def format_readout(o: dict, detail: bool = True) -> str:
             L.append(f"  The probability is how often such a majority was right out of sample in 2010-26 ({rec['n_indep']:.0f} independent calls, "
                      f"95 % range {100 * rec['lo']:.0f}-{100 * rec['hi']:.0f} %)"
                      + "".join(f"; {100 * r['record'][e]['acc']:.0f} % in {e}" for e in ("2016-26", "2023-26") if e in r["record"] and r["record"][e]["acc"] == r["record"][e]["acc"]))
+        w = r.get("conviction_weighted") or {}
+        if w and w.get("side"):
+            wr = w.get("record") or {}
+            L.append(f"  Weighted by each analyst's own conviction: {'UP' if w['side'] > 0 else 'DOWN'} with a {100 * w['share']:.0f} % weighted majority"
+                     + (f"; such calls were right {100 * wr['acc']:.0f} % in 2010-26 (not proven better than the plain vote)" if w.get("call") and wr.get("acc") == wr.get("acc") and wr else "")
+                     + ("" if w.get("call") else " (too thin for a call)"))
         if detail:
             df = pd.DataFrame(r["analysts"])
             by = df.groupby("school")["vote"].value_counts().unstack(fill_value=0).reindex(columns=["up", "down", "no view"], fill_value=0)

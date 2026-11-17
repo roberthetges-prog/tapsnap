@@ -155,6 +155,25 @@ what is priced and the next meeting date); it does not improve the probability. 
 'direction, probability', the probability being the pooled walk-forward hit rate of clear-or-strong majorities.
 Also added: `committee.refresh_fed_target()` (the mirror's Fed target series was two months stale; FRED answers directly).
 
+### Round 8, trials 3-10 (2026-11-17): weighting the analysts (owner's idea: weight each input by importance, e.g. the
+### Fed in a Fed-meeting week, and by whether a known pattern is repeating)
+Eight schemes against the equal vote, call rule and selection rule declared in `experiments/71_committee_weights.py`
+before running; pick on 2010-17, confirmation on 2018-26. Report `reports/committee_weights.md`.
+Accuracy at 1 / 2 months, 2010-26 (equal vote 59.0 / 63.1):
+* track record (mute analysts with a bad past) 58.8 / 58.8; track x conviction 59.6 / 58.7
+* own conviction (weight = distance of the analyst's probability from 50 %) 60.9 / 63.9
+* equal weight per school 59.2 / 59.6
+* event week (x3 for Fed desk, central banks and rates in a Fed or ECB week; x3 economy before payrolls / CPI) 59.0 / 61.7;
+  on Fed-week sessions alone 57.9 vs 58.0 for the equal vote: the Fed week does not make the Fed analysts more right
+* pattern (weight = who was right in the 250 most similar past vote patterns) 58.6 / 59.2
+* learned ridge weights 58.8 / 54.9; pattern replay (what followed the 250 most similar patterns) 61.5 / 51.6 on 2.9 and
+  2.2 calls a year (too few; 45.6 % at two months in 2010-17)
+Pick by the rule: own conviction (2010-17 score 65.2 vs 64.7). Confirmation 2018-26: +1.9 points at one month, +1.1 at two.
+Bar (+2 at both) missed, so THE EQUAL VOTE STAYS. Conviction weighting is the only scheme not worse in any cell and makes
+slightly more calls; it is shown as a second line in the read-out, labelled not proven better.
+Why nothing beats equal weights: with roughly 110 independent one-month outcomes since 2010, any weight estimated from
+the record is mostly noise (the classic forecast-combination result). Round 8 total: 10 trials, no new survivor.
+
 ## Product definition (owner, 2026-11-11)
 Directional POSITION trading: hold for weeks up to a month or more, a few decisions a month, each with a calibrated
 probability; act when P >= 60 % (target band 60-80 %). Not day trading. Backtesting on history is the research engine;
