@@ -297,7 +297,9 @@ USD/SEK, USD/NOK, EUR/AUD as declared reserve; gold dropped by the declared data
   event-week shortfall falls from 2.5 to 0.4 points. The 5-session gain, the evenness and the event repair are solid.
 * It did not pass on EUR/USD itself in round 11.
 Decision: K2 is printed with the vote as a second opinion for 5 and 21 sessions (the event calendar in the repo ends in
-December 2026, too short for 63); the bots' levels remain the product. First survivor since round 2, and it concerns
+December 2026, too short for 63); the bots' levels remain the product. OWNER'S DECISION 2026-11-18: make the switch
+anyway: K2's levels are the published ones at 5 and 21 sessions, the bots' levels are printed beside them and stay the
+published ones at 63 sessions until the event calendar is extended. First survivor since round 2, and it concerns
 levels, not direction.
 
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials

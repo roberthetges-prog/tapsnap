@@ -285,7 +285,15 @@ def live(refresh: bool = True) -> dict:
                               "lower_range": [float(np.nanquantile(LO.iloc[0], 0.1)), float(np.nanquantile(LO.iloc[0], 0.9))],
                               "upper_range": [float(np.nanquantile(HI.iloc[0], 0.1)), float(np.nanquantile(HI.iloc[0], 0.9))],
                               "event_adjusted": list(map(float, alt[h])) if h in alt else None,
+                              "bots_lower": float(np.nanmedian(LO.iloc[0])), "bots_upper": float(np.nanmedian(HI.iloc[0])),
                               "record": r, "level_record": lv, "bots": bots}
+    # owner's decision 2026-11-18: the event-adjusted levels are the published ones where they can be computed (5, 21 sessions)
+    for h, r in out["horizons"].items():
+        if r.get("event_adjusted"):
+            r["lower"], r["upper"] = r["event_adjusted"]
+            r["levels_from"] = "event-adjusted"
+        else:
+            r["levels_from"] = "bots"
     return out
 
 
@@ -293,6 +301,8 @@ def format_vote(o: dict, detail: bool = True) -> str:
     names = {5: "1 WEEK", 21: "1 MONTH", 63: "3 MONTHS"}
     L = [f"EUR/USD VOTE of {N_BOTS} bots | session close {o['asof'][:16]} UTC | price {o['price']:.4f}"]
     for h, r in o["horizons"].items():
+        if h == 63 and r.get("levels_from") == "bots":
+            pass
         side = "UP" if r["side"] > 0 else ("DOWN" if r["side"] < 0 else "TIED")
         L.append(f"\n{names[h]}: {r['up']} UP / {r['down']} DOWN  ->  {side}   |   lower level {r['lower']:.4f}   upper level {r['upper']:.4f}")
         rec = (r["record"] or {}).get("2010-26")
@@ -301,12 +311,12 @@ def format_vote(o: dict, detail: bool = True) -> str:
                      f"95 % range {100 * rec['lo']:.0f}-{100 * rec['hi']:.0f} %)"
                      + "".join(f"; {100 * r['record'][e]['acc']:.0f} % in {e}" for e in ("2016-26", "2023-26") if e in r["record"] and r["record"][e]["acc"] == r["record"][e]["acc"]))
         lv = (r["level_record"] or {}).get("2010-26")
-        if lv:
+        if r.get("levels_from") == "event-adjusted":
+            L.append(f"  Levels: event-adjusted method (on six other markets each level held 78-82 % of the time, evenly in calm and volatile markets and in event weeks; "
+                     f"not separately proven on EUR/USD). The bots' own levels: {r['bots_lower']:.4f} / {r['bots_upper']:.4f}")
+        elif lv:
             L.append(f"  Levels: the low stayed above the lower level {100 * lv['lower_held']:.0f} % of the time and the high below the upper level "
                      f"{100 * lv['upper_held']:.0f} % (2010-26); both held {100 * lv['both_held']:.0f} %")
-        if r.get("event_adjusted"):
-            L.append(f"  Event-adjusted levels (second opinion; held more evenly on six other markets, not yet proven on EUR/USD): "
-                     f"{r['event_adjusted'][0]:.4f} / {r['event_adjusted'][1]:.4f}")
         if detail:
             df = pd.DataFrame(r["bots"])
             by = df[df.vote != "none"].groupby("learner")["vote"].value_counts().unstack(fill_value=0).reindex(columns=["up", "down"], fill_value=0)
