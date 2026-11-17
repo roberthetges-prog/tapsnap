@@ -1,0 +1,97 @@
+trade_design declaration, written before any trade outcome was computed
+timestamp_utc 2026-11-17T17:49:49Z
+aae63a5a8fc5ecbab9503b23e468a8f7c9f9cf15e2f501b9f46cd536cc248c93  src/eurusd/arms/trade_design.py
+
+"""Arm AB ("trade_design"): entry / take-profit / stop / time-limit designs for agreement-rule calls, with a stated
+win probability, and how much of that win rate is edge rather than barrier geometry.
+
+EVERYTHING IN THIS DOCSTRING WAS WRITTEN ON 2026-11-17 BEFORE ANY TRADE OUTCOME WAS COMPUTED (a copy with a timestamp
+is in experiments/results/arms/logs/trade_design_declaration.txt). Only structural facts were looked at first: the
+session grid, how hourly bars map to sessions, the shape of the 2023 data hole, the yearly mean of ATR14.
+
+SIGNAL (not new, not tuned here)
+  The walk-forward three-signal agreement rule: sign(cot_z52) = sign(d_spread2y_20) = sign(house score), the house
+  score fitted for test year Y on rows whose outcome was known before Y-01-01 (`committee.build_frame`,
+  `committee._fold_columns`, exactly as `experiments/70_committee.py::agreement_side`). Calls exist from 2006.
+  Step 0 (reconciliation, before anything else): its plain-hold accuracy at 21 / 42 / 63 sessions, phase-averaged,
+  2010-26, recomputed with this module's own scoring, must equal the published 58.3 / 63.3 / 66.7 % to 0.1 point.
+
+TRADE MECHANICS (one set of conventions for every design)
+  * Entry: at the close of a session on which the rule calls a direction, at that session's close price
+    (feature-store NY-close session grid: sessions run 22:00 -> 22:00 UTC).
+  * One trade at a time. A trade ends ONLY by its take-profit, its stop or its time limit (a flip of the rule does not
+    close it). The next trade is opened at the first session close AT OR AFTER the previous exit on which the rule
+    calls (so a trade that ends on time may be renewed on the same close, and after an intraday barrier exit the
+    earliest new entry is that session's close). The sequence starts at the first call (2006). Trades per year reported.
+  * ATR: the feature store's `atr14_pips` = Wilder ATR(14) of the NY-close daily sessions, as known at the entry
+    close. This is the unit in which the project's path / level probabilities were calibrated (a level 2 ATR14 away
+    untouched in 10 sessions 69 %, ...). NOT the 13-week weekly ATR of `swing.py` (about 2.2 times larger).
+  * Barriers: take-profit = entry + side x tp x ATR, stop = entry - side x sl x ATR, fixed at entry.
+  * Path: the hourly bars (`load_ohlc("H1")`) from the entry close to the close of session entry + H. Touch is judged
+    on the bar series as given (HistData bid) for both sides; the whole spread is charged as the round-turn cost.
+    Stop fills at the stop, or at the bar's open when the bar opens beyond it (gap). Take-profit fills at its level
+    (no gap improvement). If one hourly bar touches both barriers, the 1-minute bars of that hour decide; if they
+    cannot (same minute, or no 1-minute data) the STOP is assumed first.
+  * Time limit: exit at the close of session entry + H. An entry needs a complete window (entry + H inside the data).
+  * Costs: 1.2 pips per round turn (headline), 0.6 as sensitivity, plus overnight carry exactly as `swing.simulate`:
+    for every night held, side x (EUR overnight rate - Fed target) x days / 360 on the previous close.
+  * WIN = net pips after costs and carry > 0. A take-profit exit is a win, a stop exit a loss, a time exit either.
+  * A trade belongs to the era of its ENTRY session (index year, as `70_committee.acc_row`).
+  * Data hole 2023-02-03 .. 2023-07-28 (about 7 of 24 hourly bars missing on most sessions): trades are simulated on
+    the bars that exist (a barrier jumped across missing hours is filled by the gap rule above); every trade alive in
+    the hole is flagged, results are also shown without those trades, and for the chosen design the flagged trades
+    are cross-checked against Yahoo daily highs / lows.
+
+THE 12 CANDIDATES (counted; barriers in ATR14 units; nothing else will be run as a candidate)
+   #  name             take-profit  stop  time limit   geometry (driftless first-touch odds, sl / (tp + sl))
+   1  tp1_sl2_h21          1.0      2.0      21         67 %
+   2  tp1.5_sl3_h21        1.5      3.0      21         67 %
+   3  tp1_sl3_h21          1.0      3.0      21         75 %
+   4  tp2_sl2_h21          2.0      2.0      21         50 %  symmetric (earlier work: tb21_2atr)
+   5  tp1.5_sl3_h42        1.5      3.0      42         67 %
+   6  tp2_sl3_h42          2.0      3.0      42         60 %
+   7  tp2_sl4_h42          2.0      4.0      42         67 %
+   8  tp3_sl3_h42          3.0      3.0      42         50 %  symmetric (earlier work: tb42_3atr)
+   9  tp3_sl4_h42          3.0      4.0      42         57 %
+  10  tp3_sl2_h42          3.0      2.0      42         40 %  inverse (target farther than the stop)
+  11  hold_h21             none     none     21         reference: plain time-exit hold
+  12  hold_h42             none     none     42         reference: plain time-exit hold
+
+REPORTED FOR EVERY DESIGN AND ERA (2010-26, 2016-26, 2023-26, and the split 2010-17 / 2018-26)
+  trades, trades per year, win rate with Wilson 95 % interval, average win and loss (net pips), net expectancy per
+  trade in pips, in ATR units and in units of the stop distance, its standard error, share of exits by take-profit /
+  stop / time, mean holding sessions, net pips per year.
+  RANDOM-ENTRY BASELINE (geometry alone): the same design, the same number of trades with the same spacing (the era's
+  real entry sessions moved by one random circular shift inside the era's eligible sessions) and an independent
+  random direction per trade; 1,000 draws, fixed seed. Baseline win rate / expectancy = mean over draws; also the
+  2.5-97.5 % range of the draws and the share of draws at or above the real number (one-sided p).
+  EDGE = win rate minus baseline win rate; expectancy minus baseline expectancy (which should be about minus costs).
+
+STATED PROBABILITY (walk-forward)
+  For a trade entered in year Y the probability that would have been STATED for its design is the win rate of that
+  design's own trades CLOSED before Y-01-01 (all walk-forward trades since 2006; no statement with fewer than 20
+  closed trades). Stated versus realised by era, for every design. Next to it the geometry-only statement (win rate
+  of the same design over ALL sessions and both directions whose windows closed before Y-01-01) and the Brier score
+  of each, so that "is a stated 70 % a realised 70 %" and "does the statement beat pure geometry" are both answered.
+
+SELECTION RULE (the only choice in this arm; made on 2010-2017 entries, 1.2 pips, carry included)
+  Among the ten barrier designs (1-10) with a win rate of at least 60 % on their 2010-2017 trades, the one with the
+  highest net expectancy per trade in pips on those trades. If none reaches 60 %, the design with the highest
+  2010-2017 win rate is carried forward and the arm is a FAIL at the selection stage.
+PASS BAR (primary test; chosen design on trades entered 2018-2026, which the choice never saw; 1.2 pips, carry)
+  (a) win rate >= 60 %;
+  (b) the Wilson 95 % lower bound of that win rate is above the design's random-entry baseline win rate in 2018-26;
+  (c) net expectancy per trade > 0;
+  (d) net expectancy per trade >= the plain hold's with the same time limit (2018-26) minus one standard error,
+      the standard error being that of the chosen design's own mean net pips per trade.
+  All four -> PASS, otherwise FAIL, said plainly.
+
+DESCRIPTIVE ONLY (labelled as such; none of it can change the choice or the verdict)
+  * stale placebo: the agreement signal of 63 sessions earlier through the chosen design (same sequencing);
+  * shuffled direction: the chosen design's real entry dates with random directions (expectancy about minus costs);
+  * phase-averaged version: every session with a call treated as an entry (no sequencing), against every session and
+    both directions; shows whether the sequenced record is a lucky phase;
+  * the bar's (d) with the standard error of the difference, per-year and per-session-held expectancy, 0.6 pips,
+    results without the trades alive in the 2023 data hole;
+  * spot check of ten trades of the chosen design against the raw hourly bars by an independent plain loop.
+"""

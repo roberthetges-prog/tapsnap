@@ -183,7 +183,23 @@ Round 9 addendum of `experiments/HOWTO_ARMS.md`:
   against a random-entry baseline that shows how much of the win rate is barrier geometry.
 * AC `leg_decomposition`: euro leg or dollar leg? The slow signals on EUR vs a basket and USD vs a basket; does hedging
   the unpredicted leg raise accuracy?
-Status: RUNNING (launched 2026-11-17).
+Status: AB finished; AA and AC running (launched 2026-11-17).
+
+**AB `trade_design` (12 candidates): FAILS the bar (reports/arm_trade_design.md).** Agreement-rule calls with take-profit /
+stop / time-limit barriers resolved on hourly bars, against the same barriers on random dates and directions.
+* The pick by the declared rule (take-profit 3 ATR, stop 4 ATR, 42 sessions) won 63.2 % on 76 unseen trades in 2018-26,
+  +50 pips a trade; random entry with the same barriers wins 54.2 %, inside the interval (51.9-73.1); the plain 42-session
+  hold earned +87 pips a trade. 0 of 10 barrier designs pass.
+* A 70-78 % win rate IS available and its stated probability holds (take-profit 1 ATR, stop 3 ATR, 21 sessions: stated
+  76.9 %, realised 77.4 % in 2018-26), but random entries win 71.8 % with the same barriers: about 5 points are edge, the
+  rest is geometry, and the average loss is 2.3 times the average win.
+* The rule's edge is +6 to +10 win-rate points over the random-entry baseline whatever the barriers (2010-26); +2.5 to +9
+  in 2018-26; -2 to +7 in 2023-26. Barriers move the baseline (40-72 %), not the edge.
+* No barrier design earns more pips a year than the plain hold (2018-26: holds +497 / +451, barrier designs +250 to +434).
+  A stop only caps the single worst trade (-1,227 pips on the 42-session hold).
+* A 63-session-stale signal through the chosen design still wins 61 % but earns +25 instead of +65 pips a trade.
+Decision: nothing changes in the product. A trade ticket may quote a win probability only together with its random-entry
+baseline (e.g. 'wins about 64 %; 54 of that is what these barriers give anyone; the call adds about 9 points').
 
 ## Product definition (owner, 2026-11-11)
 Directional POSITION trading: hold for weeks up to a month or more, a few decisions a month, each with a calibrated

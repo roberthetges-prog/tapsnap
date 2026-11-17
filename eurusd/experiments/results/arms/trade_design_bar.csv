@@ -1,0 +1,7 @@
+test,value,threshold,pass,verdict,chosen
+(a) win rate >= 60 %,63.2 % (76 trades),60 %,True,FAIL,tp3_sl4_h42
+(b) Wilson lower bound above the random-entry baseline,lower bound 51.9 %,baseline 54.2 %,False,FAIL,tp3_sl4_h42
+(c) net expectancy per trade > 0,+50.5 pips,0,True,FAIL,tp3_sl4_h42
+(d) expectancy >= plain hold's minus one standard error (own SE),+50.5 pips (SE 26.6),hold +86.7 - 26.6 = +60.1,False,FAIL,tp3_sl4_h42
+selection stage: some design reached 60 % in 2010-17,True,True,True,FAIL,tp3_sl4_h42
+descriptive: (d) with the SE of the difference,+50.5 pips,hold +86.7 - 50.2 = +36.5,True,FAIL,tp3_sl4_h42
