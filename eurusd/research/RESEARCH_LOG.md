@@ -120,6 +120,25 @@ What could still move the ceiling: time (the paper forward test, currently pause
 blocked (live options skew, OIS curves, CLS flow, real-time vintages), and the two forward-only leads (information
 shocks; skew-contradicted calls). More mining of the same public data would now mostly manufacture false positives.
 
+## Round 8 (2026-11-17): the committee of 100 analysts (owner's idea) - 1 trial
+Owner asked for 100 independent agents that each give a direction and a probability, with the vote as the recommendation.
+Built as 50 views of the evidence in 10 schools x 2 temperaments (prior-following on all history; prior-free on the last
+ten years), yearly walk-forward, design / majority classes / keep bar written into `src/eurusd/committee.py` before the
+first run. Test `experiments/70_committee.py`, report `reports/committee.md`.
+* A clear majority (>= 65 % of the analysts with a view, at least 20 voting) was right 59.6 % at one month, 63.8 % at two,
+  64.7 % at three (2010-26; 112 / 47 / 31 independent calls); 56 / 60 / 65 % since 2016; 46 / 44 / 43 % since 2023.
+* Same as the three-signal agreement rule on the same folds (58.3 / 63.3 / 66.7 %): gain +1.3 and +0.6 points 2010-26,
+  -1.7 and -2.1 since 2016. **Bar missed (FAIL)**: the committee is the agreement rule in another costume, because the
+  only analysts with a real record are the positioning and macro-score ones already in the rule.
+* The size of the majority does NOT sort the outcomes: 80 %+ majorities were right 57 % at one month, 65-80 % majorities
+  61 %. '85 of 100' is not more reliable than '70 of 100'; the analysts are correlated, so the share is not a probability.
+* A 63-session-stale vote still scores 57-59 %, a 126-session-stale one 51 %: it is a slow regime read.
+* Null machine (labels shifted by years): 43-58 %. The noise band is about +-8 points on these call counts.
+* Look-ahead control clean (0 of 48 columns differ on a truncated frame); future-label test in `experiments/test_committee.py`.
+Decision: kept as a READ-OUT only (`cli committee`, one line in the weekly outlook), labelled with the hit rate each
+majority class actually had; it decides nothing and the position call still follows the agreement rule.
+Also fixed: the live price splice fetched only 5 days, leaving holes after a pause longer than that; it now covers the gap.
+
 ## Product definition (owner, 2026-11-11)
 Directional POSITION trading: hold for weeks up to a month or more, a few decisions a month, each with a calibrated
 probability; act when P >= 60 % (target band 60-80 %). Not day trading. Backtesting on history is the research engine;

@@ -54,6 +54,14 @@ quarter** when positioning, the 2-year spread trend and the macro score agree (2
 **path and level events 69-87 %**, calibrated in every era; next-session range 75-78 %. Nothing else that is public and
 reachable adds to this: see `research/RESEARCH_LOG.md` and `reports/FINAL_REPORT.md` section 3d.
 
+## The committee of 100 analysts (round 8)
+
+`PYTHONPATH=src python -m eurusd.cli committee` (add `--all` for every vote) asks 100 analysts (50 kinds of evidence in
+10 schools, each read once by a prior-follower and once by a ten-year empiricist) whether EUR/USD will be higher or lower
+in 1, 2 and 3 months, and prints the count next to what such a majority was actually worth in the walk-forward test.
+A clear majority was right 60 / 64 / 65 % (2010-26), the same as the three-signal rule, and a bigger majority was not
+more reliable than a smaller one, so the committee describes and decides nothing. See `reports/committee.md`.
+
 ## Operating it
 
 `reports/GO_LIVE_RUNBOOK.md` is the operating plan: forward test first, small real money only if the forward
@@ -80,6 +88,7 @@ PYTHONPATH=src python -m eurusd.cli signals            # live entries with stop-
 PYTHONPATH=src python -m eurusd.cli signals --asof 2026-11-05T06:59 --account 10000 --risk 0.005
 PYTHONPATH=src python -m eurusd.cli update             # fetch the newest HistData month(s), rebuild bars
 PYTHONPATH=src python -m eurusd.cli backtest london_short H1 '{"entry_min":420,"exit_min":780,"stop_adr":1.0}' --period validate
+PYTHONPATH=src python -m eurusd.cli committee          # the 100-analyst vote with its historical hit rate
 python experiments/01_behaviour_stats.py              # behaviour statistics -> reports/behaviour_stats.md
 python experiments/02_grid_builtin.py                 # grid search of the built-in families
 ```

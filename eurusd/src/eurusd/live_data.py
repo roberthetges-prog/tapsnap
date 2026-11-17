@@ -52,7 +52,9 @@ def load_h1_live(refresh: bool = False) -> pd.DataFrame:
     h1["source"] = "histdata"
     if refresh:
         try:
-            fetch_recent_yahoo()
+            # cover the whole gap since the last HistData bar (a 5-day window left holes after a long pause)
+            gap = (pd.Timestamp.now(tz="UTC") - h1.index[-1]).days + 3
+            fetch_recent_yahoo(days=int(min(max(gap, 5), 700)))
         except Exception as e:
             print(f"warning: could not refresh recent bars ({e}); using stored data")
     if RECENT.exists():

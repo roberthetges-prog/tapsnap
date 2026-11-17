@@ -121,6 +121,22 @@ def cmd_scenarios(a):
             print(n)
 
 
+def cmd_committee(a):
+    from . import committee as CM
+    o = CM.live(refresh=not a.no_refresh)
+    if a.json:
+        print(json.dumps(o, indent=1, default=str))
+        return
+    print(CM.format_readout(o))
+    if a.all:
+        import pandas as pd
+        for h, r in o["horizons"].items():
+            d = pd.DataFrame(r["analysts"])
+            d["p_up"] = (100 * d["p_up"]).round(1)
+            print(f"\n--- all 100 analysts, {h} sessions ---")
+            print(d[["analyst", "school", "vote", "p_up", "what"]].to_string(index=False))
+
+
 def cmd_risk(a):
     eng, _ = _engine(a)
     txt = eng.report()
@@ -177,6 +193,8 @@ def main(argv=None):
     al = sub.add_parser("alerts"); al.add_argument("--no-refresh", action="store_true"); al.set_defaults(f=cmd_alerts)
     ww = sub.add_parser("weekly"); ww.add_argument("--no-refresh", action="store_true"); ww.set_defaults(f=cmd_weekly)
     sc = sub.add_parser("scenarios"); sc.add_argument("--review", action="store_true", help="apply the keep/dispose rule"); sc.set_defaults(f=cmd_scenarios)
+    cm = sub.add_parser("committee"); cm.add_argument("--no-refresh", action="store_true"); cm.add_argument("--json", action="store_true")
+    cm.add_argument("--all", action="store_true", help="list every analyst's vote"); cm.set_defaults(f=cmd_committee)
     r = sub.add_parser("risk"); r.add_argument("--asof"); r.add_argument("--no-refresh", action="store_true"); r.add_argument("--out"); r.set_defaults(f=cmd_risk)
     k = sub.add_parser("book"); k.add_argument("action", choices=["show", "add", "close", "equity"]); k.add_argument("--strategy"); k.add_argument("--side", choices=["long", "short"])
     k.add_argument("--entry", type=float); k.add_argument("--stop", type=float); k.add_argument("--lots", type=float); k.add_argument("--opened"); k.add_argument("--exit")
