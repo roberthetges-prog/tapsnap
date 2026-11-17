@@ -1,0 +1,218 @@
+pair,column,family,first,last,share_present_1987_98,share_present_1999_on
+eur,pos_z52,positioning,1987-02-17,2026-11-06,0.997,0.964
+eur,pos_z156,positioning,1989-02-14,2026-11-06,0.829,0.892
+eur,pos_d4,positioning,1986-03-14,2026-11-06,1.0,0.996
+eur,rd_lvl,short rates,1986-01-02,2026-11-06,1.0,1.0
+eur,rd_d3,short rates,1986-01-02,2026-11-06,1.0,1.0
+eur,rd_d6,short rates,1986-01-02,2026-11-06,1.0,1.0
+eur,mom21,own price,1986-01-02,2026-11-06,1.0,1.0
+eur,mom63,own price,1986-01-02,2026-11-06,1.0,1.0
+eur,mom126,own price,1986-01-02,2026-11-06,1.0,1.0
+eur,mom252,own price,1986-01-02,2026-11-06,1.0,1.0
+eur,ma_state,own price,1986-01-02,2026-11-06,1.0,1.0
+eur,brk126,own price,1986-01-02,2026-11-06,1.0,1.0
+eur,dist5y,own price,1986-01-02,2026-11-06,1.0,1.0
+eur,stretch20,own price,1986-01-02,2026-11-06,1.0,1.0
+eur,usdx21,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+eur,usdx63,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+eur,vix_lvl,global,1990-01-03,2026-11-06,0.755,1.0
+eur,vix_d5,global,1990-01-10,2026-11-06,0.753,1.0
+eur,eq_r21,global,1986-01-02,2026-11-06,1.0,1.0
+eur,eq_r63,global,1986-01-02,2026-11-06,1.0,1.0
+eur,oil_r21,global,1986-02-04,2026-11-06,1.0,0.999
+eur,oil_r63,global,1986-04-04,2026-11-06,1.0,0.999
+eur,gold_r3,global,1986-01-02,2026-11-06,1.0,1.0
+eur,us_curve,global,1986-01-02,2026-11-06,1.0,1.0
+eur,us2y_d20n,global,1986-01-02,2026-11-06,1.0,1.0
+eur,fed_latest,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+eur,fed_cycle,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+eur,fed_surprise,Fed meetings,1989-07-10,2026-11-06,0.796,0.999
+eur,fed_priced,Fed meetings,1986-01-02,2026-11-06,1.0,1.0
+eur,fed_fx,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+eur,seas_month,seasonality,1986-01-02,2026-11-06,1.0,1.0
+gbp,pos_z52,positioning,1987-02-17,2026-11-06,0.997,1.0
+gbp,pos_z156,positioning,1989-02-14,2026-11-06,0.829,1.0
+gbp,pos_d4,positioning,1986-03-14,2026-11-06,1.0,1.0
+gbp,rd_lvl,short rates,1986-01-02,2026-05-26,1.0,0.984
+gbp,rd_d3,short rates,1986-01-02,2026-05-26,1.0,0.984
+gbp,rd_d6,short rates,1986-01-02,2026-05-26,1.0,0.984
+gbp,mom21,own price,1986-01-02,2026-11-06,1.0,1.0
+gbp,mom63,own price,1986-01-02,2026-11-06,1.0,1.0
+gbp,mom126,own price,1986-01-02,2026-11-06,1.0,1.0
+gbp,mom252,own price,1986-01-02,2026-11-06,1.0,1.0
+gbp,ma_state,own price,1986-01-02,2026-11-06,1.0,1.0
+gbp,brk126,own price,1986-01-02,2026-11-06,1.0,1.0
+gbp,dist5y,own price,1986-01-02,2026-11-06,1.0,1.0
+gbp,stretch20,own price,1986-01-02,2026-11-06,1.0,1.0
+gbp,usdx21,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+gbp,usdx63,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+gbp,vix_lvl,global,1990-01-03,2026-11-06,0.755,1.0
+gbp,vix_d5,global,1990-01-10,2026-11-06,0.753,1.0
+gbp,eq_r21,global,1986-01-02,2026-11-06,1.0,1.0
+gbp,eq_r63,global,1986-01-02,2026-11-06,1.0,1.0
+gbp,oil_r21,global,1986-02-04,2026-11-06,1.0,0.999
+gbp,oil_r63,global,1986-04-04,2026-11-06,1.0,0.999
+gbp,gold_r3,global,1986-01-02,2026-11-06,1.0,1.0
+gbp,us_curve,global,1986-01-02,2026-11-06,1.0,1.0
+gbp,us2y_d20n,global,1986-01-02,2026-11-06,1.0,1.0
+gbp,fed_latest,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+gbp,fed_cycle,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+gbp,fed_surprise,Fed meetings,1989-07-10,2026-11-06,0.796,0.999
+gbp,fed_priced,Fed meetings,1986-01-02,2026-11-06,1.0,1.0
+gbp,fed_fx,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+gbp,seas_month,seasonality,1986-01-02,2026-11-06,1.0,1.0
+jpy,pos_z52,positioning,1987-02-17,2026-11-06,0.997,1.0
+jpy,pos_z156,positioning,1989-02-14,2026-11-06,0.829,1.0
+jpy,pos_d4,positioning,1986-03-14,2026-11-06,1.0,1.0
+jpy,rd_lvl,short rates,2002-05-16,2026-11-06,0.0,0.879
+jpy,rd_d3,short rates,2002-08-15,2026-11-06,0.0,0.87
+jpy,rd_d6,short rates,2002-11-15,2026-11-06,0.0,0.861
+jpy,mom21,own price,1986-01-02,2026-11-06,1.0,1.0
+jpy,mom63,own price,1986-01-02,2026-11-06,1.0,1.0
+jpy,mom126,own price,1986-01-02,2026-11-06,1.0,1.0
+jpy,mom252,own price,1986-01-02,2026-11-06,1.0,1.0
+jpy,ma_state,own price,1986-01-02,2026-11-06,1.0,1.0
+jpy,brk126,own price,1986-01-02,2026-11-06,1.0,1.0
+jpy,dist5y,own price,1986-01-02,2026-11-06,1.0,1.0
+jpy,stretch20,own price,1986-01-02,2026-11-06,1.0,1.0
+jpy,usdx21,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+jpy,usdx63,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+jpy,vix_lvl,global,1990-01-03,2026-11-06,0.755,1.0
+jpy,vix_d5,global,1990-01-10,2026-11-06,0.753,1.0
+jpy,eq_r21,global,1986-01-02,2026-11-06,1.0,1.0
+jpy,eq_r63,global,1986-01-02,2026-11-06,1.0,1.0
+jpy,oil_r21,global,1986-02-04,2026-11-06,1.0,0.999
+jpy,oil_r63,global,1986-04-04,2026-11-06,1.0,0.999
+jpy,gold_r3,global,1986-01-02,2026-11-06,1.0,1.0
+jpy,us_curve,global,1986-01-02,2026-11-06,1.0,1.0
+jpy,us2y_d20n,global,1986-01-02,2026-11-06,1.0,1.0
+jpy,fed_latest,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+jpy,fed_cycle,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+jpy,fed_surprise,Fed meetings,1989-07-10,2026-11-06,0.796,0.999
+jpy,fed_priced,Fed meetings,1986-01-02,2026-11-06,1.0,1.0
+jpy,fed_fx,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+jpy,seas_month,seasonality,1986-01-02,2026-11-06,1.0,1.0
+chf,pos_z52,positioning,1987-02-17,2026-11-06,0.997,1.0
+chf,pos_z156,positioning,1989-02-14,2026-11-06,0.829,1.0
+chf,pos_d4,positioning,1986-03-14,2026-11-06,1.0,1.0
+chf,rd_lvl,short rates,1999-08-16,2026-11-06,0.0,0.978
+chf,rd_d3,short rates,1999-11-15,2026-11-06,0.0,0.969
+chf,rd_d6,short rates,2000-02-15,2026-11-06,0.0,0.96
+chf,mom21,own price,1986-01-02,2026-11-06,1.0,1.0
+chf,mom63,own price,1986-01-02,2026-11-06,1.0,1.0
+chf,mom126,own price,1986-01-02,2026-11-06,1.0,1.0
+chf,mom252,own price,1986-01-02,2026-11-06,1.0,1.0
+chf,ma_state,own price,1986-01-02,2026-11-06,1.0,1.0
+chf,brk126,own price,1986-01-02,2026-11-06,1.0,1.0
+chf,dist5y,own price,1986-01-02,2026-11-06,1.0,1.0
+chf,stretch20,own price,1986-01-02,2026-11-06,1.0,1.0
+chf,usdx21,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+chf,usdx63,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+chf,vix_lvl,global,1990-01-03,2026-11-06,0.755,1.0
+chf,vix_d5,global,1990-01-10,2026-11-06,0.753,1.0
+chf,eq_r21,global,1986-01-02,2026-11-06,1.0,1.0
+chf,eq_r63,global,1986-01-02,2026-11-06,1.0,1.0
+chf,oil_r21,global,1986-02-04,2026-11-06,1.0,0.999
+chf,oil_r63,global,1986-04-04,2026-11-06,1.0,0.999
+chf,gold_r3,global,1986-01-02,2026-11-06,1.0,1.0
+chf,us_curve,global,1986-01-02,2026-11-06,1.0,1.0
+chf,us2y_d20n,global,1986-01-02,2026-11-06,1.0,1.0
+chf,fed_latest,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+chf,fed_cycle,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+chf,fed_surprise,Fed meetings,1989-07-10,2026-11-06,0.796,0.999
+chf,fed_priced,Fed meetings,1986-01-02,2026-11-06,1.0,1.0
+chf,fed_fx,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+chf,seas_month,seasonality,1986-01-02,2026-11-06,1.0,1.0
+cad,pos_z52,positioning,1987-02-17,2026-11-06,0.997,1.0
+cad,pos_z156,positioning,1989-02-14,2026-11-06,0.829,1.0
+cad,pos_d4,positioning,1986-03-14,2026-11-06,1.0,1.0
+cad,rd_lvl,short rates,1986-01-02,2026-11-06,1.0,1.0
+cad,rd_d3,short rates,1986-01-02,2026-11-06,1.0,1.0
+cad,rd_d6,short rates,1986-01-02,2026-11-06,1.0,1.0
+cad,mom21,own price,1986-01-02,2026-11-06,1.0,1.0
+cad,mom63,own price,1986-01-02,2026-11-06,1.0,1.0
+cad,mom126,own price,1986-01-02,2026-11-06,1.0,1.0
+cad,mom252,own price,1986-01-02,2026-11-06,1.0,1.0
+cad,ma_state,own price,1986-01-02,2026-11-06,1.0,1.0
+cad,brk126,own price,1986-01-02,2026-11-06,1.0,1.0
+cad,dist5y,own price,1986-01-02,2026-11-06,1.0,1.0
+cad,stretch20,own price,1986-01-02,2026-11-06,1.0,1.0
+cad,usdx21,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+cad,usdx63,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+cad,vix_lvl,global,1990-01-03,2026-11-06,0.755,1.0
+cad,vix_d5,global,1990-01-10,2026-11-06,0.753,1.0
+cad,eq_r21,global,1986-01-02,2026-11-06,1.0,1.0
+cad,eq_r63,global,1986-01-02,2026-11-06,1.0,1.0
+cad,oil_r21,global,1986-02-04,2026-11-06,1.0,0.999
+cad,oil_r63,global,1986-04-04,2026-11-06,1.0,0.999
+cad,gold_r3,global,1986-01-02,2026-11-06,1.0,1.0
+cad,us_curve,global,1986-01-02,2026-11-06,1.0,1.0
+cad,us2y_d20n,global,1986-01-02,2026-11-06,1.0,1.0
+cad,fed_latest,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+cad,fed_cycle,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+cad,fed_surprise,Fed meetings,1989-07-10,2026-11-06,0.796,0.999
+cad,fed_priced,Fed meetings,1986-01-02,2026-11-06,1.0,1.0
+cad,fed_fx,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+cad,seas_month,seasonality,1986-01-02,2026-11-06,1.0,1.0
+aud,pos_z52,positioning,1993-01-04,2026-11-06,0.503,0.997
+aud,pos_z156,positioning,1993-07-20,2026-11-06,0.458,0.997
+aud,pos_d4,positioning,1987-09-14,2026-11-06,0.705,0.994
+aud,rd_lvl,short rates,1986-01-02,2026-11-06,1.0,1.0
+aud,rd_d3,short rates,1986-01-02,2026-11-06,1.0,1.0
+aud,rd_d6,short rates,1986-01-02,2026-11-06,1.0,1.0
+aud,mom21,own price,1986-01-02,2026-11-06,1.0,1.0
+aud,mom63,own price,1986-01-02,2026-11-06,1.0,1.0
+aud,mom126,own price,1986-01-02,2026-11-06,1.0,1.0
+aud,mom252,own price,1986-01-02,2026-11-06,1.0,1.0
+aud,ma_state,own price,1986-01-02,2026-11-06,1.0,1.0
+aud,brk126,own price,1986-01-02,2026-11-06,1.0,1.0
+aud,dist5y,own price,1986-01-02,2026-11-06,1.0,1.0
+aud,stretch20,own price,1986-01-02,2026-11-06,1.0,1.0
+aud,usdx21,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+aud,usdx63,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+aud,vix_lvl,global,1990-01-03,2026-11-06,0.755,1.0
+aud,vix_d5,global,1990-01-10,2026-11-06,0.753,1.0
+aud,eq_r21,global,1986-01-02,2026-11-06,1.0,1.0
+aud,eq_r63,global,1986-01-02,2026-11-06,1.0,1.0
+aud,oil_r21,global,1986-02-04,2026-11-06,1.0,0.999
+aud,oil_r63,global,1986-04-04,2026-11-06,1.0,0.999
+aud,gold_r3,global,1986-01-02,2026-11-06,1.0,1.0
+aud,us_curve,global,1986-01-02,2026-11-06,1.0,1.0
+aud,us2y_d20n,global,1986-01-02,2026-11-06,1.0,1.0
+aud,fed_latest,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+aud,fed_cycle,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+aud,fed_surprise,Fed meetings,1989-07-10,2026-11-06,0.796,0.999
+aud,fed_priced,Fed meetings,1986-01-02,2026-11-06,1.0,1.0
+aud,fed_fx,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+aud,seas_month,seasonality,1986-01-02,2026-11-06,1.0,1.0
+nzd,pos_z52,positioning,2000-01-04,2026-11-06,0.0,0.757
+nzd,pos_z156,positioning,2006-10-03,2026-11-06,0.0,0.721
+nzd,pos_d4,positioning,1999-02-09,2026-11-06,0.0,0.817
+nzd,rd_lvl,short rates,1986-01-02,2026-11-06,1.0,1.0
+nzd,rd_d3,short rates,1986-01-02,2026-11-06,1.0,1.0
+nzd,rd_d6,short rates,1986-01-02,2026-11-06,1.0,1.0
+nzd,mom21,own price,1986-01-02,2026-11-06,1.0,1.0
+nzd,mom63,own price,1986-01-02,2026-11-06,1.0,1.0
+nzd,mom126,own price,1986-01-02,2026-11-06,1.0,1.0
+nzd,mom252,own price,1986-01-02,2026-11-06,1.0,1.0
+nzd,ma_state,own price,1986-01-02,2026-11-06,1.0,1.0
+nzd,brk126,own price,1986-01-02,2026-11-06,1.0,1.0
+nzd,dist5y,own price,1986-01-02,2026-11-06,1.0,1.0
+nzd,stretch20,own price,1986-01-02,2026-11-06,1.0,1.0
+nzd,usdx21,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+nzd,usdx63,dollar factor,1986-01-02,2026-11-06,1.0,1.0
+nzd,vix_lvl,global,1990-01-03,2026-11-06,0.755,1.0
+nzd,vix_d5,global,1990-01-10,2026-11-06,0.753,1.0
+nzd,eq_r21,global,1986-01-02,2026-11-06,1.0,1.0
+nzd,eq_r63,global,1986-01-02,2026-11-06,1.0,1.0
+nzd,oil_r21,global,1986-02-04,2026-11-06,1.0,0.999
+nzd,oil_r63,global,1986-04-04,2026-11-06,1.0,0.999
+nzd,gold_r3,global,1986-01-02,2026-11-06,1.0,1.0
+nzd,us_curve,global,1986-01-02,2026-11-06,1.0,1.0
+nzd,us2y_d20n,global,1986-01-02,2026-11-06,1.0,1.0
+nzd,fed_latest,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+nzd,fed_cycle,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+nzd,fed_surprise,Fed meetings,1989-07-10,2026-11-06,0.796,0.999
+nzd,fed_priced,Fed meetings,1986-01-02,2026-11-06,1.0,1.0
+nzd,fed_fx,Fed meetings,1989-07-10,2026-11-06,0.796,1.0
+nzd,seas_month,seasonality,1986-01-02,2026-11-06,1.0,1.0

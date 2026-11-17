@@ -1,0 +1,14 @@
+control,h,era,sessions,n_indep,acc,lo,hi,note
+"look-ahead column on every desk, training (a)",21,2010-26,4187,199.4,0.9988058275614998,0.9810610841168677,1.0,100 % of bot-years kept it; median bot 99.1 %
+"shuffled outcomes, seed 1, training (a)",21,2010-26,4127,196.5,0.47104434213714563,0.4035699316082222,0.5416605385732542,always-up on the same shuffled path 50.9 %; median bot 48.6 %
+"shuffled outcomes, seed 1, training (c)",21,2010-26,4121,196.2,0.45789856830866293,0.3908712872467186,0.5290653025323864,always-up on the same shuffled path 50.9 %; median bot 47.7 %
+"shuffled outcomes, seed 2, training (a)",21,2010-26,4124,196.4,0.466537342386033,0.4007798468147511,0.5391725955195776,always-up on the same shuffled path 47.4 %; median bot 48.6 %
+"shuffled outcomes, seed 3, training (a)",21,2010-26,4141,197.2,0.4890123158657329,0.4184231065840836,0.5566816525893147,always-up on the same shuffled path 50.6 %; median bot 50.5 %
+"truncation at 2018-12-31, training (a)",21,2018,249,,,,,max |difference in P(up)| 0.00e+00; votes that differ 0 of 24900; rows 249 vs 249
+"truncation at 2018-12-31, training (a)",63,2018,249,,,,,max |difference in P(up)| 0.00e+00; votes that differ 0 of 24900; rows 249 vs 249
+"truncation at 2018-12-31, training (b)",21,2018,249,,,,,max |difference in P(up)| 0.00e+00; votes that differ 0 of 24900; rows 249 vs 249
+"truncation at 2018-12-31, training (b)",63,2018,249,,,,,max |difference in P(up)| 0.00e+00; votes that differ 0 of 24900; rows 249 vs 249
+"truncation at 2018-12-31, training (c)",21,2018,249,,,,,max |difference in P(up)| 0.00e+00; votes that differ 0 of 24900; rows 249 vs 249
+"truncation at 2018-12-31, training (c)",63,2018,249,,,,,max |difference in P(up)| 0.00e+00; votes that differ 0 of 24900; rows 249 vs 249
+"truncation at 2018-12-31, training (d)",21,2018,249,,,,,max |difference in P(up)| 0.00e+00; votes that differ 0 of 24900; rows 249 vs 249
+"truncation at 2018-12-31, training (d)",63,2018,249,,,,,max |difference in P(up)| 0.00e+00; votes that differ 0 of 24900; rows 249 vs 249
