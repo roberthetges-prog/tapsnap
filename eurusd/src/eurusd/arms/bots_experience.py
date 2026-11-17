@@ -88,6 +88,17 @@ CONTROLS: shuffled outcomes (each pair's daily returns re-ordered by one common 
 evidence untouched; expect about 50 %); truncation (all inputs cut at 2018-12-31, the 2018 fold re-run, forecasts
 must be identical); look-ahead (the next 21 sessions' change added to every desk; the harness must find it).
 
+POST-HOC (written 2026-11-17 AFTER the declared run had been read; none of the three candidates met the bar, and
+nothing above was changed). Corrections of fact and two added checks, labelled post-hoc in the outputs:
+  * AUD's first public pos_z52 is 1993-01, not 1988 as written above: the archive holds only 3-22 AUD reports a year
+    before 1993, too few for a 364-day window of 20 reports. So AUD joins training (d) from 1993-01.
+  * 28 of the 100 bots have an all-history memory (the roster is inherited from `bots.SPECS`); 72 cannot see 1987-98.
+  * The declared shuffle (a permutation) scored 46-49 %, below 50: a permuted path keeps the true total change, so
+    what was learned on its past is slightly anti-informative about its rest. Added: outcomes rebuilt from daily
+    returns with random signs (one common sign per day for all pairs), 3 seeds, trainings (a) and (c).
+  * Added: share of UP votes and accuracy by vote direction under each training (does pooling just flip a bias?).
+Candidate count: 3 (b, c, d). No candidate was added, changed or re-run after the outcome.
+
 Run:  PYTHONPATH=src OMP_NUM_THREADS=1 python -m eurusd.arms.bots_experience
 """
 from __future__ import annotations
@@ -650,7 +661,8 @@ def run(save: bool = True, verbose: bool = True):
     PR.to_csv(RES / f"{ARM}_vs_product.csv", index=False)
     CT = controls(F, S, V)
     CT.to_csv(RES / f"{ARM}_controls.csv", index=False)
-    write_report(R, VER, ST, CO, OT, PR, CT, cov, S, rec, LEAK, same_mem, len(allhist))
+    PH = posthoc(F, S, V)
+    write_report(R, VER, ST, CO, OT, PR, CT, cov, S, rec, LEAK, same_mem, len(allhist), PH)
     if verbose:
         pd.set_option("display.width", 250); pd.set_option("display.max_rows", 500)
         print(VER.to_string(index=False))
@@ -726,7 +738,46 @@ def controls(F, S, V) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def write_report(R, VER, ST, CO, OT, PR, CT, cov, S, rec, LEAK, same_mem, n_all):
+def posthoc(F, S, V) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """POST-HOC descriptive checks (see the module docstring)."""
+    f1, f2 = RES / f"{ARM}_posthoc_signflip.csv", RES / f"{ARM}_posthoc_vote_direction.csv"
+    rows = []
+    for h in (21, 63):
+        sa = side_of(V[("a", h)]["eur"])
+        for tr in "abcd":
+            P = V[(tr, h)]["eur"]
+            y = F["eur"][f"y{h}"].reindex(P.index)
+            s = side_of(P)
+            H = hits(s, y)
+            m = H.notna() & (P.index.year >= 2010)
+            rows.append({"training": tr, "h": h, "up_share": float((s[m] > 0).mean()), "went_up": float((y[m] > 0).mean()), "acc_when_up": float(H[m & (s > 0)].mean()),
+                         "acc_when_down": float(H[m & (s < 0)].mean()), "same_side_as_a": float((s == sa.reindex(s.index))[m].mean())})
+    D = pd.DataFrame(rows)
+    D.to_csv(f2, index=False)
+    if f1.exists():
+        return pd.read_csv(f1), D
+    out = []
+    for seed in (1, 2, 3):
+        rng = np.random.default_rng(SEED + 100 + seed)
+        flip = rng.choice([-1.0, 1.0], len(F["eur"]) - 1)
+        G = {}
+        for c in PAIRS:
+            x = F[c].copy()
+            lc = pd.Series(np.r_[0.0, np.cumsum(np.diff(np.log(x["__close"].values)) * flip)], index=x.index)
+            x["ys21"] = np.sign(lc.shift(-21) - lc)
+            G[c] = x
+        for tr in ("a", "c"):
+            P, _, _ = walk(G, S[tr], 21, ycol="ys21", verbose=False)
+            ys = G["eur"]["ys21"].reindex(P["eur"].index)
+            H = hits(side_of(P["eur"]), ys)
+            out.append({"control": f"outcomes from sign-flipped daily returns, seed {seed}, training ({tr})", "h": 21, "era": "2010-26", **acc(H, 21, 2010, 2026),
+                        "note": f"always-up {100 * acc(hits(pd.Series(1.0, index=P['eur'].index), ys), 21, 2010, 2026)['acc']:.1f} %; median bot {100 * bot_stats(P['eur'], ys)['median']:.1f} %"})
+    O = pd.DataFrame(out)
+    O.to_csv(f1, index=False)
+    return O, D
+
+
+def write_report(R, VER, ST, CO, OT, PR, CT, cov, S, rec, LEAK, same_mem, n_all, PH):
     pc = lambda d, cols: d.assign(**{c: (100 * d[c]).round(1) for c in cols if c in d})  # noqa: E731
     names = {"a": "(a) EUR/USD 1999+", "b": "(b) + mark era 1987-98", "c": "(c) + six other pairs 1999+", "d": "(d) all pairs 1987+"}
     adopted = VER[VER.ADOPTED]
@@ -778,7 +829,17 @@ def write_report(R, VER, ST, CO, OT, PR, CT, cov, S, rec, LEAK, same_mem, n_all)
     L += [cv.reset_index().to_markdown(index=False), "",
           "Share of 1987-98 sessions on which the column is present:", "",
           cov.pivot(index="column", columns="pair", values="share_present_1987_98").reindex(POOL)[list(PAIRS)].reset_index().to_markdown(index=False), ""]
-    (ROOT / "reports" / f"arm_{ARM}.md").write_text("\n".join(L) + "\n")
+    Lp = ["## Post-hoc checks (added after the declared run was read; descriptive)", "",
+          "Outcomes rebuilt from daily returns with random signs (no structure left, no fixed total): what the harness scores on pure noise.", "",
+          pc(PH[0], ["acc", "lo", "hi"]).to_markdown(index=False), "",
+          "Vote direction on EUR/USD, 2010-26 (`up_share` = share of sessions the majority voted UP; `went_up` = share that rose):", "",
+          pc(PH[1], ["up_share", "went_up", "acc_when_up", "acc_when_down", "same_side_as_a"]).assign(training=PH[1].training.map(names)).to_markdown(index=False), ""]
+    text = "\n".join(L) + "\n"
+    head = (ROOT / "reports" / f"arm_{ARM}_notes.md")
+    notes = head.read_text() if head.exists() else ""
+    i = text.index("## The table")
+    j = text.index("## Training rows")
+    (ROOT / "reports" / f"arm_{ARM}.md").write_text(text[:i] + notes + text[i:j] + "\n".join(Lp) + "\n" + text[j:])
 
 
 if __name__ == "__main__":
