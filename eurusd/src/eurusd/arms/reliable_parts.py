@@ -1245,8 +1245,9 @@ def write_report(T: dict, V: dict, path: Path | None = None) -> str:
     a("The sign-flip surrogate keeps every session's range and all volatility clustering and removes any drift, trend or reversal across sessions. The realised odds sit inside its range for "
       "every pair and every level: the odds are what a driftless walk with the measured volatility gives. The formula works because the ATR is a fixed multiple of daily sigma: ATR14 / sigma of "
       "daily returns in 2010-26 is " + ", ".join(f"{NAMES[p]} {aos.loc[p, 'atr_over_sigma']:.2f}" for p in ORDER) + " (Brownian motion: 1.60; a 5-minute Gaussian walk: "
-      f"{mc.attrs.get('atr_over_sigma', float('nan')):.2f}). Fat tails lower the ratio (USD/CHF's 2015 de-peg, USD/JPY's intervention days), and they are also why the 3-ATR odds of USD/JPY are the "
-      "lowest of the seven. The full grid (k = 0.5 .. 4 ATR, h = 5, 10, 21) per pair, pooled and against both random walks is in `reliable_parts_calibration_notouch.csv`: pooled realised and "
+      f"{mc.attrs.get('atr_over_sigma', float('nan')):.2f}). Fat tails lower the ratio (USD/CHF's 2015 de-peg, USD/JPY's intervention days). USD/JPY's 3-ATR / 10-session odds are the lowest of the seven "
+      f"({odds('usdjpy', 10, 3.0, '2010-26'):.1f} %); its own surrogate gives {float(fl[(fl['pair'] == 'usdjpy') & (fl['era'] == '2010-26') & (fl['h'] == 10) & (fl['k'] == 3.0)]['surrogate_mean'].iloc[0]):.1f} %, "
+      "so that too is its volatility pattern, not direction. The full grid (k = 0.5 .. 4 ATR, h = 5, 10, 21) per pair, pooled and against both random walks is in `reliable_parts_calibration_notouch.csv`: pooled realised and "
       "analytic differ by at most " + f"{(pool[pool['pair'] == 'pooled_six']['no_touch'] - pool[pool['pair'] == 'pooled_six']['analytic_bm']).abs().max():.1f}" + " points over the 21 cells.\n")
 
     # ---------------------------------------------------------------- 4b
