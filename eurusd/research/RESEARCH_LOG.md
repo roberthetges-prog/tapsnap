@@ -183,7 +183,7 @@ Round 9 addendum of `experiments/HOWTO_ARMS.md`:
   against a random-entry baseline that shows how much of the win rate is barrier geometry.
 * AC `leg_decomposition`: euro leg or dollar leg? The slow signals on EUR vs a basket and USD vs a basket; does hedging
   the unpredicted leg raise accuracy?
-Status: AA and AB finished; AC running (launched 2026-11-17).
+Status: COMPLETE (2026-11-17). 24 candidates (AA 6, AB 12, AC 6), no survivor; one finding that lowers the planning figures.
 
 **AA `pre_euro` (6 candidates, 12 declared evaluations, 3 post-hoc checks): CLEAN FAIL (reports/arm_pre_euro.md).**
 The identical positioning rule on Deutsche Mark futures (CFTC history from 1986, never used before), scored on the
@@ -218,6 +218,24 @@ stop / time-limit barriers resolved on hourly bars, against the same barriers on
 * A 63-session-stale signal through the chosen design still wins 61 % but earns +25 instead of +65 pips a trade.
 Decision: nothing changes in the product. A trade ticket may quote a win probability only together with its random-entry
 baseline (e.g. 'wins about 64 %; 54 of that is what these barriers give anyone; the call adds about 9 points').
+
+**AC `leg_decomposition` (6 candidates): FAILS (reports/arm_leg_decomposition.md).** EUR/USD split into the euro against a
+basket (JPY, GBP, CHF, CAD, AUD) and the dollar against the same basket, on Fed H.10 fixings.
+* The agreement calls expressed on the euro leg are 5.5-8 points LESS accurate than on plain EUR/USD (21 sessions: 53.2 vs
+  59.2 % in 2010-26, interval -11.2 .. -1.0); Sharpe 0.22 / -0.20 after the six spreads of the hedge against 0.66 / 0.47.
+* Neither a euro nor a dollar signal: 2010-15 the euro leg earned two thirds of the P&L, 2016-26 the dollar leg nearly all
+  of it; positioning alone calls both legs about 55 %. The legs are almost uncorrelated, so the pair collects whichever is
+  working and a hedge removes edge with the noise. ECB weights, Fed weights and a seven-currency basket say the same.
+Decision: keep expressing calls on plain EUR/USD.
+
+## Round 10 (opened 2026-11-17): do the RELIABLE parts hold elsewhere?
+After round 9 the directional edge has no out-of-time support, while two things have been stable in every era on EUR/USD:
+the next-session range forecast (75-78 % above/below median; 80 % band) and the level / no-touch odds (2 ATR and 3 ATR
+away untouched within 10 sessions 69 % / 87 %; within 21 sessions 52 % / 71 %). Neither was ever tested off EUR/USD.
+* BA `reliable_parts`: the same range model and the same level odds, frozen, on six other dollar pairs (GBP, JPY, CHF,
+  CAD, AUD, NZD). If they hold, the stop / target / sizing layer of the product is structural; if not, it too is
+  EUR/USD-specific and must be labelled so.
+Status: RUNNING.
 
 ## Product definition (owner, 2026-11-11)
 Directional POSITION trading: hold for weeks up to a month or more, a few decisions a month, each with a calibrated

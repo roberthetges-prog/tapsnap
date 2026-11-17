@@ -15,12 +15,14 @@ Code `src/eurusd/arms/leg_decomposition.py` (`run()`; `PYTHONPATH=src OMP_NUM_TH
 |         42 | 2016-26 | (a) gain >= +3.0 and (c) stale copy loses half of it |           -5.5 |                                1.8 | FAIL (a), (c) not applicable: no gain |
 |         42 | 2023-26 | (b) not worse than plain EUR/USD                     |            5.5 |                               10.7 | pass                                  |
 
-**Plain-language answer: it is more a dollar signal than a euro signal, and since 2016 it has been almost only a dollar signal.**
+**Plain-language answer: it is not a euro signal, and not reliably a dollar signal either. It is a signal about the pair; the leg that delivered has changed: mostly the euro leg in 2010-15, almost only the dollar leg since 2016. Over 2010-26 as a whole slightly more of it came from the dollar side.**
 
-* On the dollar leg alone (dollar against the same basket, euro excluded) the calls are right 56.8 / 62.7 / 65.3 % at 21 / 42 / 63 sessions in 2010-26 and 59.9 / 64.8 / 65.8 % in 2016-26: about what they score on EUR/USD itself (59.2 / 62.9 / 66.2 and 58.3 / 61.3 / 66.1 %). On the euro leg alone they are right 53.2 / 57.4 / 61.2 % and 50.3 / 55.8 / 59.7 %, which a random entry with the same call pattern matches or beats in 31 / 15 / 12 % and 44 / 34 / 26 % of 1,000 draws (dollar leg: 4 / 2 / 0 % and 3 / 1 / 1 %; plain EUR/USD: 4 / 2 / 1 % and 7 / 6 / 4 %).
-* Exact split of the profit (EUR/USD = euro leg minus dollar leg, so the P&L of a call splits with no residual): of 403 bp a year gross on EUR/USD in 2010-26, 231 bp came from the dollar leg (t 2.2) and 172 bp from the euro leg (t 1.9). Since 2016: 233 of 253 bp (92 %) from the dollar leg, 20 bp (t 0.2) from the euro leg. Since 2023: 201 of 303 bp from the dollar leg.
-* By the attribution rule declared in advance the formal answer is **'cannot be attributed to one leg'**: accuracy on the dollar leg is higher than on the euro leg by 3.6, 9.6, 5.2 and 9.0 points in the four cells (3 were required), but the paired intervals in 2010-26 include zero (-13.2 .. +5.7 at 21 sessions, -16.3 .. +6.2 at 42); only 2016-26 at 21 sessions excludes it (-18.5 .. -0.7). So: both legs before 2016, the dollar leg since, and the data cannot prove the difference between the legs.
-* Consequence for the product: **keep trading the calls on plain EUR/USD.** The two legs are almost uncorrelated (correlation of their 21-session moves +0.05 in 2010-26) and EUR/USD is their difference, so the pair collects whatever the calls know about either leg. Hedging the dollar leg throws away the larger half of the edge; hedging the euro leg (trading a dollar basket instead) keeps the accuracy but does not raise it and costs five spreads.
+* Direction, 2010-26: on the dollar leg alone (dollar against the same basket, euro excluded) the calls are right 56.8 / 62.7 / 65.3 % at 21 / 42 / 63 sessions, about what they score on EUR/USD itself (59.2 / 62.9 / 66.2 %); on the euro leg alone 53.2 / 57.4 / 61.2 %. Since 2016: dollar leg 59.9 / 64.8 / 65.8 %, euro leg 50.3 / 55.8 / 59.7 % (EUR/USD 58.3 / 61.3 / 66.1 %). A random entry with the same call pattern matches or beats the euro-leg numbers in 31 / 15 / 12 % (2010-26) and 44 / 34 / 26 % (2016-26) of 1,000 draws; the dollar-leg numbers in 4 / 2 / 0 % and 3 / 1 / 1 %; plain EUR/USD in 4 / 2 / 1 % and 7 / 6 / 4 %.
+* But in 2010-15 (ADDED; the euro-crisis years) it was the other way round at one month: euro leg 58.2 / 60.1 / 63.5 %, dollar leg 51.5 / 59.2 / 64.4 %, EUR/USD 60.8 / 65.6 / 66.3 %.
+* Exact split of the profit (EUR/USD = euro leg minus dollar leg, so the P&L of a call splits with no residual), gross bp a year: 2010-26 403 on EUR/USD = 172 euro leg (t 1.9) + 231 dollar leg (t 2.2); 2010-15 678 = 450 euro leg (t 2.2) + 228 dollar leg (t 1.2); 2016-26 253 = 20 euro leg (t 0.2) + 233 dollar leg (t 1.9), i.e. 92 % from the dollar leg; 2023-26 303 = 102 + 201.
+* By the attribution rule declared in advance the formal answer is **'cannot be attributed to one leg'**: accuracy on the dollar leg is higher than on the euro leg by 3.6, 9.6, 5.2 and 9.0 points in the four declared cells (3 were required), but the paired intervals in 2010-26 include zero (-13.2 .. +5.7 at 21 sessions, -16.3 .. +6.2 at 42); only 2016-26 at 21 sessions excludes it (-18.5 .. -0.7). The data cannot prove a difference between the legs, and the sub-periods disagree about its sign.
+* The premise of the primary test (positioning in euro futures is a statement about the euro) is not supported: positioning alone calls the direction of both legs about equally often and earned most of its money on the dollar leg (section 3).
+* Consequence for the product: **keep trading the calls on plain EUR/USD.** The two legs are almost uncorrelated (correlation of their 21-session moves +0.05 in 2010-26) and EUR/USD is their difference, so the pair collects whatever the calls know about either leg, whichever leg it turns out to be. A hedge removes one leg's noise only by also removing that leg's share of the edge, and which leg carries the edge was not stable: hedging the dollar leg would have thrown away nine tenths of the profit since 2016; hedging the euro leg (trading a dollar basket instead) would have thrown away two thirds of it in 2010-15, and since 2016 it matches plain EUR/USD without beating it, for five spreads instead of one.
 
 ## Key table: the same agreement calls scored on three instruments
 
@@ -248,10 +250,10 @@ Call pattern: 2010-26: calls on 44 % of sessions, 45 % of them long, 340 separat
 | U        |  63 | 2023-26 |      14.9 |        3.7 |  59.5 | 35.7 | 80.2 |        50.7 |      39.9 |      62.9 |       0.09 |
 
 What the inputs say:
-* **Positioning** (the input the theory was about). Direction accuracy is the same on both legs at 21 sessions (54.8 % euro leg, 55.2 % dollar leg, 2010-26) and somewhat higher on the euro leg at 42 and 63 sessions (60.6 vs 56.4; 62.0 vs 57.5); no paired interval excludes zero. In money terms it is the other way round: 68 % of its 2010-26 P&L and 101 % of its 2016-26 P&L came from the dollar leg (gross Sharpe 0.71 on the dollar leg, -0.01 on the euro leg). 'Net speculative position in euro futures' is a position in the EUR/USD contract; it is at least as much a view on the dollar as on the euro. The premise of the primary test is not supported.
-* **House macro score**: dollar leg (54.8 / 60.1 / 60.5 % since 2016; random entry at least as good in 4 / 1 / 0 % of draws) rather than euro leg (49.3 / 51.0 / 55.4 %).
+* **Positioning** (the input the theory was about). Direction accuracy is the same on both legs at 21 sessions (54.8 % euro leg, 55.2 % dollar leg, 2010-26) and somewhat higher on the euro leg at 42 and 63 sessions (60.6 vs 56.4; 62.0 vs 57.5); no paired interval excludes zero. In money terms it is the other way round: 68 % of its 2010-26 P&L and 101 % of its 2016-26 P&L came from the dollar leg (above 100 means the euro leg lost a little; gross Sharpe 0.71 on the dollar leg, -0.01 on the euro leg). 'Net speculative position in euro futures' is a position in the EUR/USD contract; it is at least as much a view on the dollar as on the euro. (In 2010-15 alone the euro leg earned two thirds of positioning's P&L, section 6a.) The premise of the primary test is not supported.
+* **House macro score**: since 2016 the dollar leg (54.8 / 60.1 / 60.5 %; random entry at least as good in 4 / 1 / 0 % of draws) rather than the euro leg (49.3 / 51.0 / 55.4 %); in 2010-15 the reverse (section 6a).
 * **2-year spread trend**: about 50 % on everything on its own (known); the little there is sits on the dollar leg at 42-63 sessions (53.6 / 54.9 %).
-* **2023-26** runs the other way for positioning (euro leg 54-61 %, dollar leg 45-46 %) on 15-47 independent decisions with intervals 25 points wide: not evidence of anything.
+* **2023-26** runs the other way for positioning (euro leg 54-61 %, dollar leg 45-46 %) on 15-47 independent decisions with intervals 27-45 points wide: not evidence of anything.
 
 Euro leg minus dollar leg, per input (paired 95 % interval, same call days):
 
@@ -472,20 +474,65 @@ Because S = E - U bar by bar, the gross P&L of any call on EUR/USD is the P&L of
 
 | signal       | era     |   bp_per_year_eurusd |   bp_per_year_eur_leg |   bp_per_year_usd_leg |   share_from_usd_leg |   t_eurusd |   t_eur_leg |   t_usd_leg |   sharpe_gross_eur_leg |   sharpe_gross_usd_leg |
 |:-------------|:--------|---------------------:|----------------------:|----------------------:|---------------------:|-----------:|------------:|------------:|-----------------------:|-----------------------:|
+| agreement    | 2010-15 |                678   |                 449.6 |                 228.4 |                 0.34 |       2.49 |        2.21 |        1.19 |                   0.89 |                   0.48 |
 | agreement    | 2010-26 |                403.1 |                 171.8 |                 231.4 |                 0.57 |       3.08 |        1.86 |        2.24 |                   0.45 |                   0.54 |
 | agreement    | 2016-26 |                253.2 |                  20.3 |                 233   |                 0.92 |       1.84 |        0.22 |        1.92 |                   0.07 |                   0.58 |
 | agreement    | 2023-26 |                302.7 |                 102.1 |                 200.5 |                 0.66 |       1.43 |        0.89 |        1.03 |                   0.45 |                   0.52 |
+| positioning  | 2010-15 |                768.9 |                 521.1 |                 247.8 |                 0.32 |       1.94 |        1.86 |        0.89 |                   0.75 |                   0.36 |
 | positioning  | 2010-26 |                562.6 |                 180.5 |                 382.1 |                 0.68 |       2.85 |        1.37 |        2.42 |                   0.33 |                   0.58 |
 | positioning  | 2016-26 |                450.2 |                  -5.3 |                 455.4 |                 1.01 |       2.1  |       -0.04 |        2.39 |                  -0.01 |                   0.71 |
 | positioning  | 2023-26 |                238.2 |                  59.3 |                 178.9 |                 0.75 |       0.71 |        0.32 |        0.58 |                   0.16 |                   0.29 |
+| spread_trend | 2010-15 |                407.4 |                 222.6 |                 184.8 |                 0.45 |       1.03 |        0.8  |        0.66 |                   0.32 |                   0.27 |
 | spread_trend | 2010-26 |                267.8 |                  86.7 |                 181.1 |                 0.68 |       1.36 |        0.66 |        1.15 |                   0.16 |                   0.28 |
 | spread_trend | 2016-26 |                191.6 |                  12.6 |                 179.1 |                 0.93 |       0.89 |        0.09 |        0.94 |                   0.03 |                   0.28 |
 | spread_trend | 2023-26 |                456.9 |                 107.4 |                 349.5 |                 0.76 |       1.37 |        0.58 |        1.14 |                   0.29 |                   0.57 |
+| house_score  | 2010-15 |               1038.9 |                 650.1 |                 388.8 |                 0.37 |       2.62 |        2.33 |        1.4  |                   0.94 |                   0.56 |
 | house_score  | 2010-26 |                668.3 |                 290.6 |                 377.7 |                 0.57 |       3.39 |        2.21 |        2.39 |                   0.53 |                   0.57 |
 | house_score  | 2016-26 |                466.2 |                  94.5 |                 371.7 |                 0.8  |       2.17 |        0.7  |        1.95 |                   0.21 |                   0.58 |
 | house_score  | 2023-26 |                302.4 |                 142   |                 160.3 |                 0.53 |       0.9  |        0.77 |        0.52 |                   0.39 |                   0.26 |
 
-For every input and every era more than half of the money came from the dollar leg; over 2016-26 it is 80-100 %. No t-statistic on the euro leg reaches 1 in the 2016-26 or 2023-26 windows. (Direction accuracy and money can disagree: positioning calls the euro leg's direction as often as the dollar leg's, but the dollar leg moves further when it is right.)
+In the three declared eras more than half of the money came from the dollar leg for every input (80-100 % over 2016-26). In 2010-15 (ADDED rows) it was the euro leg that earned the larger part (55-68 %). No t-statistic on the euro leg reaches 1 in the 2016-26 or 2023-26 windows; none on the dollar leg reaches 1.5 in 2010-15. (Direction accuracy and money can disagree: positioning calls the euro leg's direction as often as the dollar leg's, but the dollar leg moves further when it is right.)
+
+So the split is not stable: the euro leg in 2010-15, the dollar leg in 2016-26. The same in direction accuracy, 2010-15 only (ADDED; 34 / 17 / 11 independent calls for the agreement rule, so the intervals are wide):
+
+| signal       | series   |   h |   n_indep |   acc |   lo |   hi |   base_mean |   p_random |
+|:-------------|:---------|----:|----------:|------:|-----:|-----:|------------:|-----------:|
+| agreement    | S        |  21 |      33.8 |  60.8 | 45   | 76.1 |        49.9 |       0.1  |
+| agreement    | E        |  21 |      33.8 |  58.2 | 42.2 | 73.6 |        49.6 |       0.1  |
+| agreement    | U        |  21 |      33.8 |  51.5 | 34.1 | 65.9 |        50.4 |       0.44 |
+| agreement    | S        |  42 |      16.9 |  65.6 | 41.3 | 82.7 |        49.8 |       0.06 |
+| agreement    | E        |  42 |      16.9 |  60.1 | 36   | 78.4 |        49.2 |       0.1  |
+| agreement    | U        |  42 |      16.9 |  59.2 | 36   | 78.4 |        50.6 |       0.16 |
+| agreement    | S        |  63 |      11.3 |  66.3 | 35.4 | 84.8 |        48.6 |       0.05 |
+| agreement    | E        |  63 |      11.3 |  63.5 | 35.4 | 84.8 |        48.8 |       0.02 |
+| agreement    | U        |  63 |      11.3 |  64.4 | 35.4 | 84.8 |        49.4 |       0.05 |
+| positioning  | S        |  21 |      74   |  63.3 | 52.1 | 73.6 |        49.6 |       0.04 |
+| positioning  | E        |  21 |      74.1 |  58   | 46.7 | 68.7 |        49.6 |       0.05 |
+| positioning  | U        |  21 |      74.1 |  52.8 | 41.5 | 63.7 |        50.1 |       0.31 |
+| positioning  | S        |  42 |      37   |  63.8 | 48.8 | 78.2 |        49.4 |       0.04 |
+| positioning  | E        |  42 |      37   |  61.8 | 46.1 | 75.9 |        49.3 |       0.04 |
+| positioning  | U        |  42 |      37   |  55.7 | 40.9 | 71.3 |        50   |       0.2  |
+| positioning  | S        |  63 |      24.7 |  62   | 40.7 | 76.6 |        48.9 |       0.1  |
+| positioning  | E        |  63 |      24.7 |  62.4 | 40.7 | 76.6 |        49.1 |       0.04 |
+| positioning  | U        |  63 |      24.7 |  55.1 | 37.1 | 73.3 |        49.3 |       0.23 |
+| spread_trend | S        |  21 |      74   |  47.3 | 36.3 | 58.5 |        50.8 |       0.83 |
+| spread_trend | E        |  21 |      74.1 |  49.7 | 38.9 | 61.1 |        50   |       0.54 |
+| spread_trend | U        |  21 |      74.1 |  47.9 | 36.3 | 58.5 |        50.6 |       0.78 |
+| spread_trend | S        |  42 |      37   |  49.3 | 33.4 | 64.1 |        50.7 |       0.7  |
+| spread_trend | E        |  42 |      37   |  45.4 | 31   | 61.6 |        50.1 |       0.92 |
+| spread_trend | U        |  42 |      37   |  53.9 | 38.4 | 69   |        51.1 |       0.21 |
+| spread_trend | S        |  63 |      24.7 |  51.9 | 33.5 | 70   |        50   |       0.3  |
+| spread_trend | E        |  63 |      24.7 |  49.2 | 30   | 66.5 |        49.8 |       0.56 |
+| spread_trend | U        |  63 |      24.7 |  57   | 37.1 | 73.3 |        50.5 |       0.04 |
+| house_score  | S        |  21 |      74   |  55.9 | 44.1 | 66.2 |        49.6 |       0.09 |
+| house_score  | E        |  21 |      74.1 |  56.7 | 45.4 | 67.4 |        49.7 |       0.01 |
+| house_score  | U        |  21 |      74.1 |  50.7 | 40.2 | 62.4 |        50   |       0.42 |
+| house_score  | S        |  42 |      37   |  60.7 | 43.5 | 73.7 |        49.5 |       0    |
+| house_score  | E        |  42 |      37   |  58.7 | 43.5 | 73.7 |        49.4 |       0.01 |
+| house_score  | U        |  42 |      37   |  52.4 | 35.9 | 66.6 |        49.9 |       0.3  |
+| house_score  | S        |  63 |      24.7 |  60.3 | 40.7 | 76.6 |        49.1 |       0.03 |
+| house_score  | E        |  63 |      24.7 |  60.4 | 40.7 | 76.6 |        49.4 |       0    |
+| house_score  | U        |  63 |      24.7 |  56.9 | 37.1 | 73.3 |        49.4 |       0.12 |
 
 ### 6b. Candidate 6, POST HOC: the calls on a broad dollar basket (dollar against EUR, JPY, GBP, CHF, CAD, AUD at 1/6 each)
 
@@ -552,7 +599,7 @@ Agreement calls scored on each pair. EURxxx: right when the euro rose against xx
 | USDCAD   |  42 | 2016-26 |      28   |  60.7 | 42.4 | 76.4 |        49.6 |       0.02 |
 | USDAUD   |  42 | 2016-26 |      28   |  62.5 | 42.4 | 76.4 |        49.9 |       0    |
 
-After a long-EUR/USD call the dollar tends to fall against sterling, the franc, the Canadian and the Australian dollar as well (55-63 % in these cells); the yen is the weak spot (49-57 %). The euro itself does best against the yen (54-59 %) and LOSES to the Australian dollar (43-45 %): a 'long EUR/USD' call is in practice a 'dollar down' call, and the euro is not the currency that gains most from it. Ten pairs, four cells each: single-pair differences are descriptive, none is a result.
+After a long-EUR/USD call the dollar tends to fall against sterling, the franc, the Canadian and the Australian dollar as well (55-63 % in these cells); the yen is the weak spot (49-57 %). The euro itself does best against the yen (54-59 %) and LOSES to the Australian dollar (43-45 %): over these windows a 'long EUR/USD' call behaved like a 'dollar down' call, and the euro was not the currency that gains most from it. Ten pairs, four cells each: single-pair differences are descriptive, none is a result.
 
 ## 7. Sanity checks
 
@@ -604,12 +651,12 @@ Entering at the same-day fixing (five hours before the call, formally a peek), a
 
 Accuracy 48-52 % on every series and the gain within +-2 points: the pipeline finds nothing when there is nothing.
 
-**Identity**: section 1 (exact). **Look-ahead**: the calls are the committee module's walk-forward calls (its truncation control: 0 of 48 columns differ); no parameter is fitted on the legs; the basket weights are fixed constants (the ECB weights are 2021 figures applied to the whole history, which is a mild anachronism in a robustness run, not a leak of prices).
+**Identity**: section 1 (exact). **Look-ahead**: the calls are the committee module's walk-forward calls (truncation control in `reports/committee.md`: 0 of 48 columns differ); no parameter is fitted on the legs; the basket weights are fixed constants (the ECB weights are 2021 figures applied to the whole history, which is a mild anachronism in a robustness run, not a leak of prices).
 
 ## 8. Candidates and counts
 
 * Candidates: **6**. Declared: (1) euro leg, equal weights [primary]; (2) dollar leg, equal weights [mirror]; (3) ECB weights; (4) Fed weights; (5) seven-currency basket. Added post hoc: (6) broad dollar. Each was scored at 21 / 42 / 63 sessions in three eras with the same tables; the Sharpe comparison and the incremental test are other yardsticks on candidates 1, 2 and 6, not new candidates.
-* Declared descriptive cells: 4 signals x 3 instruments x 9 (horizon, era) = 108 accuracies; 10 single pairs x 9 = 90. Checks: 4 timing variants, 5 shuffles.
+* Declared descriptive cells: 4 signals x 3 instruments x 9 (horizon, era) = 108 accuracies; 10 single pairs x 9 = 90. Added descriptive: the P&L split (4 signals x 4 eras) and the 2010-15 accuracies (36). Checks: 4 timing variants, 5 shuffles. With this many descriptive cells, isolated p-values near 0.05 in the tables mean nothing.
 
 ## 9. Suspicious, and caveats
 
@@ -620,11 +667,11 @@ Accuracy 48-52 % on every series and the gain within +-2 points: the pipeline fi
 * **Spot only.** No carry in any expression, as everywhere in the project. A long-euro-against-basket position earns or pays a different carry from long EUR/USD (the basket holds two low-yield and three higher-yield currencies); with the gross edge on the euro leg at 20 bp a year since 2016 this cannot change the verdict.
 * **Small samples.** 2023-26 has 19 / 9 / 6 independent calls at 21 / 42 / 63 sessions; the Wilson intervals are 40-60 points wide.
 * **H.10 is one noon snapshot** of buying rates rounded to four decimals (about 1 bp); irrelevant against 21-session moves of 150-230 bp.
-* The attribution rule was declared in advance and returns 'cannot be attributed'; the stronger statement in the verdict ('more dollar than euro, almost only dollar since 2016') rests on the exact P&L split, which was added after the first run and is descriptive.
+* The attribution rule was declared in advance and returns 'cannot be attributed'; the statement in the verdict ('euro leg in 2010-15, dollar leg since 2016') rests on the exact P&L split and the 2010-15 rows, both added after the first run and descriptive. Two sub-periods that disagree are exactly what noise around 'both legs, equally' would also produce.
 
 ## 10. Files
 
 * `src/eurusd/arms/leg_decomposition.py` - declaration in the docstring, `run()` entry point, `write_report()`.
-* `experiments/results/arms/leg_decomposition_*.csv`: `reconcile`, `accuracy`, `primary`, `verdict_rows`, `mirror`, `e_vs_u`, `e_vs_u_inputs`, `alt_baskets`, `broad_dollar`, `sharpe`, `sharpe_diff`, `cost_table`, `incremental`, `pnl_corr`, `attribution`, `call_mix`, `pairs`, `timing`, `shuffled`, `leg_stats`, `check_h10_vs_store`, `check_h10_vs_ecb`.
+* `experiments/results/arms/leg_decomposition_*.csv`: `reconcile`, `accuracy`, `primary`, `verdict_rows`, `mirror`, `e_vs_u`, `e_vs_u_inputs`, `alt_baskets`, `broad_dollar`, `sharpe`, `sharpe_diff`, `cost_table`, `incremental`, `pnl_corr`, `attribution`, `accuracy_2010_15`, `call_mix`, `pairs`, `timing`, `shuffled`, `leg_stats`, `check_h10_vs_store`, `check_h10_vs_ecb`.
 * `experiments/results/arms/leg_decomposition_positions.parquet` (primary expression, 2010+: `pos`, `fwd_bp`, `net_bp`, booked one session later so that it lines up with the close-to-close arms) and `leg_decomposition_calls.parquet` (the walk-forward calls and the three input signs).
 * New data: `data/processed/cross/leg_ecb_ref_rates.parquet` (ECB reference rates, USD JPY GBP CHF CAD AUD SEK NOK per EUR, 1999-01-04 .. 2026-11-17, no lag needed: used only at fixings after the call) and `data/processed/cross/leg_ecb_trade_weights.csv` (ECB narrow-group trade weights, 2021).

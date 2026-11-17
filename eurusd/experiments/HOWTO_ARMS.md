@@ -170,3 +170,12 @@ Round 9 rules on top of the earlier ones:
 * Do not commit. Do not touch `state/`, `config/`, the live modules (`exposure.py`, `scenarios.py`, `brief.py`,
   `risk.py`, `committee.py`, `live_data.py`, `refresh.py`, `cli.py`) or other arms' files. CFTC history files need a
   browser User-Agent on GET (`curl -A "Mozilla/5.0"`); FRED needs `curl --http1.1` with NO browser user-agent.
+
+---
+# Round 10 addendum (2026-11-17): replicate what is reliable
+
+Round 9 result: the positioning rule fails on the Deutsche Mark 1987-98 (48 %), take-profit / stop designs add nothing but
+geometry, and hedging a leg makes the calls worse. The directional edge has no out-of-time support. Round 10 turns to the
+parts of the product that HAVE been stable in every era on EUR/USD and asks whether they hold on other pairs with nothing
+re-tuned. All Round 9 rules apply (primary test and bar in the module docstring before any outcome; counts, intervals,
+baselines; no commits; no live files).

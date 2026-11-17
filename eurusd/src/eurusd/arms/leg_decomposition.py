@@ -89,7 +89,9 @@ ADDED AFTER THE FIRST RUN (2026-11-17; nothing above was altered, the declared r
     euro (EUR, JPY, GBP, CHF, CAD, AUD at 1/6 each), suggested by the per-pair table. Same gain table and bar as the
     primary; it was chosen after seeing results, so a good number here would be a lead, not a finding.
   * Descriptive, exact: the gross P&L of the calls on EUR/USD split into its EUR-leg and USD-leg parts (S = E - U
-    holds bar by bar, so the split is an identity, not an estimate); the long / short mix of the calls.
+    holds bar by bar, so the split is an identity, not an estimate); the long / short mix of the calls; and the
+    accuracy and P&L split for 2010-15 alone (the complement of the declared 2016-26 era), because the split
+    between the legs turned out to differ between the two halves.
   * Fix in the incremental test only: a fixing-based stream is booked one session later so that it lines up with
     the close-to-close streams of the other arms (see `incremental`). Accuracy tables were not affected.
   Total candidates run: 6 (5 declared + 1 post hoc; cap 12).
@@ -857,11 +859,11 @@ def write_report(K: dict, path: Path | None = None) -> None:
           f"In money terms it is the other way round: {100 * _g(pa, 'share_from_usd_leg', signal='positioning', era='2010-26'):.0f} % of its 2010-26 P&L and "
           f"{100 * _g(pa, 'share_from_usd_leg', signal='positioning', era='2016-26'):.0f} % of its 2016-26 P&L came from the dollar leg (above 100 means the euro leg lost a little; gross Sharpe {_g(pa, 'sharpe_gross_usd_leg', signal='positioning', era='2016-26'):.2f} "
           f"on the dollar leg, {_g(pa, 'sharpe_gross_eur_leg', signal='positioning', era='2016-26'):.2f} on the euro leg). 'Net speculative position in euro futures' is a position in the EUR/USD contract; "
-          "it is at least as much a view on the dollar as on the euro. The premise of the primary test is not supported.",
-          f"* **House macro score**: dollar leg ({acc3('house_score', 'U', '2016-26')} % since 2016; random entry at least as good in {pr3('house_score', 'U', '2016-26')} % of draws) rather than euro leg ({acc3('house_score', 'E', '2016-26')} %).",
+          "it is at least as much a view on the dollar as on the euro. (In 2010-15 alone the euro leg earned two thirds of positioning's P&L, section 6a.) The premise of the primary test is not supported.",
+          f"* **House macro score**: since 2016 the dollar leg ({acc3('house_score', 'U', '2016-26')} %; random entry at least as good in {pr3('house_score', 'U', '2016-26')} % of draws) rather than the euro leg ({acc3('house_score', 'E', '2016-26')} %); in 2010-15 the reverse (section 6a).",
           f"* **2-year spread trend**: about 50 % on everything on its own (known); the little there is sits on the dollar leg at 42-63 sessions "
           f"({p(A, 'acc', signal='spread_trend', series='U', h=42, era='2010-26'):.1f} / {p(A, 'acc', signal='spread_trend', series='U', h=63, era='2010-26'):.1f} %).",
-          "* **2023-26** runs the other way for positioning (euro leg 54-61 %, dollar leg 45-46 %) on 15-47 independent decisions with intervals 25 points wide: not evidence of anything.", "",
+          "* **2023-26** runs the other way for positioning (euro leg 54-61 %, dollar leg 45-46 %) on 15-47 independent decisions with intervals 27-45 points wide: not evidence of anything.", "",
           "Euro leg minus dollar leg, per input (paired 95 % interval, same call days):", "",
           _md(K["e_vs_u_inputs"].rename(columns={"acc_ref": "acc_U", "acc_leg": "acc_E", "gain": "E_minus_U", "gain_lo": "lo", "gain_hi": "hi"})[["signal", "h", "era", "n_indep", "acc_E", "acc_U", "E_minus_U", "lo", "hi"]]
               .pipe(lambda d: d[d.era != "2023-26"]), pct=("acc_E", "acc_U", "E_minus_U", "lo", "hi")), ""]
@@ -927,9 +929,10 @@ def write_report(K: dict, path: Path | None = None) -> None:
           "(`identity_err_bp` = 0). bp a year, gross, all sessions:", "",
           _md(AT[["signal", "era", "bp_per_year_eurusd", "bp_per_year_eur_leg", "bp_per_year_usd_leg", "share_from_usd_leg", "t_eurusd", "t_eur_leg", "t_usd_leg", "sharpe_gross_eur_leg", "sharpe_gross_usd_leg"]],
               dec1=("bp_per_year_eurusd", "bp_per_year_eur_leg", "bp_per_year_usd_leg"), dec2=("share_from_usd_leg", "t_eurusd", "t_eur_leg", "t_usd_leg", "sharpe_gross_eur_leg", "sharpe_gross_usd_leg")), "",
-          "For every input and every era more than half of the money came from the dollar leg; over 2016-26 it is 80-100 %. No t-statistic on the euro leg reaches 1 in the 2016-26 or 2023-26 windows. "
+          "In the three declared eras more than half of the money came from the dollar leg for every input (80-100 % over 2016-26). In 2010-15 (ADDED rows) it was the euro leg that earned the larger "
+          "part (55-68 %). No t-statistic on the euro leg reaches 1 in the 2016-26 or 2023-26 windows; none on the dollar leg reaches 1.5 in 2010-15. "
           "(Direction accuracy and money can disagree: positioning calls the euro leg's direction as often as the dollar leg's, but the dollar leg moves further when it is right.)", "",
-          "The split is not stable. In 2010-15 the euro leg earned more than the dollar leg for the agreement rule and the house score; in 2016-26 the dollar leg earned nearly everything. "
+          "So the split is not stable: the euro leg in 2010-15, the dollar leg in 2016-26. "
           "The same in direction accuracy, 2010-15 only (ADDED; 34 / 17 / 11 independent calls for the agreement rule, so the intervals are wide):", "",
           _md(K["accuracy_2010_15"][["signal", "series", "h", "n_indep", "acc", "lo", "hi", "base_mean", "p_random"]], pct=PCT, dec2=("p_random",)), "",
           "### 6b. Candidate 6, POST HOC: the calls on a broad dollar basket (dollar against EUR, JPY, GBP, CHF, CAD, AUD at 1/6 each)", "",
@@ -942,7 +945,7 @@ def write_report(K: dict, path: Path | None = None) -> None:
           "Agreement calls scored on each pair. EURxxx: right when the euro rose against xxx after a long call; USDxxx: right when the dollar FELL against xxx after a long call.", "",
           _md(K["pairs"][K["pairs"].era != "2023-26"][["series", "h", "era", "n_indep", "acc", "lo", "hi", "base_mean", "p_random"]].pipe(lambda d: d[d.h.isin([21, 42])]), pct=PCT, dec2=("p_random",)), "",
           "After a long-EUR/USD call the dollar tends to fall against sterling, the franc, the Canadian and the Australian dollar as well (55-63 % in these cells); the yen is the weak spot (49-57 %). "
-          "The euro itself does best against the yen (54-59 %) and LOSES to the Australian dollar (43-45 %): a 'long EUR/USD' call is in practice a 'dollar down' call, and the euro is not the "
+          "The euro itself does best against the yen (54-59 %) and LOSES to the Australian dollar (43-45 %): over these windows a 'long EUR/USD' call behaved like a 'dollar down' call, and the euro was not the "
           "currency that gains most from it. Ten pairs, four cells each: single-pair differences are descriptive, none is a result.", ""]
 
     # ---- sanity
@@ -955,13 +958,14 @@ def write_report(K: dict, path: Path | None = None) -> None:
           "**Shuffled labels** (one joint permutation of all outcomes and of the returns the house score is fitted on, five seeds, 2010-26):", "",
           _md(K["shuffled"], pct=PCT), "",
           "Accuracy 48-52 % on every series and the gain within +-2 points: the pipeline finds nothing when there is nothing.", "",
-          "**Identity**: section 1 (exact). **Look-ahead**: the calls are the committee module's walk-forward calls (its truncation control: 0 of 48 columns differ); no parameter is fitted on the legs; "
+          "**Identity**: section 1 (exact). **Look-ahead**: the calls are the committee module's walk-forward calls (truncation control in `reports/committee.md`: 0 of 48 columns differ); no parameter is fitted on the legs; "
           "the basket weights are fixed constants (the ECB weights are 2021 figures applied to the whole history, which is a mild anachronism in a robustness run, not a leak of prices).", "",
           "## 8. Candidates and counts", "",
           f"* Candidates: **{K['n_candidates']}**. Declared: (1) euro leg, equal weights [primary]; (2) dollar leg, equal weights [mirror]; (3) ECB weights; (4) Fed weights; (5) seven-currency basket. "
           "Added post hoc: (6) broad dollar. Each was scored at 21 / 42 / 63 sessions in three eras with the same tables; the Sharpe comparison and the incremental test are other yardsticks on "
           "candidates 1, 2 and 6, not new candidates.",
-          "* Declared descriptive cells: 4 signals x 3 instruments x 9 (horizon, era) = 108 accuracies; 10 single pairs x 9 = 90. Checks: 4 timing variants, 5 shuffles.", "",
+          "* Declared descriptive cells: 4 signals x 3 instruments x 9 (horizon, era) = 108 accuracies; 10 single pairs x 9 = 90. Added descriptive: "
+          "the P&L split (4 signals x 4 eras) and the 2010-15 accuracies (36). Checks: 4 timing variants, 5 shuffles. With this many descriptive cells, isolated p-values near 0.05 in the tables mean nothing.", "",
           "## 9. Suspicious, and caveats", "",
           f"* **Entry-time noise in 2023-26.** The same calls on plain EUR/USD have a net Sharpe of {sh('plain EUR/USD (H.10)', '2023-26'):.2f} when entered at the next noon fixing and "
           f"{sh('plain EUR/USD (store closes)', '2023-26'):.2f} on the feature-store closes 19 hours earlier (2010-26: {sh('plain EUR/USD (H.10)', '2010-26'):.2f} vs {sh('plain EUR/USD (store closes)', '2010-26'):.2f}; "
@@ -978,12 +982,12 @@ def write_report(K: dict, path: Path | None = None) -> None:
           "low-yield and three higher-yield currencies); with the gross edge on the euro leg at 20 bp a year since 2016 this cannot change the verdict.",
           "* **Small samples.** 2023-26 has 19 / 9 / 6 independent calls at 21 / 42 / 63 sessions; the Wilson intervals are 40-60 points wide.",
           "* **H.10 is one noon snapshot** of buying rates rounded to four decimals (about 1 bp); irrelevant against 21-session moves of 150-230 bp.",
-          "* The attribution rule was declared in advance and returns 'cannot be attributed'; the stronger statement in the verdict ('more dollar than euro, almost only dollar since 2016') rests on "
-          "the exact P&L split, which was added after the first run and is descriptive.", "",
+          "* The attribution rule was declared in advance and returns 'cannot be attributed'; the statement in the verdict ('euro leg in 2010-15, dollar leg since 2016') rests on "
+          "the exact P&L split and the 2010-15 rows, both added after the first run and descriptive. Two sub-periods that disagree are exactly what noise around 'both legs, equally' would also produce.", "",
           "## 10. Files", "",
           "* `src/eurusd/arms/leg_decomposition.py` - declaration in the docstring, `run()` entry point, `write_report()`.",
           "* `experiments/results/arms/leg_decomposition_*.csv`: `reconcile`, `accuracy`, `primary`, `verdict_rows`, `mirror`, `e_vs_u`, `e_vs_u_inputs`, `alt_baskets`, `broad_dollar`, `sharpe`, `sharpe_diff`, "
-          "`cost_table`, `incremental`, `pnl_corr`, `attribution`, `call_mix`, `pairs`, `timing`, `shuffled`, `leg_stats`, `check_h10_vs_store`, `check_h10_vs_ecb`.",
+          "`cost_table`, `incremental`, `pnl_corr`, `attribution`, `accuracy_2010_15`, `call_mix`, `pairs`, `timing`, `shuffled`, `leg_stats`, `check_h10_vs_store`, `check_h10_vs_ecb`.",
           "* `experiments/results/arms/leg_decomposition_positions.parquet` (primary expression, 2010+: `pos`, `fwd_bp`, `net_bp`, booked one session later so that it lines up with the "
           "close-to-close arms) and `leg_decomposition_calls.parquet` (the walk-forward calls and the three input signs).",
           "* New data: `data/processed/cross/leg_ecb_ref_rates.parquet` (ECB reference rates, USD JPY GBP CHF CAD AUD SEK NOK per EUR, 1999-01-04 .. 2026-11-17, no lag needed: used only at fixings "
