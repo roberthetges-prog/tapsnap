@@ -271,7 +271,17 @@ Decision: the bots' median level stays. The two caveats are printed with the vot
 * DA `bots_experience`: the same 100 seeded bots on evidence that exists for every dollar pair and back to the 1980s,
   trained (a) on EUR/USD 1999+ only, (b) plus the Deutsche Mark era, (c) plus six other dollar pairs, (d) both; all
   scored on EUR/USD 2010-26. Adopted only if the vote is at least 2 points better at 21 and 63 sessions in 2018-26.
-Status: RUNNING.
+Status: COMPLETE (2026-11-17). 3 candidates. **NOT ADOPTED (reports/arm_bots_experience.md).**
+* More years (mark era 1987-98): +0.1 / +0.2 points at 21 / 63 sessions in 2018-26 (intervals include zero). 72 of the 100
+  bots have a 5- or 10-year memory and are unchanged by construction; the 28 all-history bots are slightly worse.
+* More markets (six other dollar pairs pooled): -8.3 / -9.2 points (45.0 / 46.5 % on 2010-26 against 52.9 / 53.9 %). The
+  bots drop positioning (26 % -> 5 % of kept columns) for global columns shared by all pairs (18 % -> 37 %), become more
+  alike (correlation of being right 0.22 -> 0.28) and the pooled vote scores 48-52 % on every other pair.
+* The generic evidence set alone costs nothing (52.9 / 53.9 % against the product's 52.0 / 53.2 %). Noise floor about 4 points.
+Decision: `bots.py` unchanged.
+
+RESEARCH LOOP STOPPED by the owner on 2026-11-17 (weekly usage). Heartbeat disabled; the paper forward test and alerts
+continue. About 650 trials in twelve rounds; no survivor since round 2, and that one has no out-of-time support.
 
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
