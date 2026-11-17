@@ -149,3 +149,24 @@ Because these sources are new, also report for each signal: its correlation with
 (cot_z52, d_spread2y_20, house score) and with EUR/USD's own trailing 1- and 3-month return (a signal that merely
 restates the recent price move is not new information: show accuracy after regressing that out, as arm K's control did).
 FRED: use `curl --http1.1` with NO browser user-agent.
+
+---
+# Round 9 addendum (2026-11-17): out-of-time evidence and product form, not more mining
+
+Read the Round 3-7 addenda first; all apply. `research/RESEARCH_LOG.md` lists ~570 trials and its verdict: more signal
+mining on the same public data now mostly manufactures false positives. So round 9 does not look for new predictors of
+2010-2026. Each arm asks a question whose answer is useful whichever way it comes out:
+* AA `pre_euro`: does the surviving rule work on a period nobody has looked at (Deutsche Mark, 1986-1998)?
+* AB `trade_design`: what entry / take-profit / stop / time-limit design gives the agreement-rule calls a stated win
+  probability that holds out of sample, and how much of that win rate is edge rather than barrier geometry?
+* AC `leg_decomposition`: do the slow signals predict the euro leg or the dollar leg, and does hedging the other leg help?
+Round 9 rules on top of the earlier ones:
+* The primary test of each arm is written into the arm's module docstring BEFORE any outcome is computed, with its pass
+  bar. At most 12 candidates per arm, counted. Everything else is labelled descriptive.
+* Every accuracy or win rate is reported with the number of INDEPENDENT decisions, a Wilson interval and decisions per
+  year, for each era, and next to a matched baseline (random entry dates with the same count and spacing, 1,000 draws).
+* Reconcile first: reproduce the agreement rule's published numbers with `eurusd.arms.selective` / `eurusd.committee`
+  helpers (58.3 / 63.3 / 66.7 % at 21 / 42 / 63 sessions, phase-averaged, 2010-26) before building on it.
+* Do not commit. Do not touch `state/`, `config/`, the live modules (`exposure.py`, `scenarios.py`, `brief.py`,
+  `risk.py`, `committee.py`, `live_data.py`, `refresh.py`, `cli.py`) or other arms' files. CFTC history files need a
+  browser User-Agent on GET (`curl -A "Mozilla/5.0"`); FRED needs `curl --http1.1` with NO browser user-agent.

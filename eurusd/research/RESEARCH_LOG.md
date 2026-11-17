@@ -174,6 +174,17 @@ slightly more calls; it is shown as a second line in the read-out, labelled not 
 Why nothing beats equal weights: with roughly 110 independent one-month outcomes since 2010, any weight estimated from
 the record is mostly noise (the classic forecast-combination result). Round 8 total: 10 trials, no new survivor.
 
+## Round 9 (opened 2026-11-17; owner switched the research loop back on)
+No new predictors of 2010-2026 (see the verdict above). Three arms whose answer is useful either way, protocol in the
+Round 9 addendum of `experiments/HOWTO_ARMS.md`:
+* AA `pre_euro`: the positioning rule and the agreement rule on the Deutsche Mark, 1986-1998 (CFTC history before 1999,
+  never used here). Out-of-time replication: it either supports the planning Sharpe or lowers it.
+* AB `trade_design`: take-profit / stop / time-limit designs for agreement-rule calls with a stated win probability,
+  against a random-entry baseline that shows how much of the win rate is barrier geometry.
+* AC `leg_decomposition`: euro leg or dollar leg? The slow signals on EUR vs a basket and USD vs a basket; does hedging
+  the unpredicted leg raise accuracy?
+Status: RUNNING (launched 2026-11-17).
+
 ## Product definition (owner, 2026-11-11)
 Directional POSITION trading: hold for weeks up to a month or more, a few decisions a month, each with a calibrated
 probability; act when P >= 60 % (target band 60-80 %). Not day trading. Backtesting on history is the research engine;
