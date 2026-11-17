@@ -235,7 +235,22 @@ away untouched within 10 sessions 69 % / 87 %; within 21 sessions 52 % / 71 %). 
 * BA `reliable_parts`: the same range model and the same level odds, frozen, on six other dollar pairs (GBP, JPY, CHF,
   CAD, AUD, NZD). If they hold, the stop / target / sizing layer of the product is structural; if not, it too is
   EUR/USD-specific and must be labelled so.
-Status: RUNNING.
+Status: COMPLETE (2026-11-17). 11 candidates.
+**BA `reliable_parts`: both declared bars missed, for different reasons (reports/arm_reliable_parts.md).**
+* LEVEL ODDS replicate almost exactly: on GBP, JPY, AUD, CHF, CAD, NZD a level 2 ATR / 3 ATR away is untouched within
+  10 sessions 68.3-68.9 % / 84.8-87.6 % and within 21 sessions 50.9-52.2 % / 69.5-71.5 % (EUR/USD 69 / 87 / 52 / 71);
+  24 of 24 cells within 2.2 points. The stability clause failed in 3 of 24 cells, but a stationary driftless surrogate
+  fails it as often, so that clause carried no information (reported as declared, not redrawn).
+* They are ARITHMETIC, not prediction: the driftless-Brownian formula 2*Phi(k*1.596/sqrt(h)) - 1 gives 68.7 / 87.0 /
+  51.4 / 70.4 with no data. The only empirical content is that ATR14 measures the next 10-21 sessions' volatility.
+* RANGE FORECAST: the model form transfers (edge over 'same as yesterday' +4.4 to +7.9 points on every pair, 80 % band
+  covers 77-82 % everywhere, frozen EUR coefficients within a point of each pair's own fit) but the headline '75-78 %'
+  is EUR/USD-specific: 66-74 % elsewhere (1 of 6 pairs within 4 points), 'volatile-day' call 84-93 % elsewhere. Reason
+  (post hoc): EUR/USD's volatility wandered further from its year-ago median, which makes the class easier. Against a
+  stronger baseline (21-session mean range above the median) the regression adds only 1-2 points, on EUR/USD too.
+Decision: quote level odds as the arithmetic of a driftless market at today's volatility (valid on any liquid dollar
+pair), never as an edge; label the 75-78 % and 93 % range figures as EUR/USD-only. What the product can rely on is the
+volatility estimate, nothing more.
 
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
