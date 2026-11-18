@@ -262,8 +262,14 @@ def live(refresh: bool = True) -> dict:
     try:      # round 13: event-adjusted, more even levels (confirmed on six other markets, thin margin): shown beside the bots' levels
         from eurusd.arms import sharper_levels as SL
         Xs = SL.build(D, load_h1_live(refresh=False))
-        for h in (5, 21):      # the event calendar in the repo ends in December 2026: not enough for a 63-session window
-            alt[h] = SL.levels(Xs, h, name="har_rv_ev")
+        ev = SL.event_times()
+        cal_end = min(pd.Timestamp(int(v.max()), unit="ns", tz="UTC") for k, v in ev.items() if k in ("ecb", "nfp", "cpi"))
+        for h in (5, 21, 63):
+            # the method counts the scheduled events inside the window: usable only while the calendars cover it
+            if X["__ct"].iloc[-1] + pd.offsets.BDay(h) <= cal_end:
+                alt[h] = SL.levels(Xs, h, name="har_rv_ev")
+            else:
+                notes = notes + [f"event-adjusted levels for {h} sessions unavailable: the event calendars end {cal_end.date()}; the bots' levels are published instead"]
     except Exception as e:
         notes = notes + [f"event-adjusted levels unavailable: {type(e).__name__}"]
     for h in HORIZONS:

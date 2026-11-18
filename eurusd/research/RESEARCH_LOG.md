@@ -308,6 +308,13 @@ Stretching both of the bots' median levels by one walk-forward factor (about 1.3
 gives a band that contained the whole period's price action 80.0 / 81.1 / 79.5 % of the time in 2010-26, 80-82 % in
 2016-26 and 81-82 % in 2023-26 (target 80, bar +-4). Printed with the vote as the 'wide band'.
 
+## Heartbeat 2026-11-18 12:06: no arm running; no new round opened this cycle
+The published levels (K2) count scheduled ECB and US releases inside the window, and the repo's calendars end in
+December 2026; the official 2027 calendars are on www.ecb.europa.eu and www.bls.gov, which the network policy blocks
+(a request to add the hosts was put to the owner at 06:06 and not answered). Fix made: the vote now falls back to the
+bots' levels for any horizon whose window runs past the calendars, and says so. Once the 2027 calendars are in
+`data/macro/ecb_decisions.csv` and `us_bls_releases.csv`, all three horizons use K2 automatically.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
