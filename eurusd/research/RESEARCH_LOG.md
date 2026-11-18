@@ -302,6 +302,12 @@ anyway: K2's levels are the published ones at 5 and 21 sessions, the bots' level
 published ones at 63 sessions until the event calendar is extended. First survivor since round 2, and it concerns
 levels, not direction.
 
+## Round 14 (2026-11-18): the wide band - 1 trial, PASSES
+`experiments/73_joint_band.py` (declared in its docstring). The two levels each hold ~80 % but both together ~60 %.
+Stretching both of the bots' median levels by one walk-forward factor (about 1.33 / 1.37 / 1.34 at 5 / 21 / 63 sessions)
+gives a band that contained the whole period's price action 80.0 / 81.1 / 79.5 % of the time in 2010-26, 80-82 % in
+2016-26 and 81-82 % in 2023-26 (target 80, bar +-4). Printed with the vote as the 'wide band'.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a

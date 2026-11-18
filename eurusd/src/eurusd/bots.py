@@ -287,6 +287,16 @@ def live(refresh: bool = True) -> dict:
                               "event_adjusted": list(map(float, alt[h])) if h in alt else None,
                               "bots_lower": float(np.nanmedian(LO.iloc[0])), "bots_upper": float(np.nanmedian(HI.iloc[0])),
                               "record": r, "level_record": lv, "bots": bots}
+    # round 14: the wide band, both sides holding together 8 times in 10 (bots' levels stretched by a tested factor)
+    try:
+        jb = pd.read_csv(RES / "bots_joint_band.csv")
+        for h, r in out["horizons"].items():
+            k = float(jb[(jb.h == h) & (jb.era == "live")]["avg_factor"].iloc[0])
+            p0 = out["price"]
+            r["band"] = [p0 * (r["bots_lower"] / p0) ** k, p0 * (r["bots_upper"] / p0) ** k]
+            r["band_held"] = float(jb[(jb.h == h) & (jb.era == "2010-26")]["both_held"].iloc[0])
+    except Exception:
+        pass
     # owner's decision 2026-11-18: the event-adjusted levels are the published ones where they can be computed (5, 21 sessions)
     for h, r in out["horizons"].items():
         if r.get("event_adjusted"):
@@ -317,6 +327,8 @@ def format_vote(o: dict, detail: bool = True) -> str:
         elif lv:
             L.append(f"  Levels: the low stayed above the lower level {100 * lv['lower_held']:.0f} % of the time and the high below the upper level "
                      f"{100 * lv['upper_held']:.0f} % (2010-26); both held {100 * lv['both_held']:.0f} %")
+        if r.get("band"):
+            L.append(f"  Wide band: {r['band'][0]:.4f} to {r['band'][1]:.4f} (the whole period's price action stayed inside such a band {100 * r['band_held']:.0f} % of the time, 2010-26)")
         if detail:
             df = pd.DataFrame(r["bots"])
             by = df[df.vote != "none"].groupby("learner")["vote"].value_counts().unstack(fill_value=0).reindex(columns=["up", "down"], fill_value=0)
