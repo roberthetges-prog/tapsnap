@@ -269,9 +269,9 @@ def live(refresh: bool = True) -> dict:
             if X["__ct"].iloc[-1] + pd.offsets.BDay(h) <= cal_end:
                 alt[h] = SL.levels(Xs, h, name="har_rv_ev")
             else:
-                notes = notes + [f"event-adjusted levels for {h} sessions unavailable: the event calendars end {cal_end.date()}; the bots' levels are published instead"]
+                out["refresh"].append(f"event-adjusted levels for {h} sessions unavailable: the event calendars end {cal_end.date()}; the bots' levels are published instead")
     except Exception as e:
-        notes = notes + [f"event-adjusted levels unavailable: {type(e).__name__}"]
+        out["refresh"].append(f"event-adjusted levels unavailable: {type(e).__name__}")
     for h in HORIZONS:
         P, LO, HI, kept = run_fold(X, h, now, last)
         t = count(P).iloc[0]
