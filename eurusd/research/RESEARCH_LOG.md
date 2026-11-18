@@ -315,6 +315,14 @@ December 2026; the official 2027 calendars are on www.ecb.europa.eu and www.bls.
 bots' levels for any horizon whose window runs past the calendars, and says so. Once the 2027 calendars are in
 `data/macro/ecb_decisions.csv` and `us_bls_releases.csv`, all three horizons use K2 automatically.
 
+## Round 15 (2026-11-18 18:06 heartbeat): an even wide band - 1 trial, misses the bar by 0.1 point
+`experiments/74_even_band.py` (declared in its docstring). The round-14 band holds 80 % overall but 77 % in calm markets
+and 84-92 % in volatile ones (spread 7 points at 5 and 21 sessions, 17 at 63), and 77-80 % in event weeks vs 82-84 %
+otherwise. Candidate: the stretch factor chosen per volatility tercile (same walk-forward rule). Result 2010-26 /
+2018-26: spread falls to 1.5 / 1.8 points (5 sessions), 3.4 / 2.5 (21), 7.3 / 3.3 (63); every tercile cell at 5 and 21
+sessions is 80.7-84.1 %, one cell (normal tercile, 21 sessions, 2010-26: 84.1 %) is 0.1 point outside the declared +-4
+band, so FAIL by the letter; the band is 1-2 % wider and holds 82 % overall. Not adopted on my own; the owner may switch.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
