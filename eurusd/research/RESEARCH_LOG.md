@@ -344,6 +344,14 @@ in 2018-26 breaches 8.3 / 10.7 (21 sessions) and 5.1 / 15.0 (63), outside the de
 asymmetry learned from 2008-17 (euro falling) reversed afterwards. Nothing adopted; the band stays symmetric. The lesson
 is the same as for direction: whichever side history favoured does not persist.
 
+## Round 19 (2026-11-19 18:06 heartbeat): levels at 10 and 42 sessions - 1 trial, FAILS by the letter
+`experiments/78_levels_10_42.py` (declared). Same bots, nothing re-tuned. 10 sessions: lower / upper held 79.3 / 81.4
+(2010-26), 81.4 / 80.1 (2016-26), 84.2 / 79.8 (2023-26: 0.2 point outside the +-4 band on 99 periods). 42 sessions:
+77.4 / 82.1, 80.7 / 78.5, 85.0 / 74.3 (2023-26, 23 periods: outside). The wide band holds 79.6-82.2 % at both horizons
+in every era. So two-week levels are as good as the published ones within noise; two-month levels drift in the small
+recent sample, as the 63-session ones do. Not added to the product (the bar was missed); the owner can ask for the
+two-week horizon.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
