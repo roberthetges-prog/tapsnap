@@ -132,7 +132,7 @@ MACRO = ROOT / "data" / "macro"
 RES = ROOT / "experiments" / "results" / "arms"
 REPORT = ROOT / "reports" / f"arm_{ARM}.md"
 
-HORIZONS = (5, 21, 63)
+HORIZONS = (5, 10, 21, 63)
 BOT_YEARS = list(range(2006, 2027))
 TEST_YEARS = list(range(2007, 2027))
 ERAS = (("2010-26", 2010, 2026), ("2016-26", 2016, 2026), ("2023-26", 2023, 2026), ("2010-17", 2010, 2017), ("2018-26", 2018, 2026))

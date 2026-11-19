@@ -32,6 +32,29 @@ Code `src/eurusd/bots.py` (design declared in its docstring before the first run
 | every vote    | 2016-26 |     550.2 |  48.6 | 44.4 | 52.7 |       50   |            97.8 |
 | every vote    | 2023-26 |     196.4 |  48.5 | 41.6 | 55.4 |       49.1 |            98.7 |
 
+### 10 sessions
+
+| cls           | era     |   n_indep |   acc |   lo |   hi |   per_year |   share_of_days |
+|:--------------|:--------|----------:|------:|-----:|-----:|-----------:|----------------:|
+| thin          | 2010-26 |     174.6 |  48   | 40.7 | 55.4 |       10.3 |            40   |
+| thin          | 2016-26 |     131.2 |  51.1 | 42.7 | 59.5 |       11.9 |            46.7 |
+| thin          | 2023-26 |      37.4 |  47.9 | 33.4 | 64.1 |        9.4 |            37.8 |
+| fair          | 2010-26 |     139.6 |  49.6 | 41.1 | 57.5 |        8.2 |            32   |
+| fair          | 2016-26 |      98.3 |  51.8 | 42.3 | 61.7 |        8.9 |            35   |
+| fair          | 2023-26 |      39.4 |  52   | 36.2 | 66.1 |        9.8 |            39.8 |
+| wide          | 2010-26 |      58.9 |  51.8 | 38.4 | 63.2 |        3.5 |            13.5 |
+| wide          | 2016-26 |      35.5 |  51.5 | 34.5 | 65.5 |        3.2 |            12.6 |
+| wide          | 2023-26 |      18.5 |  48.6 | 29   | 71   |        4.6 |            18.7 |
+| very wide     | 2010-26 |      55.1 |  54.3 | 41.5 | 67   |        3.2 |            12.6 |
+| very wide     | 2016-26 |      10.2 |  36.3 | 16.8 | 68.7 |        0.9 |             3.6 |
+| very wide     | 2023-26 |       2.7 |  40.7 |  6.1 | 79.2 |        0.7 |             2.7 |
+| fair or wider | 2010-26 |     253.6 |  51.1 | 45.1 | 57.3 |       14.9 |            58.1 |
+| fair or wider | 2016-26 |     144   |  50.6 | 42.6 | 58.7 |       13.1 |            51.3 |
+| fair or wider | 2023-26 |      60.6 |  50.5 | 38.6 | 62.9 |       15.2 |            61.2 |
+| every vote    | 2010-26 |     428.2 |  49.9 | 45.3 | 54.7 |       25.2 |            98.1 |
+| every vote    | 2016-26 |     275.2 |  50.8 | 45   | 56.8 |       25   |            98   |
+| every vote    | 2023-26 |      98   |  49.5 | 39.3 | 58.7 |       24.5 |            99   |
+
 ### 21 sessions
 
 | cls           | era     |   n_indep |   acc |   lo |   hi |   per_year |   share_of_days |
@@ -90,6 +113,14 @@ Code `src/eurusd/bots.py` (design declared in its docstring before the first run
 |   5 | 60-69      |      44.8 |        471 |      94.2 |
 |   5 | 70-79      |      55.2 |        400 |      80   |
 |   5 | 80-100     |      53.7 |        415 |      83   |
+|  10 | 0-19       |      28.6 |         14 |       1.4 |
+|  10 | 20-29      |      50.6 |        170 |      17   |
+|  10 | 30-39      |      47.7 |        767 |      76.7 |
+|  10 | 40-49      |      49.6 |       1169 |     116.9 |
+|  10 | 50-59      |      43.1 |        773 |      77.3 |
+|  10 | 60-69      |      46.9 |        552 |      55.2 |
+|  10 | 70-79      |      51.8 |        384 |      38.4 |
+|  10 | 80-100     |      53.9 |        534 |      53.4 |
 |  21 | 0-19       |      55.8 |        156 |       7.4 |
 |  21 | 20-29      |      49.9 |        401 |      19.1 |
 |  21 | 30-39      |      46.5 |        780 |      37.1 |
@@ -123,6 +154,16 @@ Code `src/eurusd/bots.py` (design declared in its docstring before the first run
 |   5 | no volatility scaling | volatility above its median | 2010-26 |       2184 |     436.8 |         80   |         80   |        60.8 |            3.34 |              nan   |              nan   |
 |   5 | bots | volatility below its median                  | 2010-26 |       2184 |     436.8 |         77   |         78.2 |        55.6 |            2.1  |              nan   |              nan   |
 |   5 | no volatility scaling | volatility below its median | 2010-26 |       2184 |     436.8 |         92.9 |         92.1 |        85.2 |            3.24 |              nan   |              nan   |
+|  10 | bots                                                | 2010-26 |       4363 |     436.3 |         79.3 |         81.4 |        61.1 |            4.03 |               68.2 |               69.1 |
+|  10 | bots                                                | 2016-26 |       2807 |     280.7 |         81.4 |         80.1 |        62.1 |            3.6  |               70   |               69.1 |
+|  10 | bots                                                | 2023-26 |        990 |      99   |         84.2 |         79.8 |        64.1 |            3.41 |               75.4 |               75   |
+|  10 | no volatility scaling                               | 2010-26 |       4363 |     436.3 |         86.3 |         87.5 |        74   |            4.65 |               63.1 |               73   |
+|  10 | no volatility scaling                               | 2016-26 |       2807 |     280.7 |         90.3 |         89.2 |        79.7 |            4.51 |               70.4 |               80.4 |
+|  10 | no volatility scaling                               | 2023-26 |        990 |      99   |         92   |         89.6 |        81.6 |            4.32 |               90   |               82.3 |
+|  10 | bots | volatility above its median                  | 2010-26 |       2181 |     218.1 |         82.1 |         84.7 |        67.1 |            5.06 |              nan   |              nan   |
+|  10 | no volatility scaling | volatility above its median | 2010-26 |       2181 |     218.1 |         80.1 |         82.7 |        63.2 |            4.72 |              nan   |              nan   |
+|  10 | bots | volatility below its median                  | 2010-26 |       2182 |     218.2 |         76.5 |         78   |        55.1 |            3    |              nan   |              nan   |
+|  10 | no volatility scaling | volatility below its median | 2010-26 |       2182 |     218.2 |         92.4 |         92.3 |        84.8 |            4.58 |              nan   |              nan   |
 |  21 | bots                                                | 2010-26 |       4352 |     207.2 |         78   |         82.1 |        60.8 |            5.84 |               58.1 |               62.5 |
 |  21 | bots                                                | 2016-26 |       2796 |     133.1 |         80.3 |         79.9 |        61.2 |            5.16 |               66.2 |               62.5 |
 |  21 | bots                                                | 2023-26 |        979 |      46.6 |         81.8 |         77   |        59.1 |            4.93 |               70   |               67.8 |
@@ -158,6 +199,16 @@ Code `src/eurusd/bots.py` (design declared in its docstring before the first run
 | track record |   5 | 2023-26 |     198.8 |  49   | 41.9 | 55.6 |
 | track record |   5 | 2010-17 |     414.6 |  51.9 | 47   | 56.6 |
 | track record |   5 | 2018-26 |     458.6 |  49.6 | 45.1 | 54.2 |
+| equal        |  10 | 2010-26 |     428.2 |  49.9 | 45.3 | 54.7 |
+| equal        |  10 | 2016-26 |     275.2 |  50.8 | 45   | 56.8 |
+| equal        |  10 | 2023-26 |      98   |  49.5 | 39.3 | 58.7 |
+| equal        |  10 | 2010-17 |     203   |  48.2 | 41.5 | 55.1 |
+| equal        |  10 | 2018-26 |     225.2 |  51.4 | 45.1 | 58   |
+| track record |  10 | 2010-26 |     436.3 |  51.1 | 46.5 | 55.8 |
+| track record |  10 | 2016-26 |     280.7 |  51.4 | 45.4 | 57   |
+| track record |  10 | 2023-26 |      99   |  50.3 | 40.8 | 60.1 |
+| track record |  10 | 2010-17 |     207.4 |  50.7 | 44   | 57.5 |
+| track record |  10 | 2018-26 |     228.9 |  51.5 | 45.1 | 57.9 |
 | equal        |  21 | 2010-26 |     202.1 |  52   | 45.1 | 58.8 |
 | equal        |  21 | 2016-26 |     129.8 |  50.3 | 41.5 | 58.5 |
 | equal        |  21 | 2023-26 |      45.8 |  47   | 34.1 | 61.9 |
@@ -193,6 +244,16 @@ Code `src/eurusd/bots.py` (design declared in its docstring before the first run
 | vote of 63 sessions ago (fair or wider)                                                                                               |   5 | 2023-26 |     143.6 |  50.8 |  42.6 |  58.7 |
 | always up                                                                                                                             |   5 | 2023-26 |     198.8 |  49.1 |  42.4 |  56.1 |
 | single bots: median accuracy 50.0 %, best 54.1 %, worst 46.6 %, share above 50 %: 50 %; mean correlation between two bots' votes 0.13 |   5 | 2010-26 |     nan   |  50   | nan   | nan   |
+| vote of 63 sessions ago (every vote)                                                                                                  |  10 | 2010-26 |     428.2 |  48.1 |  43.4 |  52.9 |
+| vote of 63 sessions ago (fair or wider)                                                                                               |  10 | 2010-26 |     255.1 |  50.1 |  44.1 |  56.3 |
+| always up                                                                                                                             |  10 | 2010-26 |     436.3 |  48.5 |  44   |  53.3 |
+| vote of 63 sessions ago (every vote)                                                                                                  |  10 | 2016-26 |     274.9 |  48.5 |  42.5 |  54.3 |
+| vote of 63 sessions ago (fair or wider)                                                                                               |  10 | 2016-26 |     141.2 |  51.3 |  42.9 |  59.2 |
+| always up                                                                                                                             |  10 | 2016-26 |     280.7 |  49.7 |  44   |  55.6 |
+| vote of 63 sessions ago (every vote)                                                                                                  |  10 | 2023-26 |      98   |  47.3 |  37.4 |  56.7 |
+| vote of 63 sessions ago (fair or wider)                                                                                               |  10 | 2023-26 |      59.7 |  48.4 |  36.2 |  60.7 |
+| always up                                                                                                                             |  10 | 2023-26 |      99   |  48.6 |  38.9 |  58.2 |
+| single bots: median accuracy 50.1 %, best 55.4 %, worst 45.1 %, share above 50 %: 55 %; mean correlation between two bots' votes 0.11 |  10 | 2010-26 |     nan   |  50.1 | nan   | nan   |
 | vote of 63 sessions ago (every vote)                                                                                                  |  21 | 2010-26 |     202.1 |  50.2 |  43.2 |  56.8 |
 | vote of 63 sessions ago (fair or wider)                                                                                               |  21 | 2010-26 |     127.2 |  51.3 |  42.6 |  59.7 |
 | always up                                                                                                                             |  21 | 2010-26 |     207.1 |  47.5 |  40.7 |  54.1 |
@@ -216,6 +277,9 @@ Code `src/eurusd/bots.py` (design declared in its docstring before the first run
 | three-signal agreement rule                                                                                                           |   5 | 2010-26 |     384   |  56.2 |  51.3 |  61.1 |
 | three-signal agreement rule                                                                                                           |   5 | 2016-26 |     242   |  55.1 |  48.7 |  61.1 |
 | three-signal agreement rule                                                                                                           |   5 | 2023-26 |      84.4 |  56.2 |  45.3 |  66.1 |
+| three-signal agreement rule                                                                                                           |  10 | 2010-26 |     191.8 |  55.7 |  48.7 |  62.6 |
+| three-signal agreement rule                                                                                                           |  10 | 2016-26 |     120.8 |  54   |  44.9 |  62.4 |
+| three-signal agreement rule                                                                                                           |  10 | 2023-26 |      42   |  55.2 |  39.9 |  68.8 |
 | three-signal agreement rule                                                                                                           |  21 | 2010-26 |      90.8 |  58.3 |  48   |  67.8 |
 | three-signal agreement rule                                                                                                           |  21 | 2016-26 |      57   |  58   |  45   |  69.8 |
 | three-signal agreement rule                                                                                                           |  21 | 2023-26 |      19.5 |  53.5 |  31.7 |  72.7 |

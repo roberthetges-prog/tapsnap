@@ -352,6 +352,11 @@ in every era. So two-week levels are as good as the published ones within noise;
 recent sample, as the 63-session ones do. Not added to the product (the bar was missed); the owner can ask for the
 two-week horizon.
 
+## 2026-11-19: two-week horizon added to the vote (owner's decision after round 19)
+`HORIZONS = (5, 10, 21, 63)` in `bots.py` and `sharper_levels.py`; records, levels, wide band and 90 / 95 % bands rebuilt
+for all four horizons (72, 73, 75). The two-week direction vote is as uninformative as the others; its levels hold about
+80 % and its band about 80 %.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a

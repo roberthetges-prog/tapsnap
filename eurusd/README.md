@@ -65,8 +65,8 @@ rates that are barrier geometry: random entries win 72 % with the same levels (`
 ## The vote: 100 bots, direction and levels (current product read-out)
 
 `PYTHONPATH=src python -m eurusd.cli vote` (add `--all` for every bot). 100 bots, each with its own slice of the
-evidence, its own way of choosing what to trust, its own learning method and memory, vote UP or DOWN for one week, one
-month and three months, and each gives a lower and an upper level. Walk-forward record 2010-26: the direction vote was
+evidence, its own way of choosing what to trust, its own learning method and memory, vote UP or DOWN for one week, two
+weeks, one month and three months, and each gives a lower and an upper level. Walk-forward record 2010-26: the direction vote was
 right 50 / 52 / 53 % (a coin flip; a bigger majority is no more reliable); each level held about 80 % of the time in
 every era, as designed. See `reports/bots.md`.
 

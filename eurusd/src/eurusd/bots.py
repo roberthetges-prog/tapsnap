@@ -53,7 +53,7 @@ from eurusd import committee as C  # noqa: E402
 RES = C.RES
 N_BOTS = 100
 DESK = 12
-HORIZONS = (5, 21, 63)
+HORIZONS = (5, 10, 21, 63)
 TEST_YEARS = list(range(2006, 2027))
 MIN_ROWS = 500
 LEVEL_Q = 0.80
@@ -264,7 +264,7 @@ def live(refresh: bool = True) -> dict:
         Xs = SL.build(D, load_h1_live(refresh=False))
         ev = SL.event_times()
         cal_end = min(pd.Timestamp(int(v.max()), unit="ns", tz="UTC") for k, v in ev.items() if k in ("ecb", "nfp", "cpi"))
-        for h in (5, 21, 63):
+        for h in HORIZONS:
             # the method counts the scheduled events inside the window: usable only while the calendars cover it
             if X["__ct"].iloc[-1] + pd.offsets.BDay(h) <= cal_end:
                 alt[h] = SL.levels(Xs, h, name="har_rv_ev")
@@ -307,7 +307,7 @@ def live(refresh: bool = True) -> dict:
     try:
         bc = pd.read_csv(RES / "bots_band_confidence.csv")
         for h, r in out["horizons"].items():
-            if h in (5, 21) and "bots_lower" in r:
+            if h in (5, 10, 21) and "bots_lower" in r:
                 p0 = out["price"]
                 r["bands_hi"] = {}
                 for t in (0.90, 0.95):
@@ -327,7 +327,7 @@ def live(refresh: bool = True) -> dict:
 
 
 def format_vote(o: dict, detail: bool = True) -> str:
-    names = {5: "1 WEEK", 21: "1 MONTH", 63: "3 MONTHS"}
+    names = {5: "1 WEEK", 10: "2 WEEKS", 21: "1 MONTH", 63: "3 MONTHS"}
     L = [f"EUR/USD VOTE of {N_BOTS} bots | session close {o['asof'][:16]} UTC | price {o['price']:.4f}"]
     for h, r in o["horizons"].items():
         if h == 63 and r.get("levels_from") == "bots":
