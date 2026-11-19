@@ -336,6 +336,14 @@ one week and one month ('rarely breached'); not for three months.
 independent three-month periods a 5 % tail cannot be calibrated at all. 5 / 21 sessions unchanged. Nothing adopted;
 the 90 / 95 % bands stay published for one week and one month only.
 
+## Round 18 (2026-11-19 12:06 heartbeat): is the band breached evenly on both sides? - 1 trial, FAILS
+`experiments/77_band_sides.py` (declared). The single-factor band is already near-even: breaches below / above 10.7 /
+9.4 % (5 sessions), 11.2 / 7.9 (21), 11.8 / 9.1 (63) in 2010-26, and 10.1 / 9.6, 10.1 / 9.2, 8.2 / 11.1 in 2018-26: the
+side that is breached more flips between eras. A factor per side (each side breached 10 % in training) over-corrects:
+in 2018-26 breaches 8.3 / 10.7 (21 sessions) and 5.1 / 15.0 (63), outside the declared 2-point evenness, because the
+asymmetry learned from 2008-17 (euro falling) reversed afterwards. Nothing adopted; the band stays symmetric. The lesson
+is the same as for direction: whichever side history favoured does not persist.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
