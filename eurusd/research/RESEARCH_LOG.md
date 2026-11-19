@@ -330,6 +330,12 @@ at 5 and 21 sessions; too wide at 63 (the 2008-12 years in the training window s
 at 21 sessions: 63 % (80 % band), 76 % (90), 86 % (95). Adopted: the 90 and 95 % bands are printed with the vote for
 one week and one month ('rarely breached'); not for three months.
 
+## Round 17 (2026-11-19 06:06 heartbeat): 10-year window for the band factor - 1 trial, FAILS
+`experiments/76_band_window.py` (declared). At 63 sessions the 90 / 95 % bands still over-hold: 91.6 / 96.7 % in
+2010-26 and 93.3 / 97.9 % in 2018-26 (bar: within 3 points). The excess is not the 2008-12 window: with only 68 / 35
+independent three-month periods a 5 % tail cannot be calibrated at all. 5 / 21 sessions unchanged. Nothing adopted;
+the 90 / 95 % bands stay published for one week and one month only.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
