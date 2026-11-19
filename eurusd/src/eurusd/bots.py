@@ -303,6 +303,19 @@ def live(refresh: bool = True) -> dict:
             r["band_held"] = float(jb[(jb.h == h) & (jb.era == "2010-26")]["both_held"].iloc[0])
     except Exception:
         pass
+    # round 16: the same band at 90 and 95 % confidence, calibrated at 5 and 21 sessions only (too wide at 63)
+    try:
+        bc = pd.read_csv(RES / "bots_band_confidence.csv")
+        for h, r in out["horizons"].items():
+            if h in (5, 21) and "bots_lower" in r:
+                p0 = out["price"]
+                r["bands_hi"] = {}
+                for t in (0.90, 0.95):
+                    k = float(bc[(bc.h == h) & (bc.era == "live") & (bc.target == t)]["avg_factor"].iloc[0])
+                    held = float(bc[(bc.h == h) & (bc.era == "2010-26") & (bc.target == t)]["both_held"].iloc[0])
+                    r["bands_hi"][str(int(100 * t))] = [p0 * (r["bots_lower"] / p0) ** k, p0 * (r["bots_upper"] / p0) ** k, held]
+    except Exception:
+        pass
     # owner's decision 2026-11-18: the event-adjusted levels are the published ones where they can be computed (5, 21 sessions)
     for h, r in out["horizons"].items():
         if r.get("event_adjusted"):
@@ -335,6 +348,8 @@ def format_vote(o: dict, detail: bool = True) -> str:
                      f"{100 * lv['upper_held']:.0f} % (2010-26); both held {100 * lv['both_held']:.0f} %")
         if r.get("band"):
             L.append(f"  Wide band: {r['band'][0]:.4f} to {r['band'][1]:.4f} (the whole period's price action stayed inside such a band {100 * r['band_held']:.0f} % of the time, 2010-26)")
+        if r.get("bands_hi"):
+            L.append("  Rarely breached: " + " | ".join(f"{int(k)} %: {v[0]:.4f} to {v[1]:.4f} (held {100 * v[2]:.0f} %)" for k, v in r["bands_hi"].items()))
         if detail:
             df = pd.DataFrame(r["bots"])
             by = df[df.vote != "none"].groupby("learner")["vote"].value_counts().unstack(fill_value=0).reindex(columns=["up", "down"], fill_value=0)

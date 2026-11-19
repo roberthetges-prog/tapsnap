@@ -323,6 +323,13 @@ otherwise. Candidate: the stretch factor chosen per volatility tercile (same wal
 sessions is 80.7-84.1 %, one cell (normal tercile, 21 sessions, 2010-26: 84.1 %) is 0.1 point outside the declared +-4
 band, so FAIL by the letter; the band is 1-2 % wider and holds 82 % overall. Not adopted on my own; the owner may switch.
 
+## Round 16 (2026-11-19 00:06 heartbeat): the wide band at 90 and 95 % - 1 trial, PASSES at 5 and 21 sessions, FAILS at 63
+`experiments/75_band_confidence.py` (declared). Joint holding 2010-26 / 2018-26: 90 % target -> 89.5 / 89.7 (5 sessions),
+90.7 / 90.4 (21), 91.7 / 93.9 (63); 95 % target -> 94.4 / 94.4, 95.2 / 95.2, 97.3 / 99.0. Within the declared 3 points
+at 5 and 21 sessions; too wide at 63 (the 2008-12 years in the training window stretch the factor). Worst single year
+at 21 sessions: 63 % (80 % band), 76 % (90), 86 % (95). Adopted: the 90 and 95 % bands are printed with the vote for
+one week and one month ('rarely breached'); not for three months.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
