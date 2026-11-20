@@ -372,6 +372,7 @@ def format_touch(o: dict) -> str:
         L.append(f"  within {names[h]}: " + (f"{100 * r['p_touch']:.0f} %" if r["p_touch"] is not None else "below 1 %") + f"  (distance {r['distance_units']:.2f} volatility units)")
     if o.get("event_window_this_week") is not None:
         L.append("  (one-week odds from the " + ("event-week table: a scheduled Fed / ECB / payrolls / CPI release falls inside the week)" if o["event_window_this_week"] else "no-event table: no scheduled Fed / ECB / payrolls / CPI release inside the week)"))
+    L.append("  Caveat: these are averages over market states; in calm markets the true odds ran about 3 points higher and in volatile markets 4-8 points lower (volatility mean-reverts).")
     L.append("Calibration 2010-26: stated and realised odds within 1 point at every distance; the odds are volatility arithmetic, not a forecast of direction.")
     return "\n".join(L)
 

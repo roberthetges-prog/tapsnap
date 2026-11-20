@@ -371,6 +371,14 @@ alike); at 10 sessions the no-event group (59 independent windows) is 4-6 points
 both groups at 5 sessions; 2.3 / 3.0 at 10 sessions (bar 3, borderline). Adopted at one week only: `cli touch` uses the
 event-week or no-event table for the one-week odds and says which; 10 and 21 sessions stay pooled.
 
+## Round 22 (2026-11-20 12:07 heartbeat): touch odds by volatility state - 1 trial, FAILS; a real finding recorded
+`experiments/81_touch_volstate.py` (declared). Scaling by today's gauge over-reacts, because volatility mean-reverts:
+at one gauge unit the pooled table states 31-32 % everywhere, while the realised touch rate was 34-35 % in calm markets
+and 24-27 % in volatile ones, at 5 / 10 / 21 sessions, in 2010-26 and 2018-26 alike (same sign as round 11's
+elasticity < 1 for the levels). Per-tercile tables reduce the error but still miss by 4-7 points in the small volatile
+tercile of 2018-26 (bar 3), so not adopted. A caveat line is printed with `cli touch`. Next natural candidate: shrink
+the gauge towards its long-run level before scaling (one declared parameter), which would also serve the levels.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
