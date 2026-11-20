@@ -379,6 +379,13 @@ elasticity < 1 for the levels). Per-tercile tables reduce the error but still mi
 tercile of 2018-26 (bar 3), so not adopted. A caveat line is printed with `cli touch`. Next natural candidate: shrink
 the gauge towards its long-run level before scaling (one declared parameter), which would also serve the levels.
 
+## Round 23 (2026-11-20 18:06 heartbeat): shrink the gauge towards its long-run level - 1 trial, FAILS
+`experiments/82_touch_shrink.py` (declared). One parameter w (weight on the long-run median gauge) chosen on 2010-17:
+w = 0.3 brings the worst per-tercile calibration gap from 6.8 to 3.3 points there, but in 2018-26 only from 12.1 to
+7.5 (bar 3); the volatile tercile of 2018-26 (2020, 2022) is still 5-7 points over-stated at every horizon. Not
+adopted. Two rounds now say the same: the touch odds and levels are right on average but the state dependence is
+larger than a fixed shrink can remove; the caveat stays.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
