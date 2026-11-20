@@ -326,6 +326,38 @@ def live(refresh: bool = True) -> dict:
     return out
 
 
+def touch_odds(level: float, refresh: bool = False, D=None, h1=None) -> dict:
+    """Odds that `level` is touched within 5, 10 and 21 sessions (round 20: calibrated to within 1 point in every era).
+    Distance is measured in units of the median bot gauge x sqrt(h); the table in bots_touch_odds.csv is read off by
+    linear interpolation (0.25 .. 3.0 gauge units; beyond 3.0 the odds are quoted as 'below 1 %')."""
+    from eurusd.exposure import _daily_frame
+    from eurusd.live_data import load_h1_live
+    if D is None:
+        D = _daily_frame(refresh)
+        h1 = load_h1_live(refresh=False)
+    X = build(D, h1)
+    g = float(np.median([X[f"g_{sp['gauge']}"].iloc[-1] for sp in SPECS]))
+    px = float(X["__close"].iloc[-1])
+    T = pd.read_csv(RES / "bots_touch_odds.csv")
+    dist = abs(np.log(level / px))
+    out = {"asof": str(X["__ct"].iloc[-1]), "price": px, "level": level, "side": "above" if level > px else "below", "gauge_daily": g, "horizons": {}}
+    for h in (5, 10, 21):
+        t = T[T.h == h].sort_values("distance")
+        d = dist / (g * np.sqrt(h))
+        p = float(np.interp(d, t.distance, t.p_touch)) if d <= t.distance.max() else None
+        out["horizons"][h] = {"distance_units": d, "p_touch": p}
+    return out
+
+
+def format_touch(o: dict) -> str:
+    names = {5: "1 week", 10: "2 weeks", 21: "1 month"}
+    L = [f"Odds that {o['level']:.4f} ({o['side']} the price, {abs(o['level'] - o['price']) * 1e4:.0f} pips away) is touched | session close {o['asof'][:16]} UTC | price {o['price']:.4f}"]
+    for h, r in o["horizons"].items():
+        L.append(f"  within {names[h]}: " + (f"{100 * r['p_touch']:.0f} %" if r["p_touch"] is not None else "below 1 %") + f"  (distance {r['distance_units']:.2f} volatility units)")
+    L.append("Calibration 2010-26: stated and realised odds within 1 point at every distance; the odds are volatility arithmetic, not a forecast of direction.")
+    return "\n".join(L)
+
+
 def format_vote(o: dict, detail: bool = True) -> str:
     names = {5: "1 WEEK", 10: "2 WEEKS", 21: "1 MONTH", 63: "3 MONTHS"}
     L = [f"EUR/USD VOTE of {N_BOTS} bots | session close {o['asof'][:16]} UTC | price {o['price']:.4f}"]

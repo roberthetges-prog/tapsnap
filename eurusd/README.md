@@ -108,6 +108,7 @@ PYTHONPATH=src python -m eurusd.cli signals            # live entries with stop-
 PYTHONPATH=src python -m eurusd.cli signals --asof 2026-11-05T06:59 --account 10000 --risk 0.005
 PYTHONPATH=src python -m eurusd.cli update             # fetch the newest HistData month(s), rebuild bars
 PYTHONPATH=src python -m eurusd.cli backtest london_short H1 '{"entry_min":420,"exit_min":780,"stop_adr":1.0}' --period validate
+PYTHONPATH=src python -m eurusd.cli touch 1.1200       # odds that a level is touched within 1 week / 2 weeks / 1 month
 PYTHONPATH=src python -m eurusd.cli committee          # the analysts' vote: direction and probability
 python experiments/01_behaviour_stats.py              # behaviour statistics -> reports/behaviour_stats.md
 python experiments/02_grid_builtin.py                 # grid search of the built-in families

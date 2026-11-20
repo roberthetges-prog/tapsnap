@@ -357,6 +357,13 @@ two-week horizon.
 for all four horizons (72, 73, 75). The two-week direction vote is as uninformative as the others; its levels hold about
 80 % and its band about 80 %.
 
+## Round 20 (2026-11-20 00:06 heartbeat): touch odds for any level - 1 trial, PASSES
+`experiments/79_touch_odds.py` (declared). Walk-forward touch frequency by distance (0.25-3.0 median-gauge units) at
+5 / 10 / 21 sessions: stated vs realised within 0.7 / 1.0 / 1.0 points at every distance in 2010-26 and 2018-26, within
+1.7 since 2023 (bar 4). The empirical table has fatter tails than the driftless-Brownian formula (6.6 % vs 4.6 % at 2
+units, 21 sessions), so the table is used, not the formula. Adopted as `cli touch <level>`: the odds that a user's
+stop or target is touched within one week, two weeks or one month. Arithmetic of volatility, not direction.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a

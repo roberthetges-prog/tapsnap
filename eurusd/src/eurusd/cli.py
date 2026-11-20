@@ -154,6 +154,12 @@ def cmd_vote(a):
             print(d[["bot", "vote", "p_up", "learner", "memory", "research", "lower", "upper", "trusts"]].round(4).to_string(index=False))
 
 
+def cmd_touch(a):
+    from . import bots as BT
+    o = BT.touch_odds(a.level, refresh=not a.no_refresh)
+    print(json.dumps(o, indent=1, default=str) if a.json else BT.format_touch(o))
+
+
 def cmd_risk(a):
     eng, _ = _engine(a)
     txt = eng.report()
@@ -214,6 +220,8 @@ def main(argv=None):
     cm.add_argument("--all", action="store_true", help="list every analyst's vote"); cm.set_defaults(f=cmd_committee)
     vt = sub.add_parser("vote"); vt.add_argument("--no-refresh", action="store_true"); vt.add_argument("--json", action="store_true")
     vt.add_argument("--all", action="store_true", help="list every bot's vote and levels"); vt.set_defaults(f=cmd_vote)
+    tc = sub.add_parser("touch", help="odds that a price level is touched within 1 week / 2 weeks / 1 month"); tc.add_argument("level", type=float)
+    tc.add_argument("--no-refresh", action="store_true"); tc.add_argument("--json", action="store_true"); tc.set_defaults(f=cmd_touch)
     r = sub.add_parser("risk"); r.add_argument("--asof"); r.add_argument("--no-refresh", action="store_true"); r.add_argument("--out"); r.set_defaults(f=cmd_risk)
     k = sub.add_parser("book"); k.add_argument("action", choices=["show", "add", "close", "equity"]); k.add_argument("--strategy"); k.add_argument("--side", choices=["long", "short"])
     k.add_argument("--entry", type=float); k.add_argument("--stop", type=float); k.add_argument("--lots", type=float); k.add_argument("--opened"); k.add_argument("--exit")
