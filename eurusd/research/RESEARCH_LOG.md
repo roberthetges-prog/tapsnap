@@ -364,6 +364,13 @@ for all four horizons (72, 73, 75). The two-week direction vote is as uninformat
 units, 21 sessions), so the table is used, not the formula. Adopted as `cli touch <level>`: the odds that a user's
 stop or target is touched within one week, two weeks or one month. Arithmetic of volatility, not direction.
 
+## Round 21 (2026-11-20 06:06 heartbeat): touch odds in event weeks - 1 trial, PASSES at 5 sessions, borderline at 10
+`experiments/80_touch_events.py` (declared). Pooled odds are 1.5-2.4 points too low in one-week windows that contain a
+scheduled FOMC / ECB / payrolls / CPI release and 1-3.6 points too high in windows without one (2010-26 and 2018-26
+alike); at 10 sessions the no-event group (59 independent windows) is 4-6 points off. Split tables: within 1.2 points in
+both groups at 5 sessions; 2.3 / 3.0 at 10 sessions (bar 3, borderline). Adopted at one week only: `cli touch` uses the
+event-week or no-event table for the one-week odds and says which; 10 and 21 sessions stay pooled.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a

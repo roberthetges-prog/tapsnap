@@ -341,8 +341,24 @@ def touch_odds(level: float, refresh: bool = False, D=None, h1=None) -> dict:
     T = pd.read_csv(RES / "bots_touch_odds.csv")
     dist = abs(np.log(level / px))
     out = {"asof": str(X["__ct"].iloc[-1]), "price": px, "level": level, "side": "above" if level > px else "below", "gauge_daily": g, "horizons": {}}
+    # round 21: at one week the odds are 2-4 points higher in windows with a scheduled FOMC / ECB / payrolls / CPI
+    ev_week = None
+    try:
+        from eurusd.arms import sharper_levels as SL
+        ev = SL.event_times()
+        a0 = pd.DatetimeIndex([X["__ct"].iloc[-1]]).as_unit("ns").asi8
+        b0 = pd.DatetimeIndex([X["__ct"].iloc[-1] + pd.offsets.BDay(5)]).as_unit("ns").asi8
+        cal_end = min(pd.Timestamp(int(v.max()), unit="ns", tz="UTC") for k, v in ev.items() if k in ("ecb", "nfp", "cpi"))
+        if X["__ct"].iloc[-1] + pd.offsets.BDay(5) <= cal_end:
+            ev_week = bool(any(SL._count_in(ev[k], a0, b0)[0] > 0 for k in ("fomc", "ecb", "nfp", "cpi")))
+        TE = pd.read_csv(RES / "bots_touch_odds_events.csv")
+    except Exception:
+        TE = None
+    out["event_window_this_week"] = ev_week
     for h in (5, 10, 21):
         t = T[T.h == h].sort_values("distance")
+        if h == 5 and ev_week is not None and TE is not None:
+            t = TE[(TE.h == 5) & (TE.group == ("event window" if ev_week else "no event"))].sort_values("distance")
         d = dist / (g * np.sqrt(h))
         p = float(np.interp(d, t.distance, t.p_touch)) if d <= t.distance.max() else None
         out["horizons"][h] = {"distance_units": d, "p_touch": p}
@@ -354,6 +370,8 @@ def format_touch(o: dict) -> str:
     L = [f"Odds that {o['level']:.4f} ({o['side']} the price, {abs(o['level'] - o['price']) * 1e4:.0f} pips away) is touched | session close {o['asof'][:16]} UTC | price {o['price']:.4f}"]
     for h, r in o["horizons"].items():
         L.append(f"  within {names[h]}: " + (f"{100 * r['p_touch']:.0f} %" if r["p_touch"] is not None else "below 1 %") + f"  (distance {r['distance_units']:.2f} volatility units)")
+    if o.get("event_window_this_week") is not None:
+        L.append("  (one-week odds from the " + ("event-week table: a scheduled Fed / ECB / payrolls / CPI release falls inside the week)" if o["event_window_this_week"] else "no-event table: no scheduled Fed / ECB / payrolls / CPI release inside the week)"))
     L.append("Calibration 2010-26: stated and realised odds within 1 point at every distance; the odds are volatility arithmetic, not a forecast of direction.")
     return "\n".join(L)
 
