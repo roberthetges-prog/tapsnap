@@ -401,6 +401,15 @@ median worse (+0.03 to +0.66 %), 20 %-trimmed mean better at all four horizons i
 (a few pips); adopted in the live read-out because the bar was declared and met. Band factors stay as calibrated on
 the median (the two differ by under 0.2 % of width); the historical records are unchanged.
 
+## Round 26 (2026-11-21 12:05 heartbeat): how many bots are needed? - descriptive, 1 trial
+`experiments/85_roster_size.py` (declared). Random rosters of 10 / 25 / 50 / 100 bots, 20 draws each, 2010-26:
+* Levels: 25 bots already give the full roster's quality (loss 45.51 vs 45.50 bp at 5 sessions, 94.4 vs 94.3 at 21;
+  holding rates identical to 0.3 points); 10 bots are 0.3 % worse and vary by roster.
+* Direction: 49.5-50.0 % at 5 sessions and 50.5-52.0 % at 21 whatever the roster size; the spread across random
+  rosters of 10 (+-1.7 points) is as large as the difference between 10 and 100 bots. More bots will not help the vote;
+  fewer would not hurt the levels.
+Decision: roster stays at 100 (cheap enough, and the owner's design); no change.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
