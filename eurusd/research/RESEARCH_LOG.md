@@ -410,6 +410,16 @@ the median (the two differ by under 0.2 % of width); the historical records are 
   fewer would not hurt the levels.
 Decision: roster stays at 100 (cheap enough, and the owner's design); no change.
 
+## Round 27 (2026-11-21 18:06 heartbeat): levels when the price is at a recent extreme - descriptive, 1 trial; a fix is warranted
+`experiments/86_levels_at_extremes.py` (declared). When the close sits in the bottom decile of its 63-session range the
+LOWER level is breached much more often: held 73.2 / 72.6 / 71.0 % at 5 / 10 / 21 sessions in 2010-26 and 75.7 / 76.6 /
+78.2 % in 2018-26, against 80-82 % in the middle of the range (bar for 'warranted': >4 points off in both eras: met at 5
+and 10 sessions). At the top decile the upper level holds MORE often (84-87 % at 10 / 21 sessions) and the lower a bit
+less (75-78 %). So falls continue at lows while rises stall at highs: a one-sided effect, present in both eras. Declared
+candidate for the next heartbeat (round 28): when the close is in the bottom decile of its 63-session range, widen the
+lower level by a walk-forward factor that restores an 80 % holding rate on past bottom-decile sessions; nothing else
+changes. Bar: bottom-decile lower holding within 4 points of 80 % at 5 and 10 sessions in 2018-26, middle unchanged.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
