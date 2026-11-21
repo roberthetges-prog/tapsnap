@@ -394,6 +394,13 @@ realised vol) is the most state-free in 2018-26 (4.6 / 6.1 / 3.6) and fast gauge
 Not adopted (not the pick). The state-dependence thread is closed for now; four rounds, no fixed rule passes out of
 sample. Caveat stands.
 
+## Round 25 (2026-11-21 06:06 heartbeat): combining the bots' levels - 3 candidates, the trimmed mean PASSES (tiny gain)
+`experiments/84_level_aggregation.py` (declared). Against the median: mean worse (+0.03 to +0.24 %), record-weighted
+median worse (+0.03 to +0.66 %), 20 %-trimmed mean better at all four horizons in 2018-26 (-0.13 / -0.15 / -0.05 /
+-0.06 %) with intervals excluding zero at 5 and 10 sessions: passes the declared bar. The gain is negligible in practice
+(a few pips); adopted in the live read-out because the bar was declared and met. Band factors stay as calibrated on
+the median (the two differ by under 0.2 % of width); the historical records are unchanged.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a

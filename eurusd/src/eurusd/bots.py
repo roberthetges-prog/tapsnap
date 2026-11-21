@@ -258,6 +258,10 @@ def live(refresh: bool = True) -> dict:
     rec = pd.read_csv(RES / "bots_record.csv") if (RES / "bots_record.csv").exists() else pd.DataFrame()
     lev = pd.read_csv(RES / "bots_levels.csv") if (RES / "bots_levels.csv").exists() else pd.DataFrame()
     out = {"asof": str(X["__ct"].iloc[-1]), "price": float(X["__close"].iloc[-1]), "refresh": notes, "horizons": {}}
+    def _agg(row):      # round 25: the 20 %-trimmed mean beat the median at every horizon in 2018-26 (by 0.05-0.15 %, intervals excluding zero at 5 and 10 sessions)
+        v = np.sort(np.asarray(row, dtype=float)[np.isfinite(np.asarray(row, dtype=float))])
+        k = int(0.2 * len(v))
+        return float(v[k:len(v) - k].mean()) if len(v) > 2 * k else float(np.nanmedian(v))
     alt = {}
     try:      # round 13: event-adjusted, more even levels (confirmed on six other markets, thin margin): shown beside the bots' levels
         from eurusd.arms import sharper_levels as SL
@@ -287,11 +291,11 @@ def live(refresh: bool = True) -> dict:
                  "p_up": float(P.iloc[0][sp["bot"]]), "learner": sp["learner"], "memory": sp["memory"] or "all", "research": sp["research"],
                  "trusts": list(k), "lower": float(LO.iloc[0][sp["bot"]]), "upper": float(HI.iloc[0][sp["bot"]])} for sp, k in zip(SPECS, kept)]
         out["horizons"][h] = {"up": int(t["up"]), "down": int(t["down"]), "pct": float(t["pct"]), "side": float(t["side"]), "cls": t["cls"],
-                              "lower": float(np.nanmedian(LO.iloc[0])), "upper": float(np.nanmedian(HI.iloc[0])),
+                              "lower": float(_agg(LO.iloc[0])), "upper": float(_agg(HI.iloc[0])),
                               "lower_range": [float(np.nanquantile(LO.iloc[0], 0.1)), float(np.nanquantile(LO.iloc[0], 0.9))],
                               "upper_range": [float(np.nanquantile(HI.iloc[0], 0.1)), float(np.nanquantile(HI.iloc[0], 0.9))],
                               "event_adjusted": list(map(float, alt[h])) if h in alt else None,
-                              "bots_lower": float(np.nanmedian(LO.iloc[0])), "bots_upper": float(np.nanmedian(HI.iloc[0])),
+                              "bots_lower": float(_agg(LO.iloc[0])), "bots_upper": float(_agg(HI.iloc[0])),
                               "record": r, "level_record": lv, "bots": bots}
     # round 14: the wide band, both sides holding together 8 times in 10 (bots' levels stretched by a tested factor)
     try:
