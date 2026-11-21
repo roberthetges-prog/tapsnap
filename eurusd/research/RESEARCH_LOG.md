@@ -386,6 +386,14 @@ w = 0.3 brings the worst per-tercile calibration gap from 6.8 to 3.3 points ther
 adopted. Two rounds now say the same: the touch odds and levels are right on average but the state dependence is
 larger than a fixed shrink can remove; the caveat stays.
 
+## Round 24 (2026-11-21 00:06 heartbeat): which gauge makes the touch odds state-free? - 1 trial, FAILS
+`experiments/83_touch_gauge.py` (declared). Picked on 2010-17: ATR14 at every horizon (worst tercile gap 2.8 / 5.3 /
+4.9 points); on 2018-26 it misses by 5.9 / 9.2 / 6.5 (bar 3). Read after the fact: the slowest gauge (63-session
+realised vol) is the most state-free in 2018-26 (4.6 / 6.1 / 3.6) and fast gauges (10- and 21-session) the least
+(10-14 points), which agrees with rounds 11, 22 and 23: the right elasticity to today's volatility is well below one.
+Not adopted (not the pick). The state-dependence thread is closed for now; four rounds, no fixed rule passes out of
+sample. Caveat stands.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
