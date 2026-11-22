@@ -436,6 +436,13 @@ independent periods), worst cell 12 points. With 18 cells the per-cell rates are
 state thread for good: the three caveats printed with the vote (calm vs volatile, event weeks, 3-month lows) are the
 honest form; none of six attempted corrections or statements beat the plain average out of sample.
 
+## Round 30 (2026-11-22 12:06 heartbeat): touch-odds table replicated on six dollar pairs - 1 trial, PASSES 6 of 6
+`experiments/89_touch_replication.py` (declared). Each pair's own walk-forward table is within 0.8-2.0 points of realised
+at every distance (0.5-2.5 units) and horizon (5 / 10 / 21) in 2010-26 and 2018-26; the EUR/USD table applied FROZEN
+is within 1.2-3.0 points. So the touch odds are a property of liquid dollar pairs, not of EUR/USD's history, and the
+`cli touch` statement can be trusted on any of them (with the same state caveats). Nothing to change.
+Also: dry run of the weekly outlook before tonight's scheduled run: clean.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
