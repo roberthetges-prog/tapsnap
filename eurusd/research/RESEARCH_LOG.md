@@ -420,6 +420,14 @@ candidate for the next heartbeat (round 28): when the close is in the bottom dec
 lower level by a walk-forward factor that restores an 80 % holding rate on past bottom-decile sessions; nothing else
 changes. Bar: bottom-decile lower holding within 4 points of 80 % at 5 and 10 sessions in 2018-26, middle unchanged.
 
+## Round 28 (2026-11-22 00:05 heartbeat): widen the lower level at 63-session lows - 1 trial, FAILS (over-corrects)
+`experiments/87_lower_at_lows.py` (declared in round 27). The walk-forward factor (1.25 / 1.34 / 1.54 at 5 / 10 / 21
+sessions, i.e. the lower level 25-55 % further away) restores 80 % on the training years but over-shoots on 2018-26:
+bottom-decile lower holding 84.2 / 87.9 / 93.6 % (bar: within 4 of 80 at 5 and 10). The effect is real in both eras but
+weaker since 2018 (76-78 % unfixed, vs 71-75 % before), so a factor learned on the past is too big. Not adopted. Same
+pattern as rounds 18 and 23: the direction of these state effects persists, their size does not. Levels stay as they are;
+`cli vote` should carry the caveat that at a 63-session low the lower level holds nearer 75 %.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
