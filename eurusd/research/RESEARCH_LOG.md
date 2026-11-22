@@ -428,6 +428,14 @@ weaker since 2018 (76-78 % unfixed, vs 71-75 % before), so a factor learned on t
 pattern as rounds 18 and 23: the direction of these state effects persists, their size does not. Levels stay as they are;
 `cli vote` should carry the caveat that at a 63-session low the lower level holds nearer 75 %.
 
+## Round 29 (2026-11-22 06:05 heartbeat): a state look-up for the levels' holding rate - 1 trial, FAILS
+`experiments/88_state_lookup.py` (declared). Stating the holding rate per state cell (volatility tercile x event window
+x 3-month-range position, cells with 150+ past sessions) is WORSE than the pooled 80 % statement out of sample: mean
+absolute gap 5.0 / 5.3 / 5.9 points against 4.2 / 4.6 / 2.4 for the pooled statement (2018-26, cells with 20+
+independent periods), worst cell 12 points. With 18 cells the per-cell rates are noise. Not adopted. Closing the
+state thread for good: the three caveats printed with the vote (calm vs volatile, event weeks, 3-month lows) are the
+honest form; none of six attempted corrections or statements beat the plain average out of sample.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
