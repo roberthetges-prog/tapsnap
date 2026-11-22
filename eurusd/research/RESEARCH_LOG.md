@@ -443,6 +443,13 @@ is within 1.2-3.0 points. So the touch odds are a property of liquid dollar pair
 `cli touch` statement can be trusted on any of them (with the same state caveats). Nothing to change.
 Also: dry run of the weekly outlook before tonight's scheduled run: clean.
 
+## Round 31 (2026-11-22 18:05 heartbeat): levels and wide band replicated on six dollar pairs - 1 trial, PASSES 5 of 6
+`experiments/90_levels_replication.py` (declared; single-gauge form of the bots' levels, round-14 band rule, nothing
+re-tuned). GBP, JPY, AUD, CHF, NZD: each level 77-84 % and the band 78-83 % at 5 / 10 / 21 sessions in 2010-26 and
+2018-26. USD/CAD fails on the upper level (74-78 %: a pair that trended up through 2010-26), the band still 78-81 %.
+Band factor 1.30-1.38 on every pair (EUR/USD 1.33-1.37). The level machinery is structural; only the direction of a
+long trend disturbs one side, as round 27-28 found on EUR/USD. Nothing to change.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
