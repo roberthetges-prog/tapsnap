@@ -450,6 +450,11 @@ re-tuned). GBP, JPY, AUD, CHF, NZD: each level 77-84 % and the band 78-83 % at 5
 Band factor 1.30-1.38 on every pair (EUR/USD 1.33-1.37). The level machinery is structural; only the direction of a
 long trend disturbs one side, as round 27-28 found on EUR/USD. Nothing to change.
 
+## Round 32 (2026-11-23 00:05 heartbeat): one-week levels by weekday of the window start - descriptive, 1 trial
+`experiments/91_levels_weekday.py` (declared). No weekday effect: lower 78.5-80.5 %, upper 79.5-82.0 %, band
+78.9-81.4 % for every start weekday in both eras (bar for a fix: >4 points off in both eras; max 2). The weekend gap
+does not matter at this horizon. Nothing to change.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
