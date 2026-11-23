@@ -16,7 +16,7 @@ from eurusd import bots as B
 X = B.build(); rows = []; live = []
 g = pd.DataFrame({sp["bot"]: X[f"g_{sp['gauge']}"] for sp in B.SPECS}).median(axis=1)
 hist = X["__src"] == "histdata"; hi, lo = X["__high"].where(hist), X["__low"].where(hist)
-for h in (5, 10, 21):
+for h in (5, 10, 21, 63):
     fmax = hi[::-1].rolling(h, min_periods=h).max()[::-1].shift(-1); fmin = lo[::-1].rolling(h, min_periods=h).min()[::-1].shift(-1)
     rng_ = np.log(fmax / fmin); s = g * np.sqrt(h); ratio = rng_ / s
     yend = X["__ct"].shift(-h)

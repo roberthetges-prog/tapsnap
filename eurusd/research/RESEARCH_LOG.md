@@ -462,6 +462,13 @@ misses split evenly below / above. The band's midpoint calls 'range above / belo
 (naive 'same as last period' 69-76 %), the same as the published HAR figure. Adopted: 'Expected travel' line in
 `cli vote` for 5 / 10 / 21 sessions (63 not calibrated here).
 
+## Round 34 (2026-11-23 12:06 heartbeat): travel band on six dollar pairs and at 63 sessions - 1 trial, pairs FAIL by the letter
+`experiments/93_travel_replication.py` (declared; 21-session realised-vol gauge). Coverage 74-83 % on every pair, era
+and horizon: AUD, NZD, CAD 77-83 % (pass); GBP, CHF, JPY under-cover slightly at 5 / 10 sessions (73.8-76.4 %, bar
+76-84), so 3 / 6 and 4 / 6 pairs pass (bar 5). The shape transfers; a single-window gauge is a little too narrow on the
+three low-volatility pairs. EUR/USD at 63 sessions with the median bot gauge: 81.5 / 80.4 % (pass) -> the 'Expected travel' line is extended to
+three months (92_range_band.py rerun with h = 63).
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
