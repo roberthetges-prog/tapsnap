@@ -320,6 +320,17 @@ def live(refresh: bool = True) -> dict:
                     r["bands_hi"][str(int(100 * t))] = [p0 * (r["bots_lower"] / p0) ** k, p0 * (r["bots_upper"] / p0) ** k, held]
     except Exception:
         pass
+    # round 33: expected travel (high minus low) over the period, 80 % band, from the median bot gauge
+    try:
+        rb = pd.read_csv(RES / "bots_range_band_live.csv")
+        gm = float(np.median([X[f"g_{sp['gauge']}"].iloc[-1] for sp in SPECS]))
+        for h, r in out["horizons"].items():
+            q = rb[rb.h == h]
+            if len(q):
+                sc = gm * np.sqrt(h) * out["price"] * 1e4
+                r["travel_pips"] = [float(q.q10.iloc[0] * sc), float(q.q50.iloc[0] * sc), float(q.q90.iloc[0] * sc)]
+    except Exception:
+        pass
     # owner's decision 2026-11-18: the event-adjusted levels are the published ones where they can be computed (5, 21 sessions)
     for h, r in out["horizons"].items():
         if r.get("event_adjusted"):
@@ -403,6 +414,9 @@ def format_vote(o: dict, detail: bool = True) -> str:
                      f"{100 * lv['upper_held']:.0f} % (2010-26); both held {100 * lv['both_held']:.0f} %")
         if r.get("band"):
             L.append(f"  Wide band: {r['band'][0]:.4f} to {r['band'][1]:.4f} (the whole period's price action stayed inside such a band {100 * r['band_held']:.0f} % of the time, 2010-26)")
+        if r.get("travel_pips"):
+            t = r["travel_pips"]
+            L.append(f"  Expected travel (high minus low): about {t[1]:.0f} pips, 8 in 10 between {t[0]:.0f} and {t[2]:.0f}")
         if r.get("bands_hi"):
             L.append("  Rarely breached: " + " | ".join(f"{int(k)} %: {v[0]:.4f} to {v[1]:.4f} (held {100 * v[2]:.0f} %)" for k, v in r["bands_hi"].items()))
         if detail:

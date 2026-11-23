@@ -455,6 +455,13 @@ long trend disturbs one side, as round 27-28 found on EUR/USD. Nothing to change
 78.9-81.4 % for every start weekday in both eras (bar for a fix: >4 points off in both eras; max 2). The weekend gap
 does not matter at this horizon. Nothing to change.
 
+## Round 33 (2026-11-23 06:05 heartbeat): an 80 % band for the period's travel (high minus low) - 1 trial, PASSES
+`experiments/92_range_band.py` (declared). Walk-forward 10 / 90 % quantiles of range / (median gauge x sqrt h):
+coverage 77.3 / 76.3 / 78.5 % (2010-26) and 79.0 / 77.4 / 79.5 % (2018-26) at 5 / 10 / 21 sessions (bar 76-84),
+misses split evenly below / above. The band's midpoint calls 'range above / below its 1-year median' right 75-79 %
+(naive 'same as last period' 69-76 %), the same as the published HAR figure. Adopted: 'Expected travel' line in
+`cli vote` for 5 / 10 / 21 sessions (63 not calibrated here).
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
