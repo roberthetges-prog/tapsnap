@@ -469,6 +469,11 @@ and horizon: AUD, NZD, CAD 77-83 % (pass); GBP, CHF, JPY under-cover slightly at
 three low-volatility pairs. EUR/USD at 63 sessions with the median bot gauge: 81.5 / 80.4 % (pass) -> the 'Expected travel' line is extended to
 three months (92_range_band.py rerun with h = 63).
 
+## Round 35 (2026-11-23 18:05 heartbeat): 90 / 95 % bands replicated on six dollar pairs - 1 trial, PASSES 6 of 6
+`experiments/94_band_confidence_replication.py` (declared; 21-session realised-vol gauge). Joint holding 88.2-92.7 %
+for the 90 % band and 92.9-96.8 % for the 95 % band at 5 / 10 / 21 sessions on every pair in 2010-26 and 2018-26
+(bar: within 3 points), CHF and JPY at the low edge. The rarely-breached bands are structural too. Nothing to change.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
