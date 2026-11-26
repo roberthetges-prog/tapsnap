@@ -474,6 +474,15 @@ three months (92_range_band.py rerun with h = 63).
 for the 90 % band and 92.9-96.8 % for the 95 % band at 5 / 10 / 21 sessions on every pair in 2010-26 and 2018-26
 (bar: within 3 points), CHF and JPY at the low edge. The rarely-breached bands are structural too. Nothing to change.
 
+## Rounds 36 (2026-11-26 12:05 heartbeat; eleven heartbeats 24-26 Nov were missed while the session was being
+## restarted): levels by calendar month - descriptive, 1 trial
+`experiments/95_levels_by_month.py` (declared). Ten months hold within noise. September stands out: the lower level
+held 73.2 / 67.9 % at 5 sessions and 67.9 / 57.5 % at 21 sessions (2010-26 / 2018-26; about 70 and 17 independent
+periods per month-era), the upper 84-97 %: Septembers have been euro-negative (2011, 2014, 2022). Meets the declared
+'fix warranted' bar, but by the lesson of rounds 18, 23 and 28 (direction of such effects persists, size does not) and
+the closed state thread, no fix is made; recorded as a caveat candidate only. February also weak at 21 sessions
+(70.8 / 66.3 % lower) on 17 periods.
+
 ## The vote: 100 self-researching bots, direction and levels (owner's design, 2026-11-17) - 2 trials
 Owner: no entries; just direction by a vote of 100 differently trained agents that do their own research, plus a lower
 and an upper level. Built as `src/eurusd/bots.py` (design in its docstring before the first run; a bot is its seed: a
